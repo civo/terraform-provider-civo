@@ -1,4 +1,4 @@
-Terraform Provider
+Terraform Provider ![Travis build](https://travis-ci.org/civo/terraform-provider-civo.svg?branch=master)
 ==================
 
 - Website: https://www.terraform.io
