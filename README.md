@@ -5,7 +5,7 @@ Terraform Provider ![Travis build](https://travis-ci.org/civo/terraform-provider
 - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
+**STATUS:** This project is currently under active development, but is not ready for public usage at this point.
 
 Requirements
 ------------
