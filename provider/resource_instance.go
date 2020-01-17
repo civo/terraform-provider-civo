@@ -215,5 +215,11 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceInstanceDelete(d *schema.ResourceData, m interface{}) error {
+	apiClient := m.(*civogo.Client)
+
+	_, err := apiClient.DeleteInstance(d.Id())
+	if err != nil {
+		log.Printf("[INFO] Civo instance (%s) was delete", d.Id())
+	}
 	return nil
 }
