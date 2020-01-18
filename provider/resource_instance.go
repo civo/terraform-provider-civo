@@ -37,9 +37,10 @@ func resourceInstance() *schema.Resource {
 				ValidateFunc: validateName,
 			},
 			"reverse_dns": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified)",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified)",
+				ValidateFunc: validateName,
 			},
 			"size": {
 				Type:        schema.TypeString,
@@ -65,6 +66,11 @@ func resourceInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)",
+			},
+			"notes": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Add some notes to the instance",
 			},
 			"sshkey_id": {
 				Type:        schema.TypeString,
@@ -205,12 +211,56 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("public_ip", resp.PublicIP)
 	d.Set("pseudo_ip", resp.PseudoIP)
 	d.Set("status", resp.Status)
-	d.Set("created_at", resp.CreatedAt)
+	d.Set("created_at", resp.CreatedAt.String())
+	d.Set("notes", resp.Notes)
 
 	return nil
 }
 
 func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
+	apiClient := m.(*civogo.Client)
+
+	if d.HasChange("size") {
+		newSize := d.Get("size").(string)
+		_, err := apiClient.UpgradeInstance(d.Id(), newSize)
+		if err != nil {
+			log.Printf("[WARN] An error occurred while resizing the instance (%s)", d.Id())
+		}
+
+		return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+			resp, err := apiClient.GetInstance(d.Id())
+
+			if err != nil {
+				return resource.NonRetryableError(fmt.Errorf("error geting instance: %s", err))
+			}
+
+			if resp.Status != "ACTIVE" {
+				return resource.RetryableError(fmt.Errorf("expected instance to be resizing but was in state %s", resp.Status))
+			}
+
+			return resource.NonRetryableError(resourceInstanceRead(d, m))
+		})
+
+	}
+
+	if d.HasChange("notes") {
+		notes := d.Get("notes").(string)
+		instance, err := apiClient.GetInstance(d.Id())
+		if err != nil {
+			// check if the droplet no longer exists.
+			log.Printf("[WARN] Civo instance (%s) not found", d.Id())
+			d.SetId("")
+			return nil
+		}
+
+		instance.Notes = notes
+
+		_, err = apiClient.UpdateInstance(instance)
+		if err != nil {
+			log.Printf("[WARN] An error occurred while adding a note to the instance (%s)", d.Id())
+		}
+	}
+
 	return resourceInstanceRead(d, m)
 }
 
