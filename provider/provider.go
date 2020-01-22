@@ -17,6 +17,7 @@ func Provider() terraform.ResourceProvider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"civo_instance": resourceInstance(),
+			"civo_network":  resourceNetwork(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

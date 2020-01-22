@@ -37,6 +37,8 @@ github.com/bsm/go-vlq v0.0.0-20150828105119-ec6e8d4f5f4e/go.mod h1:N+BjUcTjSxc2m
 github.com/cheggaaa/pb v1.0.27/go.mod h1:pQciLPpbU0oxA0h+VJYYLxO+XeDQb5pZijXscXHm81s=
 github.com/civo/civogo v0.0.0-20200116211328-a6d635388fa4 h1:bRX4UokNiGQxrB2uP/M3O2vYOSi4WmQNqgd1ZozZkfk=
 github.com/civo/civogo v0.0.0-20200116211328-a6d635388fa4/go.mod h1:QwPxaDertZ7sxu3Fdibu/JdXBJV3RqYZrh76YEbGLKg=
+github.com/civo/civogo v0.0.0-20200121103424-a69bef1d9ea8 h1:v6uezjqyqgivBSCcPH9R9oC1XgyRK11WoHYYPX//x9Y=
+github.com/civo/civogo v0.0.0-20200121103424-a69bef1d9ea8/go.mod h1:QwPxaDertZ7sxu3Fdibu/JdXBJV3RqYZrh76YEbGLKg=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
