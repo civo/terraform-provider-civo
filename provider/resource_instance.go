@@ -143,10 +143,10 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		config.SSHKeyID = attr.(string)
 	}
 
-	if attr, ok := d.GetOk("tags"); ok {
-		//config.Tags = attr.(*schema.Set).List()
-		config.Tags = attr.(string)
-	}
+	//if attr, ok := d.GetOk("tags"); ok {
+	//	//config.Tags = attr.(*schema.Set).List()
+	//	config.Tags = attr.(string)
+	//}
 
 	instance, err := apiClient.CreateInstance(config)
 	if err != nil {

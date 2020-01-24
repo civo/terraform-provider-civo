@@ -93,8 +93,7 @@ func resourceNetworkUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange("label") {
 		config := &civogo.NetworkConfig{Label: d.Get("label").(string)}
 
-		//_, err := apiClient.RenameNetwork(config, d.Id())
-		_, err := apiClient.RenameNetwork(config)
+		_, err := apiClient.RenameNetwork(config, d.Id())
 		if err != nil {
 			log.Printf("[WARN] An error occurred while rename the network (%s)", d.Id())
 		}
