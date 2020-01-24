@@ -1,4 +1,4 @@
-package provider
+package civo
 
 import (
 	"github.com/civo/civogo"
