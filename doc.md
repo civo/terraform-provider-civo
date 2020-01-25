@@ -1,6 +1,6 @@
 # Help to use the civo terraform provider
 
-## Leyend
+## Legend
 
 - ``#`` (optional parameter)
 
