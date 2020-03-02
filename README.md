@@ -3,6 +3,7 @@ Terraform Provider ![Travis build](https://travis-ci.org/civo/terraform-provider
 
 - Website: https://www.terraform.io
 - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
+- [![Build Status](https://github.com/civo/terraform-provider-civo/workflows/Go/badge.svg)](https://github.com/civo/terraform-provider-civo/actions)
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
 **STATUS:** This project is currently under active development, but is not ready for public usage at this point.
@@ -10,8 +11,8 @@ Terraform Provider ![Travis build](https://travis-ci.org/civo/terraform-provider
 Requirements
 ------------
 
--   [Terraform](https://www.terraform.io/downloads.html) 0.10.x
--   [Go](https://golang.org/doc/install) 1.11 (to build the provider plugin)
+-   [Terraform](https://www.terraform.io/downloads.html) 0.12.x
+-   [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
 
 Building The Provider
 ---------------------
