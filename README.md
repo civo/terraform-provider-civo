@@ -3,6 +3,7 @@ Terraform Provider ![Travis build](https://travis-ci.org/civo/terraform-provider
 
 - Website: https://www.terraform.io
 - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
+- [![Build Status](https://github.com/civo/terraform-provider-civo/workflows/Go/badge.svg)](https://github.com/civo/terraform-provider-civo/actions)
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
 **STATUS:** This project is currently under active development, but is not ready for public usage at this point.
