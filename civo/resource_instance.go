@@ -61,16 +61,11 @@ func resourceInstance() *schema.Resource {
 				Description: "The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)",
 			},
 			"tags": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "An optional tags",
+				Description: "An optional list of tags, represented as a key, value pair",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			//"tags": {
-			//	Type:        schema.TypeSet,
-			//	Optional:    true,
-			//	Description: "An optional list of tags, represented as a key, value pair",
-			//	Elem:        &schema.Schema{Type: schema.TypeString},
-			//},
 			// Computed resource
 			"private_ip": {
 				Type:     schema.TypeString,
@@ -143,10 +138,10 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		config.SSHKeyID = attr.(string)
 	}
 
-	//if attr, ok := d.GetOk("tags"); ok {
-	//	//config.Tags = attr.(*schema.Set).List()
-	//	config.Tags = attr.(string)
-	//}
+	if attr, ok := d.GetOk("tags"); ok {
+		//config.Tags = attr.(*schema.Set).List()
+		config.Tags = attr.([]string)
+	}
 
 	instance, err := apiClient.CreateInstance(config)
 	if err != nil {
@@ -230,7 +225,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		notes := d.Get("notes").(string)
 		instance, err := apiClient.GetInstance(d.Id())
 		if err != nil {
-			// check if the droplet no longer exists.
+			// check if the instance no longer exists.
 			log.Printf("[WARN] Civo instance (%s) not found", d.Id())
 			d.SetId("")
 			return nil
