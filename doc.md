@@ -27,6 +27,7 @@ resource "civo_instance" "my-test-instance" {
     hostname = "test-terraform"
     initial_user = "root"
     size = "g2.large"
+    tags = ["hello", "test"]
     # template = "id"
     # network_id = civo_network.custom_net.id // this will be calculate automatic
     # depends_on = [civo_network.custom_net]  // this is to wait for the creation of the network  

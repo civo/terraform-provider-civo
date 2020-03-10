@@ -71,3 +71,22 @@ $ make testacc TESTARGS='-run=TestAccCivoDomain_Basic'
 ```
 
 For information about writting acceptance tests, see the main Terraform [contributing guide](https://github.com/hashicorp/terraform/blob/master/.github/CONTRIBUTING.md#writing-acceptance-tests).
+
+Progress
+----------------------
+- ✅ ~~Provider~~
+- ✅ ~~Instances~~
+- ✅ ~~Networks~~
+- ✅ ~~Volumes~~
+- Regions
+- Quotas
+- Sizes
+- Domain names
+- Domain records
+- Kubernetes Clusters
+- Kubernetes Applications
+- Load balancers
+- SSH keys
+- Snapshots
+- Firewalls
+- Templates
