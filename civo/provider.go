@@ -16,9 +16,11 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"civo_instance": resourceInstance(),
-			"civo_network":  resourceNetwork(),
-			"civo_volume":   resourceVolume(),
+			"civo_instance":          resourceInstance(),
+			"civo_network":           resourceNetwork(),
+			"civo_volume":            resourceVolume(),
+			"civo_dns_domain_name":   resourceDnsDomainName(),
+			"civo_dns_domain_record": resourceDnsDomainRecord(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

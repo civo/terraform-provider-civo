@@ -48,10 +48,7 @@ func resourceNetwork() *schema.Resource {
 
 func resourceNetworkCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
-
-	config := &civogo.NetworkConfig{Label: d.Get("label").(string)}
-
-	network, err := apiClient.NewNetwork(config)
+	network, err := apiClient.NewNetwork(d.Get("label").(string))
 	if err != nil {
 		fmt.Errorf("failed to create a new config: %s", err)
 		return err
@@ -91,9 +88,7 @@ func resourceNetworkUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	if d.HasChange("label") {
-		config := &civogo.NetworkConfig{Label: d.Get("label").(string)}
-
-		_, err := apiClient.RenameNetwork(config, d.Id())
+		_, err := apiClient.RenameNetwork(d.Get("label").(string), d.Id())
 		if err != nil {
 			log.Printf("[WARN] An error occurred while rename the network (%s)", d.Id())
 		}

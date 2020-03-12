@@ -58,7 +58,7 @@ func resourceVolume() *schema.Resource {
 func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	config := &civogo.VolumeConfig{Name: d.Get("name").(string), SizeGB: d.Get("size_gb").(int), Bootable: d.Get("bootable").(bool)}
+	config := &civogo.VolumeConfig{Name: d.Get("name").(string), SizeGigabytes: d.Get("size_gb").(int), Bootable: d.Get("bootable").(bool)}
 
 	volume, err := apiClient.NewVolume(config)
 	if err != nil {
@@ -94,7 +94,7 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", CurrentVolume.Name)
-	d.Set("size_gb", CurrentVolume.SizeGB)
+	d.Set("size_gb", CurrentVolume.SizeGigabytes)
 	d.Set("bootable", CurrentVolume.Bootable)
 	d.Set("instance_id", CurrentVolume.InstanceID)
 	d.Set("mount_point", CurrentVolume.MountPoint)
