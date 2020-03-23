@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"log"
+	"strings"
 )
 
 func resourceInstance() *schema.Resource {
@@ -59,6 +60,11 @@ func resourceInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)",
+			},
+			"firewall_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
@@ -148,7 +154,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 
 	instance, err := apiClient.CreateInstance(config)
 	if err != nil {
-		fmt.Errorf("failed to create instance: %s", err)
+		fmt.Errorf("[WARN] failed to create instance: %s", err)
 		return err
 	}
 
@@ -156,13 +162,19 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		resp, err := apiClient.GetInstance(instance.ID)
-
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error geting instance: %s", err))
 		}
 
 		if resp.Status != "ACTIVE" {
-			return resource.RetryableError(fmt.Errorf("expected instance to be created but was in state %s", resp.Status))
+			return resource.RetryableError(fmt.Errorf("[WARN] expected instance to be created but was in state %s", resp.Status))
+		} else {
+			if attr, ok := d.GetOk("firewall_id"); ok {
+				_, errInstance := apiClient.SetInstanceFirewall(instance.ID, attr.(string))
+				if errInstance != nil {
+					return resource.NonRetryableError(fmt.Errorf("[WARN] failed to set firewall to the instance: %s", errInstance))
+				}
+			}
 		}
 
 		return resource.NonRetryableError(resourceInstanceRead(d, m))
@@ -175,7 +187,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	resp, err := apiClient.GetInstance(d.Id())
 	if err != nil {
 		// check if the droplet no longer exists.
-		log.Printf("[WARN] Civo instance (%s) not found", d.Id())
+		log.Printf("[WARN] civo instance (%s) not found", d.Id())
 		d.SetId("")
 		return nil
 	}
@@ -183,8 +195,6 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("hostname", resp.Hostname)
 	d.Set("reverse_dns", resp.ReverseDNS)
 	d.Set("size", resp.Size)
-	d.Set("network_id", resp.NetworkID)
-	d.Set("template", resp.TemplateID)
 	d.Set("initial_user", resp.InitialUser)
 	d.Set("sshkey_id", resp.SSHKey)
 	d.Set("tags", resp.Tags)
@@ -194,6 +204,18 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("status", resp.Status)
 	d.Set("created_at", resp.CreatedAt.String())
 	d.Set("notes", resp.Notes)
+
+	if _, ok := d.GetOk("network_id"); ok {
+		d.Set("network_id", resp.NetworkID)
+	}
+
+	if _, ok := d.GetOk("template"); ok {
+		d.Set("template", resp.TemplateID)
+	}
+
+	if attr, ok := d.GetOk("firewall_id"); ok {
+		d.Set("firewall_id", attr.(string))
+	}
 
 	return nil
 }
@@ -212,11 +234,11 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 			resp, err := apiClient.GetInstance(d.Id())
 
 			if err != nil {
-				return resource.NonRetryableError(fmt.Errorf("error geting instance: %s", err))
+				return resource.NonRetryableError(fmt.Errorf("[WARN] error geting instance: %s", err))
 			}
 
 			if resp.Status != "ACTIVE" {
-				return resource.RetryableError(fmt.Errorf("expected instance to be resizing but was in state %s", resp.Status))
+				return resource.RetryableError(fmt.Errorf("[WARN] expected instance to be resizing but was in state %s", resp.Status))
 			}
 
 			return resource.NonRetryableError(resourceInstanceRead(d, m))
@@ -229,7 +251,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		instance, err := apiClient.GetInstance(d.Id())
 		if err != nil {
 			// check if the instance no longer exists.
-			log.Printf("[WARN] Civo instance (%s) not found", d.Id())
+			log.Printf("[WARN] civo instance (%s) not found", d.Id())
 			d.SetId("")
 			return nil
 		}
@@ -238,8 +260,43 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 
 		_, err = apiClient.UpdateInstance(instance)
 		if err != nil {
-			log.Printf("[WARN] An error occurred while adding a note to the instance (%s)", d.Id())
+			log.Printf("[WARN] an error occurred while adding a note to the instance (%s)", d.Id())
 		}
+	}
+
+	if d.HasChange("firewall_id") {
+		firewallID := d.Get("firewall_id").(string)
+		_, err := apiClient.SetInstanceFirewall(d.Id(), firewallID)
+		if err != nil {
+			// check if the instance no longer exists.
+			log.Printf("[WARN] an error occurred while set firewall to the instance (%s)", d.Id())
+			d.SetId("")
+			return nil
+		}
+	}
+
+	if d.HasChange("tags") {
+		tfTags := d.Get("tags").(*schema.Set).List()
+		tags := make([]string, len(tfTags))
+		for i, tfTag := range tfTags {
+			tags[i] = tfTag.(string)
+		}
+
+		instance, err := apiClient.GetInstance(d.Id())
+		if err != nil {
+			// check if the instance no longer exists.
+			log.Printf("[WARN] civo instance (%s) not found", d.Id())
+			d.SetId("")
+			return nil
+		}
+
+		tagsToString := strings.Join(tags, " ")
+
+		_, err = apiClient.SetInstanceTags(instance, tagsToString)
+		if err != nil {
+			log.Printf("[WARN] an error occurred while adding tags to the instance (%s)", d.Id())
+		}
+
 	}
 
 	return resourceInstanceRead(d, m)

@@ -81,8 +81,8 @@ Progress
 - Regions
 - Quotas
 - Sizes
-- Domain names
-- Domain records
+- ✅ ~~Domain names~~
+- ✅ ~~Domain records~~
 - Kubernetes Clusters
 - Kubernetes Applications
 - Load balancers
