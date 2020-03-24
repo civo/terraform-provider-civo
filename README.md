@@ -78,15 +78,15 @@ Progress
 - ✅ ~~Instances~~
 - ✅ ~~Networks~~
 - ✅ ~~Volumes~~
+- ✅ ~~Firewalls~~
+- ✅ ~~Load balancers~~
+- ✅ ~~SSH keys~~
+- ✅ ~~Domain names~~
+- ✅ ~~Domain records~~
 - Regions
 - Quotas
 - Sizes
-- ✅ ~~Domain names~~
-- ✅ ~~Domain records~~
 - Kubernetes Clusters
 - Kubernetes Applications
-- Load balancers
-- SSH keys
 - Snapshots
-- Firewalls
 - Templates

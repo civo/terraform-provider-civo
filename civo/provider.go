@@ -24,6 +24,7 @@ func Provider() terraform.ResourceProvider {
 			"civo_firewall":          resourceFirewall(),
 			"civo_firewall_rule":     resourceFirewallRule(),
 			"civo_loadbalancer":      resourceLoadBalancer(),
+			"civo_ssh_key":           resourceSSHKey(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
