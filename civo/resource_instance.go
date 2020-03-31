@@ -34,7 +34,7 @@ func resourceInstance() *schema.Resource {
 			"public_ip_requiered": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "This should be either none, create",
+				Description: "This should be either false, true or `move_ip_from:intances_id`",
 			},
 			"network_id": {
 				Type:        schema.TypeString,
@@ -73,6 +73,10 @@ func resourceInstance() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			// Computed resource
+			"initial_password": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"private_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -98,10 +102,9 @@ func resourceInstance() *schema.Resource {
 		Read:   resourceInstanceRead,
 		Update: resourceInstanceUpdate,
 		Delete: resourceInstanceDelete,
-		//Exists: resourceExistsItem,
-		//Importer: &schema.ResourceImporter{
-		//	State: schema.ImportStatePassthrough,
-		//},
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 	}
 }
 
@@ -169,10 +172,26 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		if resp.Status != "ACTIVE" {
 			return resource.RetryableError(fmt.Errorf("[WARN] expected instance to be created but was in state %s", resp.Status))
 		} else {
+			/*
+				Once the instance is created, we check if the object firewall_id,
+				if it is, then we set the firewall id to the instances
+			*/
 			if attr, ok := d.GetOk("firewall_id"); ok {
 				_, errInstance := apiClient.SetInstanceFirewall(instance.ID, attr.(string))
 				if errInstance != nil {
 					return resource.NonRetryableError(fmt.Errorf("[WARN] failed to set firewall to the instance: %s", errInstance))
+				}
+			}
+
+			/*
+				Once the instance is created, we check if the object notes,
+				if it is, then we add the note to the instances
+			*/
+			if attr, ok := d.GetOk("notes"); ok {
+				resp.Notes = attr.(string)
+				_, errInstance := apiClient.UpdateInstance(resp)
+				if errInstance != nil {
+					return resource.NonRetryableError(fmt.Errorf("[WARN] failed to set note to the instance: %s", errInstance))
 				}
 			}
 		}
@@ -186,7 +205,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 
 	resp, err := apiClient.GetInstance(d.Id())
 	if err != nil {
-		// check if the droplet no longer exists.
+		// check if the instance no longer exists.
 		log.Printf("[WARN] civo instance (%s) not found", d.Id())
 		d.SetId("")
 		return nil
@@ -196,6 +215,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("reverse_dns", resp.ReverseDNS)
 	d.Set("size", resp.Size)
 	d.Set("initial_user", resp.InitialUser)
+	d.Set("initial_password", resp.InitialPassword)
 	d.Set("sshkey_id", resp.SSHKey)
 	d.Set("tags", resp.Tags)
 	d.Set("private_ip", resp.PrivateIP)
@@ -243,7 +263,6 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 
 			return resource.NonRetryableError(resourceInstanceRead(d, m))
 		})
-
 	}
 
 	if d.HasChange("notes") {
@@ -307,7 +326,7 @@ func resourceInstanceDelete(d *schema.ResourceData, m interface{}) error {
 
 	_, err := apiClient.DeleteInstance(d.Id())
 	if err != nil {
-		log.Printf("[INFO] Civo instance (%s) was delete", d.Id())
+		log.Printf("[INFO] civo instance (%s) was delete", d.Id())
 	}
 	return nil
 }

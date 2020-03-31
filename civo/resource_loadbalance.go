@@ -231,7 +231,7 @@ func resourceLoadBalancerUpdate(d *schema.ResourceData, m interface{}) error {
 
 	_, err := apiClient.UpdateLoadBalancer(d.Id(), conf)
 	if err != nil {
-		fmt.Errorf("[ERR] failed to update load balancer: %s", err)
+		fmt.Errorf("[WARN] failed to update load balancer: %s", err)
 		return err
 	}
 

@@ -15,6 +15,9 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_TOKEN", ""),
 			},
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"civo_template": dataSourceTemplate(),
+		},
 		ResourcesMap: map[string]*schema.Resource{
 			"civo_instance":          resourceInstance(),
 			"civo_network":           resourceNetwork(),
@@ -25,6 +28,7 @@ func Provider() terraform.ResourceProvider {
 			"civo_firewall_rule":     resourceFirewallRule(),
 			"civo_loadbalancer":      resourceLoadBalancer(),
 			"civo_ssh_key":           resourceSSHKey(),
+			"civo_template":          resourceTemplate(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
