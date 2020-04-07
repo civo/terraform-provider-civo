@@ -136,7 +136,7 @@ func resourceTemplateRead(d *schema.ResourceData, m interface{}) error {
 
 	resp, err := apiClient.GetTemplateByCode(d.Get("code").(string))
 	if err != nil {
-		fmt.Errorf("[WARN] failed to create template: %s", err)
+		fmt.Errorf("[WARN] failed to read template: %s", err)
 		return err
 	}
 

@@ -90,7 +90,6 @@ Progress resource
 - Sizes
 - Kubernetes Clusters
 - Kubernetes Applications
-- Snapshots
 
 Progress data source
 ----------------------
