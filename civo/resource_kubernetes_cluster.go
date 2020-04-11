@@ -32,6 +32,7 @@ func resourceKubernetesCluster() *schema.Resource {
 			"kubernetes_version": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "1.0.0",
 				Description: "the version of k3s to install (optional, the default is currently the latest available)",
 			},
 			"tags": {
@@ -188,7 +189,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	d.SetId(resp.ID)
 
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		resp, err := apiClient.FindKubernetesCluster(d.Get("name").(string))
+		resp, err := apiClient.FindKubernetesCluster(d.Id())
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("[WARN] error geting kubernetes cluster: %s", err))
 		}
@@ -236,26 +237,32 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	config := &civogo.KubernetesClusterConfig{
-		Name:            d.Get("name").(string),
-		TargetNodesSize: d.Get("target_nodes_size").(string),
-	}
+	config := &civogo.KubernetesClusterConfig{}
 
-	if d.HasChange("num_target_nodes") {
+	if d.HasChange("num_target_nodes") || d.HasChange("kubernetes_version") || d.HasChange("applications") || d.HasChange("name") {
+		config.Name = d.Get("name").(string)
 		config.NumTargetNodes = d.Get("num_target_nodes").(int)
-	}
-
-	if d.HasChange("applications") {
+		config.KubernetesVersion = d.Get("kubernetes_version").(string)
 		config.Applications = d.Get("applications").(string)
 	}
 
 	_, err := apiClient.UpdateKubernetesCluster(d.Id(), config)
 	if err != nil {
-		fmt.Errorf("[WARN] failed to update load balancer: %s", err)
-		return err
+		return fmt.Errorf("[WARN] failed to update kubernetes cluster: %s", err)
 	}
 
-	return resourceKubernetesClusterRead(d, m)
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		resp, err := apiClient.FindKubernetesCluster(d.Id())
+		if err != nil {
+			return resource.NonRetryableError(fmt.Errorf("[WARN] error geting kubernetes cluster: %s", err))
+		}
+
+		if resp.Status != "ACTIVE" {
+			return resource.RetryableError(fmt.Errorf("[WARN] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
+		}
+
+		return resource.NonRetryableError(resourceKubernetesClusterRead(d, m))
+	})
 }
 
 func resourceKubernetesClusterDelete(d *schema.ResourceData, m interface{}) error {
