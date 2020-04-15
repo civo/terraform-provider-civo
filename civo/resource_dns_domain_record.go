@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// Constant all possible DNS Record
 const (
 	// DNSRecordTypeA represents an A record
 	DNSRecordTypeA = "a"
@@ -22,6 +23,7 @@ const (
 	DNSRecordTypeTXT = "txt"
 )
 
+// Dns domain record resource with this we can create and manage DNS Domain
 func resourceDnsDomainRecord() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
@@ -35,6 +37,12 @@ func resourceDnsDomainRecord() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The choice of RR type from a, cname, mx or txt",
+				ValidateFunc: validation.StringInSlice([]string{
+					DNSRecordTypeA,
+					DNSRecordTypeCName,
+					DNSRecordTypeMX,
+					DNSRecordTypeTXT,
+				}, false),
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -79,14 +87,16 @@ func resourceDnsDomainRecord() *schema.Resource {
 		Delete: resourceDnsDomainRecordDelete,
 		//Exists: resourceExistsItem,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceDnsDomainRecordImport,
 		},
 	}
 }
 
+// function to create a new record for the main domain
 func resourceDnsDomainRecordCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] configuring the domain record %s", d.Get("name").(string))
 	config := &civogo.DNSRecordConfig{
 		Name:  d.Get("name").(string),
 		Value: d.Get("value").(string),
@@ -116,9 +126,10 @@ func resourceDnsDomainRecordCreate(d *schema.ResourceData, m interface{}) error 
 		config.Type = DNSRecordTypeTXT
 	}
 
+	log.Printf("[INFO] Creating the domain record %s", d.Get("name").(string))
 	dnsDomainRecord, err := apiClient.CreateDNSRecord(d.Get("domain_id").(string), config)
 	if err != nil {
-		fmt.Errorf("failed to create a new record: %s", err)
+		fmt.Errorf("[ERR] failed to create a new domain record: %s", err)
 		return err
 	}
 
@@ -127,14 +138,18 @@ func resourceDnsDomainRecordCreate(d *schema.ResourceData, m interface{}) error 
 	return resourceDnsDomainRecordRead(d, m)
 }
 
+// function to read a dns domain record
 func resourceDnsDomainRecordRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retriving the domain record %s", d.Get("name").(string))
 	resp, err := apiClient.GetDNSRecord(d.Get("domain_id").(string), d.Id())
 	if err != nil {
-		log.Printf("[WARN] civo domain record (%s) not found", d.Id())
-		d.SetId("")
-		return nil
+		if resp != nil {
+			d.SetId("")
+			return nil
+		}
+		return fmt.Errorf("[WARN] domain record (%s) not found", d.Id())
 	}
 
 	d.Set("name", resp.Name)
@@ -145,20 +160,19 @@ func resourceDnsDomainRecordRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("type", resp.Type)
 	d.Set("priority", resp.Priority)
 	d.Set("ttl", resp.TTL)
-	d.Set("created_at", resp.CreatedAt.String())
-	d.Set("updated_at", resp.UpdatedAt.String())
+	d.Set("created_at", resp.CreatedAt.UTC().String())
+	d.Set("updated_at", resp.UpdatedAt.UTC().String())
 
 	return nil
 }
 
+// function to update a dns domain record
 func resourceDnsDomainRecordUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	resp, err := apiClient.GetDNSRecord(d.Get("domain_id").(string), d.Id())
 	if err != nil {
-		log.Printf("[WARN] civo domain record (%s) not found", d.Id())
-		d.SetId("")
-		return nil
+		return fmt.Errorf("[WARN] domain record (%s) not found", d.Id())
 	}
 
 	config := &civogo.DNSRecordConfig{}
@@ -186,30 +200,62 @@ func resourceDnsDomainRecordUpdate(d *schema.ResourceData, m interface{}) error 
 		}
 	}
 
+	log.Printf("[INFO] Updating the domain record %s", d.Get("name").(string))
 	_, err = apiClient.UpdateDNSRecord(resp, config)
 	if err != nil {
-		log.Printf("[WARN] an error occurred while renamed the domain record (%s)", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while renamed the domain record %s, %s", d.Id(), err)
 	}
 
 	return resourceDnsDomainRecordRead(d, m)
 }
 
+//function to delete a dns domain record
 func resourceDnsDomainRecordDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] Searching the domain record %s", d.Get("name").(string))
 	resp, err := apiClient.GetDNSRecord(d.Get("domain_id").(string), d.Id())
 	if err != nil {
-		log.Printf("[WARN] civo domain record (%s) not found", d.Id())
-		d.SetId("")
-		return nil
+		return fmt.Errorf("[WARN] domain record (%s) not found", d.Id())
 	}
 
+	log.Printf("[INFO] deleting the domain record %s", d.Get("name").(string))
 	_, err = apiClient.DeleteDNSRecord(resp)
 	if err != nil {
-		log.Printf("[WARN] civo domain record (%s) not found", d.Id())
-		d.SetId("")
-		return nil
+		return fmt.Errorf("[WARN] an error occurred while tring to delete the domain record %s", d.Id())
 	}
 
 	return nil
+}
+
+// custom import to able to add a main domain to the terraform
+func resourceDnsDomainRecordImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	apiClient := m.(*civogo.Client)
+
+	domainId, DomainRecordId, err := resourceCommonParseId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("[INFO] retriving the domain record %s", DomainRecordId)
+	resp, err := apiClient.GetDNSRecord(domainId, DomainRecordId)
+	if err != nil {
+		if resp != nil {
+			return nil, err
+		}
+	}
+
+	d.SetId(resp.ID)
+	d.Set("name", resp.Name)
+	d.Set("account_id", resp.AccountID)
+	d.Set("domain_id", resp.DNSDomainID)
+	d.Set("name", resp.Name)
+	d.Set("value", resp.Value)
+	d.Set("type", resp.Type)
+	d.Set("priority", resp.Priority)
+	d.Set("ttl", resp.TTL)
+	d.Set("created_at", resp.CreatedAt.UTC().String())
+	d.Set("updated_at", resp.UpdatedAt.UTC().String())
+
+	return []*schema.ResourceData{d}, nil
 }

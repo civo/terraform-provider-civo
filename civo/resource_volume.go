@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// Volume resource, with this we can create and manage all volume
 func resourceVolume() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
@@ -49,20 +50,22 @@ func resourceVolume() *schema.Resource {
 		Update: resourceVolumeUpdate,
 		Delete: resourceVolumeDelete,
 		//Exists: resourceExistsItem,
-		//Importer: &schema.ResourceImporter{
-		//	State: schema.ImportStatePassthrough,
-		//},
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 	}
 }
 
+// function to create the new volume
 func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] configuring the volume %s", d.Get("name").(string))
 	config := &civogo.VolumeConfig{Name: d.Get("name").(string), SizeGigabytes: d.Get("size_gb").(int), Bootable: d.Get("bootable").(bool)}
 
 	volume, err := apiClient.NewVolume(config)
 	if err != nil {
-		return fmt.Errorf("failed to create a new config: %s", err)
+		return fmt.Errorf("[ERR] failed to create a new config: %s", err)
 	}
 
 	d.SetId(volume.ID)
@@ -70,39 +73,34 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	if d.Get("instance_id").(string) != "" {
 		_, err := apiClient.AttachVolume(d.Id(), d.Get("instance_id").(string))
 		if err != nil {
-			log.Printf("[WARN] An error occurred while trying to attach the volume (%s)", d.Id())
+			return fmt.Errorf("[ERR] An error occurred while tring to attach the volume (%s)", d.Id())
 		}
 	}
 
 	return resourceNetworkRead(d, m)
 }
 
+// function to read the volume
 func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	CurrentVolume := civogo.Volume{}
-
-	resp, err := apiClient.ListVolumes()
+	log.Printf("[INFO] retrieving the template %s", d.Id())
+	resp, err := apiClient.FindVolume(d.Id())
 	if err != nil {
-		return fmt.Errorf("failed to create a new config: %s", err)
+		return fmt.Errorf("[ERR] failed retrieving the volume: %s", err)
 	}
 
-	for _, volume := range resp {
-		if volume.ID == d.Id() {
-			CurrentVolume = volume
-		}
-	}
-
-	d.Set("name", CurrentVolume.Name)
-	d.Set("size_gb", CurrentVolume.SizeGigabytes)
-	d.Set("bootable", CurrentVolume.Bootable)
-	d.Set("instance_id", CurrentVolume.InstanceID)
-	d.Set("mount_point", CurrentVolume.MountPoint)
-	d.Set("created_at", CurrentVolume.CreatedAt)
+	d.Set("name", resp.Name)
+	d.Set("size_gb", resp.SizeGigabytes)
+	d.Set("bootable", resp.Bootable)
+	d.Set("instance_id", resp.InstanceID)
+	d.Set("mount_point", resp.MountPoint)
+	d.Set("created_at", resp.CreatedAt.UTC().String())
 
 	return nil
 }
 
+// function to update the volume
 func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
@@ -110,7 +108,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 		if d.Get("instance_id").(string) != "" {
 			_, err := apiClient.AttachVolume(d.Id(), d.Get("instance_id").(string))
 			if err != nil {
-				log.Printf("[WARN] An error occurred while trying to attach the volume (%s)", d.Id())
+				return fmt.Errorf("[WARN] An error occurred while tring to attach the volume %s, %s", d.Id(), err)
 			}
 
 			return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
@@ -118,7 +116,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 
 				resp, err := apiClient.ListVolumes()
 				if err != nil {
-					return resource.NonRetryableError(fmt.Errorf("failed to get all volume: %s", err))
+					return resource.NonRetryableError(fmt.Errorf("[ERR] failed to get all volume: %s", err))
 				}
 
 				for _, volume := range resp {
@@ -128,7 +126,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 				}
 
 				if CurrentVolume.MountPoint != "" {
-					return resource.RetryableError(fmt.Errorf("expected volume to be mount but was in state %s", CurrentVolume.MountPoint))
+					return resource.RetryableError(fmt.Errorf("expected volume to be mount but the mount point is %s", CurrentVolume.MountPoint))
 				}
 
 				return resource.NonRetryableError(resourceVolumeRead(d, m))
@@ -138,7 +136,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 		if d.Get("instance_id").(string) == "" {
 			_, err := apiClient.DetachVolume(d.Id())
 			if err != nil {
-				log.Printf("[WARN] An error occurred while trying to detach volume (%s)", d.Id())
+				return fmt.Errorf("[ERR] An error occurred while tring to detach volume (%s)", d.Id())
 			}
 
 			return resourceVolumeRead(d, m)
@@ -150,7 +148,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 		if d.Get("instance_id").(string) != "" {
 			_, err := apiClient.DetachVolume(d.Id())
 			if err != nil {
-				log.Printf("[WARN] An error occurred while trying to detach volume (%s)", d.Id())
+				return fmt.Errorf("[WARN] an error occurred while tring to detach volume %s, %s", d.Id(), err)
 			}
 
 			time.Sleep(10 * time.Second)
@@ -158,14 +156,14 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 			newSize := d.Get("size_gb").(int)
 			_, err = apiClient.ResizeVolume(d.Id(), newSize)
 			if err != nil {
-				log.Printf("[INFO] Civo volume (%s) size not change", d.Id())
+				return fmt.Errorf("[ERR] the volume (%s) size not change %s", d.Id(), err)
 			}
 
 			time.Sleep(2 * time.Second)
 
 			_, err = apiClient.AttachVolume(d.Id(), d.Get("instance_id").(string))
 			if err != nil {
-				log.Printf("[WARN] An error occurred while trying to attach the volume (%s)", d.Id())
+				return fmt.Errorf("[ERR] an error occurred while tring to attach the volume %s", d.Id())
 			}
 
 		}
@@ -175,12 +173,14 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceVolumeRead(d, m)
 }
 
+// function to delete the volume
 func resourceVolumeDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the volume %s", d.Id())
 	_, err := apiClient.DeleteVolume(d.Id())
 	if err != nil {
-		log.Printf("[INFO] Civo volume (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete the volume %s", err)
 	}
 	return nil
 }

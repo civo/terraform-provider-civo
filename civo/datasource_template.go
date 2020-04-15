@@ -5,8 +5,11 @@ import (
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"log"
 )
 
+// Data source to get from the api a specific template
+// using the code of the image
 func dataSourceTemplate() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceTemplateRead,
@@ -68,6 +71,7 @@ func dataSourceTemplateRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if hasCode {
+		log.Printf("[INFO] Getting all template")
 		image, err := apiClient.GetTemplateByCode(code.(string))
 		if err != nil {
 			fmt.Errorf("[ERR] failed to retrive template: %s", err)

@@ -7,6 +7,7 @@ import (
 	"log"
 )
 
+// Ssh resource, with this we can create and manage all Snapshot
 func resourceSSHKey() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
@@ -40,13 +41,14 @@ func resourceSSHKey() *schema.Resource {
 	}
 }
 
+// function to create a new ssh key
 func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] creating the new ssh key %s", d.Get("name").(string))
 	sshKey, err := apiClient.NewSSHKey(d.Get("name").(string), d.Get("public_key").(string))
 	if err != nil {
-		fmt.Errorf("[WARN] failed to create a new ssh key: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create a new ssh key: %s", err)
 	}
 
 	d.SetId(sshKey.ID)
@@ -54,9 +56,11 @@ func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceSSHKeyRead(d, m)
 }
 
+// function to read a ssh key
 func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retrieving the new ssh key %s", d.Get("name").(string))
 	sshKey, err := apiClient.FindSSHKey(d.Id())
 	if err != nil {
 		if sshKey != nil {
@@ -64,7 +68,7 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[WARN] error retrieving ssh key: %s", err)
+		return fmt.Errorf("[ERR] error retrieving ssh key: %s", err)
 	}
 
 	d.Set("name", sshKey.Name)
@@ -73,14 +77,16 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+// function to update the ssh key
 func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	if d.HasChange("name") {
 		if d.Get("name").(string) != "" {
+			log.Printf("[INFO] updating the ssh key %s", d.Get("name").(string))
 			_, err := apiClient.UpdateSSHKey(d.Get("name").(string), d.Id())
 			if err != nil {
-				log.Printf("[WARN] an error occurred while trying to rename the ssh key (%s)", d.Id())
+				return fmt.Errorf("[ERR] an error occurred while tring to rename the ssh key %s", d.Id())
 			}
 		}
 	}
@@ -88,12 +94,14 @@ func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceSSHKeyRead(d, m)
 }
 
+// function to delete the ssh key
 func resourceSSHKeyDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the ssh key %s", d.Id())
 	_, err := apiClient.DeleteSSHKey(d.Id())
 	if err != nil {
-		log.Printf("[INFO] civo ssh key (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete the ssh key %s", d.Id())
 	}
 	return nil
 }

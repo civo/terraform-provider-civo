@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
+// Civo cloud provider
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -38,6 +39,7 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
+// Provider configuration
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	token := d.Get("token").(string)
 	client, _ := civogo.NewClient(token)

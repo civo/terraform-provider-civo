@@ -9,6 +9,9 @@ import (
 	"log"
 )
 
+// Snapshot resource, with this we can create and manage all Snapshot
+// this resource dont have update option, we used ForceNew so any change
+// in any value will be recreate the resource
 func resourceSnapshot() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -78,12 +81,17 @@ func resourceSnapshot() *schema.Resource {
 		Create: resourceSnapshotCreate,
 		Read:   resourceSnapshotRead,
 		Delete: resourceSnapshotDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 	}
 }
 
+// function to create a new snapshot
 func resourceSnapshotCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] configuring the new snapshot %s", d.Get("name").(string))
 	config := &civogo.SnapshotConfig{
 		InstanceID: d.Get("instance_id").(string),
 	}
@@ -96,10 +104,10 @@ func resourceSnapshotCreate(d *schema.ResourceData, m interface{}) error {
 		config.Cron = attr.(string)
 	}
 
+	log.Printf("[INFO] creating the new snapshot %s", d.Get("name").(string))
 	resp, err := apiClient.CreateSnapshot(d.Get("name").(string), config)
 	if err != nil {
-		fmt.Errorf("[WARN] failed to create snapshot: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create snapshot: %s", err)
 	}
 
 	d.SetId(resp.ID)
@@ -132,13 +140,14 @@ func resourceSnapshotCreate(d *schema.ResourceData, m interface{}) error {
 
 }
 
+// function to read the snapshot
 func resourceSnapshotRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retrieving the snapshot %s", d.Get("name").(string))
 	resp, err := apiClient.FindSnapshot(d.Id())
 	if err != nil {
-		fmt.Errorf("[WARN] failed to read snapshot: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed retrieving the snapshot: %s", err)
 	}
 
 	safeValue := false
@@ -156,18 +165,20 @@ func resourceSnapshotRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("size_gb", resp.SizeGigabytes)
 	d.Set("state", resp.State)
 	d.Set("cron_timing", resp.Cron)
-	d.Set("requested_at", resp.RequestedAt.String())
-	d.Set("completed_at", resp.CompletedAt.String())
+	d.Set("requested_at", resp.RequestedAt.UTC().String())
+	d.Set("completed_at", resp.CompletedAt.UTC().String())
 
 	return nil
 }
 
+// function to delete snapshot
 func resourceSnapshotDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the snapshot %s", d.Id())
 	_, err := apiClient.DeleteSnapshot(d.Id())
 	if err != nil {
-		log.Printf("[INFO] civo snapshot (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete the snapshot %s", d.Id())
 	}
 
 	return nil

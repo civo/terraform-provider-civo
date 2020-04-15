@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// The instance resource represents an object of type instances
+// and with it you can handle the instances created with Terraform
 func resourceInstance() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
@@ -108,12 +110,14 @@ func resourceInstance() *schema.Resource {
 	}
 }
 
+// function to create a instance
 func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] configuring the instance %s", d.Get("hostname").(string))
 	config, err := apiClient.NewInstanceConfig()
 	if err != nil {
-		fmt.Errorf("failed to create a new config: %s", err)
+		fmt.Errorf("[ERR] failed to create a new config: %s", err)
 		return err
 	}
 
@@ -155,14 +159,16 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 
 	config.Tags = tags
 
+	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
 	instance, err := apiClient.CreateInstance(config)
 	if err != nil {
-		fmt.Errorf("[WARN] failed to create instance: %s", err)
+		fmt.Errorf("[ERR] failed to create instance: %s", err)
 		return err
 	}
 
 	d.SetId(instance.ID)
 
+	// retry to wait the instances is ready
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		resp, err := apiClient.GetInstance(instance.ID)
 		if err != nil {
@@ -170,7 +176,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		}
 
 		if resp.Status != "ACTIVE" {
-			return resource.RetryableError(fmt.Errorf("[WARN] expected instance to be created but was in state %s", resp.Status))
+			return resource.RetryableError(fmt.Errorf("[ERR] expected instance to be created but was in state %s", resp.Status))
 		} else {
 			/*
 				Once the instance is created, we check if the object firewall_id,
@@ -179,7 +185,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 			if attr, ok := d.GetOk("firewall_id"); ok {
 				_, errInstance := apiClient.SetInstanceFirewall(instance.ID, attr.(string))
 				if errInstance != nil {
-					return resource.NonRetryableError(fmt.Errorf("[WARN] failed to set firewall to the instance: %s", errInstance))
+					return resource.NonRetryableError(fmt.Errorf("[ERR] failed to set firewall to the instance: %s", errInstance))
 				}
 			}
 
@@ -191,7 +197,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 				resp.Notes = attr.(string)
 				_, errInstance := apiClient.UpdateInstance(resp)
 				if errInstance != nil {
-					return resource.NonRetryableError(fmt.Errorf("[WARN] failed to set note to the instance: %s", errInstance))
+					return resource.NonRetryableError(fmt.Errorf("[ERR] failed to set note to the instance: %s", errInstance))
 				}
 			}
 		}
@@ -200,13 +206,15 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	})
 }
 
+// function to read the instance
 func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retriving the instance %s", d.Id())
 	resp, err := apiClient.GetInstance(d.Id())
 	if err != nil {
 		// check if the instance no longer exists.
-		log.Printf("[WARN] civo instance (%s) not found", d.Id())
+		fmt.Errorf("[ERR] instance (%s) not found", d.Id())
 		d.SetId("")
 		return nil
 	}
@@ -222,7 +230,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("public_ip", resp.PublicIP)
 	d.Set("pseudo_ip", resp.PseudoIP)
 	d.Set("status", resp.Status)
-	d.Set("created_at", resp.CreatedAt.String())
+	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 
 	if _, ok := d.GetOk("network_id"); ok {
@@ -240,60 +248,66 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+// function to update a instance
 func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// check if the size change if change we send to resize the instance
 	if d.HasChange("size") {
 		newSize := d.Get("size").(string)
+
+		log.Printf("[INFO] resizing the instance %s", d.Id())
 		_, err := apiClient.UpgradeInstance(d.Id(), newSize)
 		if err != nil {
-			log.Printf("[WARN] An error occurred while resizing the instance (%s)", d.Id())
+			return fmt.Errorf("[WARN] An error occurred while resizing the instance %s", d.Id())
 		}
 
 		return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 			resp, err := apiClient.GetInstance(d.Id())
 
 			if err != nil {
-				return resource.NonRetryableError(fmt.Errorf("[WARN] error geting instance: %s", err))
+				return resource.NonRetryableError(fmt.Errorf("[ERR] error geting instance: %s", err))
 			}
 
 			if resp.Status != "ACTIVE" {
-				return resource.RetryableError(fmt.Errorf("[WARN] expected instance to be resizing but was in state %s", resp.Status))
+				return resource.RetryableError(fmt.Errorf("[ERR] expected instance to be resizing but was in state %s", resp.Status))
 			}
 
 			return resource.NonRetryableError(resourceInstanceRead(d, m))
 		})
 	}
 
+	// if has note we add to the instance
 	if d.HasChange("notes") {
 		notes := d.Get("notes").(string)
 		instance, err := apiClient.GetInstance(d.Id())
 		if err != nil {
 			// check if the instance no longer exists.
-			log.Printf("[WARN] civo instance (%s) not found", d.Id())
-			d.SetId("")
-			return nil
+			return fmt.Errorf("[ERR] instance %s not found", d.Id())
 		}
 
 		instance.Notes = notes
 
+		log.Printf("[INFO] adding notes to the instance %s", d.Id())
 		_, err = apiClient.UpdateInstance(instance)
 		if err != nil {
-			log.Printf("[WARN] an error occurred while adding a note to the instance (%s)", d.Id())
+			return fmt.Errorf("[ERR] an error occurred while adding a note to the instance %s", d.Id())
 		}
 	}
 
+	// if a firewall is declare we update the instance
 	if d.HasChange("firewall_id") {
 		firewallID := d.Get("firewall_id").(string)
+
+		log.Printf("[INFO] adding firewall to the instance %s", d.Id())
 		_, err := apiClient.SetInstanceFirewall(d.Id(), firewallID)
 		if err != nil {
 			// check if the instance no longer exists.
-			log.Printf("[WARN] an error occurred while set firewall to the instance (%s)", d.Id())
-			d.SetId("")
-			return nil
+			return fmt.Errorf("[ERR] an error occurred while set firewall to the instance %s", d.Id())
 		}
 	}
 
+	// if tags is declare we update the instance with the tags
 	if d.HasChange("tags") {
 		tfTags := d.Get("tags").(*schema.Set).List()
 		tags := make([]string, len(tfTags))
@@ -304,16 +318,15 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		instance, err := apiClient.GetInstance(d.Id())
 		if err != nil {
 			// check if the instance no longer exists.
-			log.Printf("[WARN] civo instance (%s) not found", d.Id())
-			d.SetId("")
-			return nil
+			return fmt.Errorf("[ERR] instance %s not found", d.Id())
 		}
 
 		tagsToString := strings.Join(tags, " ")
 
+		log.Printf("[INFO] adding tags to the instance %s", d.Id())
 		_, err = apiClient.SetInstanceTags(instance, tagsToString)
 		if err != nil {
-			log.Printf("[WARN] an error occurred while adding tags to the instance (%s)", d.Id())
+			return fmt.Errorf("[ERR] an error occurred while adding tags to the instance %s", d.Id())
 		}
 
 	}
@@ -321,12 +334,14 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceInstanceRead(d, m)
 }
 
+// function to delete instance
 func resourceInstanceDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the instance %s", d.Id())
 	_, err := apiClient.DeleteInstance(d.Id())
 	if err != nil {
-		log.Printf("[INFO] civo instance (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete instance %s", d.Id())
 	}
 	return nil
 }

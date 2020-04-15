@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"log"
 	"regexp"
 	"strconv"
 )
 
+// Data source to get and filter all instances size
+// use to define the size in resourceInstance
 func dataSourceInstancesSize() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceInstancesSizeRead,
@@ -56,11 +59,13 @@ func dataSourceInstancesSizeRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if filtersOk {
+		log.Printf("[INFO] Getting the instances size")
 		resp, err := apiClient.ListInstanceSizes()
 		if err != nil {
 			return fmt.Errorf("no instances size was found in the server")
 		}
 
+		log.Printf("[INFO] Finding the size of the instances")
 		size, err := findInstancesSizeByFilter(resp, filters.(*schema.Set))
 		if err != nil {
 			return fmt.Errorf("no instances size was found in the server, %s", err)
@@ -159,7 +164,7 @@ func findInstancesSizeByFilter(sizes []civogo.InstanceSize, set *schema.Set) (*c
 		return &results[0], nil
 	}
 	if len(results) == 0 {
-		return nil, fmt.Errorf("no sizes found for your search")
+		return nil, fmt.Errorf("no instances sizes found for your search")
 	}
-	return nil, fmt.Errorf("too many sizes found (found %d, expected 1)", len(results))
+	return nil, fmt.Errorf("too many instances sizes found (found %d, expected 1)", len(results))
 }

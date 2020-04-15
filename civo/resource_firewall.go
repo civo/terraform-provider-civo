@@ -7,6 +7,7 @@ import (
 	"log"
 )
 
+// Firewall resource with this we can create and manage all firewall
 func resourceFirewall() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
@@ -31,12 +32,14 @@ func resourceFirewall() *schema.Resource {
 	}
 }
 
+// function to create a firewall
 func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] creating a new firewall %s", d.Get("name").(string))
 	firewall, err := apiClient.NewFirewall(d.Get("name").(string))
 	if err != nil {
-		fmt.Errorf("failed to create a new firewall: %s", err)
+		fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
 		return err
 	}
 
@@ -45,17 +48,18 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceFirewallRead(d, m)
 }
 
+// function to read a firewall
 func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retriving the firewall %s", d.Id())
 	resp, err := apiClient.FindFirewall(d.Id())
 	if err != nil {
 		if resp != nil {
 			d.SetId("")
 			return nil
 		}
-
-		return fmt.Errorf("[ERR] error retrieving firewall: %s", err)
+		return fmt.Errorf("[ERR] error retrieving firewall %s, %s", d.Id(), err)
 	}
 
 	d.Set("name", resp.Name)
@@ -64,14 +68,16 @@ func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+// function to update the firewall
 func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	if d.HasChange("name") {
 		if d.Get("name").(string) != "" {
+			log.Printf("[INFO] updating the firewall name, %s", d.Id())
 			_, err := apiClient.RenameFirewall(d.Id(), d.Get("name").(string))
 			if err != nil {
-				log.Printf("[WARN] an error occurred while trying to rename the firewall (%s)", d.Id())
+				return fmt.Errorf("[WARN] an error occurred while tring to rename the firewall %s, %s", d.Id(), err)
 			}
 		}
 	}
@@ -79,12 +85,14 @@ func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceFirewallRead(d, m)
 }
 
+// function to delete a firewall
 func resourceFirewallDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the firewall %s", d.Id())
 	_, err := apiClient.DeleteFirewall(d.Id())
 	if err != nil {
-		log.Printf("[INFO] civo firewall (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete the firewall %s, %s", d.Id(), err)
 	}
 	return nil
 }

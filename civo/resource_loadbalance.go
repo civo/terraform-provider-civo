@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// This resource represent a load balancer in the system
 func resourceLoadBalancer() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
@@ -123,9 +124,11 @@ func resourceLoadBalancer() *schema.Resource {
 	}
 }
 
+// function to create a new load balancer
 func resourceLoadBalancerCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] configuring the load balancer %s", d.Get("hostname").(string))
 	conf := &civogo.LoadBalancerConfig{
 		Hostname:       d.Get("hostname").(string),
 		Protocol:       d.Get("protocol").(string),
@@ -156,10 +159,10 @@ func resourceLoadBalancerCreate(d *schema.ResourceData, m interface{}) error {
 		conf.IgnoreInvalidBackendTLS = v.(bool)
 	}
 
+	log.Printf("[INFO] creating the load balancer %s", d.Get("hostname").(string))
 	lb, err := apiClient.CreateLoadBalancer(conf)
 	if err != nil {
-		fmt.Errorf("[ERR] failed to create a new load balancer: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create a new load balancer: %s", err)
 	}
 
 	d.SetId(lb.ID)
@@ -167,17 +170,18 @@ func resourceLoadBalancerCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceLoadBalancerRead(d, m)
 }
 
+// function to read the load balancer
 func resourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retrieving the load balancer %s", d.Id())
 	resp, err := apiClient.FindLoadBalancer(d.Id())
 	if err != nil {
 		if resp != nil {
 			d.SetId("")
 			return nil
 		}
-
-		return fmt.Errorf("[WARN] error retrieving load balancer: %s", err)
+		return fmt.Errorf("[ERR] error retrieving load balancer: %s", err)
 	}
 
 	d.Set("hostname", resp.Hostname)
@@ -193,15 +197,17 @@ func resourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("ignore_invalid_backend_tls", resp.IgnoreInvalidBackendTLS)
 
 	if err := d.Set("backend", flattenLoadBalancerBackend(resp.Backends)); err != nil {
-		return fmt.Errorf("[WARN] error retrieving the backend for load balancer error: %#v", err)
+		return fmt.Errorf("[ERR] error retrieving the backend for load balancer error: %#v", err)
 	}
 
 	return nil
 }
 
+// function to update the load balancer
 func resourceLoadBalancerUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] configuring the load balancer to update %s", d.Id())
 	conf := &civogo.LoadBalancerConfig{
 		Hostname:       d.Get("hostname").(string),
 		Protocol:       d.Get("protocol").(string),
@@ -229,27 +235,29 @@ func resourceLoadBalancerUpdate(d *schema.ResourceData, m interface{}) error {
 		conf.IgnoreInvalidBackendTLS = d.Get("ignore_invalid_backend_tls").(bool)
 	}
 
+	log.Printf("[INFO] updating the load balancer %s", d.Id())
 	_, err := apiClient.UpdateLoadBalancer(d.Id(), conf)
 	if err != nil {
-		fmt.Errorf("[WARN] failed to update load balancer: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to update load balancer: %s", err)
 	}
 
 	return resourceLoadBalancerRead(d, m)
 
 }
 
+// function to delete the load balancer
 func resourceLoadBalancerDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the load balancer %s", d.Id())
 	_, err := apiClient.DeleteLoadBalancer(d.Id())
 	if err != nil {
-		log.Printf("[INFO] Civo load balancer (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete load balancer %s", d.Id())
 	}
 	return nil
 }
 
-// Utils
+// function to expand the load balancer backend to send to the api
 func expandLoadBalancerBackend(backend []interface{}) []civogo.LoadBalancerBackendConfig {
 	expandedBackend := make([]civogo.LoadBalancerBackendConfig, 0, len(backend))
 	for _, rawBackend := range backend {
@@ -267,6 +275,7 @@ func expandLoadBalancerBackend(backend []interface{}) []civogo.LoadBalancerBacke
 	return expandedBackend
 }
 
+// function to flatten the load balancer backend when is coming from the api
 func flattenLoadBalancerBackend(backend []civogo.LoadBalancerBackend) []interface{} {
 	if backend == nil {
 		return nil

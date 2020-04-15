@@ -4,8 +4,12 @@ import (
 	"fmt"
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"log"
 )
 
+// Data source to get and filter all kubernetes version
+// available in the server, use to define the version at the
+// moment of the cluster creation in resourceKubernetesCluster
 func dataSourceKubernetesVersion() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceKubernetesVersionRead,
@@ -42,11 +46,13 @@ func dataSourceKubernetesVersionRead(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if filtersOk {
+		log.Printf("[INFO] Getting all versions of kubernetes")
 		resp, err := apiClient.ListAvailableKubernetesVersions()
 		if err != nil {
 			return fmt.Errorf("no version was found in the server")
 		}
 
+		log.Printf("[INFO] Finding the version of kubernetes")
 		version, err := findKubernetesVersionByFilter(resp, filters.(*schema.Set))
 		if err != nil {
 			return fmt.Errorf("no version was found in the server, %s", err)
@@ -99,7 +105,7 @@ func findKubernetesVersionByFilter(version []civogo.KubernetesVersion, set *sche
 		return &results[0], nil
 	}
 	if len(results) == 0 {
-		return nil, fmt.Errorf("no version found for your search")
+		return nil, fmt.Errorf("no kubernetes version found for your search")
 	}
-	return nil, fmt.Errorf("too many version found (found %d, expected 1)", len(results))
+	return nil, fmt.Errorf("too many kubernetes version found (found %d, expected 1)", len(results))
 }

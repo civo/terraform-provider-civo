@@ -6,8 +6,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"log"
 )
 
+// Kubernetes Cluster resource, with this you can manage all cluster from terraform
 func resourceKubernetesCluster() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -83,9 +85,13 @@ func resourceKubernetesCluster() *schema.Resource {
 		Read:   resourceKubernetesClusterRead,
 		Update: resourceKubernetesClusterUpdate,
 		Delete: resourceKubernetesClusterDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 	}
 }
 
+// schema for the instances
 func instanceSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -130,6 +136,7 @@ func instanceSchema() *schema.Schema {
 	}
 }
 
+// schema for the application in the cluster
 func applicationSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -157,9 +164,11 @@ func applicationSchema() *schema.Schema {
 	}
 }
 
+// function to create a new cluster
 func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] configuring a new kubernetes cluster %s", d.Get("name").(string))
 	config := &civogo.KubernetesClusterConfig{
 		Name:            d.Get("name").(string),
 		TargetNodesSize: d.Get("target_nodes_size").(string),
@@ -181,9 +190,10 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 		config.Applications = attr.(string)
 	}
 
+	log.Printf("[INFO] creating a new kubernetes cluster %s", d.Get("name").(string))
 	resp, err := apiClient.NewKubernetesClusters(config)
 	if err != nil {
-		return fmt.Errorf("[WARN] failed to create the kubernets cluster: %s", err)
+		return fmt.Errorf("[ERR] failed to create the kubernets cluster: %s", err)
 	}
 
 	d.SetId(resp.ID)
@@ -191,23 +201,25 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		resp, err := apiClient.FindKubernetesCluster(d.Id())
 		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("[WARN] error geting kubernetes cluster: %s", err))
+			return resource.NonRetryableError(fmt.Errorf("[ERR] error geting kubernetes cluster: %s", err))
 		}
 
 		if resp.Ready != true {
-			return resource.RetryableError(fmt.Errorf("[WARN] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
+			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
 		}
 
 		return resource.NonRetryableError(resourceKubernetesClusterRead(d, m))
 	})
 }
 
+// function to read the kubernetes cluster
 func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retrieving the kubernetes cluster %s", d.Id())
 	resp, err := apiClient.FindKubernetesCluster(d.Id())
 	if err != nil {
-		return fmt.Errorf("[WARN] failed to find the kubernets cluster: %s", err)
+		return fmt.Errorf("[ERR] failed to find the kubernets cluster: %s", err)
 	}
 
 	d.Set("name", resp.Name)
@@ -224,16 +236,17 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 
 	if err := d.Set("instances", flattenInstances(resp.Instances)); err != nil {
-		return fmt.Errorf("[WARN] error retrieving the instances for kubernetes cluster error: %#v", err)
+		return fmt.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
 	}
 
 	if err := d.Set("installed_applications", flattenInstalledApplication(resp.InstalledApplications)); err != nil {
-		return fmt.Errorf("[WARN] error retrieving the installed application for kubernetes cluster error: %#v", err)
+		return fmt.Errorf("[ERR] error retrieving the installed application for kubernetes cluster error: %#v", err)
 	}
 
 	return nil
 }
 
+// function to update the kubernetes cluster
 func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
@@ -246,36 +259,40 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 		config.Applications = d.Get("applications").(string)
 	}
 
+	log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())
 	_, err := apiClient.UpdateKubernetesCluster(d.Id(), config)
 	if err != nil {
-		return fmt.Errorf("[WARN] failed to update kubernetes cluster: %s", err)
+		return fmt.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
 	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		resp, err := apiClient.FindKubernetesCluster(d.Id())
 		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("[WARN] error geting kubernetes cluster: %s", err))
+			return resource.NonRetryableError(fmt.Errorf("[ERR] error geting kubernetes cluster: %s", err))
 		}
 
 		if resp.Status != "ACTIVE" {
-			return resource.RetryableError(fmt.Errorf("[WARN] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
+			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
 		}
 
 		return resource.NonRetryableError(resourceKubernetesClusterRead(d, m))
 	})
 }
 
+// function to delete the kubernetes cluster
 func resourceKubernetesClusterDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
 	_, err := apiClient.DeleteKubernetesCluster(d.Id())
 	if err != nil {
-		return fmt.Errorf("[INFO] kubernets cluster (%s) was delete", d.Id())
+		return fmt.Errorf("[INFO] an error occurred while tring to delete the kubernetes cluster %s", err)
 	}
 
 	return nil
 }
 
+// function to flatten all instances inside the cluster
 func flattenInstances(instances []civogo.KubernetesInstance) []interface{} {
 	if instances == nil {
 		return nil
@@ -300,6 +317,7 @@ func flattenInstances(instances []civogo.KubernetesInstance) []interface{} {
 	return flattenedInstances
 }
 
+// function to flatten all applications inside the cluster
 func flattenInstalledApplication(apps []civogo.KubernetesInstalledApplication) []interface{} {
 	if apps == nil {
 		return nil

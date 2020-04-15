@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// Template resource, with this we can create and manage all template
 func resourceTemplate() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -73,9 +74,13 @@ func resourceTemplate() *schema.Resource {
 		Read:   resourceTemplateRead,
 		Update: resourceTemplateUpdate,
 		Delete: resourceTemplateDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceTemplateImport,
+		},
 	}
 }
 
+// function to create a new template
 func resourceTemplateCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
@@ -91,6 +96,7 @@ func resourceTemplateCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("`volume_id` or `image_id` must be assigned")
 	}
 
+	log.Printf("[INFO] configuring the template %s", d.Get("code").(string))
 	config := &civogo.Template{
 		Code: d.Get("code").(string),
 		Name: d.Get("name").(string),
@@ -120,10 +126,10 @@ func resourceTemplateCreate(d *schema.ResourceData, m interface{}) error {
 		config.CloudConfig = attr.(string)
 	}
 
+	log.Printf("[INFO] creating the template %s", d.Get("code").(string))
 	resp, err := apiClient.NewTemplate(config)
 	if err != nil {
-		fmt.Errorf("[WARN] failed to create template: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create template: %s", err)
 	}
 
 	d.SetId(resp.ID)
@@ -131,13 +137,14 @@ func resourceTemplateCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceTemplateRead(d, m)
 }
 
+// function to read a template
 func resourceTemplateRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retrieving the template %s", d.Get("code").(string))
 	resp, err := apiClient.GetTemplateByCode(d.Get("code").(string))
 	if err != nil {
-		fmt.Errorf("[WARN] failed to read template: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to retrieving the template: %s", err)
 	}
 
 	d.Set("code", resp.Code)
@@ -152,9 +159,11 @@ func resourceTemplateRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+// function to update the template
 func resourceTemplateUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] configuring the template %s", d.Get("code").(string))
 	conf := &civogo.Template{
 		Name:             d.Get("name").(string),
 		ShortDescription: d.Get("short_description").(string),
@@ -165,22 +174,49 @@ func resourceTemplateUpdate(d *schema.ResourceData, m interface{}) error {
 		ImageID:          d.Get("image_id").(string),
 	}
 
+	log.Printf("[INFO] updating the template %s", d.Get("code").(string))
 	_, err := apiClient.UpdateTemplate(d.Id(), conf)
 	if err != nil {
-		fmt.Errorf("[WARN] failed to update template: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to update template: %s", err)
 	}
 
 	return resourceTemplateRead(d, m)
 }
 
+// function to delete the template
 func resourceTemplateDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the template %s", d.Id())
 	_, err := apiClient.DeleteTemplate(d.Id())
 	if err != nil {
-		log.Printf("[INFO] civo template (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete the template %s", d.Id())
 	}
 
 	return nil
+}
+
+// custom import to able to add a template to the terraform
+func resourceTemplateImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	apiClient := m.(*civogo.Client)
+
+	log.Printf("[INFO] retriving the template %s", d.Id())
+	resp, err := apiClient.GetTemplateByCode(d.Id())
+	if err != nil {
+		if resp != nil {
+			return nil, err
+		}
+	}
+
+	d.SetId(resp.ID)
+	d.Set("code", resp.Code)
+	d.Set("name", resp.Name)
+	d.Set("volume_id", resp.VolumeID)
+	d.Set("image_id", resp.ImageID)
+	d.Set("short_description", resp.ShortDescription)
+	d.Set("description", resp.Description)
+	d.Set("default_username", resp.DefaultUsername)
+	d.Set("cloud_config", resp.CloudConfig)
+
+	return []*schema.ResourceData{d}, nil
 }

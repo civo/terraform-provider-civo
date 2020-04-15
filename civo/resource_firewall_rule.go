@@ -8,6 +8,9 @@ import (
 	"log"
 )
 
+// Firewall Rule resource represent you can create and manage all firewall rules
+// this resource don't have a update option because the backend don't have the
+// support for that, so in this case we use ForceNew for all object in the resource
 func resourceFirewallRule() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
@@ -70,21 +73,23 @@ func resourceFirewallRule() *schema.Resource {
 		Create: resourceFirewallRuleCreate,
 		Read:   resourceFirewallRuleRead,
 		Delete: resourceFirewallRuleDelete,
-		//Importer: &schema.ResourceImporter{
-		//	State: schema.ImportStatePassthrough,
-		//},
+		Importer: &schema.ResourceImporter{
+			State: resourceFirewallRuleImport,
+		},
 	}
 }
 
+// function to create a new firewall rule
 func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	tfCidrs := d.Get("cird").(*schema.Set).List()
-	cird := make([]string, len(tfCidrs))
-	for i, tfCird := range tfCidrs {
+	tfCidr := d.Get("cird").(*schema.Set).List()
+	cird := make([]string, len(tfCidr))
+	for i, tfCird := range tfCidr {
 		cird[i] = tfCird.(string)
 	}
 
+	log.Printf("[INFO] configuring a new firewall rule for firewall %s", d.Get("firewall_id").(string))
 	config := &civogo.FirewallRuleConfig{
 		FirewallID: d.Get("firewall_id").(string),
 		Protocol:   d.Get("protocol").(string),
@@ -101,6 +106,7 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 		config.Label = attr.(string)
 	}
 
+	log.Printf("[INFO] creating a new firewall rule for firewall %s", d.Get("firewall_id").(string))
 	firewallRule, err := apiClient.NewFirewallRule(config)
 	if err != nil {
 		fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
@@ -112,9 +118,11 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceFirewallRuleRead(d, m)
 }
 
+// function to read a firewall rule
 func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	resp, err := apiClient.FindFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
 		if resp != nil {
@@ -136,12 +144,43 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+// function to delete a firewall rule
 func resourceFirewallRuleDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	_, err := apiClient.DeleteFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
-		log.Printf("[INFO] civo firewall rule (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete firewall rule %s", d.Id())
 	}
 	return nil
+}
+
+// custom import to able to add a firewall rule to the terraform
+func resourceFirewallRuleImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	apiClient := m.(*civogo.Client)
+
+	firewallId, firewallRuleId, err := resourceCommonParseId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("[INFO] retriving the firewall rule %s", firewallRuleId)
+	resp, err := apiClient.FindFirewallRule(firewallId, firewallRuleId)
+	if err != nil {
+		if resp != nil {
+			return nil, err
+		}
+	}
+
+	d.SetId(resp.ID)
+	d.Set("firewall_id", resp.FirewallID)
+	d.Set("protocol", resp.Protocol)
+	d.Set("start_port", resp.StartPort)
+	d.Set("end_port", resp.EndPort)
+	d.Set("cird", resp.Cidr)
+	d.Set("direction", resp.Direction)
+	d.Set("label", resp.Label)
+
+	return []*schema.ResourceData{d}, nil
 }
