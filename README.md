@@ -85,12 +85,13 @@ Progress resource
 - ✅ ~~Domain records~~
 - ✅ ~~Templates~~
 - ✅ ~~Snapshots~~
-- Regions
-- Quotas
-- Sizes
-- Kubernetes Clusters
-- Kubernetes Applications
+- ✅ ~~Regions~~
+- ✅ ~~Quotas~~
+- ✅ ~~Sizes~~
+- ✅ ~~Kubernetes Clusters~~
 
 Progress data source
 ----------------------
 - ✅ ~~Templates~~
+- ✅ ~~Instances Size~~
+- ✅ ~~Kubernetes Version~~

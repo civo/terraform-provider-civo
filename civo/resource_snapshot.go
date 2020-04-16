@@ -3,10 +3,12 @@ package civo
 import (
 	"fmt"
 	"github.com/civo/civogo"
+	"github.com/gorhill/cronexpr"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
+	"time"
 )
 
 // Snapshot resource, with this we can create and manage all Snapshot
@@ -66,6 +68,10 @@ func resourceSnapshot() *schema.Resource {
 				Computed: true,
 			},
 			"state": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"next_execution": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -151,9 +157,14 @@ func resourceSnapshotRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	safeValue := false
+	nextExecution := time.Time{}
 
 	if resp.Safe == 1 {
 		safeValue = true
+	}
+
+	if resp.Cron != "" {
+		nextExecution = cronexpr.MustParse(resp.Cron).Next(time.Now().UTC())
 	}
 
 	d.Set("instance_id", resp.InstanceID)
@@ -165,6 +176,7 @@ func resourceSnapshotRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("size_gb", resp.SizeGigabytes)
 	d.Set("state", resp.State)
 	d.Set("cron_timing", resp.Cron)
+	d.Set("next_execution", nextExecution.String())
 	d.Set("requested_at", resp.RequestedAt.UTC().String())
 	d.Set("completed_at", resp.CompletedAt.UTC().String())
 

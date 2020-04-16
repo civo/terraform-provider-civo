@@ -9,7 +9,7 @@ import (
 )
 
 // Firewall Rule resource represent you can create and manage all firewall rules
-// this resource don't have a update option because the backend don't have the
+// this resource don't have an update option because the backend don't have the
 // support for that, so in this case we use ForceNew for all object in the resource
 func resourceFirewallRule() *schema.Resource {
 	fmt.Print()
@@ -25,7 +25,7 @@ func resourceFirewallRule() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "",
+				Description: "The protocol choice from tcp, udp or icmp (the default if unspecified is tcp)",
 				ValidateFunc: validation.StringInSlice([]string{
 					"tcp",
 					"udp",
@@ -36,28 +36,28 @@ func resourceFirewallRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "",
+				Description:  "The start of the port range to configure for this rule (or the single port if required)",
 				ValidateFunc: validation.NoZeroValues,
 			},
 			"end_port": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "",
+				Description:  "The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)",
 				ValidateFunc: validation.NoZeroValues,
 			},
 			"cird": {
 				Type:        schema.TypeSet,
 				Required:    true,
 				ForceNew:    true,
-				Description: "",
+				Description: "The IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (defaults to being globally applied, i.e. 0.0.0.0/0)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"direction": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "",
+				Description: "Will this rule affect inbound or outbound traffic (by default this is inbound)",
 				ValidateFunc: validation.StringInSlice([]string{
 					"inbound",
 					"outbound",
@@ -67,6 +67,7 @@ func resourceFirewallRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
+				Description:  "A string that will be the displayed name/reference for this rule (optional)",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 		},
@@ -109,8 +110,7 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] creating a new firewall rule for firewall %s", d.Get("firewall_id").(string))
 	firewallRule, err := apiClient.NewFirewallRule(config)
 	if err != nil {
-		fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
 	}
 
 	d.SetId(firewallRule.ID)

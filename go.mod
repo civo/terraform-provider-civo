@@ -5,6 +5,7 @@ require (
 	github.com/aws/aws-sdk-go v1.29.22 // indirect
 	github.com/civo/civogo v0.2.5
 	github.com/fatih/color v1.9.0 // indirect
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/hashicorp/go-getter v1.4.1 // indirect
 	github.com/hashicorp/go-hclog v0.12.1 // indirect
 	github.com/hashicorp/go-plugin v1.1.0 // indirect
