@@ -3,6 +3,7 @@ package civo
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 func validateName(v interface{}, k string) (ws []string, es []error) {
@@ -19,4 +20,15 @@ func validateName(v interface{}, k string) (ws []string, es []error) {
 		return warns, errs
 	}
 	return warns, errs
+}
+
+// util function to help the import function
+func resourceCommonParseId(id string) (string, string, error) {
+	parts := strings.SplitN(id, ":", 2)
+
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return "", "", fmt.Errorf("unexpected format of ID (%s), expected attribute1:attribute2", id)
+	}
+
+	return parts[0], parts[1], nil
 }

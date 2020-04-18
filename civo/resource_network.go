@@ -7,6 +7,7 @@ import (
 	"log"
 )
 
+// The resource network represent a network inside the cloud
 func resourceNetwork() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
@@ -40,21 +41,20 @@ func resourceNetwork() *schema.Resource {
 		Update: resourceNetworkUpdate,
 		Delete: resourceNetworkDelete,
 		//Exists: resourceExistsItem,
-		//Importer: &schema.ResourceImporter{
-		//	State: schema.ImportStatePassthrough,
-		//},
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 	}
 }
 
+// function to create a new network
 func resourceNetworkCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	config := &civogo.NetworkConfig{Label: d.Get("label").(string)}
-
-	network, err := apiClient.NewNetwork(config)
+	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
+	network, err := apiClient.NewNetwork(d.Get("label").(string))
 	if err != nil {
-		fmt.Errorf("failed to create a new config: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create a new network: %s", err)
 	}
 
 	d.SetId(network.ID)
@@ -62,14 +62,16 @@ func resourceNetworkCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceNetworkRead(d, m)
 }
 
+// function to read a network
 func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	CurrentNetwork := civogo.Network{}
 
+	log.Printf("[INFO] retriving the network %s", d.Id())
 	resp, err := apiClient.ListNetworks()
 	if err != nil {
-		fmt.Errorf("failed to create a new config: %s", err)
+		return fmt.Errorf("[ERR] failed to list all network %s", err)
 	}
 
 	for _, net := range resp {
@@ -87,29 +89,29 @@ func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+// function to update the network
 func resourceNetworkUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	if d.HasChange("label") {
-		config := &civogo.NetworkConfig{Label: d.Get("label").(string)}
-
-		_, err := apiClient.RenameNetwork(config, d.Id())
+		log.Printf("[INFO] updating the network %s", d.Id())
+		_, err := apiClient.RenameNetwork(d.Get("label").(string), d.Id())
 		if err != nil {
-			log.Printf("[WARN] An error occurred while rename the network (%s)", d.Id())
+			return fmt.Errorf("[ERR] An error occurred while rename the network %s", d.Id())
 		}
-
 		return resourceNetworkRead(d, m)
 	}
-
 	return resourceNetworkRead(d, m)
 }
 
+// function to delete a network
 func resourceNetworkDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	log.Printf("[INFO] deleting the network %s", d.Id())
 	_, err := apiClient.DeleteNetwork(d.Id())
 	if err != nil {
-		log.Printf("[INFO] Civo network (%s) was delete", d.Id())
+		return fmt.Errorf("[ERR] an error occurred while tring to delete the network %s", d.Id())
 	}
 	return nil
 }
