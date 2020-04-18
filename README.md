@@ -85,8 +85,6 @@ Progress resource
 - ✅ ~~Domain records~~
 - ✅ ~~Templates~~
 - ✅ ~~Snapshots~~
-- ✅ ~~Regions~~
-- ✅ ~~Quotas~~
 - ✅ ~~Sizes~~
 - ✅ ~~Kubernetes Clusters~~
 

@@ -3,7 +3,6 @@ package civo
 import (
 	"fmt"
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"log"
 	"time"
@@ -17,23 +16,18 @@ func resourceVolume() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "Name for the volume",
+				Description:  "A name that you wish to use to refer to this volume",
 				ValidateFunc: validateName,
 			},
 			"size_gb": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "Size for the volume in GB",
+				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes ",
 			},
 			"bootable": {
 				Type:        schema.TypeBool,
 				Required:    true,
-				Description: "Mark like bootable this volume",
-			},
-			"instance_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Attach to a instance",
+				Description: "Mark the volume as bootable",
 			},
 			// Computed resource
 			"mount_point": {
@@ -70,13 +64,6 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(volume.ID)
 
-	if d.Get("instance_id").(string) != "" {
-		_, err := apiClient.AttachVolume(d.Id(), d.Get("instance_id").(string))
-		if err != nil {
-			return fmt.Errorf("[ERR] An error occurred while tring to attach the volume (%s)", d.Id())
-		}
-	}
-
 	return resourceNetworkRead(d, m)
 }
 
@@ -84,7 +71,7 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	log.Printf("[INFO] retrieving the template %s", d.Id())
+	log.Printf("[INFO] retrieving the volume %s", d.Id())
 	resp, err := apiClient.FindVolume(d.Id())
 	if err != nil {
 		return fmt.Errorf("[ERR] failed retrieving the volume: %s", err)
@@ -93,7 +80,6 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("name", resp.Name)
 	d.Set("size_gb", resp.SizeGigabytes)
 	d.Set("bootable", resp.Bootable)
-	d.Set("instance_id", resp.InstanceID)
 	d.Set("mount_point", resp.MountPoint)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 
@@ -104,48 +90,14 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	if d.HasChange("instance_id") {
-		if d.Get("instance_id").(string) != "" {
-			_, err := apiClient.AttachVolume(d.Id(), d.Get("instance_id").(string))
-			if err != nil {
-				return fmt.Errorf("[WARN] An error occurred while tring to attach the volume %s, %s", d.Id(), err)
-			}
-
-			return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-				CurrentVolume := civogo.Volume{}
-
-				resp, err := apiClient.ListVolumes()
-				if err != nil {
-					return resource.NonRetryableError(fmt.Errorf("[ERR] failed to get all volume: %s", err))
-				}
-
-				for _, volume := range resp {
-					if volume.ID == d.Id() {
-						CurrentVolume = volume
-					}
-				}
-
-				if CurrentVolume.MountPoint != "" {
-					return resource.RetryableError(fmt.Errorf("expected volume to be mount but the mount point is %s", CurrentVolume.MountPoint))
-				}
-
-				return resource.NonRetryableError(resourceVolumeRead(d, m))
-			})
-		}
-
-		if d.Get("instance_id").(string) == "" {
-			_, err := apiClient.DetachVolume(d.Id())
-			if err != nil {
-				return fmt.Errorf("[ERR] An error occurred while tring to detach volume (%s)", d.Id())
-			}
-
-			return resourceVolumeRead(d, m)
-		}
-
+	log.Printf("[INFO] retrieving the volume %s", d.Id())
+	resp, err := apiClient.FindVolume(d.Id())
+	if err != nil {
+		return fmt.Errorf("[ERR] failed retrieving the volume: %s", err)
 	}
 
 	if d.HasChange("size_gb") {
-		if d.Get("instance_id").(string) != "" {
+		if resp.InstanceID != "" {
 			_, err := apiClient.DetachVolume(d.Id())
 			if err != nil {
 				return fmt.Errorf("[WARN] an error occurred while tring to detach volume %s, %s", d.Id(), err)
@@ -161,11 +113,17 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 
 			time.Sleep(2 * time.Second)
 
-			_, err = apiClient.AttachVolume(d.Id(), d.Get("instance_id").(string))
+			_, err = apiClient.AttachVolume(d.Id(), resp.InstanceID)
 			if err != nil {
 				return fmt.Errorf("[ERR] an error occurred while tring to attach the volume %s", d.Id())
 			}
 
+		} else {
+			newSize := d.Get("size_gb").(int)
+			_, err = apiClient.ResizeVolume(d.Id(), newSize)
+			if err != nil {
+				return fmt.Errorf("[ERR] the volume (%s) size not change %s", d.Id(), err)
+			}
 		}
 
 	}

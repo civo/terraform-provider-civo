@@ -25,6 +25,7 @@ func Provider() terraform.ResourceProvider {
 			"civo_instance":           resourceInstance(),
 			"civo_network":            resourceNetwork(),
 			"civo_volume":             resourceVolume(),
+			"civo_volume_attachment":  resourceVolumeAttachment(),
 			"civo_dns_domain_name":    resourceDnsDomainName(),
 			"civo_dns_domain_record":  resourceDnsDomainRecord(),
 			"civo_firewall":           resourceFirewall(),

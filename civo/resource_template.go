@@ -41,7 +41,7 @@ func resourceTemplate() *schema.Resource {
 			"short_description": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "A one line description of the template (optional)e",
+				Description:  "A one line description of the template (optional)",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"description": {
