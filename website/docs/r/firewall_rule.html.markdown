@@ -25,7 +25,7 @@ resource "civo_firewall_rule" "http" {
   protocol = "tcp"
   start_port = "80"
   end_port = "80"
-  cird = ["192.168.1.2/32", "10.10.10.1/32", format("%s/%s",civo_instance.foo.public_ip,"32")]
+  cidr = ["192.168.1.2/32", "10.10.10.1/32", format("%s/%s",civo_instance.foo.public_ip,"32")]
   direction = "inbound"
   label = "server web"
   depends_on = [civo_firewall.www]
@@ -40,7 +40,7 @@ The following arguments are supported:
 * `protocol` (Required) This may be one of "tcp", "udp", or "icmp".
 * `start_port` (Required) The start port where traffic to be allowed.
 * `end_port` (Required) The end port where traffic to be allowed.
-* `cird` (Required) the IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (defaults to being globally applied, i.e. 0.0.0.0/0).
+* `cidr` (Required) the IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (defaults to being globally applied, i.e. 0.0.0.0/0).
 * `direction` (Required) will this rule affect inbound or outbound traffic (by default this is inbound)
 * `label` (Optional) a string that will be the displayed name/reference for this rule (optional)
 
@@ -53,7 +53,7 @@ The following attributes are exported:
 * `protocol` This may be one of "tcp", "udp", or "icmp".
 * `start_port` The start port where traffic to be allowed.
 * `end_port` The end port where traffic to be allowed.
-* `cird` A list of IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR.
+* `cidr` A list of IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR.
 * `direction` Will this rule affect inbound or outbound traffic (by default this is inbound)
 * `label` A string that will be the displayed name/reference for this rule (optional)
 

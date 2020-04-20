@@ -46,7 +46,7 @@ func resourceFirewallRule() *schema.Resource {
 				Description:  "The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)",
 				ValidateFunc: validation.NoZeroValues,
 			},
-			"cird": {
+			"cidr": {
 				Type:        schema.TypeSet,
 				Required:    true,
 				ForceNew:    true,
@@ -84,7 +84,7 @@ func resourceFirewallRule() *schema.Resource {
 func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	tfCidr := d.Get("cird").(*schema.Set).List()
+	tfCidr := d.Get("cidr").(*schema.Set).List()
 	cird := make([]string, len(tfCidr))
 	for i, tfCird := range tfCidr {
 		cird[i] = tfCird.(string)
@@ -137,7 +137,7 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("protocol", resp.Protocol)
 	d.Set("start_port", resp.StartPort)
 	d.Set("end_port", resp.EndPort)
-	d.Set("cird", resp.Cidr)
+	d.Set("cidr", resp.Cidr)
 	d.Set("direction", resp.Direction)
 	d.Set("label", resp.Label)
 
@@ -178,7 +178,7 @@ func resourceFirewallRuleImport(d *schema.ResourceData, m interface{}) ([]*schem
 	d.Set("protocol", resp.Protocol)
 	d.Set("start_port", resp.StartPort)
 	d.Set("end_port", resp.EndPort)
-	d.Set("cird", resp.Cidr)
+	d.Set("cidr", resp.Cidr)
 	d.Set("direction", resp.Direction)
 	d.Set("label", resp.Label)
 
