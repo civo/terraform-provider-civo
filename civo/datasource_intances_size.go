@@ -3,6 +3,7 @@ package civo
 import (
 	"fmt"
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"log"
 	"regexp"
@@ -17,33 +18,42 @@ func dataSourceInstancesSize() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"filter": dataSourceFiltersSchema(),
 			// computed attributes
-			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"nice_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"cpu_cores": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"ram_mb": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"disk_gb": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"selectable": {
-				Type:     schema.TypeBool,
-				Computed: true,
+			"sizes": {
+				Type:        schema.TypeSet,
+				Required:    true,
+				Description: "a list of backend instances, each containing an instance_id, protocol (http or https) and port",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"nice_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"cpu_cores": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"ram_mb": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"disk_gb": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"selectable": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -71,20 +81,17 @@ func dataSourceInstancesSizeRead(d *schema.ResourceData, m interface{}) error {
 			return fmt.Errorf("no instances size was found in the server, %s", err)
 		}
 
-		d.SetId(size.ID)
-		d.Set("name", size.Name)
-		d.Set("nice_name", size.NiceName)
-		d.Set("cpu_cores", size.CPUCores)
-		d.Set("ram_mb", size.RAMMegabytes)
-		d.Set("disk_gb", size.DiskGigabytes)
-		d.Set("description", size.Description)
-		d.Set("selectable", size.Selectable)
+		d.SetId(resource.UniqueId())
+
+		if err := d.Set("sizes", size); err != nil {
+			return fmt.Errorf("unable to set `%s` attribute: %s", "sizes", err)
+		}
 	}
 
 	return nil
 }
 
-func findInstancesSizeByFilter(sizes []civogo.InstanceSize, set *schema.Set) (*civogo.InstanceSize, error) {
+func findInstancesSizeByFilter(sizes []civogo.InstanceSize, set *schema.Set) ([]civogo.InstanceSize, error) {
 	results := make([]civogo.InstanceSize, 0)
 
 	var filters []Filter
@@ -160,8 +167,8 @@ func findInstancesSizeByFilter(sizes []civogo.InstanceSize, set *schema.Set) (*c
 		}
 	}
 
-	if len(results) == 1 {
-		return &results[0], nil
+	if len(results) > 1 {
+		return results, nil
 	}
 	if len(results) == 0 {
 		return nil, fmt.Errorf("no instances sizes found for your search")
