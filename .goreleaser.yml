@@ -5,14 +5,20 @@ builds:
       - linux
       - darwin
       - windows
+      - solaris
+      - openbsd
+      - freebsd
     goarch:
       - 386
       - amd64
       - arm
-      - arm64
     ignore:
       - goos: darwin
         goarch: 386
+      - goos: solaris
+        goarch: 386
+      - goos: openbsd
+        goarch: arm
 checksum:
   name_template: '{{ .ProjectName }}_checksums.txt'
 changelog:
@@ -25,12 +31,6 @@ changelog:
       - Merge branch
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    replacements:
-      darwin: darwin
-      linux: linux
-      windows: windows
-      386: i386
-      amd64: x86_64
     format_overrides:
       - goos: windows
         format: zip
