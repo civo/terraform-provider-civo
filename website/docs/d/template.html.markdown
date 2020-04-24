@@ -10,28 +10,48 @@ description: |-
 
 Get information on an template for use in other resources (e.g. creating a Instance).
 This is useful if the template in question is not managed by Terraform or 
-you need to utilize any of the image's data.
+you need to utilize any of the image's data, with the ability to filter the results.
 
 ## Example Usage
 
 ```hcl
 data "civo_template" "debian" {
-    code = "debian-buster"
+   filter {
+        name = "code"
+        values = ["buster"]
+   }
 }
 
 resource "civo_instance" "my-test-instance" {
     hostname = "foo.com"
     tags = ["python", "nginx"]
     notes = "this is a note for the server"
-    size = data.civo_size.small.id
-    template = data.civo_template.debian.id
+    size = element(data.civo_instances_size.small.sizes, 0).name
+    template = element(data.civo_template.debian.templates, 0).id
 }
 ```
 ## Argument Reference
 
-The `code` arguments must be provided:
+The following arguments are supported:
 
-* `code` - A unqiue, alphanumerical, short, human readable code for the template
+* `filter` - (Optional) Filter the results.
+  The `filter` block is documented below.
+* `sort` - (Optional) Sort the results.
+  The `sort` block is documented below.
+
+`filter` supports the following arguments:
+
+* `key` - (Required) Filter the sizes by this key. This may be one of `code`,
+  `name`.
+* `values` - (Required) Only retrieves the template which keys has value that matches
+  one of the values provided here.
+
+`sort` supports the following arguments:
+
+* `key` - (Required) Sort the sizes by this key. This may be one of `code`, 
+`name`.
+* `direction` - (Required) The sort direction. This may be either `asc` or `desc`.
+
 
 ## Attributes Reference
 
