@@ -3,19 +3,16 @@ package civo
 import (
 	"fmt"
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/datalist"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"log"
 )
 
 // Data source to get and filter all kubernetes version
 // available in the server, use to define the version at the
 // moment of the cluster creation in resourceKubernetesCluster
 func dataSourceKubernetesVersion() *schema.Resource {
-	return &schema.Resource{
-		Read: dataSourceKubernetesVersionRead,
-		Schema: map[string]*schema.Schema{
-			"filter": dataSourceFiltersSchema(),
-			// computed attributes
+	dataListConfig := &datalist.ResourceConfig{
+		RecordSchema: map[string]*schema.Schema{
 			"version": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -29,83 +26,51 @@ func dataSourceKubernetesVersion() *schema.Resource {
 				Computed: true,
 			},
 			"default": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 		},
+		FilterKeys: []string{
+			"version",
+			"label",
+			"type",
+			"default",
+		},
+		SortKeys: []string{
+			"version",
+		},
+		ResultAttributeName: "versions",
+		FlattenRecord:       flattenKubernetesVersion,
+		GetRecords:          getKubernetesVersions,
 	}
+
+	return datalist.NewResource(dataListConfig)
 }
 
-func dataSourceKubernetesVersionRead(d *schema.ResourceData, m interface{}) error {
+func getKubernetesVersions(m interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
-	filters, filtersOk := d.GetOk("filter")
-
-	if !filtersOk {
-		return fmt.Errorf("one of filters must be assigned")
+	versions := []interface{}{}
+	partialVersions, err := apiClient.ListAvailableKubernetesVersions()
+	if err != nil {
+		return nil, fmt.Errorf("[ERR] error retrieving all versions: %s", err)
 	}
 
-	if filtersOk {
-		log.Printf("[INFO] Getting all versions of kubernetes")
-		resp, err := apiClient.ListAvailableKubernetesVersions()
-		if err != nil {
-			return fmt.Errorf("no version was found in the server")
-		}
-
-		log.Printf("[INFO] Finding the version of kubernetes")
-		version, err := findKubernetesVersionByFilter(resp, filters.(*schema.Set))
-		if err != nil {
-			return fmt.Errorf("no version was found in the server, %s", err)
-		}
-
-		d.SetId(version.Version)
-		d.Set("version", version.Version)
-		d.Set("label", fmt.Sprintf("v%s", version.Version))
-		d.Set("type", version.Type)
-		d.Set("default", version.Default)
+	for _, partialSize := range partialVersions {
+		versions = append(versions, partialSize)
 	}
 
-	return nil
+	return versions, nil
 }
 
-func findKubernetesVersionByFilter(version []civogo.KubernetesVersion, set *schema.Set) (*civogo.KubernetesVersion, error) {
-	results := make([]civogo.KubernetesVersion, 0)
+func flattenKubernetesVersion(version, m interface{}) (map[string]interface{}, error) {
 
-	var filters []Filter
+	s := version.(civogo.KubernetesVersion)
 
-	for _, v := range set.List() {
-		m := v.(map[string]interface{})
-		var filterValues []string
-		for _, e := range m["values"].([]interface{}) {
-			filterValues = append(filterValues, e.(string))
-		}
-		filters = append(filters, Filter{Name: m["name"].(string), Values: filterValues, Regex: m["regex"].(bool)})
-	}
-
-	for _, valueFilters := range filters {
-		for _, valueVersion := range version {
-
-			// Filter for version
-			if valueFilters.Name == "version" {
-				if valueVersion.Version == valueFilters.Values[0] {
-					results = append(results, valueVersion)
-				}
-			}
-
-			// Filter for type
-			if valueFilters.Name == "type" {
-				if valueVersion.Type == valueFilters.Values[0] {
-					results = append(results, valueVersion)
-				}
-			}
-		}
-	}
-
-	if len(results) == 1 {
-		return &results[0], nil
-	}
-	if len(results) == 0 {
-		return nil, fmt.Errorf("no kubernetes version found for your search")
-	}
-	return nil, fmt.Errorf("too many kubernetes version found (found %d, expected 1)", len(results))
+	flattenedVersion := map[string]interface{}{}
+	flattenedVersion["version"] = s.Version
+	flattenedVersion["label"] = fmt.Sprintf("v%s", s.Version)
+	flattenedVersion["type"] = s.Type
+	flattenedVersion["default"] = s.Default
+	return flattenedVersion, nil
 }
