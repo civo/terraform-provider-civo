@@ -3,91 +3,100 @@ package civo
 import (
 	"fmt"
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/datalist"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Data source to get from the api a specific template
 // using the code of the image
 func dataSourceTemplate() *schema.Resource {
-	return &schema.Resource{
-		Read: dataSourceTemplateRead,
-		Schema: map[string]*schema.Schema{
-			"code": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "code of the image",
-				ValidateFunc: validation.NoZeroValues,
+
+	dataListConfig := &datalist.ResourceConfig{
+		RecordSchema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
-			// computed attributes
+			"code": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "name of the image",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"volume_id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "volume_id of the image",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"image_id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "image_id of the image",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"short_description": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "short_description of the image",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"description": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "description of the image",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"default_username": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "default_username of the image",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"cloud_config": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "cloud_config of the image",
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
+		FilterKeys: []string{
+			"code",
+			"name",
+		},
+		SortKeys: []string{
+			"code",
+			"name",
+		},
+		ResultAttributeName: "templates",
+		FlattenRecord:       flattenTemplate,
+		GetRecords:          getTemplates,
 	}
+
+	return datalist.NewResource(dataListConfig)
+
 }
 
-func dataSourceTemplateRead(d *schema.ResourceData, m interface{}) error {
+func getTemplates(m interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
-	code, hasCode := d.GetOk("code")
-
-	if !hasCode {
-		return fmt.Errorf("`code` must be assigned")
+	templates := []interface{}{}
+	partialTemplates, err := apiClient.ListTemplates()
+	if err != nil {
+		return nil, fmt.Errorf("[ERR] error retrieving all templates: %s", err)
 	}
 
-	if hasCode {
-		log.Printf("[INFO] Getting all template")
-		image, err := apiClient.GetTemplateByCode(code.(string))
-		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive template: %s", err)
-			return err
-		}
-
-		d.SetId(image.ID)
-		d.Set("code", image.Code)
-		d.Set("name", image.Name)
-		d.Set("volume_id", image.VolumeID)
-		d.Set("image_id", image.ImageID)
-		d.Set("short_description", image.ShortDescription)
-		d.Set("description", image.Description)
-		d.Set("default_username", image.DefaultUsername)
-		d.Set("cloud_config", image.CloudConfig)
+	for _, partialSize := range partialTemplates {
+		templates = append(templates, partialSize)
 	}
 
-	return nil
+	return templates, nil
+}
+
+func flattenTemplate(template, m interface{}) (map[string]interface{}, error) {
+
+	s := template.(civogo.Template)
+
+	flattenedTemplate := map[string]interface{}{}
+	flattenedTemplate["id"] = s.ID
+	flattenedTemplate["code"] = s.Code
+	flattenedTemplate["name"] = s.Name
+	flattenedTemplate["volume_id"] = s.VolumeID
+	flattenedTemplate["image_id"] = s.ImageID
+	flattenedTemplate["short_description"] = s.ShortDescription
+	flattenedTemplate["description"] = s.Description
+	flattenedTemplate["default_username"] = s.DefaultUsername
+	flattenedTemplate["cloud_config"] = s.CloudConfig
+
+	return flattenedTemplate, nil
 }

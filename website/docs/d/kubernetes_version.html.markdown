@@ -8,7 +8,7 @@ description: |-
 
 # civo\_kubernetes\_version
 
-Provides access to the available Civo Kubernetes Service versions.
+Provides access to the available Civo Kubernetes Service versions, with the ability to filter the results.
 
 ## Example Usage
 
@@ -26,7 +26,7 @@ data "civo_kubernetes_version" "stable" {
 ```hcl
 data "civo_kubernetes_version" "stable" {
     filter {
-        name = "type"
+        key = "type"
         values = ["stable"]
     }
 }
@@ -35,8 +35,8 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Traefik"
     num_target_nodes = 4
-    kubernetes_version = data.civo_kubernetes_version.stable.id
-    target_nodes_size = data.civo_size.small.id
+    kubernetes_version = element(data.civo_kubernetes_version.stable.versions, 0).version
+    target_nodes_size = element(data.civo_instances_size.small.sizes, 0).name
 }
 ```
 
@@ -45,7 +45,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 ```hcl
 data "civo_kubernetes_version" "minor_version" {
     filter {
-        name = "version"
+        key = "version"
         values = ["0.9.1"]
     }
 }
@@ -53,18 +53,28 @@ data "civo_kubernetes_version" "minor_version" {
 
 ## Argument Reference
 
-* `filter` - (Required) Filter the results. The filter block is documented below.
+* `filter` - (Optional) Filter the results.
+  The `filter` block is documented below.
+* `sort` - (Optional) Sort the results.
+  The `sort` block is documented below.
 
 `filter` supports the following arguments:
 
-* `name` - - (Required) Filter the sizes by this key. This may be one of `version`, `type`.
-* `values` - (Required) Only retrieves images which keys has value that matches one of the values provided here.
+* `key` - (Required) Filter the sizes by this key. This may be one of `version`,
+  `label`, `type`, `default`.
+* `values` - (Required) Only retrieves the version which keys has value that matches
+  one of the values provided here.
+
+`sort` supports the following arguments:
+
+* `key` - (Required) Sort the sizes by this key. This may be one of `version`.
+* `direction` - (Required) The sort direction. This may be either `asc` or `desc`.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The id used when you create a new cluster is the same like `version`
+
 * `version` - A version of the kubernetes.
 * `label` - The label of this version.
 * `type` - The type of the version can be `stable`, `legacy` etc...
