@@ -5,6 +5,7 @@ import (
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
 	"strings"
 )
@@ -73,6 +74,13 @@ func resourceInstance() *schema.Resource {
 				Optional:    true,
 				Description: "An optional list of tags, represented as a key, value pair",
 				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"script": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: "the contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, " +
+					"read/write/executable only by root and then will be executed at the end of the cloud initialization",
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			// Computed resource
 			"initial_password": {
@@ -149,6 +157,10 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 
 	if attr, ok := d.GetOk("sshkey_id"); ok {
 		config.SSHKeyID = attr.(string)
+	}
+
+	if attr, ok := d.GetOk("script"); ok {
+		config.Script = attr.(string)
 	}
 
 	tfTags := d.Get("tags").(*schema.Set).List()
@@ -230,6 +242,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("public_ip", resp.PublicIP)
 	d.Set("pseudo_ip", resp.PseudoIP)
 	d.Set("status", resp.Status)
+	d.Set("script", resp.Script)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 

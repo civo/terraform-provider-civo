@@ -31,13 +31,14 @@ The following arguments are supported:
 * `hostname` - (Required) The Instance hostname.
 * `reverse_dns` - (Optional) A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified).
 * `size` - (Optional) The name of the size, from the current list, e.g. g2.small (required).
-* `public_ip_requiered` - (Optional) This should be either false, true or `move_ip_from:intances_id`.
+* `public_ip` - (Optional) This should be either false, true or `move_ip_from:intances_id`.
 * `network_id` - (Optional) This must be the ID of the network from the network listing (optional; default network used when not specified).
 * `template` - (Optional) The ID for the template to use to build the instance.
 * `initial_user` - (Optional) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo).
 * `notes` - (Optional) Add some notes to the instance.
 * `sshkey_id` - (Optional) The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field).
 * `firewall_id` - (Optional) The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all).
+* `script` - (Optional) the contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, read/write/executable only by root and then will be executed at the end of the cloud initialization
 * `tags` - (Optional) An optional list of tags, represented as a key, value pair.
 
 ## Attributes Reference
@@ -60,6 +61,7 @@ The following attributes are exported:
 * `public_ip` - The public ip.
 * `pseudo_ip` - Is the ip that is used to route the public ip from the internet to the instance using NAT 
 * `status` - The status of the instance
+* `script` - the contents of a script uploaded
 * `created_at` - The date of creation of the instance
 
 ## Import
