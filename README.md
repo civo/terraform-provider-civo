@@ -34,7 +34,9 @@ $ make build
 Using the provider
 ----------------------
 
-See the [Civo Provider documentation](https://www.terraform.io/docs/providers/civo/index.html) to get started using the Civo provider.
+When the provider is out of beta the documentation will be at [Civo Provider documentation](https://www.terraform.io/docs/providers/civo/index.html),
+but during the beta the best resource for learning about it is [this guide](https://www.civo.com/learn/using-the-civo-terraform-provider)
+
 
 Developing the Provider
 ---------------------------
