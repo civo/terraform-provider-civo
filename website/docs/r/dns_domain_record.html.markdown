@@ -29,7 +29,7 @@ resource "civo_dns_domain_record" "www" {
 The following arguments are supported:
 
 * `domain_id` - (Required) The id of the domain
-* `type` - (Required) The choice of RR type from a, cname, mx or txt
+* `type` - (Required) The choice of record type from a, cname, mx or txt
 * `name` - (Required) The portion before the domain name (e.g. www) or an @ for the apex/root domain (you cannot use an A record with an amex/root domain)
 * `value` - (Required) The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
 * `priority` - (Optional) Useful for MX records only, the priority mail should be attempted it (defaults to 10)
@@ -42,7 +42,7 @@ The following attributes are exported including the arguments:
 * `id` - A unique ID that can be used to identify and reference a Record.
 * `account_id` - The id account of the domain
 * `created_at` - The date when it was created in UTC format
-* `updated_at` - Tthe date when it was updated in UTC format
+* `updated_at` - The date when it was updated in UTC format
 
 ## Import
 
