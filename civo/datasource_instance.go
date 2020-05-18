@@ -8,8 +8,8 @@ import (
 	"log"
 )
 
-// Data source to get from the api a specific template
-// using the code of the image
+// Data source to get from the api a specific instance
+// using the id or the hostname
 func dataSourceInstance() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceInstanceRead,

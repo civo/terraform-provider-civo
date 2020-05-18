@@ -22,6 +22,7 @@ func Provider() terraform.ResourceProvider {
 			"civo_instances_size":     dataSourceInstancesSize(),
 			"civo_instances":          dataSourceInstances(),
 			"civo_instance":           dataSourceInstance(),
+			"civo_dns_domain_name":    dataSourceDnsDomainName(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"civo_instance":           resourceInstance(),

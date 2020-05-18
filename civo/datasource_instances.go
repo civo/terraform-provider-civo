@@ -7,8 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-// Data source to get and filter all instances size
-// use to define the size in resourceInstance
+// Data source to get and filter all instances with filter
 func dataSourceInstances() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
 		RecordSchema: map[string]*schema.Schema{
