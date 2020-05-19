@@ -17,8 +17,8 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer, Traefik"
     num_target_nodes = 4
-    kubernetes_version = data.civo_kubernetes_version.stable.id
-    target_nodes_size = data.civo_size.small.id
+    kubernetes_version = element(data.civo_kubernetes_version.stable.versions, 0).version
+    target_nodes_size = element(data.civo_instances_size.small.sizes, 0).name
 }
 ```
 
@@ -31,8 +31,8 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer, Traefik"
     num_target_nodes = 4
-    kubernetes_version = data.civo_kubernetes_version.stable.id
-    target_nodes_size = data.civo_size.small.id
+    kubernetes_version = element(data.civo_kubernetes_version.stable.versions, 0).version
+    target_nodes_size = element(data.civo_instances_size.small.sizes, 0).name
 }
 
 provider "kubernetes" {
