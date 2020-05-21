@@ -48,7 +48,7 @@ The following attributes are exported:
 * `region` - The region where the snapshot was take.
 * `size_gb` - The size of the snapshot in GB.
 * `state` - The status of the snapshot.
-* `next_execution` - if cron was define the this date will be the next execution date.
+* `next_execution` - if cron was define this date will be the next execution date.
 * `requested_at` - The date where the snapshot was requested.
 * `completed_at` - The date where the snapshot was completed.
 
