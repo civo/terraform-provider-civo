@@ -27,6 +27,7 @@ func Provider() terraform.ResourceProvider {
 			"civo_network":            dataSourceNetwork(),
 			"civo_volume":             dataSourceVolume(),
 			"civo_loadbalancer":       dataSourceLoadBalancer(),
+			"civo_ssh_key":            dataSourceSSHKey(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"civo_instance":           resourceInstance(),
