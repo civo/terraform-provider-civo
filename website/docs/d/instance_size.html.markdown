@@ -18,7 +18,7 @@ Most common usage will probably be to supply a size to instances:
 ```hcl
 data "civo_instances_size" "small" {
     filter {
-        name = "name"
+        key = "name"
         values = ["g2.small"]
     }
 }
@@ -28,7 +28,7 @@ resource "civo_instance" "my-test-instance" {
     tags = ["python", "nginx"]
     notes = "this is a note for the server"
     size = element(data.civo_instances_size.small.sizes, 0).name
-    template = data.civo_template.debian.id
+    template = element(data.civo_template.debian.templates, 0).id
 }
 ```
 
@@ -37,12 +37,12 @@ The data source also supports multiple filters and sorts. For example, to fetch 
 ```hcl
 data "civo_instances_size" "small" {
     filter {
-        name = "cpu_cores"
+        key = "cpu_cores"
         values = [1,2]
     }
 
     sort {
-        name = "disk_gb"
+        key = "disk_gb"
         direction = "desc"
     }
 
@@ -53,7 +53,7 @@ resource "civo_instance" "my-test-instance" {
     tags = ["python", "nginx"]
     notes = "this is a note for the server"
     size = element(data.civo_instances_size.small.sizes, 0).name
-    template = data.civo_template.debian.id
+    template = element(data.civo_template.debian.templates, 0).id
 }
 ```
 
@@ -63,13 +63,13 @@ The data source can also handle multiple sorts. In which case, the sort will be 
 data "civo_instances_size" "main" {
   sort {
     // Sort by memory ascendingly
-    name       = "ram_mb"
+    key       = "ram_mb"
     direction = "asc"
   }
 
   sort {
     // Then sort by disk descendingly for sizes with same memory
-    name       = "disk_gb"
+    key       = "disk_gb"
     direction = "desc"
   }
 }

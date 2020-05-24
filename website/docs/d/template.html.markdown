@@ -17,7 +17,7 @@ you need to utilize any of the image's data, with the ability to filter the resu
 ```hcl
 data "civo_template" "debian" {
    filter {
-        name = "code"
+        key = "code"
         values = ["buster"]
    }
 }
