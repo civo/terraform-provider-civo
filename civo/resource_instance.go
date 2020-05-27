@@ -32,6 +32,7 @@ func resourceInstance() *schema.Resource {
 			"size": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "g2.xsmall",
 				Description: "The name of the size, from the current list, e.g. g2.small (required)",
 			},
 			"public_ip_requiered": {
@@ -52,6 +53,7 @@ func resourceInstance() *schema.Resource {
 			"initial_user": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "civo",
 				Description: "The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)",
 			},
 			"notes": {
