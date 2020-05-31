@@ -1,6 +1,7 @@
 package civo
 
 import (
+	"fmt"
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -51,7 +52,10 @@ func Provider() terraform.ResourceProvider {
 
 // Provider configuration
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	token := d.Get("token").(string)
-	client, _ := civogo.NewClient(token)
-	return client, nil
+	if token, ok := d.GetOk("token"); ok {
+		client, _ := civogo.NewClient(token.(string))
+		return client, nil
+	} else {
+		return nil, fmt.Errorf("[ERR] token not found")
+	}
 }
