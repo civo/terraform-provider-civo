@@ -55,10 +55,11 @@ func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retriving the firewall %s", d.Id())
 	resp, err := apiClient.FindFirewall(d.Id())
 	if err != nil {
-		if resp != nil {
+		if resp == nil {
 			d.SetId("")
 			return nil
 		}
+
 		return fmt.Errorf("[ERR] error retrieving firewall %s, %s", d.Id(), err)
 	}
 

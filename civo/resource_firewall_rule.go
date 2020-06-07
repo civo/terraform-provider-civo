@@ -126,7 +126,7 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	resp, err := apiClient.FindFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
-		if resp != nil {
+		if resp == nil {
 			d.SetId("")
 			return nil
 		}

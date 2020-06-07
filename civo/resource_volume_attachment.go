@@ -72,7 +72,7 @@ func resourceVolumeAttachmentRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retrieving the volume %s", volumeID)
 	resp, err := apiClient.FindVolume(volumeID)
 	if err != nil {
-		if resp != nil {
+		if resp == nil {
 			d.SetId("")
 			return nil
 		}

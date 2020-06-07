@@ -225,7 +225,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] retriving the instance %s", d.Id())
 	resp, err := apiClient.GetInstance(d.Id())
-	if err != nil {
+	if err == nil {
 		d.SetId("")
 		// check if the instance no longer exists.
 		return fmt.Errorf("[ERR] instance (%s) not found", d.Id())

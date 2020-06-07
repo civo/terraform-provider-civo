@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
-	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"log"
 	"time"
+
+	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 // Volume resource, with this we can create and manage all volume
@@ -74,6 +75,10 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retrieving the volume %s", d.Id())
 	resp, err := apiClient.FindVolume(d.Id())
 	if err != nil {
+		if resp == nil {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("[ERR] failed retrieving the volume: %s", err)
 	}
 

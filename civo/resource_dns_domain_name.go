@@ -58,7 +58,7 @@ func resourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retriving the domain %s", d.Get("name").(string))
 	resp, err := apiClient.GetDNSDomain(d.Get("name").(string))
 	if err != nil {
-		if resp != nil {
+		if resp == nil {
 			d.SetId("")
 			return nil
 		}

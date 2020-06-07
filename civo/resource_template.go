@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Template resource, with this we can create and manage all template
@@ -144,6 +145,10 @@ func resourceTemplateRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retrieving the template %s", d.Get("code").(string))
 	resp, err := apiClient.GetTemplateByCode(d.Get("code").(string))
 	if err != nil {
+		if resp == nil {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("[ERR] failed to retrieving the template: %s", err)
 	}
 

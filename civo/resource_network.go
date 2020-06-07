@@ -2,9 +2,10 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"log"
 )
 
 // The resource network represent a network inside the cloud
@@ -71,6 +72,11 @@ func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retriving the network %s", d.Id())
 	resp, err := apiClient.ListNetworks()
 	if err != nil {
+		if resp == nil {
+			d.SetId("")
+			return nil
+		}
+
 		return fmt.Errorf("[ERR] failed to list all network %s", err)
 	}
 

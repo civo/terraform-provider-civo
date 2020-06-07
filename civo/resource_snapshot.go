@@ -153,6 +153,11 @@ func resourceSnapshotRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retrieving the snapshot %s", d.Get("name").(string))
 	resp, err := apiClient.FindSnapshot(d.Id())
 	if err != nil {
+		if resp == nil {
+			d.SetId("")
+			return nil
+		}
+
 		return fmt.Errorf("[ERR] failed retrieving the snapshot: %s", err)
 	}
 

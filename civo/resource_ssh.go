@@ -2,9 +2,10 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"log"
 )
 
 // Ssh resource, with this we can create and manage all Snapshot
@@ -63,7 +64,7 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retrieving the new ssh key %s", d.Get("name").(string))
 	sshKey, err := apiClient.FindSSHKey(d.Id())
 	if err != nil {
-		if sshKey != nil {
+		if sshKey == nil {
 			d.SetId("")
 			return nil
 		}

@@ -178,7 +178,7 @@ func resourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retrieving the load balancer %s", d.Id())
 	resp, err := apiClient.FindLoadBalancer(d.Id())
 	if err != nil {
-		if resp != nil {
+		if resp == nil {
 			d.SetId("")
 			return nil
 		}
