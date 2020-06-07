@@ -220,7 +220,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	log.Printf("[INFO] retrieving the kubernetes cluster %s", d.Id())
 	resp, err := apiClient.FindKubernetesCluster(d.Id())
 	if err != nil {
-		if resp != nil {
+		if resp == nil {
 			d.SetId("")
 			return nil
 		}
