@@ -36,6 +36,6 @@ resource "civo_instance" "web" {
 
 The following arguments are supported:
 
-* `token` - (Required) This is the Civo API token. Alternatively, this can also be specified
+* `token` - (Optional) This is the Civo API token. Alternatively, this can also be specified
   using environment variables ordered by precedence:
   * `CIVO_TOKEN`
