@@ -9,11 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
-// Data source to get from the api a specific domain
+// dataSourceDnsDomainName data source to get from the api a specific domain
 // using the id or the name of the domain
-func dataSourceDnsDomainName() *schema.Resource {
+func dataSourceDNSDomainNamego() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDnsDomainNameRead,
+		Read: dataSourceDNSDomainNameRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -31,7 +31,7 @@ func dataSourceDnsDomainName() *schema.Resource {
 	}
 }
 
-func dataSourceDnsDomainNameRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	var foundDomain *civogo.DNSDomain

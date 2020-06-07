@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Firewall Rule resource represent you can create and manage all firewall rules
@@ -160,13 +161,13 @@ func resourceFirewallRuleDelete(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallRuleImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
 
-	firewallId, firewallRuleId, err := resourceCommonParseId(d.Id())
+	firewallID, firewallRuleID, err := resourceCommonParseID(d.Id())
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[INFO] retriving the firewall rule %s", firewallRuleId)
-	resp, err := apiClient.FindFirewallRule(firewallId, firewallRuleId)
+	log.Printf("[INFO] retriving the firewall rule %s", firewallRuleID)
+	resp, err := apiClient.FindFirewallRule(firewallID, firewallRuleID)
 	if err != nil {
 		if resp != nil {
 			return nil, err

@@ -2,6 +2,7 @@ package civo
 
 import (
 	"fmt"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -9,9 +10,9 @@ import (
 
 // Data source to get from the api a specific domain record
 // using the id or the name of the domain
-func dataSourceDnsDomainRecord() *schema.Resource {
+func dataSourceDNSDomainRecord() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDnsDomainRecordRead,
+		Read: dataSourceDNSDomainRecordRead,
 		Schema: map[string]*schema.Schema{
 			"domain_id": {
 				Type:         schema.TypeString,
@@ -56,7 +57,7 @@ func dataSourceDnsDomainRecord() *schema.Resource {
 	}
 }
 
-func dataSourceDnsDomainRecordRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceDNSDomainRecordRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 	domain := d.Get("domain_id").(string)
 	name := d.Get("name").(string)

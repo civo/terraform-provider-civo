@@ -9,7 +9,7 @@ import (
 )
 
 // Dns Domain resource, with this we can create and manage DNS Domain
-func resourceDnsDomainName() *schema.Resource {
+func resourceDNSDomainName() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -25,19 +25,19 @@ func resourceDnsDomainName() *schema.Resource {
 				Computed: true,
 			},
 		},
-		Create: resourceDnsDomainNameCreate,
-		Read:   resourceDnsDomainNameRead,
-		Update: resourceDnsDomainNameUpdate,
-		Delete: resourceDnsDomainNameDelete,
+		Create: resourceDNSDomainNameCreate,
+		Read:   resourceDNSDomainNameRead,
+		Update: resourceDNSDomainNameUpdate,
+		Delete: resourceDNSDomainNameDelete,
 		//Exists: resourceExistsItem,
 		Importer: &schema.ResourceImporter{
-			State: resourceDnsDomainImport,
+			State: resourceDNSDomainImport,
 		},
 	}
 }
 
 // function to create a new domain in your account
-func resourceDnsDomainNameCreate(d *schema.ResourceData, m interface{}) error {
+func resourceDNSDomainNameCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Creating the domain %s", d.Get("name").(string))
@@ -48,11 +48,11 @@ func resourceDnsDomainNameCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(dnsDomain.ID)
 
-	return resourceDnsDomainNameRead(d, m)
+	return resourceDNSDomainNameRead(d, m)
 }
 
 // function to read a domain from your account
-func resourceDnsDomainNameRead(d *schema.ResourceData, m interface{}) error {
+func resourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] retriving the domain %s", d.Get("name").(string))
@@ -73,7 +73,7 @@ func resourceDnsDomainNameRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // function to update a specific domain
-func resourceDnsDomainNameUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceDNSDomainNameUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Searching the domain %s", d.Get("name").(string))
@@ -94,11 +94,11 @@ func resourceDnsDomainNameUpdate(d *schema.ResourceData, m interface{}) error {
 
 	}
 
-	return resourceDnsDomainNameRead(d, m)
+	return resourceDNSDomainNameRead(d, m)
 }
 
 // function to delete a specific domain
-func resourceDnsDomainNameDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDNSDomainNameDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Searching the domain to %s", d.Get("name").(string))
@@ -118,7 +118,7 @@ func resourceDnsDomainNameDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 // custom import to able add a main domain to the terraform
-func resourceDnsDomainImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceDNSDomainImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Searching the domain %s", d.Get("name").(string))

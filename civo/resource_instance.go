@@ -190,28 +190,28 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 
 		if resp.Status != "ACTIVE" {
 			return resource.RetryableError(fmt.Errorf("[ERR] expected instance to be created but was in state %s", resp.Status))
-		} else {
-			/*
-				Once the instance is created, we check if the object firewall_id,
-				if it is, then we set the firewall id to the instances
-			*/
-			if attr, ok := d.GetOk("firewall_id"); ok {
-				_, errInstance := apiClient.SetInstanceFirewall(instance.ID, attr.(string))
-				if errInstance != nil {
-					return resource.NonRetryableError(fmt.Errorf("[ERR] failed to set firewall to the instance: %s", errInstance))
-				}
-			}
+		}
 
-			/*
-				Once the instance is created, we check if the object notes,
-				if it is, then we add the note to the instances
-			*/
-			if attr, ok := d.GetOk("notes"); ok {
-				resp.Notes = attr.(string)
-				_, errInstance := apiClient.UpdateInstance(resp)
-				if errInstance != nil {
-					return resource.NonRetryableError(fmt.Errorf("[ERR] failed to set note to the instance: %s", errInstance))
-				}
+		/*
+			Once the instance is created, we check if the object firewall_id,
+			if it is, then we set the firewall id to the instances
+		*/
+		if attr, ok := d.GetOk("firewall_id"); ok {
+			_, errInstance := apiClient.SetInstanceFirewall(instance.ID, attr.(string))
+			if errInstance != nil {
+				return resource.NonRetryableError(fmt.Errorf("[ERR] failed to set firewall to the instance: %s", errInstance))
+			}
+		}
+
+		/*
+			Once the instance is created, we check if the object notes,
+			if it is, then we add the note to the instances
+		*/
+		if attr, ok := d.GetOk("notes"); ok {
+			resp.Notes = attr.(string)
+			_, errInstance := apiClient.UpdateInstance(resp)
+			if errInstance != nil {
+				return resource.NonRetryableError(fmt.Errorf("[ERR] failed to set note to the instance: %s", errInstance))
 			}
 		}
 

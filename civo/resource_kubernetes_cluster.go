@@ -2,11 +2,12 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Kubernetes Cluster resource, with this you can manage all cluster from terraform
@@ -219,6 +220,10 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	log.Printf("[INFO] retrieving the kubernetes cluster %s", d.Id())
 	resp, err := apiClient.FindKubernetesCluster(d.Id())
 	if err != nil {
+		if resp != nil {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("[ERR] failed to find the kubernets cluster: %s", err)
 	}
 

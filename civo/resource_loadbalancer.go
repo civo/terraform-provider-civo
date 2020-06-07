@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // This resource represent a load balancer in the system
@@ -283,12 +284,12 @@ func flattenLoadBalancerBackend(backend []civogo.LoadBalancerBackend) []interfac
 
 	flattenedBackend := make([]interface{}, len(backend))
 	for i, back := range backend {
-		instanceId := back.InstanceID
+		instanceID := back.InstanceID
 		protocol := back.Protocol
 		port := back.Port
 
 		rawRule := map[string]interface{}{
-			"instance_id": instanceId,
+			"instance_id": instanceID,
 			"protocol":    protocol,
 			"port":        port,
 		}

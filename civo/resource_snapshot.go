@@ -2,13 +2,14 @@ package civo
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/civo/civogo"
 	"github.com/gorhill/cronexpr"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
-	"time"
 )
 
 // Snapshot resource, with this we can create and manage all Snapshot
@@ -125,24 +126,23 @@ func resourceSnapshotCreate(d *schema.ResourceData, m interface{}) error {
 			if hasCronTiming is declare them we no need to wait the state from the backend
 		*/
 		return resourceSnapshotRead(d, m)
-	} else {
-		/*
-			if hasCronTiming is not declare them we need to wait the state from the backend
-			and made a resource retry
-		*/
-		return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-			resp, err := apiClient.FindSnapshot(d.Id())
-			if err != nil {
-				return resource.NonRetryableError(fmt.Errorf("error geting snapshot: %s", err))
-			}
-
-			if resp.State != "complete" {
-				return resource.RetryableError(fmt.Errorf("[WARN] expected snapshot to be created but was in state %s", resp.State))
-			}
-
-			return resource.NonRetryableError(resourceSnapshotRead(d, m))
-		})
 	}
+	/*
+		if hasCronTiming is not declare them we need to wait the state from the backend
+		and made a resource retry
+	*/
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		resp, err := apiClient.FindSnapshot(d.Id())
+		if err != nil {
+			return resource.NonRetryableError(fmt.Errorf("error geting snapshot: %s", err))
+		}
+
+		if resp.State != "complete" {
+			return resource.RetryableError(fmt.Errorf("[WARN] expected snapshot to be created but was in state %s", resp.State))
+		}
+
+		return resource.NonRetryableError(resourceSnapshotRead(d, m))
+	})
 
 }
 

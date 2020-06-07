@@ -2,12 +2,13 @@ package civo
 
 import (
 	"fmt"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-// Civo cloud provider
+// Provider Civo cloud provider
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -23,8 +24,8 @@ func Provider() terraform.ResourceProvider {
 			"civo_instances_size":     dataSourceInstancesSize(),
 			"civo_instances":          dataSourceInstances(),
 			"civo_instance":           dataSourceInstance(),
-			"civo_dns_domain_name":    dataSourceDnsDomainName(),
-			"civo_dns_domain_record":  dataSourceDnsDomainRecord(),
+			"civo_dns_domain_name":    dataSourceDNSDomainNamego(),
+			"civo_dns_domain_record":  dataSourceDNSDomainRecord(),
 			"civo_network":            dataSourceNetwork(),
 			"civo_volume":             dataSourceVolume(),
 			"civo_loadbalancer":       dataSourceLoadBalancer(),
@@ -36,8 +37,8 @@ func Provider() terraform.ResourceProvider {
 			"civo_network":            resourceNetwork(),
 			"civo_volume":             resourceVolume(),
 			"civo_volume_attachment":  resourceVolumeAttachment(),
-			"civo_dns_domain_name":    resourceDnsDomainName(),
-			"civo_dns_domain_record":  resourceDnsDomainRecord(),
+			"civo_dns_domain_name":    resourceDNSDomainName(),
+			"civo_dns_domain_record":  resourceDNSDomainRecord(),
 			"civo_firewall":           resourceFirewall(),
 			"civo_firewall_rule":      resourceFirewallRule(),
 			"civo_loadbalancer":       resourceLoadBalancer(),
@@ -55,7 +56,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if token, ok := d.GetOk("token"); ok {
 		client, _ := civogo.NewClient(token.(string))
 		return client, nil
-	} else {
-		return nil, fmt.Errorf("[ERR] token not found")
 	}
+
+	return nil, fmt.Errorf("[ERR] token not found")
+
 }

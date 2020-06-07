@@ -23,7 +23,7 @@ func validateName(v interface{}, k string) (ws []string, es []error) {
 }
 
 // util function to help the import function
-func resourceCommonParseId(id string) (string, string, error) {
+func resourceCommonParseID(id string) (string, string, error) {
 	parts := strings.SplitN(id, ":", 2)
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
