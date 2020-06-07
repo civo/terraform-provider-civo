@@ -2,12 +2,13 @@ package civo
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/civo/civogo"
 	"github.com/gorhill/cronexpr"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
-	"time"
 )
 
 // Data source to get from the api a specific snapshot
@@ -92,8 +93,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, m interface{}) error {
 
 	snapShot, err := apiClient.FindSnapshot(searchBy)
 	if err != nil {
-		fmt.Errorf("[ERR] failed to retrive snapshot: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to retrive snapshot: %s", err)
 	}
 
 	d.SetId(snapShot.ID)

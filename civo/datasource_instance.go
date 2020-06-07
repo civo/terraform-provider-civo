@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Data source to get from the api a specific instance
@@ -105,8 +106,7 @@ func dataSourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the instance by id")
 		image, err := apiClient.FindInstance(id.(string))
 		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive instance: %s", err)
-			return err
+			return fmt.Errorf("[ERR] failed to retrive instance: %s", err)
 		}
 
 		foundImage = image
@@ -114,8 +114,7 @@ func dataSourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the instance by hostname")
 		image, err := apiClient.FindInstance(hostname.(string))
 		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive instance: %s", err)
-			return err
+			return fmt.Errorf("[ERR] failed to retrive instance: %s", err)
 		}
 
 		foundImage = image

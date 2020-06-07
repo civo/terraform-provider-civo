@@ -2,12 +2,13 @@ package civo
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
-	"strings"
 )
 
 // The instance resource represents an object of type instances
@@ -127,8 +128,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] configuring the instance %s", d.Get("hostname").(string))
 	config, err := apiClient.NewInstanceConfig()
 	if err != nil {
-		fmt.Errorf("[ERR] failed to create a new config: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create a new config: %s", err)
 	}
 
 	config.Hostname = d.Get("hostname").(string)
@@ -176,8 +176,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
 	instance, err := apiClient.CreateInstance(config)
 	if err != nil {
-		fmt.Errorf("[ERR] failed to create instance: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create instance: %s", err)
 	}
 
 	d.SetId(instance.ID)
@@ -227,10 +226,9 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retriving the instance %s", d.Id())
 	resp, err := apiClient.GetInstance(d.Id())
 	if err != nil {
-		// check if the instance no longer exists.
-		fmt.Errorf("[ERR] instance (%s) not found", d.Id())
 		d.SetId("")
-		return nil
+		// check if the instance no longer exists.
+		return fmt.Errorf("[ERR] instance (%s) not found", d.Id())
 	}
 
 	d.Set("hostname", resp.Hostname)

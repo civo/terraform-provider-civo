@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Data source to get from the api a specific domain
@@ -56,8 +57,7 @@ func dataSourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the volume by id")
 		volume, err := apiClient.FindVolume(id.(string))
 		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive volume: %s", err)
-			return err
+			return fmt.Errorf("[ERR] failed to retrive volume: %s", err)
 		}
 
 		foundVolume = volume
@@ -65,8 +65,7 @@ func dataSourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the volume by name")
 		volume, err := apiClient.FindVolume(name.(string))
 		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive volume: %s", err)
-			return err
+			return fmt.Errorf("[ERR] failed to retrive volume: %s", err)
 		}
 
 		foundVolume = volume

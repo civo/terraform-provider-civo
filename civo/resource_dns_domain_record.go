@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Constant all possible DNS Record
@@ -129,8 +130,7 @@ func resourceDnsDomainRecordCreate(d *schema.ResourceData, m interface{}) error 
 	log.Printf("[INFO] Creating the domain record %s", d.Get("name").(string))
 	dnsDomainRecord, err := apiClient.CreateDNSRecord(d.Get("domain_id").(string), config)
 	if err != nil {
-		fmt.Errorf("[ERR] failed to create a new domain record: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create a new domain record: %s", err)
 	}
 
 	d.SetId(dnsDomainRecord.ID)

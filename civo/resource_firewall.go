@@ -2,9 +2,10 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"log"
 )
 
 // Firewall resource with this we can create and manage all firewall
@@ -39,8 +40,7 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] creating a new firewall %s", d.Get("name").(string))
 	firewall, err := apiClient.NewFirewall(d.Get("name").(string))
 	if err != nil {
-		fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
 	}
 
 	d.SetId(firewall.ID)

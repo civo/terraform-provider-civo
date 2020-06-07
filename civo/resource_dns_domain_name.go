@@ -2,9 +2,10 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"log"
 )
 
 // Dns Domain resource, with this we can create and manage DNS Domain
@@ -42,8 +43,7 @@ func resourceDnsDomainNameCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Creating the domain %s", d.Get("name").(string))
 	dnsDomain, err := apiClient.CreateDNSDomain(d.Get("name").(string))
 	if err != nil {
-		fmt.Errorf("failed to create a new domains: %s", err)
-		return err
+		return fmt.Errorf("failed to create a new domains: %s", err)
 	}
 
 	d.SetId(dnsDomain.ID)

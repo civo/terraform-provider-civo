@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Data source to get from the api a specific ssh key
@@ -50,8 +51,7 @@ func dataSourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 
 	sshKey, err := apiClient.FindSSHKey(searchBy)
 	if err != nil {
-		fmt.Errorf("[ERR] failed to retrive network: %s", err)
-		return err
+		return fmt.Errorf("[ERR] failed to retrive network: %s", err)
 	}
 
 	d.SetId(sshKey.ID)

@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Data source to get from the api a specific domain
@@ -39,8 +40,7 @@ func dataSourceDnsDomainNameRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the domain by id")
 		domain, err := apiClient.FindDNSDomain(id.(string))
 		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive domain: %s", err)
-			return err
+			return fmt.Errorf("[ERR] failed to retrive domain: %s", err)
 		}
 
 		foundDomain = domain
@@ -48,8 +48,7 @@ func dataSourceDnsDomainNameRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the domain by name")
 		image, err := apiClient.FindDNSDomain(name.(string))
 		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive domain: %s", err)
-			return err
+			return fmt.Errorf("[ERR] failed to retrive domain: %s", err)
 		}
 
 		foundDomain = image

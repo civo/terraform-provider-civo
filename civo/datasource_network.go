@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 )
 
 // Data source to get from the api a specific network
@@ -56,8 +57,7 @@ func dataSourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the network by id")
 		network, err := apiClient.FindNetwork(id.(string))
 		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive network: %s", err)
-			return err
+			return fmt.Errorf("[ERR] failed to retrive network: %s", err)
 		}
 
 		foundNetwork = network
@@ -65,8 +65,7 @@ func dataSourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the network by label")
 		network, err := apiClient.FindNetwork(label.(string))
 		if err != nil {
-			fmt.Errorf("[ERR] failed to retrive network: %s", err)
-			return err
+			return fmt.Errorf("[ERR] failed to retrive network: %s", err)
 		}
 
 		foundNetwork = network

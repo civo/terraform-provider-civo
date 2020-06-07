@@ -10,11 +10,8 @@ require (
 	github.com/hashicorp/go-hclog v0.12.1 // indirect
 	github.com/hashicorp/go-plugin v1.1.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
-	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.3.0 // indirect
-	github.com/hashicorp/hcl2 v0.0.0-20191002203319-fb75b3253c80 // indirect
-	github.com/hashicorp/hil v0.0.0-20190212132231-97b3a9cdfa93 // indirect
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20200210163047-f7d8399e1194 // indirect
 	github.com/hashicorp/terraform-plugin-sdk v1.8.0
 	github.com/hashicorp/terraform-svchost v0.0.0-20191119180714-d2e4933b9136 // indirect
