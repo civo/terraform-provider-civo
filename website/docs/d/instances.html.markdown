@@ -35,7 +35,7 @@ data "civo_instances" "small-size" {
 You can filter and sort the results as well:
 
 ```hcl
-data "digitalocean_droplets" "small-with-backups" {
+data "civo_instances" "small-with-backups" {
   filter {
     key = "size"
     values = [g2.small]
@@ -57,7 +57,7 @@ data "civo_instances_size" "small" {
     }
 }
 
-data "digitalocean_droplets" "small-with-backups" {
+data "civo_instances" "small-with-backups" {
   filter {
     key = "size"
     values = [data.civo_instances_size.small.sizes[1].name]

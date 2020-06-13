@@ -1,6 +1,6 @@
 ---
 layout: "civo"
-page_title: "DigitalOcean: civo_instance"
+page_title: "Civo: civo_instance"
 sidebar_current: "docs-civo-datasource-instance"
 description: |-
   Get information on a Instance.
