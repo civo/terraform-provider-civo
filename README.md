@@ -11,7 +11,7 @@ Terraform Provider ![Travis build](https://travis-ci.org/civo/terraform-provider
 Requirements
 ------------
 
--   [Terraform](https://www.terraform.io/downloads.html) 0.12.x
+-   [Terraform](https://www.terraform.io/downloads.html) 0.13.x
 -   [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
 
 Building The Provider

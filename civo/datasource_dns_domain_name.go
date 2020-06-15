@@ -11,7 +11,7 @@ import (
 
 // dataSourceDnsDomainName data source to get from the api a specific domain
 // using the id or the name of the domain
-func dataSourceDNSDomainNamego() *schema.Resource {
+func dataSourceDNSDomainName() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceDNSDomainNameRead,
 		Schema: map[string]*schema.Schema{
