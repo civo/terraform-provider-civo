@@ -15,7 +15,7 @@ Provides access to the available Civo Kubernetes Service versions, with the abil
 ```hcl
 data "civo_kubernetes_version" "stable" {
     filter {
-        name = "type"
+        key = "type"
         values = ["stable"]
     }
 }
