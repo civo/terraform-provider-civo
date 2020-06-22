@@ -77,7 +77,7 @@ func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[ERR] failed to list all network %s", err)
+		return fmt.Errorf("[ERR] failed to list the network: %s", err)
 	}
 
 	for _, net := range resp {

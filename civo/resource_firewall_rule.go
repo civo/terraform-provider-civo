@@ -131,7 +131,7 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[ERR] error retrieving firewall Rule: %s", err)
+		return fmt.Errorf("[ERR] error retrieving firewall rule: %s", err)
 	}
 
 	d.Set("firewall_id", resp.FirewallID)

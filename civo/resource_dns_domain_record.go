@@ -150,7 +150,7 @@ func resourceDNSDomainRecordRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[WARN] domain record (%s) not found", d.Id())
+		return fmt.Errorf("[WARN] error retrieving domain record: %s", err)
 	}
 
 	d.Set("name", resp.Name)
