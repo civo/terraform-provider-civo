@@ -10,13 +10,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
+var domainName = acctest.RandString(10)
+
 // example.Widget represents a concrete Go type that represents an API resource
 func TestAccCivoLoadBalancer_basic(t *testing.T) {
 	var loadBalancer civogo.LoadBalancer
 
 	// generate a random name for each test run
 	resName := "civo_loadbalancer.foobar"
-	var domainName = acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -35,45 +36,56 @@ func TestAccCivoLoadBalancer_basic(t *testing.T) {
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "protocol", "http"),
 					resource.TestCheckResourceAttr(resName, "port", "80"),
+					resource.TestCheckResourceAttr(resName, "max_request_size", "30"),
+					resource.TestCheckResourceAttr(resName, "policy", "round_robin"),
+					resource.TestCheckResourceAttr(resName, "health_check_path", "/"),
+					resource.TestCheckResourceAttr(resName, "max_conns", "10"),
 				),
 			},
 		},
 	})
 }
 
-// func TestAccCivoLoadBalancer_update(t *testing.T) {
-// 	var firewallRule civogo.FirewallRule
+func TestAccCivoLoadBalancer_update(t *testing.T) {
+	var loadBalancer civogo.LoadBalancer
 
-// 	// generate a random name for each test run
-// 	resName := "civo_firewall_rule.testrule"
-// 	var firewallRuleName = acctest.RandomWithPrefix("rename-fw-rule")
+	// generate a random name for each test run
+	resName := "civo_loadbalancer.foobar"
 
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:     func() { testAccPreCheck(t) },
-// 		Providers:    testAccProviders,
-// 		CheckDestroy: testAccCheckCivoFirewallRuleDestroy,
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccCheckCivoFirewallRuleConfigUpdates(firewallRuleName),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckCivoFirewallRuleResourceExists(resName, &firewallRule),
-// 					resource.TestCheckResourceAttr(resName, "protocol", "tcp"),
-// 					resource.TestCheckResourceAttr(resName, "start_port", "443"),
-// 				),
-// 			},
-// 			{
-// 				// use a dynamic configuration with the random name from above
-// 				Config: testAccCheckCivoFirewallRuleConfigUpdates(firewallRuleName),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheckCivoFirewallRuleResourceExists(resName, &firewallRule),
-// 					testAccCheckCivoFirewallRuleUpdated(&firewallRule),
-// 					resource.TestCheckResourceAttr(resName, "protocol", "tcp"),
-// 					resource.TestCheckResourceAttr(resName, "start_port", "443"),
-// 				),
-// 			},
-// 		},
-// 	})
-// }
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCivoFirewallRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckCivoLoadBalancerConfigBasic(domainName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCivoLoadBalancerResourceExists(resName, &loadBalancer),
+					resource.TestCheckResourceAttr(resName, "protocol", "http"),
+					resource.TestCheckResourceAttr(resName, "port", "80"),
+					resource.TestCheckResourceAttr(resName, "max_request_size", "30"),
+					resource.TestCheckResourceAttr(resName, "policy", "round_robin"),
+					resource.TestCheckResourceAttr(resName, "health_check_path", "/"),
+					resource.TestCheckResourceAttr(resName, "max_conns", "10"),
+				),
+			},
+			{
+				// use a dynamic configuration with the random name from above
+				Config: testAccCheckCivoLoadBalancerConfigUpdates(domainName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCivoLoadBalancerResourceExists(resName, &loadBalancer),
+					testAccCheckCivoLoadBalancerUpdated(&loadBalancer, domainName),
+					resource.TestCheckResourceAttr(resName, "protocol", "http"),
+					resource.TestCheckResourceAttr(resName, "port", "80"),
+					resource.TestCheckResourceAttr(resName, "max_request_size", "50"),
+					resource.TestCheckResourceAttr(resName, "policy", "round_robin"),
+					resource.TestCheckResourceAttr(resName, "health_check_path", "/"),
+					resource.TestCheckResourceAttr(resName, "max_conns", "100"),
+				),
+			},
+		},
+	})
+}
 
 func testAccCheckCivoLoadBalancerValues(loadBalancer *civogo.LoadBalancer, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -108,17 +120,14 @@ func testAccCheckCivoLoadBalancerResourceExists(n string, loadBalancer *civogo.L
 	}
 }
 
-// func testAccCheckCivoLoadBalancerUpdated(firewall *civogo.FirewallRule) resource.TestCheckFunc {
-// 	return func(s *terraform.State) error {
-// 		if firewall.Protocol != "tcp" {
-// 			return fmt.Errorf("bad protocol, expected \"%s\", got: %#v", "tcp", firewall.Protocol)
-// 		}
-// 		if firewall.StartPort != "443" {
-// 			return fmt.Errorf("bad port, expected \"%s\", got: %#v", "443", firewall.StartPort)
-// 		}
-// 		return nil
-// 	}
-// }
+func testAccCheckCivoLoadBalancerUpdated(loadBalancer *civogo.LoadBalancer, name string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if loadBalancer.Hostname != fmt.Sprintf("rename-%s", name) {
+			return fmt.Errorf("bad protocol, expected \"%s\", got: %#v", fmt.Sprintf("rename-%s", name), loadBalancer.Hostname)
+		}
+		return nil
+	}
+}
 
 func testAccCheckCivoLoadBalancerDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*civogo.Client)
@@ -163,20 +172,28 @@ resource "civo_loadbalancer" "foobar" {
 `, name, name)
 }
 
-// func testAccCheckCivoLoadBalancerConfigUpdates(name string) string {
-// 	return fmt.Sprintf(`
-// resource "civo_firewall" "foobar" {
-// 	name = "%s"
-// }
+func testAccCheckCivoLoadBalancerConfigUpdates(name string) string {
+	return fmt.Sprintf(`
+resource "civo_instance" "vm" {
+	hostname = "instance-%s"
+}
 
-// resource "civo_firewall_rule" "testrule" {
-// 	firewall_id = civo_firewall.foobar.id
-// 	protocol = "tcp"
-// 	start_port = "443"
-// 	end_port = "443"
-// 	cidr = ["192.168.1.2/32"]
-// 	direction = "inbound"
-// 	label = "web"
-// }
-// `, name)
-// }
+resource "civo_loadbalancer" "foobar" {
+	hostname = "rename-%s"
+	protocol = "http"
+	port = 80
+	max_request_size = 50
+	policy = "round_robin"
+	health_check_path = "/"
+	max_conns = 100
+	fail_timeout = 40
+	depends_on = [civo_instance.vm]
+
+	backend {
+		instance_id = civo_instance.vm.id
+		protocol =  "http"
+		port = 80
+	}
+}
+`, name, name)
+}

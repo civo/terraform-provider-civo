@@ -46,7 +46,7 @@ func TestAccCivoFirewallRule_update(t *testing.T) {
 
 	// generate a random name for each test run
 	resName := "civo_firewall_rule.testrule"
-	var firewallRuleName = acctest.RandomWithPrefix("rename-fw-rule")
+	var firewalName = acctest.RandomWithPrefix("tf-fw-rule")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -54,21 +54,23 @@ func TestAccCivoFirewallRule_update(t *testing.T) {
 		CheckDestroy: testAccCheckCivoFirewallRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCivoFirewallRuleConfigUpdates(firewallRuleName),
+				Config: testAccCheckCivoFirewallRuleConfigBasic(firewalName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCivoFirewallRuleResourceExists(resName, &firewallRule),
 					resource.TestCheckResourceAttr(resName, "protocol", "tcp"),
-					resource.TestCheckResourceAttr(resName, "start_port", "443"),
+					resource.TestCheckResourceAttr(resName, "start_port", "80"),
+					resource.TestCheckResourceAttr(resName, "label", "web"),
 				),
 			},
 			{
 				// use a dynamic configuration with the random name from above
-				Config: testAccCheckCivoFirewallRuleConfigUpdates(firewallRuleName),
+				Config: testAccCheckCivoFirewallRuleConfigUpdates(firewalName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCivoFirewallRuleResourceExists(resName, &firewallRule),
 					testAccCheckCivoFirewallRuleUpdated(&firewallRule),
 					resource.TestCheckResourceAttr(resName, "protocol", "tcp"),
 					resource.TestCheckResourceAttr(resName, "start_port", "443"),
+					resource.TestCheckResourceAttr(resName, "label", "web_server"),
 				),
 			},
 		},
@@ -172,7 +174,7 @@ resource "civo_firewall_rule" "testrule" {
 	end_port = "443"
 	cidr = ["192.168.1.2/32"]
 	direction = "inbound"
-	label = "web"
+	label = "web_server"
 }
 `, name)
 }

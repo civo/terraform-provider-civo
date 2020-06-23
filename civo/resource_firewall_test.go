@@ -45,7 +45,8 @@ func TestAccCivoFirewall_update(t *testing.T) {
 
 	// generate a random name for each test run
 	resName := "civo_firewall.foobar"
-	var firewallName = acctest.RandomWithPrefix("rename-fw")
+	var firewallName = acctest.RandomWithPrefix("tf-fw")
+	var firewallNameUpdate = acctest.RandomWithPrefix("rename-fw")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -53,7 +54,7 @@ func TestAccCivoFirewall_update(t *testing.T) {
 		CheckDestroy: testAccCheckCivoFirewallDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCivoFirewallConfigUpdates(firewallName),
+				Config: testAccCheckCivoFirewallConfigBasic(firewallName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCivoFirewallResourceExists(resName, &firewall),
 					testAccCheckCivoFirewallValues(&firewall, firewallName),
@@ -62,11 +63,11 @@ func TestAccCivoFirewall_update(t *testing.T) {
 			},
 			{
 				// use a dynamic configuration with the random name from above
-				Config: testAccCheckCivoFirewallConfigUpdates(firewallName),
+				Config: testAccCheckCivoFirewallConfigUpdates(firewallNameUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCivoFirewallResourceExists(resName, &firewall),
-					testAccCheckCivoFirewallUpdated(&firewall, firewallName),
-					resource.TestCheckResourceAttr(resName, "name", firewallName),
+					testAccCheckCivoFirewallUpdated(&firewall, firewallNameUpdate),
+					resource.TestCheckResourceAttr(resName, "name", firewallNameUpdate),
 				),
 			},
 		},

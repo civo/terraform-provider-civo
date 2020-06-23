@@ -45,7 +45,8 @@ func TestAccCivoDNSDomainName_update(t *testing.T) {
 
 	// generate a random name for each test run
 	resName := "civo_dns_domain_name.foobar"
-	var domainName = acctest.RandomWithPrefix("renamed-tf-test") + ".example"
+	var domainName = acctest.RandomWithPrefix("tf-test") + ".example"
+	var domainNameUpdate = acctest.RandomWithPrefix("renamed-tf-test") + ".example"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -53,7 +54,7 @@ func TestAccCivoDNSDomainName_update(t *testing.T) {
 		CheckDestroy: testAccCheckCivoDNSDomainNameDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCivoDNSDomainNameConfigUpdates(domainName),
+				Config: testAccCheckCivoDNSDomainNameConfigBasic(domainName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCivoDNSDomainNameResourceExists(resName, &domain),
 					testAccCheckCivoDNSDomainNameValues(&domain, domainName),
@@ -62,11 +63,11 @@ func TestAccCivoDNSDomainName_update(t *testing.T) {
 			},
 			{
 				// use a dynamic configuration with the random name from above
-				Config: testAccCheckCivoDNSDomainNameConfigUpdates(domainName),
+				Config: testAccCheckCivoDNSDomainNameConfigUpdates(domainNameUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCivoDNSDomainNameResourceExists(resName, &domain),
-					testAccCheckCivoDNSDomainNameUpdated(&domain, domainName),
-					resource.TestCheckResourceAttr(resName, "name", domainName),
+					testAccCheckCivoDNSDomainNameUpdated(&domain, domainNameUpdate),
+					resource.TestCheckResourceAttr(resName, "name", domainNameUpdate),
 				),
 			},
 		},
