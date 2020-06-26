@@ -65,7 +65,7 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(volume.ID)
 
-	return resourceNetworkRead(d, m)
+	return resourceVolumeRead(d, m)
 }
 
 // function to read the volume
