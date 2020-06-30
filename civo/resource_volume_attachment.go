@@ -51,7 +51,7 @@ func resourceVolumeAttachmentCreate(d *schema.ResourceData, m interface{}) error
 	if volume.InstanceID == "" || volume.InstanceID != instanceID {
 		// Only one volume can be attached at one time to a single droplet.
 		log.Printf("[INFO] attaching the volume %s to instance %s", volumeID, instanceID)
-		_, err := apiClient.AttachVolume(volumeID, volumeID)
+		_, err := apiClient.AttachVolume(volumeID, instanceID)
 		if err != nil {
 			return fmt.Errorf("[ERR] error attaching volume to instance %s", err)
 		}
@@ -59,7 +59,7 @@ func resourceVolumeAttachmentCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(resource.PrefixedUniqueId(fmt.Sprintf("%s-%s-", instanceID, volumeID)))
 
-	return resourceNetworkRead(d, m)
+	return resourceVolumeAttachmentRead(d, m)
 }
 
 // function to read the volume
