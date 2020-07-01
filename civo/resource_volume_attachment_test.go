@@ -13,6 +13,7 @@ import (
 // example.Widget represents a concrete Go type that represents an API resource
 func TestAccCivoVolumeAttachment_basic(t *testing.T) {
 	var volume civogo.Volume
+	var instance civogo.Instance
 
 	// generate a random name for each test run
 	resName := "civo_volume_attachment.foobar"
@@ -30,6 +31,7 @@ func TestAccCivoVolumeAttachment_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// query the API to retrieve the widget object
 					testAccCheckCivoVolumeResourceExists("civo_volume.foo", &volume),
+					testAccCheckCivoInstanceResourceExists("civo_instance.vm", &instance),
 					// verify local values
 					resource.TestCheckResourceAttrSet(resName, "id"),
 					resource.TestCheckResourceAttrSet(resName, "instance_id"),
