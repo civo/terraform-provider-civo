@@ -64,7 +64,7 @@ the instance is first booted.
 
 ## Import
 
-Firewalls can be imported using the template `id`, e.g.
+Template can be imported using the template `id`, e.g.
 
 ```
 terraform import civo_template.my-custom-template aa589909-6bcc-42cc-8be9-b9c3648f74c1 
