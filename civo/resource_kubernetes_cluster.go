@@ -261,7 +261,12 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 		config.Name = d.Get("name").(string)
 		config.NumTargetNodes = d.Get("num_target_nodes").(int)
 		config.KubernetesVersion = d.Get("kubernetes_version").(string)
+
 		config.Applications = d.Get("applications").(string)
+	}
+
+	if d.HasChange("tags") {
+		config.Tags = d.Get("tags").(string)
 	}
 
 	log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())
@@ -277,7 +282,7 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 		}
 
 		if resp.Status != "ACTIVE" {
-			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
+			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernets cluster to be updated but the status is %s", resp.Status))
 		}
 
 		return resource.NonRetryableError(resourceKubernetesClusterRead(d, m))
