@@ -17,7 +17,7 @@ This can be used to create, modify, and delete Templates.
 resource "civo_template" "my-custom-template" {
     code = "my-template"
     name = "My Template"
-    image_id = data.civo_template.debian.image_id
+    image_id = element(data.civo_template.debian.templates, 0).image_id
     short_description = "my template"
     description = "my template with mc"
     default_username = "admin"
