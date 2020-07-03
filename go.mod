@@ -23,7 +23,7 @@ require (
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/zclconf/go-cty v1.3.1 // indirect
-	golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4 // indirect
+	golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4
 	golang.org/x/tools v0.0.0-20200623045635-ff88973b1e4e // indirect
 	google.golang.org/genproto v0.0.0-20200311144346-b662892dd51b // indirect
 	google.golang.org/grpc v1.28.0 // indirect
