@@ -88,7 +88,7 @@ data "civo_instances" "small-with-backups" {
 
 `sort` supports the following arguments:
 
-* `key` - (Required) Sort the Droplets by this key. This may be one of `id`, `hostname`, `public_ip`, `private_ip`,
+* `key` - (Required) Sort the Instance by this key. This may be one of `id`, `hostname`, `public_ip`, `private_ip`,
   `pseudo_ip`, `size`, `template` or `created_at`.
 
 * `direction` - (Required) The sort direction. This may be either `asc` or `desc`.
@@ -97,7 +97,7 @@ data "civo_instances" "small-with-backups" {
 
 * `instances` - A list of Instances satisfying any `filter` and `sort` criteria. Each instance has the following attributes:  
 
-* `id` - The ID of the Droplet.
+* `id` - The ID of the Instance.
 * `hostname` - The Instance hostname.
 * `reverse_dns` - A fully qualified domain name.
 * `size` - The name of the size.

@@ -30,7 +30,7 @@ output "instance_output" {
 }
 ```
 
-Get the Droplet by id:
+Get the Instance by id:
 
 ```hcl
 data "civo_instance" "myhostaname" {
@@ -48,7 +48,7 @@ One of following the arguments must be provided:
 
 The following attributes are exported:
 
-* `id` - The ID of the Droplet.
+* `id` - The ID of the Instance.
 * `hostname` - The Instance hostname.
 * `reverse_dns` - A fully qualified domain name.
 * `size` - The name of the size.

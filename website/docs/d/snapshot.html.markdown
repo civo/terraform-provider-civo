@@ -31,7 +31,7 @@ data "civo_snapshot" "mysql-vm" {
 
 The following attributes are exported:
 
-* `id` The ID of the Droplet snapshot.
+* `id` The ID of the Instance snapshot.
 * `name` - The name of the snapshot.
 * `instance_id` - The ID of the Instance from which the snapshot was be taken.
 * `safe` - If is `true` the instance will be shut down during the snapshot if id `false` them not.
