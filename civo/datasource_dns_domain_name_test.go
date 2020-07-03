@@ -12,7 +12,7 @@ func TestAccDataSourceCivoDnsDomainName(t *testing.T) {
 	datasourceName := "data.civo_dns_domain_name.domain"
 	domain := acctest.RandomWithPrefix("domian") + ".com"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
