@@ -64,8 +64,8 @@ the instance is first booted.
 
 ## Import
 
-Template can be imported using the template `id`, e.g.
+Template can be imported using the template `code`, e.g.
 
 ```
-terraform import civo_template.my-custom-template aa589909-6bcc-42cc-8be9-b9c3648f74c1 
+terraform import civo_template.my-custom-template my-template-code 
 ```
