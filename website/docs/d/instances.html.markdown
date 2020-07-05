@@ -60,7 +60,7 @@ data "civo_instances_size" "small" {
 data "civo_instances" "small-with-backups" {
   filter {
     key = "size"
-    values = [data.civo_instances_size.small.sizes[1].name]
+    values = [element(data.civo_instances_size.small.sizes, 0).name]
   }
   sort {
     key = "created_at"
