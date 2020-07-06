@@ -69,6 +69,10 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"master_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"dns_entry": {
 				Type:     schema.TypeString,
 				Computed: true,
