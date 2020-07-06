@@ -236,6 +236,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("ready", resp.Ready)
 	d.Set("kubeconfig", resp.KubeConfig)
 	d.Set("api_endpoint", resp.APIEndPoint)
+	d.Set("master_ip", resp.MasterIP)
 	d.Set("dns_entry", resp.DNSEntry)
 	d.Set("built_at", resp.BuiltAt.UTC().String())
 	d.Set("created_at", resp.CreatedAt.UTC().String())
