@@ -1,4 +1,11 @@
 
+0.9.10
+=============
+2020-07-06
+
+* Fixed error in the kubernetes cluster, the master's ip was not set (8ab90738)
+* Added the change logs (d049062e)
+
 0.9.9
 =============
 2020-07-06
