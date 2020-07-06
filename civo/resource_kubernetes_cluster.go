@@ -209,7 +209,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 			return resource.NonRetryableError(fmt.Errorf("[ERR] error geting kubernetes cluster: %s", err))
 		}
 
-		if resp.Ready != true {
+		if resp.Status != "ACTIVE" {
 			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
 		}
 
