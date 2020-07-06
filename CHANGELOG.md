@@ -1,4 +1,12 @@
 
+0.9.11
+=============
+2020-07-06
+
+* Added kubernetes cluster data source (bbb18219)
+* Added the make test to the github actions (92073abd)
+* Update the change logs (0202a445)
+
 0.9.10
 =============
 2020-07-06
