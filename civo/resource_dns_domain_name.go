@@ -121,7 +121,7 @@ func resourceDNSDomainNameDelete(d *schema.ResourceData, m interface{}) error {
 func resourceDNSDomainImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
 
-	log.Printf("[INFO] Searching the domain %s", d.Get("name").(string))
+	log.Printf("[INFO] Searching the domain %s", d.Id())
 	resp, err := apiClient.GetDNSDomain(d.Id())
 	if err != nil {
 		if resp != nil {

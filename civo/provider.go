@@ -21,6 +21,7 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"civo_template":           dataSourceTemplate(),
 			"civo_kubernetes_version": dataSourceKubernetesVersion(),
+			"civo_kubernetes_cluster": dataSourceKubernetesCluster(),
 			"civo_instances_size":     dataSourceInstancesSize(),
 			"civo_instances":          dataSourceInstances(),
 			"civo_instance":           dataSourceInstance(),
