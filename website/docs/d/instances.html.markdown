@@ -81,7 +81,7 @@ data "civo_instances" "small-with-backups" {
 `filter` supports the following arguments:
 
 * `key` - (Required) Filter the Instances by this key. This may be one of '`id`, `hostname`, `public_ip`, `private_ip`,
-  `pseudo_ip`, `size`, `template` or `created_at`.
+  `pseudo_ip`, `size`, `cpu_cores`, `ram_mb`, `disk_gb`, `template` or `created_at`.
 
 * `values` - (Required) A list of values to match against the `key` field. Only retrieves Instances
   where the `key` field takes on one or more of the values provided here.
@@ -89,7 +89,7 @@ data "civo_instances" "small-with-backups" {
 `sort` supports the following arguments:
 
 * `key` - (Required) Sort the Instance by this key. This may be one of `id`, `hostname`, `public_ip`, `private_ip`,
-  `pseudo_ip`, `size`, `template` or `created_at`.
+  `pseudo_ip`, `size`, `cpu_cores`, `ram_mb`, `disk_gb`, `template` or `created_at`.
 
 * `direction` - (Required) The sort direction. This may be either `asc` or `desc`.
 
@@ -101,6 +101,9 @@ data "civo_instances" "small-with-backups" {
 * `hostname` - The Instance hostname.
 * `reverse_dns` - A fully qualified domain name.
 * `size` - The name of the size.
+* `cpu_cores` - Total cpu of the inatance.
+* `ram_mb` - Total ram of the instance.
+* `disk_gb` - The size of the disk.
 * `public_ip_requiered` - This should be either false, true or `move_ip_from:intances_id`.
 * `network_id` - This will be the ID of the network.
 * `template` - The ID for the template to used to build the instance.

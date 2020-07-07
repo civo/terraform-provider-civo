@@ -111,6 +111,18 @@ func instanceSchema() *schema.Schema {
 					Type:     schema.TypeString,
 					Computed: true,
 				},
+				"cpu_cores": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
+				"ram_mb": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
+				"disk_gb": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
 				"region": {
 					Type:     schema.TypeString,
 					Computed: true,
@@ -318,6 +330,9 @@ func flattenInstances(instances []civogo.KubernetesInstance) []interface{} {
 		rawInstance := map[string]interface{}{
 			"hostname":    instance.Hostname,
 			"size":        instance.Size,
+			"cpu_cores":   instance.CPUCores,
+			"ram_mb":      instance.RAMMegabytes,
+			"disk_gb":     instance.DiskGigabytes,
 			"region":      instance.Region,
 			"status":      instance.Status,
 			"firewall_id": instance.FirewallID,

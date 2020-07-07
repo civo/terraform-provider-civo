@@ -101,6 +101,18 @@ func dataSourceInstanceSchema() *schema.Schema {
 					Type:     schema.TypeString,
 					Computed: true,
 				},
+				"cpu_cores": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
+				"ram_mb": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
+				"disk_gb": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
 				"region": {
 					Type:     schema.TypeString,
 					Computed: true,

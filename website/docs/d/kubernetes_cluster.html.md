@@ -55,6 +55,9 @@ The following attributes are exported:
 * `instances` - In addition to the arguments provided, these additional attributes about the cluster's default node instance are exported.
     - `hostname` - The hostname of the instance.
     - `size` - The size of the instance.
+    - `cpu_cores` - Total cpu of the inatance.
+    - `ram_mb` - Total ram of the instance
+    - `disk_gb` - The size of the disk.
     - `region` - The region where instance are.
     - `status` - The status of the instance.
     - `created_at` - The date where the instances was created.

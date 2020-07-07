@@ -2,6 +2,7 @@ package civo
 
 import (
 	"fmt"
+
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -25,6 +26,18 @@ func dataSourceInstances() *schema.Resource {
 			},
 			"size": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"cpu_cores": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"ram_mb": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"disk_gb": {
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"network_id": {
@@ -92,6 +105,9 @@ func dataSourceInstances() *schema.Resource {
 			"private_ip",
 			"pseudo_ip",
 			"size",
+			"cpu_cores",
+			"ram_mb",
+			"disk_gb",
 			"template",
 			"created_at",
 		},
@@ -102,6 +118,9 @@ func dataSourceInstances() *schema.Resource {
 			"private_ip",
 			"pseudo_ip",
 			"size",
+			"cpu_cores",
+			"ram_mb",
+			"disk_gb",
 			"template",
 			"created_at",
 		},
@@ -139,6 +158,9 @@ func flattenDataSourceInstances(instance, m interface{}) (map[string]interface{}
 	flattenedInstance["hostname"] = i.Hostname
 	flattenedInstance["reverse_dns"] = i.ReverseDNS
 	flattenedInstance["size"] = i.Size
+	flattenedInstance["cpu_cores"] = i.CPUCores
+	flattenedInstance["ram_mb"] = i.RAMMegabytes
+	flattenedInstance["disk_gb"] = i.DiskGigabytes
 	flattenedInstance["network_id"] = i.NetworkID
 	flattenedInstance["template"] = i.TemplateID
 	flattenedInstance["initial_user"] = i.InitialUser

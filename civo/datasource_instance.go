@@ -36,6 +36,18 @@ func dataSourceInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"cpu_cores": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"ram_mb": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"disk_gb": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"network_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -124,6 +136,9 @@ func dataSourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("hostname", foundImage.Hostname)
 	d.Set("reverse_dns", foundImage.ReverseDNS)
 	d.Set("size", foundImage.Size)
+	d.Set("cpu_cores", foundImage.CPUCores)
+	d.Set("ram_mb", foundImage.RAMMegabytes)
+	d.Set("disk_gb", foundImage.DiskGigabytes)
 	d.Set("initial_user", foundImage.InitialUser)
 	d.Set("initial_password", foundImage.InitialPassword)
 	d.Set("sshkey_id", foundImage.SSHKey)

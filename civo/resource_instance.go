@@ -86,6 +86,18 @@ func resourceInstance() *schema.Resource {
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			// Computed resource
+			"cpu_cores": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"ram_mb": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"disk_gb": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"initial_password": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -237,6 +249,9 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("hostname", resp.Hostname)
 	d.Set("reverse_dns", resp.ReverseDNS)
 	d.Set("size", resp.Size)
+	d.Set("cpu_cores", resp.CPUCores)
+	d.Set("ram_mb", resp.RAMMegabytes)
+	d.Set("disk_gb", resp.DiskGigabytes)
 	d.Set("initial_user", resp.InitialUser)
 	d.Set("initial_password", resp.InitialPassword)
 	d.Set("sshkey_id", resp.SSHKey)
