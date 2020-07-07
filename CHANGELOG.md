@@ -1,4 +1,11 @@
 
+0.9.12
+=============
+2020-07-07
+
+* Added CPU, RAM and SSD fields to Instance and Kubernetes module (d5eaef11)
+* Update change log (6e56ab4b)
+
 0.9.11
 =============
 2020-07-06
