@@ -1,4 +1,13 @@
 
+0.9.13
+=============
+2020-07-17
+
+* Changed the direction in the firewall rule from inbound to ingress (cd24e0a9)
+* Update goreleaser-action to v2 (a50103ad)
+* Update kubernetes cluster data source with the new fields (94bd2d64)
+* Update change log (eb0123f1)
+
 0.9.12
 =============
 2020-07-07
