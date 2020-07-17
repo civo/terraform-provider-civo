@@ -154,7 +154,7 @@ resource "civo_firewall_rule" "testrule" {
 	start_port = "80"
 	end_port = "80"
 	cidr = ["192.168.1.2/32"]
-	direction = "inbound"
+	direction = "ingress"
 	label = "web"
 }
 
@@ -173,7 +173,7 @@ resource "civo_firewall_rule" "testrule" {
 	start_port = "443"
 	end_port = "443"
 	cidr = ["192.168.1.2/32"]
-	direction = "inbound"
+	direction = "ingress"
 	label = "web_server"
 }
 `, name)

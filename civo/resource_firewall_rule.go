@@ -58,10 +58,9 @@ func resourceFirewallRule() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Will this rule affect inbound or outbound traffic (by default this is inbound)",
+				Description: "Will this rule affect ingress traffic",
 				ValidateFunc: validation.StringInSlice([]string{
-					"inbound",
-					"outbound",
+					"ingress",
 				}, false),
 			},
 			"label": {
