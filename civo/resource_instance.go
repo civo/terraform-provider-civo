@@ -40,7 +40,7 @@ func resourceInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "create",
-				Description: "This should be either false, true or `move_ip_from:intances_id`",
+				Description: "This should be either none, create or `move_ip_from:intances_id` by default is create",
 			},
 			"network_id": {
 				Type:        schema.TypeString,
