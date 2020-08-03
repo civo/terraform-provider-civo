@@ -39,6 +39,7 @@ func resourceInstance() *schema.Resource {
 			"public_ip_requiered": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "create",
 				Description: "This should be either false, true or `move_ip_from:intances_id`",
 			},
 			"network_id": {
@@ -153,8 +154,8 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		config.Size = attr.(string)
 	}
 
-	if attr, ok := d.GetOk("size"); ok {
-		config.Size = attr.(string)
+	if attr, ok := d.GetOk("public_ip_requiered"); ok {
+		config.PublicIPRequired = attr.(string)
 	}
 
 	if attr, ok := d.GetOk("network_id"); ok {
