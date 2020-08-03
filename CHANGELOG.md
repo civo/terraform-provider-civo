@@ -3,6 +3,8 @@
 =============
 2020-08-03
 
+* Fixed error in the description of the instance resource (9314aa97)
+* Updated the Change log (6db9f524)
 * Fixed error in the instance resource (1df99212)
 
 0.9.13
