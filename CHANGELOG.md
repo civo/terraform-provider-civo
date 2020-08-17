@@ -1,4 +1,13 @@
 
+0.9.15
+=============
+2020-08-17
+
+* Fixed bug in the kubernetes cluster resource (bee9eb41)
+* Update the README, remove Progress resource section (4a792b9a)
+* Updated the Change log (32c5e71f)
+* Fixed error in the description of the instance resource (9314aa97)
+
 0.9.14
 =============
 2020-08-03
