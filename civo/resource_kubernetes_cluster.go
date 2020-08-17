@@ -35,7 +35,6 @@ func resourceKubernetesCluster() *schema.Resource {
 			"kubernetes_version": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "1.0.0",
 				Description: "the version of k3s to install (optional, the default is currently the latest available)",
 			},
 			"tags": {
@@ -221,7 +220,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 			return resource.NonRetryableError(fmt.Errorf("[ERR] error geting kubernetes cluster: %s", err))
 		}
 
-		if resp.Status != "ACTIVE" {
+		if resp.Ready != true {
 			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
 		}
 
