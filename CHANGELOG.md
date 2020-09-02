@@ -1,4 +1,11 @@
 
+0.9.16
+=============
+2020-09-02
+
+* Added GPG to sign the binary (942f59cd)
+* Update docs to the new format (a3ee7776)
+
 0.9.15
 =============
 2020-08-17
