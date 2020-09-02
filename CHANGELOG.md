@@ -3,7 +3,11 @@
 =============
 2020-09-02
 
-* Added GPG to sign the binary (942f59cd)
+* Update the release action (e36ac2a4)
+* Update the release to use Go 1.14 (5cfb6289)
+* Update the goreleaser config (6e381d00)
+* Update Change log (932440f7)
+* Added GPG to sing the binary (942f59cd)
 * Update docs to the new format (a3ee7776)
 
 0.9.15

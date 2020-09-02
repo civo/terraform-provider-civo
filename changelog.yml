@@ -1,9 +1,41 @@
 - semver: 0.9.16
-  date: 2020-09-02T08:40:52.388815-04:00
+  date: 2020-09-02T17:57:10.001802-04:00
   packager: ""
   changes:
+  - commit: e36ac2a4a46205139240d05c90f0ae9a00a69abb
+    note: Update the release action
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: 5cfb6289e8998d3701a2786f81f206d0e22fabc0
+    note: Update the release to use Go 1.14
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: 6e381d00de8e825a65468725d5e3a1f8efa7929c
+    note: Update the goreleaser config
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: 932440f72f10fb742c008e3487ab0cf05d59743d
+    note: Update Change log
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
   - commit: 942f59cda12aeefea71283896ad4a496ff66cf03
-    note: Added GPG to sign the binary
+    note: Added GPG to sing the binary
     author:
       name: Alejandro JNM
       email: alejandrojnm@gmail.com
