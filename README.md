@@ -6,13 +6,11 @@ Terraform Provider ![Travis build](https://travis-ci.org/civo/terraform-provider
 - [![Build Status](https://github.com/civo/terraform-provider-civo/workflows/Go/badge.svg)](https://github.com/civo/terraform-provider-civo/actions)
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
-**STATUS:** This project is currently under active development, but is not ready for public usage at this point.
-
 Requirements
 ------------
 
 -   [Terraform](https://www.terraform.io/downloads.html) 0.13.x
--   [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
+-   [Go](https://golang.org/doc/install) 1.14.x (to build the provider plugin)
 
 Building The Provider
 ---------------------
