@@ -32,7 +32,7 @@ $ make build
 Using the provider
 ----------------------
 
-When the provider is out of beta the documentation will be at [Civo Provider documentation](https://www.terraform.io/docs/providers/civo/index.html),
+When the provider is out of beta the documentation will be at [Civo Provider documentation](https://registry.terraform.io/providers/civo/civo/latest/docs),
 but during the beta the best resource for learning about it is [this guide](https://www.civo.com/learn/using-the-civo-terraform-provider)
 
 
