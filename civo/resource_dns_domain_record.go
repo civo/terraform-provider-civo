@@ -9,21 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
-// Constant all possible DNS Record
-const (
-	// DNSRecordTypeA represents an A record
-	DNSRecordTypeA = "a"
-
-	// DNSRecordTypeCName represents an CNAME record
-	DNSRecordTypeCName = "cname"
-
-	// DNSRecordTypeMX represents an MX record
-	DNSRecordTypeMX = "mx"
-
-	// DNSRecordTypeTXT represents an TXT record
-	DNSRecordTypeTXT = "txt"
-)
-
 // DNS domain record resource with this we can create and manage DNS Domain
 func resourceDNSDomainRecord() *schema.Resource {
 	fmt.Print()
@@ -39,10 +24,11 @@ func resourceDNSDomainRecord() *schema.Resource {
 				Required:    true,
 				Description: "The choice of RR type from a, cname, mx or txt",
 				ValidateFunc: validation.StringInSlice([]string{
-					DNSRecordTypeA,
-					DNSRecordTypeCName,
-					DNSRecordTypeMX,
-					DNSRecordTypeTXT,
+					civogo.DNSRecordTypeA,
+					civogo.DNSRecordTypeCName,
+					civogo.DNSRecordTypeMX,
+					civogo.DNSRecordTypeTXT,
+					civogo.DNSRecordTypeSRV,
 				}, false),
 			},
 			"name": {
@@ -111,20 +97,24 @@ func resourceDNSDomainRecordCreate(d *schema.ResourceData, m interface{}) error 
 		config.Priority = attr.(int)
 	}
 
-	if d.Get("type").(string) == "a" {
-		config.Type = DNSRecordTypeA
+	if d.Get("type").(string) == "A" {
+		config.Type = civogo.DNSRecordTypeA
 	}
 
-	if d.Get("type").(string) == "cname" {
-		config.Type = DNSRecordTypeCName
+	if d.Get("type").(string) == "CNAME" {
+		config.Type = civogo.DNSRecordTypeCName
 	}
 
-	if d.Get("type").(string) == "mx" {
-		config.Type = DNSRecordTypeMX
+	if d.Get("type").(string) == "MX" {
+		config.Type = civogo.DNSRecordTypeMX
 	}
 
-	if d.Get("type").(string) == "txt" {
-		config.Type = DNSRecordTypeTXT
+	if d.Get("type").(string) == "SRV" {
+		config.Type = civogo.DNSRecordTypeSRV
+	}
+
+	if d.Get("type").(string) == "TXT" {
+		config.Type = civogo.DNSRecordTypeTXT
 	}
 
 	log.Printf("[INFO] Creating the domain record %s", d.Get("name").(string))
@@ -184,20 +174,24 @@ func resourceDNSDomainRecordUpdate(d *schema.ResourceData, m interface{}) error 
 		config.Priority = d.Get("priority").(int)
 		config.TTL = d.Get("ttl").(int)
 
-		if d.Get("type").(string) == "a" {
-			config.Type = DNSRecordTypeA
+		if d.Get("type").(string) == "A" {
+			config.Type = civogo.DNSRecordTypeA
 		}
 
-		if d.Get("type").(string) == "cname" {
-			config.Type = DNSRecordTypeCName
+		if d.Get("type").(string) == "CNAME" {
+			config.Type = civogo.DNSRecordTypeCName
 		}
 
-		if d.Get("type").(string) == "mx" {
-			config.Type = DNSRecordTypeMX
+		if d.Get("type").(string) == "MX" {
+			config.Type = civogo.DNSRecordTypeMX
 		}
 
-		if d.Get("type").(string) == "txt" {
-			config.Type = DNSRecordTypeTXT
+		if d.Get("type").(string) == "SRV" {
+			config.Type = civogo.DNSRecordTypeSRV
+		}
+
+		if d.Get("type").(string) == "TXT" {
+			config.Type = civogo.DNSRecordTypeTXT
 		}
 	}
 

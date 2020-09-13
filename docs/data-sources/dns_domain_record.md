@@ -64,7 +64,7 @@ The following attributes are exported:
 
 * `id` - A unique ID that can be used to identify and reference a Record.
 * `domain_id` - The id of the domain
-* `type` - The choice of record type from a, cname, mx or txt
+* `type` - The choice of record type from A, CNAME, MX, SRV or TXT
 * `name` - The portion before the domain name (e.g. www) or an @ for the apex/root domain (you cannot use an A record with an amex/root domain)
 * `value` - The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
 * `priority` - The priority of the record.

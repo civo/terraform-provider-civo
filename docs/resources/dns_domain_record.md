@@ -16,7 +16,7 @@ Provides a Civo dns domain record resource.
 # Create a new domain record
 resource "civo_dns_domain_record" "www" {
     domain_id = civo_dns_domain_name.main.id
-    type = "a"
+    type = "A"
     name = "www"
     value = civo_instance.foo.public_ip
     ttl = 600
@@ -29,7 +29,7 @@ resource "civo_dns_domain_record" "www" {
 The following arguments are supported:
 
 * `domain_id` - (Required) The id of the domain
-* `type` - (Required) The choice of record type from a, cname, mx or txt
+* `type` - (Required) The choice of record type from A, CNAME, MX, SRV or TXT
 * `name` - (Required) The portion before the domain name (e.g. www) or an @ for the apex/root domain (you cannot use an A record with an amex/root domain)
 * `value` - (Required) The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
 * `priority` - (Optional) Useful for MX records only, the priority mail should be attempted it (defaults to 10)
