@@ -1,4 +1,18 @@
 
+0.9.17
+=============
+2020-09-13
+
+* Allowed new record type in the DNS resource (f1524b4b)
+* Updated the civogo lib to the v0.2.17 (38a311e3)
+* Merge pull request #22 from fgrehm/patch-1 (389e6c06)
+* Update the readme and clean go.mod (1171aedb)
+* Update the Change log (26522e57)
+* Update the release action (e36ac2a4)
+* Update the release to use Go 1.14 (5cfb6289)
+* Update the goreleaser config (6e381d00)
+* Update Change log (932440f7)
+
 0.9.16
 =============
 2020-09-02
