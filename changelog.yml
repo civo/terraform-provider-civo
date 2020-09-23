@@ -1,3 +1,15 @@
+- semver: 0.9.18
+  date: 2020-09-23T10:56:30.425053-04:00
+  packager: ""
+  changes:
+  - commit: ed064a5ad052c0056e06f82df87b7a3278a56cb9
+    note: Updated the civogo lib to v0.2.18
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
 - semver: 0.9.17
   date: 2020-09-12T22:34:54.619959-04:00
   packager: ""
