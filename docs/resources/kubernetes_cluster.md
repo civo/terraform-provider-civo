@@ -51,9 +51,9 @@ provider "kubernetes" {
 The following arguments are supported:
 
 * `name` - (Required) A name for the Kubernetes cluster.
-* `num_target_nodes` - (Optional) The number of instances to create (optional, the default at the time of writing is 3).
-* `target_nodes_size` - (Optional) The size of each node (optional, the default is currently g2.small)
-* `kubernetes_version` - (Optional) The version of k3s to install (optional, the default is currently the latest available).
+* `num_target_nodes` - (Optional) The number of instances to create (The default at the time of writing is 3).
+* `target_nodes_size` - (Optional) The size of each node (The default is currently g2.small)
+* `kubernetes_version` - (Optional) The version of k3s to install (The default is currently the latest available).
 * `tags` - (Optional) A space separated list of tags, to be used freely as required.
 * `applications` - (Optional) A comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. If you want to remove a default installed application, prefix it with a '-', e.g. -traefik
 
