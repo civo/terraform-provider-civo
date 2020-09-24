@@ -1,4 +1,10 @@
 
+0.9.19
+=============
+2020-09-24
+
+* Changed kubernetes_version option now is required (30b621ff)
+
 0.9.18
 =============
 2020-09-23

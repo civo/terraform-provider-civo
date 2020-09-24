@@ -1,3 +1,15 @@
+- semver: 0.9.19
+  date: 2020-09-24T08:03:38.965333-04:00
+  packager: ""
+  changes:
+  - commit: 30b621ff9eaf65abeaaecf961e3f80cadbdbd6ce
+    note: Changed kubernetes_version option now is required
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
 - semver: 0.9.18
   date: 2020-09-23T10:56:30.425053-04:00
   packager: ""
