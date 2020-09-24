@@ -1,3 +1,15 @@
+- semver: 0.9.20
+  date: 2020-09-24T10:40:14.237591-04:00
+  packager: ""
+  changes:
+  - commit: da4842c9f9a2c1a56030df5a9ab3c65968959b59
+    note: Fixed issue in the kubernetes resource
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
 - semver: 0.9.19
   date: 2020-09-24T08:03:38.965333-04:00
   packager: ""
