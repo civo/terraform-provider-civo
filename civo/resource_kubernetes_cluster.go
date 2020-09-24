@@ -34,7 +34,7 @@ func resourceKubernetesCluster() *schema.Resource {
 			},
 			"kubernetes_version": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "the version of k3s to install (optional, the default is currently the latest available)",
 			},
 			"tags": {
