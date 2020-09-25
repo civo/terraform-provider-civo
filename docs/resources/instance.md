@@ -31,7 +31,7 @@ The following arguments are supported:
 * `hostname` - (Required) The Instance hostname.
 * `reverse_dns` - (Optional) A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified).
 * `size` - (Optional) The name of the size, from the current list, e.g. g2.small (required).
-* `public_ip` - (Optional) This should be either false, true or `move_ip_from:intances_id`.
+* `public_ip_requiered` - (Optional) This should be either false, true or `move_ip_from:intances_id`.
 * `network_id` - (Optional) This must be the ID of the network from the network listing (optional; default network used when not specified).
 * `template` - (Optional) The ID for the template to use to build the instance.
 * `initial_user` - (Optional) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo).
