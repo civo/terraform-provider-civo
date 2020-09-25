@@ -36,7 +36,7 @@ func resourceInstance() *schema.Resource {
 				Default:     "g2.xsmall",
 				Description: "The name of the size, from the current list, e.g. g2.small (required)",
 			},
-			"public_ip_requiered": {
+			"public_ip_required": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "create",
@@ -154,7 +154,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		config.Size = attr.(string)
 	}
 
-	if attr, ok := d.GetOk("public_ip_requiered"); ok {
+	if attr, ok := d.GetOk("public_ip_required"); ok {
 		config.PublicIPRequired = attr.(string)
 	}
 
