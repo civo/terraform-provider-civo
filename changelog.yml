@@ -1,3 +1,35 @@
+- semver: 0.9.21
+  date: 2020-09-25T13:57:09.838882-04:00
+  packager: ""
+  changes:
+  - commit: 3068faf09940997802e28e5d53532a0e7715e589
+    note: |-
+      Updated the civogo lib to v0.2.19
+      Fixed error in typo in the instance resource
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: d5a033afa6b8b33e6775b4fe3fa7f3d4b46061c8
+    note: |-
+      Fix documentation for the instance resource
+      Close #24
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: 1b22c80ce7dd3bef56f88ac155c5537dcbbf20e0
+    note: Updated the doc for kubernetes resource
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
 - semver: 0.9.20
   date: 2020-09-24T10:40:14.237591-04:00
   packager: ""

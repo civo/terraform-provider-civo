@@ -1,4 +1,12 @@
 
+0.9.21
+=============
+2020-09-25
+
+* Updated the civogo lib to v0.2.19 (3068faf0)
+* Fix documentation for the instance resource (d5a033af)
+* Updated the doc for kubernetes resource (1b22c80c)
+
 0.9.20
 =============
 2020-09-24
