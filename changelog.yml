@@ -1,3 +1,17 @@
+- semver: 0.9.22
+  date: 2020-11-26T08:16:51.221647-05:00
+  packager: ""
+  changes:
+  - commit: 18c5e8c7c457e54ba25889ecbcdb5c6c7cb9c051
+    note: |-
+      Fixed bug in the DNS resource, Update civogo lib
+      Close #25
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
 - semver: 0.9.21
   date: 2020-09-25T13:57:09.838882-04:00
   packager: ""

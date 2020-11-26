@@ -1,4 +1,10 @@
 
+0.9.22
+=============
+2020-11-26
+
+* Fixed bug in the DNS resource, Update civogo lib (18c5e8c7)
+
 0.9.21
 =============
 2020-09-25
