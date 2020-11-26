@@ -3,6 +3,7 @@ package civo
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -91,7 +92,7 @@ func resourceDNSDomainRecordCreate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	if attr, ok := d.GetOk("priority"); ok {
-		if d.Get("type").(string) != "mx" {
+		if d.Get("type").(string) != "MX" {
 			return fmt.Errorf("[WARN] warning priority value is only allow in the MX records")
 		}
 		config.Priority = attr.(int)
@@ -148,7 +149,7 @@ func resourceDNSDomainRecordRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("domain_id", resp.DNSDomainID)
 	d.Set("name", resp.Name)
 	d.Set("value", resp.Value)
-	d.Set("type", resp.Type)
+	d.Set("type", strings.ToUpper(string(resp.Type)))
 	d.Set("priority", resp.Priority)
 	d.Set("ttl", resp.TTL)
 	d.Set("created_at", resp.CreatedAt.UTC().String())

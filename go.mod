@@ -3,7 +3,7 @@ module github.com/civo/terraform-provider-civo
 require (
 	cloud.google.com/go v0.54.0 // indirect
 	github.com/aws/aws-sdk-go v1.29.22 // indirect
-	github.com/civo/civogo v0.2.19
+	github.com/civo/civogo v0.2.22
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/hashicorp/go-getter v1.4.1 // indirect
