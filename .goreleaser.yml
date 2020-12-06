@@ -35,4 +35,8 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 changelog:
-  skip: true
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
