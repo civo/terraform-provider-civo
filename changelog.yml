@@ -1,7 +1,23 @@
 - semver: 0.9.23
-  date: 2020-12-06T16:10:53.158398-05:00
+  date: 2020-12-06T16:18:11.926364-05:00
   packager: ""
   changes:
+  - commit: 5dd72a5d24314a6b34e5995c31acea0dfde9d8d7
+    note: Updated the goreleaser file to add the chnagelog
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: d23776dd8aa840d4d1f70cf0296cab51f8c2ad7c
+    note: Update Change log
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
   - commit: 6d0876e2b689cdd3b3c69ab6a31fa811d455f8ca
     note: Updated the civogo lib to v0.2.23
     author:
