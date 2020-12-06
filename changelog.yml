@@ -1,3 +1,34 @@
+- semver: 0.9.23
+  date: 2020-12-06T16:10:53.158398-05:00
+  packager: ""
+  changes:
+  - commit: 6d0876e2b689cdd3b3c69ab6a31fa811d455f8ca
+    note: Updated the civogo lib to v0.2.23
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: e00a1040620519a0ec98ec5e9b8d15c7a04463d0
+    note: |-
+      Merge pull request #26 from AlexsJones/patch-1
+
+      fix(README): Fixed unauthenticated download in README.md
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 7882cc5a4bb8aaa50b240aa7582b331b87030f12
+    note: Updated GitHub action for Lint
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
 - semver: 0.9.22
   date: 2020-11-26T08:16:51.221647-05:00
   packager: ""

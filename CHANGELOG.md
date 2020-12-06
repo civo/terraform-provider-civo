@@ -1,4 +1,12 @@
 
+0.9.23
+=============
+2020-12-06
+
+* Updated the civogo lib to v0.2.23 (6d0876e2)
+* Merge pull request #26 from AlexsJones/patch-1 (e00a1040)
+* Updated GitHub action for Lint (7882cc5a)
+
 0.9.22
 =============
 2020-11-26
