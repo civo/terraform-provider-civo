@@ -210,7 +210,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] creating a new kubernetes cluster %s", d.Get("name").(string))
 	resp, err := apiClient.NewKubernetesClusters(config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create the kubernets cluster: %s", err)
+		return fmt.Errorf("[ERR] failed to create the kubernetes cluster: %s", err)
 	}
 
 	d.SetId(resp.ID)
@@ -222,7 +222,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 		}
 
 		if resp.Ready != true {
-			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernets cluster to be created but the status is %s", resp.Status))
+			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernetes cluster to be created but the status is %s", resp.Status))
 		}
 
 		return resource.NonRetryableError(resourceKubernetesClusterRead(d, m))
@@ -240,7 +240,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("[ERR] failed to find the kubernets cluster: %s", err)
+		return fmt.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
 	}
 
 	d.Set("name", resp.Name)
@@ -299,7 +299,7 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 		}
 
 		if resp.Status != "ACTIVE" {
-			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernets cluster to be updated but the status is %s", resp.Status))
+			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernetes cluster to be updated but the status is %s", resp.Status))
 		}
 
 		return resource.NonRetryableError(resourceKubernetesClusterRead(d, m))
