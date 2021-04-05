@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // The instance resource represents an object of type instances
@@ -17,6 +17,11 @@ func resourceInstance() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The region for the instance, if not declare we use the region in declared in the provider",
+			},
 			"hostname": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -138,6 +143,11 @@ func resourceInstance() *schema.Resource {
 func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] configuring the instance %s", d.Get("hostname").(string))
 	config, err := apiClient.NewInstanceConfig()
 	if err != nil {
@@ -236,6 +246,11 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] retriving the instance %s", d.Id())
 	resp, err := apiClient.GetInstance(d.Id())
 	if err != nil {
@@ -283,6 +298,11 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 // function to update a instance
 func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	// check if the size change if change we send to resize the instance
 	if d.HasChange("size") {
@@ -369,6 +389,11 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 // function to delete instance
 func resourceInstanceDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	log.Printf("[INFO] deleting the instance %s", d.Id())
 	_, err := apiClient.DeleteInstance(d.Id())

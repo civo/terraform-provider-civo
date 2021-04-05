@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Firewall Rule resource represent you can create and manage all firewall rules
@@ -70,6 +70,12 @@ func resourceFirewallRule() *schema.Resource {
 				Description:  "A string that will be the displayed name/reference for this rule (optional)",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
+			"region": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "The region for this rule",
+				ValidateFunc: validation.StringIsNotEmpty,
+			},
 		},
 		Create: resourceFirewallRuleCreate,
 		Read:   resourceFirewallRuleRead,
@@ -83,6 +89,11 @@ func resourceFirewallRule() *schema.Resource {
 // function to create a new firewall rule
 func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	tfCidr := d.Get("cidr").(*schema.Set).List()
 	cird := make([]string, len(tfCidr))
@@ -122,6 +133,11 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	resp, err := apiClient.FindFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
@@ -148,6 +164,11 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallRuleDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	_, err := apiClient.DeleteFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
@@ -159,6 +180,11 @@ func resourceFirewallRuleDelete(d *schema.ResourceData, m interface{}) error {
 // custom import to able to add a firewall rule to the terraform
 func resourceFirewallRuleImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	firewallID, firewallRuleID, err := resourceCommonParseID(d.Id())
 	if err != nil {

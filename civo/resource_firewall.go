@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Firewall resource with this we can create and manage all firewall
@@ -20,7 +20,11 @@ func resourceFirewall() *schema.Resource {
 			},
 			"region": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
+			},
+			"network_id": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 		Create: resourceFirewallCreate,
@@ -36,9 +40,24 @@ func resourceFirewall() *schema.Resource {
 // function to create a firewall
 func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+	networkID := ""
+
+	if attr, ok := d.GetOk("region"); ok {
+		apiClient.Region = attr.(string)
+	}
+
+	if attr, ok := d.GetOk("network_id"); ok {
+		networkID = attr.(string)
+	} else {
+		network, err := apiClient.GetDefaultNetwork()
+		if err != nil {
+			return fmt.Errorf("[ERR] failed to get the default network: %s", err)
+		}
+		networkID = network.ID
+	}
 
 	log.Printf("[INFO] creating a new firewall %s", d.Get("name").(string))
-	firewall, err := apiClient.NewFirewall(d.Get("name").(string))
+	firewall, err := apiClient.NewFirewall(d.Get("name").(string), networkID)
 	if err != nil {
 		return fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
 	}
@@ -64,7 +83,7 @@ func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", resp.Name)
-	d.Set("region", resp.Region)
+	d.Set("network_id", resp.NetworkID)
 
 	return nil
 }
@@ -75,8 +94,11 @@ func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
 
 	if d.HasChange("name") {
 		if d.Get("name").(string) != "" {
+			firewall := civogo.FirewallConfig{
+				Name: d.Get("name").(string),
+			}
 			log.Printf("[INFO] updating the firewall name, %s", d.Id())
-			_, err := apiClient.RenameFirewall(d.Id(), d.Get("name").(string))
+			_, err := apiClient.RenameFirewall(d.Id(), &firewall)
 			if err != nil {
 				return fmt.Errorf("[WARN] an error occurred while tring to rename the firewall %s, %s", d.Id(), err)
 			}

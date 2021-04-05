@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Data source to get from the api a specific network
@@ -19,20 +19,21 @@ func dataSourceNetwork() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				ExactlyOneOf: []string{"id", "label"},
+				ExactlyOneOf: []string{"id", "label", "region"},
 			},
 			"label": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				ExactlyOneOf: []string{"id", "label"},
+				ExactlyOneOf: []string{"id", "label", "region"},
+			},
+			"region": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.NoZeroValues,
 			},
 			// Computed resource
 			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -50,6 +51,11 @@ func dataSourceNetwork() *schema.Resource {
 
 func dataSourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	var foundNetwork *civogo.Network
 
@@ -74,7 +80,6 @@ func dataSourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	d.SetId(foundNetwork.ID)
 	d.Set("name", foundNetwork.Name)
 	d.Set("label", foundNetwork.Label)
-	d.Set("region", foundNetwork.Region)
 	d.Set("default", foundNetwork.Default)
 	d.Set("cidr", foundNetwork.CIDR)
 

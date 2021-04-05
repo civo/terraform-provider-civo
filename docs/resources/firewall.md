@@ -18,12 +18,21 @@ resource "civo_firewall" "www" {
   name = "www"
 }
 ```
+### Example with region
+```hcl
+resource "civo_firewall" "www" {
+  name = "www"
+  region = "NYC1"
+}
+```
 
 ## Argument Reference
 
 The following arguments are supported:
 
 * `name` - (Required) The Firewall name
+* `region` - (Optional) The Firewall region, if is not defined we use the global defined in the provider
+* `nertwork_id` - (Optional) The Firewall network, if is not defined we use the default network
 
 
 ## Attributes Reference
@@ -32,7 +41,7 @@ The following attributes are exported:
 
 * `id` - A unique ID that can be used to identify and reference a Firewall.
 * `name` - The name of the Firewall.
-* `region` - The region where the firewall was create.
+* `network_id` - The ID of the network of the firewall
 
 ## Import
 

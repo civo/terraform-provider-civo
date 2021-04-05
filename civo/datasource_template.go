@@ -2,9 +2,10 @@ package civo
 
 import (
 	"fmt"
+
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Data source to get from the api a specific template
@@ -12,52 +13,7 @@ import (
 func dataSourceTemplate() *schema.Resource {
 
 	dataListConfig := &datalist.ResourceConfig{
-		RecordSchema: map[string]*schema.Schema{
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"code": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"volume_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"image_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"short_description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"default_username": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"cloud_config": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-		},
-		FilterKeys: []string{
-			"code",
-			"name",
-		},
-		SortKeys: []string{
-			"code",
-			"name",
-		},
+		RecordSchema:        templateSchema(),
 		ResultAttributeName: "templates",
 		FlattenRecord:       flattenTemplate,
 		GetRecords:          getTemplates,
@@ -67,7 +23,7 @@ func dataSourceTemplate() *schema.Resource {
 
 }
 
-func getTemplates(m interface{}) ([]interface{}, error) {
+func getTemplates(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
 	templates := []interface{}{}
@@ -83,7 +39,7 @@ func getTemplates(m interface{}) ([]interface{}, error) {
 	return templates, nil
 }
 
-func flattenTemplate(template, m interface{}) (map[string]interface{}, error) {
+func flattenTemplate(template, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
 
 	s := template.(civogo.Template)
 
@@ -99,4 +55,46 @@ func flattenTemplate(template, m interface{}) (map[string]interface{}, error) {
 	flattenedTemplate["cloud_config"] = s.CloudConfig
 
 	return flattenedTemplate, nil
+}
+
+func templateSchema() map[string]*schema.Schema {
+
+	return map[string]*schema.Schema{
+		"id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"code": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"volume_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"image_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"short_description": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"description": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"default_username": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"cloud_config": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+	}
 }

@@ -37,12 +37,22 @@ data "civo_instance" "myhostaname" {
     id = "6f283ab7-c37e-42f9-9b4b-f80aea8c006d"
 }
 ```
+
+Get the Instance by id and region:
+
+```hcl
+data "civo_instance" "myhostaname" {
+    id = "6f283ab7-c37e-42f9-9b4b-f80aea8c006d"
+    region = "NCY1"
+}
+```
 ## Argument Reference
 
 One of following the arguments must be provided:
 
 * `id` - (Optional) The ID of the Instance
 * `hostname` - (Optional) The hostname of the Instance.
+* `region` - (Optional) The region of an existing Instance.
 
 ## Attributes Reference
 
@@ -68,5 +78,6 @@ The following attributes are exported:
 * `public_ip` - The public ip.
 * `pseudo_ip` - Is the ip that is used to route the public ip from the internet to the instance using NAT 
 * `status` - The status of the instance
+* `region` - The region of the instance
 * `script` - the contents of a script uploaded
 * `created_at` - The date of creation of the instance

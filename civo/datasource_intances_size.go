@@ -2,59 +2,17 @@ package civo
 
 import (
 	"fmt"
+
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Data source to get and filter all instances size
 // use to define the size in resourceInstance
 func dataSourceInstancesSize() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
-		RecordSchema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"nice_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"cpu_cores": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"ram_mb": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"disk_gb": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"selectable": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-		},
-		FilterKeys: []string{
-			"name",
-			"nice_name",
-			"cpu_cores",
-			"ram_mb",
-			"disk_gb",
-			"selectable",
-		},
-		SortKeys: []string{
-			"cpu_cores",
-			"ram_mb",
-			"disk_gb",
-			"selectable",
-		},
+		RecordSchema:        instancesSizeSchema(),
 		ResultAttributeName: "sizes",
 		FlattenRecord:       flattenInstancesSize,
 		GetRecords:          getInstancesSizes,
@@ -64,7 +22,7 @@ func dataSourceInstancesSize() *schema.Resource {
 
 }
 
-func getInstancesSizes(m interface{}) ([]interface{}, error) {
+func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
 	sizes := []interface{}{}
@@ -80,7 +38,7 @@ func getInstancesSizes(m interface{}) ([]interface{}, error) {
 	return sizes, nil
 }
 
-func flattenInstancesSize(size, m interface{}) (map[string]interface{}, error) {
+func flattenInstancesSize(size, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
 
 	s := size.(civogo.InstanceSize)
 
@@ -94,4 +52,37 @@ func flattenInstancesSize(size, m interface{}) (map[string]interface{}, error) {
 	flattenedSize["selectable"] = s.Selectable
 
 	return flattenedSize, nil
+}
+
+func instancesSizeSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"nice_name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"cpu_cores": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"ram_mb": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"disk_gb": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"description": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"selectable": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+	}
 }

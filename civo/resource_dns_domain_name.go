@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Dns Domain resource, with this we can create and manage DNS Domain

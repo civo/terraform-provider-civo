@@ -1,48 +1,43 @@
-/*
-Copyright (c) 2020, DigitalOcean
-License: MPL (see https://www.mozilla.org/en-US/MPL/)
-Source: https://github.com/terraform-providers/terraform-provider-digitalocean
-*/
-
 package datalist
 
 import (
 	"math"
-	"strconv"
+	"regexp"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func floatApproxEquals(a, b float64) bool {
 	return math.Abs(a-b) < 0.000001
 }
 
-func valueMatches(s *schema.Schema, value interface{}, filterValue string) bool {
+func valueMatches(s *schema.Schema, value interface{}, filterValue interface{}, matchBy string) bool {
 	switch s.Type {
 	case schema.TypeString:
-		return strings.Contains(value.(string), filterValue)
+		switch matchBy {
+		case "exact":
+			return strings.EqualFold(filterValue.(string), value.(string))
+		case "substring":
+			return strings.Contains(value.(string), filterValue.(string))
+		case "re":
+			return filterValue.(*regexp.Regexp).MatchString(value.(string))
+		}
 
 	case schema.TypeBool:
-		if boolValue, err := strconv.ParseBool(filterValue); err == nil {
-			return boolValue == value.(bool)
-		}
+		return filterValue.(bool) == value.(bool)
 
 	case schema.TypeInt:
-		if intValue, err := strconv.Atoi(filterValue); err == nil {
-			return intValue == value.(int)
-		}
+		return filterValue.(int) == value.(int)
 
 	case schema.TypeFloat:
-		if floatValue, err := strconv.ParseFloat(filterValue, 64); err == nil {
-			return floatApproxEquals(floatValue, value.(float64))
-		}
+		return floatApproxEquals(filterValue.(float64), value.(float64))
 
 	case schema.TypeList:
 		listValues := value.([]interface{})
 		result := false
 		for _, listValue := range listValues {
-			valueDoesMatch := valueMatches(s.Elem.(*schema.Schema), listValue, filterValue)
+			valueDoesMatch := valueMatches(s.Elem.(*schema.Schema), listValue, filterValue, matchBy)
 			result = result || valueDoesMatch
 		}
 		return result
@@ -52,7 +47,7 @@ func valueMatches(s *schema.Schema, value interface{}, filterValue string) bool 
 		listValues := setValue.List()
 		result := false
 		for _, listValue := range listValues {
-			valueDoesMatch := valueMatches(s.Elem.(*schema.Schema), listValue, filterValue)
+			valueDoesMatch := valueMatches(s.Elem.(*schema.Schema), listValue, filterValue, matchBy)
 			result = result || valueDoesMatch
 		}
 		return result

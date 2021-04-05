@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // The resource network represent a network inside the cloud
@@ -19,12 +19,13 @@ func resourceNetwork() *schema.Resource {
 				Description:  "Name for the network",
 				ValidateFunc: validateName,
 			},
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Name of the region",
+			},
 			// Computed resource
 			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -52,6 +53,11 @@ func resourceNetwork() *schema.Resource {
 func resourceNetworkCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
 	network, err := apiClient.NewNetwork(d.Get("label").(string))
 	if err != nil {
@@ -66,6 +72,11 @@ func resourceNetworkCreate(d *schema.ResourceData, m interface{}) error {
 // function to read a network
 func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	CurrentNetwork := civogo.Network{}
 
@@ -87,7 +98,6 @@ func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", CurrentNetwork.Name)
-	d.Set("region", CurrentNetwork.Region)
 	d.Set("default", CurrentNetwork.Default)
 	d.Set("cidr", CurrentNetwork.CIDR)
 	d.Set("label", CurrentNetwork.Label)
@@ -98,6 +108,11 @@ func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 // function to update the network
 func resourceNetworkUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	if d.HasChange("label") {
 		log.Printf("[INFO] updating the network %s", d.Id())
@@ -113,6 +128,11 @@ func resourceNetworkUpdate(d *schema.ResourceData, m interface{}) error {
 // function to delete a network
 func resourceNetworkDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	log.Printf("[INFO] deleting the network %s", d.Id())
 	_, err := apiClient.DeleteNetwork(d.Id())

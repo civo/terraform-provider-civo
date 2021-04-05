@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Data source to get from the api a specific domain
@@ -26,6 +26,11 @@ func dataSourceVolume() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
 				ExactlyOneOf: []string{"id", "name"},
+			},
+			"region": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.NoZeroValues,
 			},
 			// Computed resource
 			"size_gb": {
@@ -50,6 +55,11 @@ func dataSourceVolume() *schema.Resource {
 
 func dataSourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	var foundVolume *civogo.Volume
 

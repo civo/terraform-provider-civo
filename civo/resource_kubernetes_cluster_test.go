@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
@@ -183,7 +183,7 @@ func testAccCheckCivoKubernetesClusterResourceExists(n string, kubernetes *civog
 
 		// retrieve the configured client from the test setup
 		client := testAccProvider.Meta().(*civogo.Client)
-		resp, err := client.GetKubernetesClusters(rs.Primary.ID)
+		resp, err := client.GetKubernetesCluster(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Kuberenetes Cluster not found: (%s) %s", rs.Primary.ID, err)
 		}

@@ -4,18 +4,24 @@ import (
 	"fmt"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	_ "github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider Civo cloud provider
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_TOKEN", ""),
+			},
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				DefaultFunc: schema.EnvDefaultFunc("CIVO_REGION", ""),
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -32,6 +38,7 @@ func Provider() terraform.ResourceProvider {
 			"civo_loadbalancer":       dataSourceLoadBalancer(),
 			"civo_ssh_key":            dataSourceSSHKey(),
 			"civo_snapshot":           dataSourceSnapshot(),
+			"civo_region":             dataSourceRegion(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"civo_instance":           resourceInstance(),
@@ -54,11 +61,22 @@ func Provider() terraform.ResourceProvider {
 
 // Provider configuration
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	if token, ok := d.GetOk("token"); ok {
-		client, _ := civogo.NewClient(token.(string))
-		return client, nil
+	var regionValue, tokenValue string
+
+	if region, ok := d.GetOk("region"); ok {
+		regionValue = region.(string)
 	}
 
-	return nil, fmt.Errorf("[ERR] token not found")
+	if token, ok := d.GetOk("token"); ok {
+		tokenValue = token.(string)
+	} else {
+		return nil, fmt.Errorf("[ERR] token not found")
+	}
+
+	client, err := civogo.NewClient(tokenValue, regionValue)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 
 }

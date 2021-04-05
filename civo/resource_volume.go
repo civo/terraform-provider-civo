@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Volume resource, with this we can create and manage all volume
@@ -29,6 +29,11 @@ func resourceVolume() *schema.Resource {
 				Type:        schema.TypeBool,
 				Required:    true,
 				Description: "Mark the volume as bootable",
+			},
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The region for the volume",
 			},
 			// Computed resource
 			"mount_point": {
@@ -55,6 +60,11 @@ func resourceVolume() *schema.Resource {
 func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] configuring the volume %s", d.Get("name").(string))
 	config := &civogo.VolumeConfig{Name: d.Get("name").(string), SizeGigabytes: d.Get("size_gb").(int), Bootable: d.Get("bootable").(bool)}
 
@@ -71,6 +81,11 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 // function to read the volume
 func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	log.Printf("[INFO] retrieving the volume %s", d.Id())
 	resp, err := apiClient.FindVolume(d.Id())
@@ -94,6 +109,11 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 // function to update the volume
 func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	log.Printf("[INFO] retrieving the volume %s", d.Id())
 	resp, err := apiClient.FindVolume(d.Id())
@@ -139,6 +159,11 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 // function to delete the volume
 func resourceVolumeDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	log.Printf("[INFO] deleting the volume %s", d.Id())
 	_, err := apiClient.DeleteVolume(d.Id())

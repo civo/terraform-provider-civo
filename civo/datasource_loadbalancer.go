@@ -2,10 +2,11 @@ package civo
 
 import (
 	"fmt"
-	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
+
+	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Data source to get from the api a specific Load Balancer
@@ -25,6 +26,11 @@ func dataSourceLoadBalancer() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
 				ExactlyOneOf: []string{"id", "hostname"},
+			},
+			"region": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.NoZeroValues,
 			},
 			// Computed resource
 			"protocol": {
@@ -93,6 +99,11 @@ func dataSourceLoadBalancer() *schema.Resource {
 
 func dataSourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	var searchBy string
 

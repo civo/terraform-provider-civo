@@ -25,6 +25,7 @@ For example to find all instances with size `g2.small`:
 
 ```hcl
 data "civo_instances" "small-size" {
+    region = "NYC1"
     filter {
         key = "size"
         values = [g2.small]
@@ -58,6 +59,7 @@ data "civo_instances_size" "small" {
 }
 
 data "civo_instances" "small-with-backups" {
+  region = "SVG1"
   filter {
     key = "size"
     values = [element(data.civo_instances_size.small.sizes, 0).name]
@@ -71,12 +73,9 @@ data "civo_instances" "small-with-backups" {
 
 
 ## Argument Reference
-
-* `filter` - (Optional) Filter the results.
-  The `filter` block is documented below.
-
-* `sort` - (Optional) Sort the results.
-  The `sort` block is documented below.
+* `region` - (Optional) If is used, them all instances will be from that region.
+* `filter` - (Optional) Filter the results. The `filter` block is documented below.
+* `sort` - (Optional) Sort the results. The `sort` block is documented below.
 
 `filter` supports the following arguments:
 

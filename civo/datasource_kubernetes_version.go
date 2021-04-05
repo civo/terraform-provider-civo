@@ -2,9 +2,10 @@ package civo
 
 import (
 	"fmt"
+
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Data source to get and filter all kubernetes version
@@ -12,33 +13,7 @@ import (
 // moment of the cluster creation in resourceKubernetesCluster
 func dataSourceKubernetesVersion() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
-		RecordSchema: map[string]*schema.Schema{
-			"version": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"label": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"type": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"default": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-		},
-		FilterKeys: []string{
-			"version",
-			"label",
-			"type",
-			"default",
-		},
-		SortKeys: []string{
-			"version",
-		},
+		RecordSchema:        KubernetesVersionSchema(),
 		ResultAttributeName: "versions",
 		FlattenRecord:       flattenKubernetesVersion,
 		GetRecords:          getKubernetesVersions,
@@ -47,7 +22,7 @@ func dataSourceKubernetesVersion() *schema.Resource {
 	return datalist.NewResource(dataListConfig)
 }
 
-func getKubernetesVersions(m interface{}) ([]interface{}, error) {
+func getKubernetesVersions(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
 	versions := []interface{}{}
@@ -63,7 +38,7 @@ func getKubernetesVersions(m interface{}) ([]interface{}, error) {
 	return versions, nil
 }
 
-func flattenKubernetesVersion(version, m interface{}) (map[string]interface{}, error) {
+func flattenKubernetesVersion(version, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
 
 	s := version.(civogo.KubernetesVersion)
 
@@ -73,4 +48,26 @@ func flattenKubernetesVersion(version, m interface{}) (map[string]interface{}, e
 	flattenedVersion["type"] = s.Type
 	flattenedVersion["default"] = s.Default
 	return flattenedVersion, nil
+}
+
+func KubernetesVersionSchema() map[string]*schema.Schema {
+
+	return map[string]*schema.Schema{
+		"version": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"label": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"type": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"default": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+	}
 }

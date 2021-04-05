@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Data source to get from the api a specific instance
@@ -26,6 +26,11 @@ func dataSourceInstance() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
 				ExactlyOneOf: []string{"id", "hostname"},
+			},
+			"region": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.NoZeroValues,
 			},
 			// computed attributes
 			"reverse_dns": {
@@ -112,6 +117,11 @@ func dataSourceInstance() *schema.Resource {
 func dataSourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	var foundImage *civogo.Instance
 
 	if id, ok := d.GetOk("id"); ok {
@@ -147,6 +157,7 @@ func dataSourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("public_ip", foundImage.PublicIP)
 	d.Set("pseudo_ip", foundImage.PseudoIP)
 	d.Set("status", foundImage.Status)
+	d.Set("region", apiClient.Region)
 	d.Set("script", foundImage.Script)
 	d.Set("created_at", foundImage.CreatedAt.UTC().String())
 	d.Set("notes", foundImage.Notes)

@@ -7,8 +7,8 @@ import (
 
 	"github.com/civo/civogo"
 	"github.com/gorhill/cronexpr"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Data source to get from the api a specific snapshot
