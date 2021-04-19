@@ -15,7 +15,7 @@ func dataSourceInstances() *schema.Resource {
 		ExtraQuerySchema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
 			},
 		},
 		ResultAttributeName: "instances",
@@ -31,14 +31,19 @@ func getDataSourceInstances(m interface{}, extra map[string]interface{}) ([]inte
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
-	if region, ok := extra["region"]; ok {
-		apiClient.Region = region.(string)
+	region, ok := extra["region"].(string)
+	if !ok {
+		return nil, fmt.Errorf("unable to find `region` key from query data")
 	}
 
-	instance := []interface{}{}
+	if region != "" {
+		apiClient.Region = region
+	}
+
+	var instance []interface{}
 	partialInstances, err := apiClient.ListInstances(1, 200)
 	if err != nil {
-		return nil, fmt.Errorf("[ERR] error retrieving sizes: %s", err)
+		return nil, fmt.Errorf("[ERR] error retrieving instances: %s", err)
 	}
 
 	for _, partialInstance := range partialInstances.Items {
@@ -50,11 +55,17 @@ func getDataSourceInstances(m interface{}, extra map[string]interface{}) ([]inte
 
 func flattenDataSourceInstances(instance, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
 
+	region, ok := extra["region"].(string)
+	if !ok {
+		return nil, fmt.Errorf("unable to find `region` key from query data")
+	}
+
 	i := instance.(civogo.Instance)
 
 	flattenedInstance := map[string]interface{}{}
 	flattenedInstance["id"] = i.ID
 	flattenedInstance["hostname"] = i.Hostname
+	flattenedInstance["region"] = region
 	flattenedInstance["reverse_dns"] = i.ReverseDNS
 	flattenedInstance["size"] = i.Size
 	flattenedInstance["cpu_cores"] = i.CPUCores
@@ -81,93 +92,93 @@ func flattenDataSourceInstances(instance, m interface{}, extra map[string]interf
 func instancesSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "id of the instance",
 		},
 		"hostname": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "hostname of the instance",
 		},
 		"region": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "region of the instance",
 		},
 		"reverse_dns": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "reverse DNS of the instance",
 		},
 		"size": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "size of the instance",
 		},
 		"cpu_cores": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Description: "CPU of the instance",
 		},
 		"ram_mb": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Description: "RAM of the instance",
 		},
 		"disk_gb": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Description: "SSD of the instance",
 		},
 		"network_id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "netwoerk id of the instance",
 		},
 		"template": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "template of the instance",
 		},
 		"initial_user": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "initial user of the instance",
 		},
 		"notes": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "note of the instance",
 		},
 		"sshkey_id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "sshkey id of the instance",
 		},
 		"firewall_id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "firewall id of the instance",
 		},
 		"tags": {
-			Type:     schema.TypeSet,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Computed: true,
+			Type:        schema.TypeSet,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Description: "tags of the instance",
 		},
 		"script": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "script of the instance",
 		},
 		"initial_password": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "initial password of the instance",
 		},
 		"private_ip": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "private ip of the instance",
 		},
 		"public_ip": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "public ip of the instance",
 		},
 		"pseudo_ip": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "pseudo ip of the instance",
 		},
 		"status": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "status of the instance",
 		},
 		"created_at": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Description: "creation date of the instance",
 		},
 	}
 }

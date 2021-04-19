@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataSourceCivoTemplate_basic(t *testing.T) {
@@ -110,19 +110,19 @@ func testAccCheckDataSourceCivoTemplatesFiltered(n string) resource.TestCheckFun
 }
 
 func testAccDataSourceCivoTemplatesConfig() string {
-	return fmt.Sprintf(`
+	return `
 data "civo_template" "foobar" {
 }
-`)
+`
 }
 
 func testAccDataSourceCivoTemplatesConfigWhitFilter() string {
-	return fmt.Sprintf(`
+	return `
 data "civo_template" "foobar" {
 	filter {
         key = "code"
         values = ["debian"]
    }
 }
-`)
+`
 }

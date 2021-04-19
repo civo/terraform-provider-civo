@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataSourceCivoKubernetesVersion_basic(t *testing.T) {
@@ -106,19 +106,19 @@ func testAccCheckDataSourceCivoKubernetesVersionFiltered(n string) resource.Test
 }
 
 func testAccDataSourceCivoKubernetesVersionConfig() string {
-	return fmt.Sprintf(`
+	return `
 data "civo_kubernetes_version" "foobar" {
 }
-`)
+`
 }
 
 func testAccDataSourceCivoKubernetesVersionConfigWhitFilter() string {
-	return fmt.Sprintf(`
+	return `
 data "civo_kubernetes_version" "foobar" {
 	filter {
         key = "type"
         values = ["stable"]
 	}
 }
-`)
+`
 }

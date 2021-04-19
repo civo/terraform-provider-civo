@@ -204,7 +204,7 @@ func testAccCheckCivoKubernetesClusterDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.GetKubernetesClusters(rs.Primary.ID)
+		_, err := client.GetKubernetesCluster(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("Kubernetes Cluster still exists")
 		}

@@ -73,6 +73,7 @@ func resourceFirewallRule() *schema.Resource {
 			"region": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				Description:  "The region for this rule",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},

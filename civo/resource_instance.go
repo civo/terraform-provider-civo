@@ -1,6 +1,7 @@
 package civo
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -14,7 +15,6 @@ import (
 // The instance resource represents an object of type instances
 // and with it you can handle the instances created with Terraform
 func resourceInstance() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -134,7 +134,7 @@ func resourceInstance() *schema.Resource {
 		Update: resourceInstanceUpdate,
 		Delete: resourceInstanceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }
@@ -205,7 +205,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(instance.ID)
 
 	// retry to wait the instances is ready
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+	return resource.RetryContext(context.Background(), d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		resp, err := apiClient.GetInstance(instance.ID)
 		if err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error geting instance: %s", err))
@@ -314,7 +314,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 			return fmt.Errorf("[WARN] An error occurred while resizing the instance %s", d.Id())
 		}
 
-		return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		return resource.RetryContext(context.Background(), d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 			resp, err := apiClient.GetInstance(d.Id())
 
 			if err != nil {

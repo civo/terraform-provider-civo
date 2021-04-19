@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/civo/civogo"
-	_ "github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	_ "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // Provider Civo cloud provider

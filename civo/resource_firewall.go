@@ -32,7 +32,7 @@ func resourceFirewall() *schema.Resource {
 		Update: resourceFirewallUpdate,
 		Delete: resourceFirewallDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }

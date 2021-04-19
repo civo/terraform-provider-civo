@@ -1,13 +1,17 @@
 package civo
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/civo/civogo"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Kubernetes Cluster resource, with this you can manage all cluster from terraform
@@ -20,17 +24,28 @@ func resourceKubernetesCluster() *schema.Resource {
 				Description:  "a name for your cluster, must be unique within your account (required)",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The region for the cluster, if not declare we use the region in declared in the provider",
+			},
+			"network_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The network for the cluster, if not declare we use the default one",
+			},
 			"num_target_nodes": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     3,
+				Computed:    true,
 				Description: "the number of instances to create (optional, the default at the time of writing is 3)",
 			},
 			"target_nodes_size": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "g2.small",
-				Description: "the size of each node (optional, the default is currently g2.small)",
+				Computed:    true,
+				Description: "the size of each node (optional, the default is currently g2.k3s.medium)",
 			},
 			"kubernetes_version": {
 				Type:        schema.TypeString,
@@ -91,7 +106,7 @@ func resourceKubernetesCluster() *schema.Resource {
 		Update: resourceKubernetesClusterUpdate,
 		Delete: resourceKubernetesClusterDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }
@@ -185,14 +200,38 @@ func applicationSchema() *schema.Schema {
 func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] configuring a new kubernetes cluster %s", d.Get("name").(string))
 	config := &civogo.KubernetesClusterConfig{
-		Name:            d.Get("name").(string),
-		TargetNodesSize: d.Get("target_nodes_size").(string),
+		Name:        d.Get("name").(string),
+		Region:      apiClient.Region,
+		NodeDestroy: "",
+	}
+
+	if networtID, ok := d.GetOk("network_id"); ok {
+		config.NetworkID = networtID.(string)
+	} else {
+		defaultNetwork, err := apiClient.GetDefaultNetwork()
+		if err != nil {
+			return fmt.Errorf("[ERR] failed to get the default network: %s", err)
+		}
+		config.NetworkID = defaultNetwork.ID
 	}
 
 	if attr, ok := d.GetOk("num_target_nodes"); ok {
 		config.NumTargetNodes = attr.(int)
+	} else {
+		config.NumTargetNodes = 3
+	}
+
+	if attr, ok := d.GetOk("target_nodes_size"); ok {
+		config.TargetNodesSize = attr.(string)
+	} else {
+		config.TargetNodesSize = "g3.k3s.small"
 	}
 
 	if attr, ok := d.GetOk("kubernetes_version"); ok {
@@ -201,13 +240,18 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 
 	if attr, ok := d.GetOk("tags"); ok {
 		config.Tags = attr.(string)
+	} else {
+		config.Tags = ""
 	}
 
 	if attr, ok := d.GetOk("applications"); ok {
 		config.Applications = attr.(string)
+	} else {
+		config.Applications = ""
 	}
 
 	log.Printf("[INFO] creating a new kubernetes cluster %s", d.Get("name").(string))
+	log.Printf("[INFO] kubernertes config %+v", config)
 	resp, err := apiClient.NewKubernetesClusters(config)
 	if err != nil {
 		return fmt.Errorf("[ERR] failed to create the kubernetes cluster: %s", err)
@@ -215,26 +259,41 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 
 	d.SetId(resp.ID)
 
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		resp, err := apiClient.FindKubernetesCluster(d.Id())
-		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("[ERR] error geting kubernetes cluster: %s", err))
-		}
+	createStateConf := &resource.StateChangeConf{
+		Pending: []string{"false"},
+		Target:  []string{"true"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.GetKubernetesCluster(d.Id())
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, strconv.FormatBool(resp.Ready), nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err = createStateConf.WaitForStateContext(context.Background())
+	if err != nil {
+		return fmt.Errorf("error waiting for cluster (%s) to be created: %s", d.Id(), err)
+	}
 
-		if resp.Ready != true {
-			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernetes cluster to be created but the status is %s", resp.Status))
-		}
+	return resourceKubernetesClusterRead(d, m)
 
-		return resource.NonRetryableError(resourceKubernetesClusterRead(d, m))
-	})
 }
 
 // function to read the kubernetes cluster
 func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] retrieving the kubernetes cluster %s", d.Id())
-	resp, err := apiClient.FindKubernetesCluster(d.Id())
+	resp, err := apiClient.GetKubernetesCluster(d.Id())
 	if err != nil {
 		if resp == nil {
 			d.SetId("")
@@ -244,10 +303,12 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	d.Set("name", resp.Name)
+	d.Set("region", apiClient.Region)
+	d.Set("network_id", resp.NetworkID)
 	d.Set("num_target_nodes", resp.NumTargetNode)
 	d.Set("target_nodes_size", resp.TargetNodeSize)
 	d.Set("kubernetes_version", resp.KubernetesVersion)
-	d.Set("tags", resp.Tags)
+	d.Set("tags", strings.Join(resp.Tags, ", "))
 	d.Set("status", resp.Status)
 	d.Set("ready", resp.Ready)
 	d.Set("kubeconfig", resp.KubeConfig)
@@ -272,14 +333,31 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	config := &civogo.KubernetesClusterConfig{}
 
-	if d.HasChange("num_target_nodes") || d.HasChange("kubernetes_version") || d.HasChange("applications") || d.HasChange("name") {
-		config.Name = d.Get("name").(string)
+	if d.HasChange("num_target_nodes") {
 		config.NumTargetNodes = d.Get("num_target_nodes").(int)
-		config.KubernetesVersion = d.Get("kubernetes_version").(string)
+		config.Region = apiClient.Region
+	}
 
+	if d.HasChange("kubernetes_version") {
+		config.KubernetesVersion = d.Get("kubernetes_version").(string)
+		config.Region = apiClient.Region
+	}
+
+	if d.HasChange("applications") {
 		config.Applications = d.Get("applications").(string)
+		config.Region = apiClient.Region
+	}
+
+	if d.HasChange("name") {
+		config.Applications = d.Get("name").(string)
+		config.Region = apiClient.Region
 	}
 
 	if d.HasChange("tags") {
@@ -292,23 +370,37 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
-	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		resp, err := apiClient.FindKubernetesCluster(d.Id())
-		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("[ERR] error geting kubernetes cluster: %s", err))
-		}
+	createStateConf := &resource.StateChangeConf{
+		Pending: []string{"SCALING"},
+		Target:  []string{"ACTIVE"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.GetKubernetesCluster(d.Id())
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, resp.Status, nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err = createStateConf.WaitForStateContext(context.Background())
+	if err != nil {
+		return fmt.Errorf("error waiting for cluster (%s) to be created: %s", d.Id(), err)
+	}
 
-		if resp.Status != "ACTIVE" {
-			return resource.RetryableError(fmt.Errorf("[ERR] waiting for the kubernetes cluster to be updated but the status is %s", resp.Status))
-		}
-
-		return resource.NonRetryableError(resourceKubernetesClusterRead(d, m))
-	})
+	return resourceKubernetesClusterRead(d, m)
 }
 
 // function to delete the kubernetes cluster
 func resourceKubernetesClusterDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
 	_, err := apiClient.DeleteKubernetesCluster(d.Id())
@@ -356,7 +448,7 @@ func flattenInstalledApplication(apps []civogo.KubernetesInstalledApplication) [
 	flattenedInstalledApplication := make([]interface{}, 0)
 	for _, app := range apps {
 		rawInstalledApplication := map[string]interface{}{
-			"application": app.Application,
+			"application": app.Name,
 			"version":     app.Version,
 			"installed":   app.Installed,
 			"category":    app.Category,

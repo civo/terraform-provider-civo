@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataSourceCivoInstanceSize_basic(t *testing.T) {
@@ -101,7 +101,7 @@ func testAccCheckDataSourceCivoInstanceSizeFilteredAndSorted(n string) resource.
 			}
 
 			CPUCore, _ := strconv.ParseFloat(rs.Primary.Attributes[fmt.Sprintf("sizes.%d.cpu_cores", i)], 64)
-			if prevCPUCore > 0 && prevCPUCore < prevCPUCore {
+			if prevCPUCore > 0 {
 				return fmt.Errorf("Sizes is not sorted by CPU Core in descending order")
 			}
 			prevCPUCore = CPUCore
@@ -113,14 +113,14 @@ func testAccCheckDataSourceCivoInstanceSizeFilteredAndSorted(n string) resource.
 }
 
 func testAccDataSourceCivoInstanceSizeConfig() string {
-	return fmt.Sprintf(`
+	return `
 data "civo_instances_size" "foobar" {
 }
-`)
+`
 }
 
 func testAccDataSourceCivoInstanceSizeConfigWhitFilterAndSort() string {
-	return fmt.Sprintf(`
+	return `
 data "civo_instances_size" "foobar" {
 	filter {
         key = "name"
@@ -132,5 +132,5 @@ data "civo_instances_size" "foobar" {
         direction = "desc"
     }
 }
-`)
+`
 }
