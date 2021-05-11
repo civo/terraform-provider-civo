@@ -2,11 +2,23 @@ package civo
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+// SizeList is a temporal struct to save all size
+type SizeList struct {
+	Name        string
+	Description string
+	Type        string
+	CPU         int
+	RAM         int
+	DisK        int
+	Selectable  bool
+}
 
 // Data source to get and filter all instances size
 // use to define the size in resourceInstance
@@ -31,7 +43,32 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 		return nil, fmt.Errorf("[ERR] error retrieving sizes: %s", err)
 	}
 
-	for _, partialSize := range partialSizes {
+	sizeList := []SizeList{}
+
+	for _, v := range partialSizes {
+		typeName := ""
+
+		switch {
+		case strings.Contains(v.Name, "db"):
+			typeName = "database"
+		case strings.Contains(v.Name, "k3s"):
+			typeName = "kubernetes"
+		default:
+			typeName = "instance"
+		}
+
+		sizeList = append(sizeList, SizeList{
+			Name:        v.Name,
+			Description: v.Description,
+			Type:        typeName,
+			CPU:         v.CPUCores,
+			RAM:         v.RAMMegabytes,
+			DisK:        v.DiskGigabytes,
+			Selectable:  v.Selectable,
+		})
+	}
+
+	for _, partialSize := range sizeList {
 		sizes = append(sizes, partialSize)
 	}
 
@@ -40,14 +77,14 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 
 func flattenInstancesSize(size, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
 
-	s := size.(civogo.InstanceSize)
+	s := size.(SizeList)
 
 	flattenedSize := map[string]interface{}{}
 	flattenedSize["name"] = s.Name
-	flattenedSize["nice_name"] = s.NiceName
-	flattenedSize["cpu_cores"] = s.CPUCores
-	flattenedSize["ram_mb"] = s.RAMMegabytes
-	flattenedSize["disk_gb"] = s.DiskGigabytes
+	flattenedSize["type"] = s.Type
+	flattenedSize["cpu"] = s.CPU
+	flattenedSize["ram"] = s.RAM
+	flattenedSize["disk"] = s.DisK
 	flattenedSize["description"] = s.Description
 	flattenedSize["selectable"] = s.Selectable
 
@@ -60,19 +97,19 @@ func instancesSizeSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
-		"nice_name": {
+		"type": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
-		"cpu_cores": {
+		"cpu": {
 			Type:     schema.TypeInt,
 			Computed: true,
 		},
-		"ram_mb": {
+		"ram": {
 			Type:     schema.TypeInt,
 			Computed: true,
 		},
-		"disk_gb": {
+		"disk": {
 			Type:     schema.TypeInt,
 			Computed: true,
 		},

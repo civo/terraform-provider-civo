@@ -24,10 +24,22 @@ resource "civo_instance" "my-test-instance" {
 }
 ```
 
+```hcl
+# Create a new Web instances in a expecific region
+resource "civo_instance" "my-test-instance" {
+    region = "LON1"
+    hostname = "foo.com"
+    tags = ["python", "nginx"]
+    notes = "this is a note for the server"
+    size = element(data.civo_instances_size.small.sizes, 0).name
+    template = element(data.civo_template.debian.templates, 0).id
+}
+```
 ## Argument Reference
 
 The following arguments are supported:
 
+* `region` - (Optional) The region for the instance, if not declare we use the region in declared in the provider.
 * `hostname` - (Required) The Instance hostname.
 * `reverse_dns` - (Optional) A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified).
 * `size` - (Optional) The name of the size, from the current list, e.g. g2.small (required).

@@ -30,6 +30,7 @@ The cluster's kubeconfig is exported as an attribute allowing you to use it with
 
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
+    region = "NYC1"
     applications = "Portainer, Traefik"
     num_target_nodes = 4
     target_nodes_size = element(data.civo_instances_size.small.sizes, 0).name
@@ -51,6 +52,7 @@ provider "kubernetes" {
 The following arguments are supported:
 
 * `name` - (Required) A name for the Kubernetes cluster.
+* `region` - (Optional) The region for the cluster.
 * `num_target_nodes` - (Optional) The number of instances to create (The default at the time of writing is 3).
 * `target_nodes_size` - (Optional) The size of each node (The default is currently g2.small)
 * `kubernetes_version` - (Optional) The version of k3s to install (The default is currently the latest available).
@@ -68,18 +70,26 @@ In addition to the arguments listed above, the following additional attributes a
 * `kubernetes_version` - The version of Kubernetes.
 * `tags` - A list of tags.
 * `applications` - A list of application installed.
-* `instances` - In addition to the arguments provided, these additional attributes about the cluster's default node instance are exported.
+* `instances` - In addition to the arguments provided, these additional attributes about the cluster's default node instance are exported:
     - `hostname` - The hostname of the instance.
-    - `size` - The size of the instance.
     - `cpu_cores` - Total cpu of the inatance.
-    - `ram_mb` - Total ram of the instance.
+    - `ram_mb` - Total ram of the instance
     - `disk_gb` - The size of the disk.
-    - `region` - The region where instance are.
     - `status` - The status of the instance.
-    - `created_at` - The date where the instances was created.
-    - `firewall_id` - The firewall id assigned to the instance
-    - `public_ip` - The public ip of the instances, only available if the instances is the master
     - `tags` - The tag of the instances
+* `pools` - A list of node pools associated with the cluster. Each node pool exports the following attributes:
+    - `id` - The ID of the pool
+    - `count` - The size of the pool
+    - `size` - The size of each node inside the pool
+    - `instance_names` - A list of the instance in the pool
+    * `instances` - A list of instance inside the pool
+        - `hostname` - The hostname of the instance.
+        - `size` - The size of the instance.
+        - `cpu_cores` - Total cpu of the inatance.
+        - `ram_mb` - Total ram of the instance
+        - `disk_gb` - The size of the disk.
+        - `status` - The status of the instance.
+        - `tags` - The tag of the instances 
 * `installed_applications` - A unique ID that can be used to identify and reference a Kubernetes cluster.
     - `application` - The name of the application
     - `version` - The version of the application

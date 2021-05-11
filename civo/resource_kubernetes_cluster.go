@@ -27,6 +27,7 @@ func resourceKubernetesCluster() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The region for the cluster, if not declare we use the region in declared in the provider",
 			},
 			"network_id": {
@@ -68,6 +69,7 @@ func resourceKubernetesCluster() *schema.Resource {
 			// Computed resource
 			"instances":              instanceSchema(),
 			"installed_applications": applicationSchema(),
+			"pools":                  nodePoolSchema(),
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -138,23 +140,7 @@ func instanceSchema() *schema.Schema {
 					Type:     schema.TypeInt,
 					Computed: true,
 				},
-				"region": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
 				"status": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
-				"created_at": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
-				"firewall_id": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
-				"public_ip": {
 					Type:     schema.TypeString,
 					Computed: true,
 				},
@@ -163,6 +149,36 @@ func instanceSchema() *schema.Schema {
 					Computed: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 				},
+			},
+		},
+	}
+}
+
+// schema for the node pool in the cluster
+func nodePoolSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"count": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
+				"size": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"instance_names": {
+					Type:     schema.TypeSet,
+					Computed: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+				"instances": instanceSchema(),
 			},
 		},
 	}
@@ -322,6 +338,10 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
 	}
 
+	if err := d.Set("pools", flattenNodePool(resp)); err != nil {
+		return fmt.Errorf("[ERR] error retrieving the pool for kubernetes cluster error: %#v", err)
+	}
+
 	if err := d.Set("installed_applications", flattenInstalledApplication(resp.InstalledApplications)); err != nil {
 		return fmt.Errorf("[ERR] error retrieving the installed application for kubernetes cluster error: %#v", err)
 	}
@@ -420,23 +440,58 @@ func flattenInstances(instances []civogo.KubernetesInstance) []interface{} {
 	flattenedInstances := make([]interface{}, 0)
 	for _, instance := range instances {
 		rawInstance := map[string]interface{}{
-			"hostname":    instance.Hostname,
-			"size":        instance.Size,
-			"cpu_cores":   instance.CPUCores,
-			"ram_mb":      instance.RAMMegabytes,
-			"disk_gb":     instance.DiskGigabytes,
-			"region":      instance.Region,
-			"status":      instance.Status,
-			"firewall_id": instance.FirewallID,
-			"public_ip":   instance.PublicIP,
-			"tags":        instance.Tags,
-			"created_at":  instance.CreatedAt.UTC().String(),
+			"hostname":  instance.Hostname,
+			"cpu_cores": instance.CPUCores,
+			"ram_mb":    instance.RAMMegabytes,
+			"disk_gb":   instance.DiskGigabytes,
+			"status":    instance.Status,
 		}
 
 		flattenedInstances = append(flattenedInstances, rawInstance)
 	}
 
 	return flattenedInstances
+}
+
+// function to flatten all instances inside the cluster
+func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
+	if cluster.Pools == nil {
+		return nil
+	}
+
+	flattenedPool := make([]interface{}, 0)
+	for _, pool := range cluster.Pools {
+		flattenedPoolInstance := make([]interface{}, 0)
+		for _, v := range pool.Instances {
+
+			instanceData := searchInstance(cluster.Instances, v.Hostname)
+
+			rawPoolInstance := map[string]interface{}{
+				"hostname":  v.Hostname,
+				"size":      pool.Size,
+				"cpu_cores": instanceData.CPUCores,
+				"ram_mb":    instanceData.RAMMegabytes,
+				"disk_gb":   instanceData.DiskGigabytes,
+				"status":    v.Status,
+				"tags":      v.Tags,
+			}
+			flattenedPoolInstance = append(flattenedPoolInstance, rawPoolInstance)
+		}
+
+		instanceName := append(pool.InstanceNames, pool.InstanceNames...)
+
+		rawPool := map[string]interface{}{
+			"id":             pool.ID,
+			"count":          pool.Count,
+			"size":           pool.Size,
+			"instance_names": instanceName,
+			"instances":      flattenedPoolInstance,
+		}
+
+		flattenedPool = append(flattenedPool, rawPool)
+	}
+
+	return flattenedPool
 }
 
 // function to flatten all applications inside the cluster
@@ -458,4 +513,13 @@ func flattenInstalledApplication(apps []civogo.KubernetesInstalledApplication) [
 	}
 
 	return flattenedInstalledApplication
+}
+
+func searchInstance(instanceList []civogo.KubernetesInstance, hostname string) civogo.KubernetesInstance {
+	for _, v := range instanceList {
+		if strings.Contains(v.Hostname, hostname) {
+			return v
+		}
+	}
+	return civogo.KubernetesInstance{}
 }

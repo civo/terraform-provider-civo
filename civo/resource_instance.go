@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -38,7 +39,7 @@ func resourceInstance() *schema.Resource {
 			"size": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "g2.xsmall",
+				Default:     "g3.xsmall",
 				Description: "The name of the size, from the current list, e.g. g2.small (required)",
 			},
 			"public_ip_required": {
@@ -50,6 +51,7 @@ func resourceInstance() *schema.Resource {
 			"network_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "This must be the ID of the network from the network listing (optional; default network used when not specified)",
 			},
 			"template": {
@@ -102,6 +104,14 @@ func resourceInstance() *schema.Resource {
 			},
 			"disk_gb": {
 				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"source_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"source_id": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"initial_password": {
@@ -168,12 +178,32 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		config.PublicIPRequired = attr.(string)
 	}
 
-	if attr, ok := d.GetOk("network_id"); ok {
-		config.NetworkID = attr.(string)
+	if networtID, ok := d.GetOk("network_id"); ok {
+		config.NetworkID = networtID.(string)
+	} else {
+		defaultNetwork, err := apiClient.GetDefaultNetwork()
+		if err != nil {
+			return fmt.Errorf("[ERR] failed to get the default network: %s", err)
+		}
+		config.NetworkID = defaultNetwork.ID
 	}
 
 	if attr, ok := d.GetOk("template"); ok {
-		config.TemplateID = attr.(string)
+		templateID := ""
+		if apiClient.Region == "SVG1" {
+			findTemplate, err := apiClient.FindTemplate(attr.(string))
+			if err != nil {
+				return fmt.Errorf("[ERR] failed to get the template: %s", err)
+			}
+			templateID = findTemplate.ID
+		} else {
+			findTemplate, err := apiClient.FindDiskImage(attr.(string))
+			if err != nil {
+				return fmt.Errorf("[ERR] failed to get the template: %s", err)
+			}
+			templateID = findTemplate.ID
+		}
+		config.TemplateID = templateID
 	}
 
 	if attr, ok := d.GetOk("initial_user"); ok {
@@ -204,42 +234,47 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(instance.ID)
 
-	// retry to wait the instances is ready
-	return resource.RetryContext(context.Background(), d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		resp, err := apiClient.GetInstance(instance.ID)
+	createStateConf := &resource.StateChangeConf{
+		Pending: []string{"BUILDING"},
+		Target:  []string{"ACTIVE"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.GetInstance(d.Id())
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, resp.Status, nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err = createStateConf.WaitForStateContext(context.Background())
+	if err != nil {
+		return fmt.Errorf("error waiting for instance (%s) to be created: %s", d.Id(), err)
+	}
+
+	if attr, ok := d.GetOk("firewall_id"); ok {
+		_, errInstance := apiClient.SetInstanceFirewall(d.Id(), attr.(string))
+		if errInstance != nil {
+			return fmt.Errorf("[ERR] updating instance firewall: %s", err)
+		}
+	}
+
+	if attr, ok := d.GetOk("notes"); ok {
+		resp, err := apiClient.GetInstance(d.Id())
 		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error geting instance: %s", err))
+			return fmt.Errorf("[ERR] getting instance: %s", err)
 		}
-
-		if resp.Status != "ACTIVE" {
-			return resource.RetryableError(fmt.Errorf("[ERR] expected instance to be created but was in state %s", resp.Status))
+		resp.Notes = attr.(string)
+		_, errInstance := apiClient.UpdateInstance(resp)
+		if errInstance != nil {
+			return fmt.Errorf("[ERR] updating instance notes: %s", err)
 		}
+	}
 
-		/*
-			Once the instance is created, we check if the object firewall_id,
-			if it is, then we set the firewall id to the instances
-		*/
-		if attr, ok := d.GetOk("firewall_id"); ok {
-			_, errInstance := apiClient.SetInstanceFirewall(instance.ID, attr.(string))
-			if errInstance != nil {
-				return resource.NonRetryableError(fmt.Errorf("[ERR] failed to set firewall to the instance: %s", errInstance))
-			}
-		}
+	return resourceInstanceRead(d, m)
 
-		/*
-			Once the instance is created, we check if the object notes,
-			if it is, then we add the note to the instances
-		*/
-		if attr, ok := d.GetOk("notes"); ok {
-			resp.Notes = attr.(string)
-			_, errInstance := apiClient.UpdateInstance(resp)
-			if errInstance != nil {
-				return resource.NonRetryableError(fmt.Errorf("[ERR] failed to set note to the instance: %s", errInstance))
-			}
-		}
-
-		return resource.NonRetryableError(resourceInstanceRead(d, m))
-	})
 }
 
 // function to read the instance
@@ -270,26 +305,22 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("disk_gb", resp.DiskGigabytes)
 	d.Set("initial_user", resp.InitialUser)
 	d.Set("initial_password", resp.InitialPassword)
+	d.Set("source_type", resp.SourceType)
+	d.Set("source_id", resp.SourceID)
 	d.Set("sshkey_id", resp.SSHKey)
 	d.Set("tags", resp.Tags)
 	d.Set("private_ip", resp.PrivateIP)
 	d.Set("public_ip", resp.PublicIP)
-	d.Set("pseudo_ip", resp.PseudoIP)
+	d.Set("network_id", resp.NetworkID)
+	d.Set("firewall_id", resp.FirewallID)
+	// d.Set("pseudo_ip", resp.PseudoIP)
 	d.Set("status", resp.Status)
 	d.Set("script", resp.Script)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 
-	if _, ok := d.GetOk("network_id"); ok {
-		d.Set("network_id", resp.NetworkID)
-	}
-
 	if _, ok := d.GetOk("template"); ok {
 		d.Set("template", resp.TemplateID)
-	}
-
-	if attr, ok := d.GetOk("firewall_id"); ok {
-		d.Set("firewall_id", attr.(string))
 	}
 
 	return nil

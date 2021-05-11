@@ -19,7 +19,8 @@ Most common usage will probably be to supply a size to instances:
 data "civo_instances_size" "small" {
     filter {
         key = "name"
-        values = ["g2.small"]
+        values = ["small"]
+        match_by = "re"
     }
 }
 
@@ -37,12 +38,12 @@ The data source also supports multiple filters and sorts. For example, to fetch 
 ```hcl
 data "civo_instances_size" "small" {
     filter {
-        key = "cpu_cores"
+        key = "cpu"
         values = [1,2]
     }
 
     sort {
-        key = "disk_gb"
+        key = "disk"
         direction = "desc"
     }
 
@@ -63,13 +64,13 @@ The data source can also handle multiple sorts. In which case, the sort will be 
 data "civo_instances_size" "main" {
   sort {
     // Sort by memory ascendingly
-    key       = "ram_mb"
+    key       = "ram"
     direction = "asc"
   }
 
   sort {
     // Then sort by disk descendingly for sizes with same memory
-    key       = "disk_gb"
+    key       = "disk"
     direction = "desc"
   }
 }
@@ -87,14 +88,14 @@ The following arguments are supported:
 `filter` supports the following arguments:
 
 * `key` - (Required) Filter the sizes by this key. This may be one of `name`,
-  `nice_name`, `cpu_cores`, `ram_mb`, `disk_gb`, `selectable`.
+  `type`, `cpu`, `ram`, `disk`, `selectable`.
 * `values` - (Required) Only retrieves images which keys has value that matches
   one of the values provided here.
 
 `sort` supports the following arguments:
 
-* `key` - (Required) Sort the sizes by this key. This may be one of `name`, 
-`nice_name`, `cpu_cores`, `ram_mb`, `disk_gb`, `selectable`.
+* `key` - (Required) Sort the sizes by this key. This may be one of `name`,
+  `type`, `cpu`, `ram`, `disk`, `selectable`.
 * `direction` - (Required) The sort direction. This may be either `asc` or `desc`.
 
 
@@ -103,9 +104,9 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `name`: The name of the instance size.
-* `nice_name`: A human name of the instance size.
-* `cpu_cores` - Total of CPU in the instance.
-* `ram_mb`: Total of RAM of the instance.
-* `disk_gb`: The instance size of SSD.
+* `type`: A human name of the instance size.
+* `cpu` - Total of CPU in the instance.
+* `ram`: Total of RAM of the instance.
+* `disk`: The instance size of SSD.
 * `description` - A description of the instance size.
 * `selectable`: If can use the instance size.

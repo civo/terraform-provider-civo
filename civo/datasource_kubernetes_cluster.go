@@ -55,6 +55,7 @@ func dataSourceKubernetesCluster() *schema.Resource {
 			},
 			"instances":              dataSourceInstanceSchema(),
 			"installed_applications": dataSourceApplicationSchema(),
+			"pools":                  dataSourcenodePoolSchema(),
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -118,23 +119,7 @@ func dataSourceInstanceSchema() *schema.Schema {
 					Type:     schema.TypeInt,
 					Computed: true,
 				},
-				"region": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
 				"status": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
-				"created_at": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
-				"firewall_id": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
-				"public_ip": {
 					Type:     schema.TypeString,
 					Computed: true,
 				},
@@ -143,6 +128,36 @@ func dataSourceInstanceSchema() *schema.Schema {
 					Computed: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 				},
+			},
+		},
+	}
+}
+
+// schema for the node pool in the cluster
+func dataSourcenodePoolSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"count": {
+					Type:     schema.TypeInt,
+					Computed: true,
+				},
+				"size": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"instance_names": {
+					Type:     schema.TypeSet,
+					Computed: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+				"instances": dataSourceInstanceSchema(),
 			},
 		},
 	}

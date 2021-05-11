@@ -32,6 +32,19 @@ resource "civo_instance" "web" {
 }
 ```
 
+```hcl
+# Configure the Civo Provider using region
+provider "civo" {
+  token = var.civo_token
+  region = "LON1"
+}
+
+# Create a web server
+resource "civo_instance" "web" {
+  # ...
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -39,3 +52,4 @@ The following arguments are supported:
 * `token` - (Optional) This is the Civo API token. Alternatively, this can also be specified
   using environment variables ordered by precedence:
   * `CIVO_TOKEN`
+* `region` - (Optional) If region is not set, then no region will be used and them you need expensify in every resource even if you expensify here you can overwrite in a resource.

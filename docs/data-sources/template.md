@@ -17,8 +17,8 @@ you need to utilize any of the image's data, with the ability to filter the resu
 ```hcl
 data "civo_template" "debian" {
    filter {
-        key = "code"
-        values = ["buster"]
+        key = "name"
+        values = ["debian-10"]
    }
 }
 
@@ -30,26 +30,46 @@ resource "civo_instance" "my-test-instance" {
     template = element(data.civo_template.debian.templates, 0).id
 }
 ```
+
+This filter will garatice to install the latest version of debian always
+
+```hcl
+data "civo_template" "debian" {
+   filter {
+        key = "name"
+        values = ["debian"]
+        match_by = "re"
+   }
+    sort {
+        key = "version"
+        direction = "asc"
+    }
+}
+
+resource "civo_instance" "foo-host" {
+    hostname = "foo.com"
+    size = element(data.civo_instances_size.small.sizes, 0).name
+    template = element(data.civo_template.debian.templates, 0).id
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `filter` - (Optional) Filter the results.
-  The `filter` block is documented below.
-* `sort` - (Optional) Sort the results.
-  The `sort` block is documented below.
+* `region` - (Optional) If is used, them all instances will be from that region.
+* `filter` - (Optional) Filter the results. The `filter` block is documented below.
+* `sort` - (Optional) Sort the results. The `sort` block is documented below.
 
 `filter` supports the following arguments:
 
-* `key` - (Required) Filter the sizes by this key. This may be one of `code`,
-  `name`.
+* `key` - (Required) Filter the sizes by this key. This may be one of `id`,`name`,`version`,`label`.
 * `values` - (Required) Only retrieves the template which keys has value that matches
   one of the values provided here.
 
 `sort` supports the following arguments:
 
-* `key` - (Required) Sort the sizes by this key. This may be one of `code`, 
-`name`.
+* `key` - (Required) Sort the sizes by this key. This may be one of `id`,`name`,`version`,`label`.
 * `direction` - (Required) The sort direction. This may be either `asc` or `desc`.
 
 
@@ -58,13 +78,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The id of the template
-* `code` - A unqiue, alphanumerical, short, human readable code for the template.
 * `name` - A short human readable name for the template
-* `volume_id` - The ID of a bootable volume, either owned by you or global.
-* `image_id` - The Image ID of any default template or the ID of another template.
-* `short_description` - A one line description of the template
-* `description` - A multi-line description of the template, in Markdown format
-* `default_username` - The default username to suggest that the user creates
-* `cloud_config` - Commonly referred to as 'user-data', this is a customisation script that is run after
-the instance is first booted.
+* `version` - The version of the template.
+* `label` - The label of the template.
 

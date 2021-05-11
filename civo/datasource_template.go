@@ -8,12 +8,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// TemplateDisk is a temporal struct to get all template in one place
+type TemplateDisk struct {
+	ID      string
+	Name    string
+	Version string
+	Label   string
+}
+
 // Data source to get from the api a specific template
 // using the code of the image
 func dataSourceTemplate() *schema.Resource {
 
 	dataListConfig := &datalist.ResourceConfig{
-		RecordSchema:        templateSchema(),
+		RecordSchema: templateSchema(),
+		ExtraQuerySchema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
 		ResultAttributeName: "templates",
 		FlattenRecord:       flattenTemplate,
 		GetRecords:          getTemplates,
@@ -26,13 +40,41 @@ func dataSourceTemplate() *schema.Resource {
 func getTemplates(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
-	templates := []interface{}{}
-	partialTemplates, err := apiClient.ListTemplates()
-	if err != nil {
-		return nil, fmt.Errorf("[ERR] error retrieving all templates: %s", err)
+	// overwrite the region if is define in the datasource
+	region, ok := extra["region"].(string)
+	if !ok {
+		return nil, fmt.Errorf("unable to find `region` key from query data")
 	}
 
-	for _, partialSize := range partialTemplates {
+	if region != "" {
+		apiClient.Region = region
+	}
+
+	templateDiskList := []TemplateDisk{}
+
+	if apiClient.Region == "SVG1" {
+		templates, err := apiClient.ListTemplates()
+		if err != nil {
+			return nil, fmt.Errorf("[ERR] error retrieving all templates: %s", err)
+		}
+
+		for _, v := range templates {
+			templateDiskList = append(templateDiskList, TemplateDisk{ID: v.ID, Name: v.Name, Version: v.Code, Label: v.ShortDescription})
+		}
+	} else {
+		diskImage, err := apiClient.ListDiskImages()
+		if err != nil {
+			return nil, fmt.Errorf("[ERR] error retrieving all Disk Images: %s", err)
+		}
+
+		for _, v := range diskImage {
+			templateDiskList = append(templateDiskList, TemplateDisk{ID: v.ID, Name: v.Name, Version: v.Version, Label: v.Label})
+		}
+
+	}
+
+	templates := []interface{}{}
+	for _, partialSize := range templateDiskList {
 		templates = append(templates, partialSize)
 	}
 
@@ -41,18 +83,13 @@ func getTemplates(m interface{}, extra map[string]interface{}) ([]interface{}, e
 
 func flattenTemplate(template, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
 
-	s := template.(civogo.Template)
+	s := template.(TemplateDisk)
 
 	flattenedTemplate := map[string]interface{}{}
 	flattenedTemplate["id"] = s.ID
-	flattenedTemplate["code"] = s.Code
 	flattenedTemplate["name"] = s.Name
-	flattenedTemplate["volume_id"] = s.VolumeID
-	flattenedTemplate["image_id"] = s.ImageID
-	flattenedTemplate["short_description"] = s.ShortDescription
-	flattenedTemplate["description"] = s.Description
-	flattenedTemplate["default_username"] = s.DefaultUsername
-	flattenedTemplate["cloud_config"] = s.CloudConfig
+	flattenedTemplate["version"] = s.Version
+	flattenedTemplate["label"] = s.Label
 
 	return flattenedTemplate, nil
 }
@@ -64,35 +101,15 @@ func templateSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
-		"code": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
 		"name": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
-		"volume_id": {
+		"version": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
-		"image_id": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"short_description": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"description": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"default_username": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"cloud_config": {
+		"label": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
