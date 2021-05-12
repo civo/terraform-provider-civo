@@ -19,9 +19,15 @@ Most common usage will probably be to supply a size to instances:
 data "civo_instances_size" "small" {
     filter {
         key = "name"
-        values = ["small"]
+        values = ["g3.small"]
         match_by = "re"
     }
+
+    filter {
+        key = "type"
+        values = ["instance"]
+    }
+
 }
 
 resource "civo_instance" "my-test-instance" {
