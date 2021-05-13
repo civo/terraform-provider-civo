@@ -42,7 +42,7 @@ The following arguments are supported:
 * `region` - (Optional) The region for the instance, if not declare we use the region in declared in the provider.
 * `hostname` - (Required) The Instance hostname.
 * `reverse_dns` - (Optional) A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified).
-* `size` - (Optional) The name of the size, from the current list, e.g. g2.small (required).
+* `size` - (Optional) The name of the size, from the current list, e.g. g3.k3s.small (required).
 * `public_ip_required` - (Optional) This should be either false, true or `move_ip_from:intances_id`.
 * `network_id` - (Optional) This must be the ID of the network from the network listing (optional; default network used when not specified).
 * `template` - (Optional) The ID for the template to use to build the instance.

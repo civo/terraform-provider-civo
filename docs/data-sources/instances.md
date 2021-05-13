@@ -21,14 +21,14 @@ about a single instance if you already know the `id`, unique `hostname`, or uniq
 
 Use the `filter` block with a `key` string and `values` list to filter images.
 
-For example to find all instances with size `g2.small`:
+For example to find all instances with size `g3.small`:
 
 ```hcl
 data "civo_instances" "small-size" {
     region = "NYC1"
     filter {
         key = "size"
-        values = [g2.small]
+        values = [g3.small]
     }
 }
 ```
@@ -39,7 +39,7 @@ You can filter and sort the results as well:
 data "civo_instances" "small-with-backups" {
   filter {
     key = "size"
-    values = [g2.small]
+    values = [g3.small]
   }
   sort {
     key = "created_at"
