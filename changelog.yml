@@ -1,3 +1,79 @@
+- semver: 0.10.1
+  date: 2021-05-13T09:22:01.510989-04:00
+  packager: ""
+  changes:
+  - commit: 7b4a6dfff18942c26fbba0b181c14c9befe6e2dd
+    note: |-
+      Updated the doc for some datasource and resource
+      close #34
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: 406bbea64f092c5823f71dd8ae1d3437ac975df9
+    note: Update the doc for datasource instance_size
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: dd2e51e5e7debd1a41e74857c8f6fbfdd88a900d
+    note: Cleaning the project
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: df85511383542282fafbfcc8c81004e93a0ab0a8
+    note: Addes more fix to the provider, updated the civogo lib
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: a049b432d99708fefd3af25910e0dc898d4f7898
+    note: Updated to v2 of the SDK of terraform and add support for muti region
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: 508fc6783f5c2d186cc2337a772bc587d5df3653
+    note: Updated to terraform sdk v2 and remove vendor folder
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: d3e176401b8ee703b8c5fba04bb8aae7e4659cd7
+    note: |-
+      Merge pull request #30 from AlexsJones/master
+
+      fix(spelling): resource_kubernetes_cluster.go kubernetes spelling
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandro@civo.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: a053b7c1a843d9d440d19a3b181b3f6b2a93e07d
+    note: |-
+      Merge pull request #27 from DoNnMyTh/patch-1
+
+      updated README.md
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandro@civo.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
 - semver: 0.9.23
   date: 2020-12-06T16:18:11.926364-05:00
   packager: ""

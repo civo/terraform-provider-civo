@@ -1,4 +1,17 @@
 
+0.10.1
+=============
+2021-05-13
+
+* Updated the doc for some datasource and resource (7b4a6dff)
+* Update the doc for datasource instance_size (406bbea6)
+* Cleaning the project (dd2e51e5)
+* Addes more fix to the provider, updated the civogo lib (df855113)
+* Updated to v2 of the SDK of terraform and add support for muti region (a049b432)
+* Updated to terraform sdk v2 and remove vendor folder (508fc678)
+* Merge pull request #30 from AlexsJones/master (d3e17640)
+* Merge pull request #27 from DoNnMyTh/patch-1 (a053b7c1)
+
 0.9.23
 =============
 2020-12-06
