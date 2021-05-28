@@ -37,7 +37,7 @@ func resourceSSHKey() *schema.Resource {
 		Update: resourceSSHKeyUpdate,
 		Delete: resourceSSHKeyDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }

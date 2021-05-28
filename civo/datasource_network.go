@@ -41,10 +41,6 @@ func dataSourceNetwork() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"cidr": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -80,8 +76,8 @@ func dataSourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	d.SetId(foundNetwork.ID)
 	d.Set("name", foundNetwork.Name)
 	d.Set("label", foundNetwork.Label)
+	d.Set("region", apiClient.Region)
 	d.Set("default", foundNetwork.Default)
-	d.Set("cidr", foundNetwork.CIDR)
 
 	return nil
 }

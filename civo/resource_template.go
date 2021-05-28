@@ -1,6 +1,7 @@
 package civo
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -76,7 +77,7 @@ func resourceTemplate() *schema.Resource {
 		Update: resourceTemplateUpdate,
 		Delete: resourceTemplateDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceTemplateImport,
+			StateContext: resourceTemplateImport,
 		},
 	}
 }
@@ -202,7 +203,7 @@ func resourceTemplateDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 // custom import to able to add a template to the terraform
-func resourceTemplateImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceTemplateImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] retriving the template %s", d.Id())

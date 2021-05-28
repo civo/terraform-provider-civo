@@ -33,10 +33,6 @@ func resourceNetwork() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"cidr": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 		Create: resourceNetworkCreate,
 		Read:   resourceNetworkRead,
@@ -44,7 +40,7 @@ func resourceNetwork() *schema.Resource {
 		Delete: resourceNetworkDelete,
 		//Exists: resourceExistsItem,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }
@@ -98,10 +94,9 @@ func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", CurrentNetwork.Name)
-	d.Set("default", CurrentNetwork.Default)
-	d.Set("cidr", CurrentNetwork.CIDR)
+	d.Set("region", apiClient.Region)
 	d.Set("label", CurrentNetwork.Label)
-
+	d.Set("default", CurrentNetwork.Default)
 	return nil
 }
 

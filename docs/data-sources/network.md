@@ -68,4 +68,3 @@ The following attributes are exported:
 * `label` - The label used in the configuration.
 * `name` - The name of the network.
 * `default` - If is the default network.
-* `cidr` - The block ip assigned to the network.

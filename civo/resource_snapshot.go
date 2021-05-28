@@ -89,7 +89,7 @@ func resourceSnapshot() *schema.Resource {
 		Read:   resourceSnapshotRead,
 		Delete: resourceSnapshotDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }

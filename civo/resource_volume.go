@@ -51,7 +51,7 @@ func resourceVolume() *schema.Resource {
 		Delete: resourceVolumeDelete,
 		//Exists: resourceExistsItem,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
 }
