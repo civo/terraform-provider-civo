@@ -1,4 +1,11 @@
 
+0.10.2
+=============
+2021-05-28
+
+* Add node pool test, remove CIDR from network and fixed some deprecate function (24fb9ccf)
+* Updated the civogo lib to v0.2.47 (dbe386ea)
+
 0.10.1
 =============
 2021-05-13

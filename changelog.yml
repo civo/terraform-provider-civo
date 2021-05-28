@@ -1,3 +1,23 @@
+- semver: 0.10.2
+  date: 2021-05-28T15:34:12.991669-04:00
+  packager: ""
+  changes:
+  - commit: 24fb9ccf68712148db130b765d15cbd1cbde0646
+    note: Add node pool test, remove CIDR from network and fixed some deprecate function
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+  - commit: dbe386eac2c2f0562870aa177dc2730bb82638ec
+    note: Updated the civogo lib to v0.2.47
+    author:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro JNM
+      email: alejandrojnm@gmail.com
 - semver: 0.10.1
   date: 2021-05-13T09:22:01.510989-04:00
   packager: ""
