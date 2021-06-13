@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -276,14 +275,14 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	d.SetId(resp.ID)
 
 	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"false"},
-		Target:  []string{"true"},
+		Pending: []string{"BUILDING"},
+		Target:  []string{"ACTIVE"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.GetKubernetesCluster(d.Id())
 			if err != nil {
 				return 0, "", err
 			}
-			return resp, strconv.FormatBool(resp.Ready), nil
+			return resp, resp.Status, nil
 		},
 		Timeout:        60 * time.Minute,
 		Delay:          3 * time.Second,
