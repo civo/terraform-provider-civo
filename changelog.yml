@@ -1,3 +1,15 @@
+- semver: 0.10.3
+  date: 2021-06-13T15:36:39.748275+01:00
+  packager: ""
+  changes:
+  - commit: 3d5ddf18966513d804dc9014daaff32a571c9836
+    note: Fixed error in the retry operation in kubernetes
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
 - semver: 0.10.2
   date: 2021-05-28T15:34:12.991669-04:00
   packager: ""

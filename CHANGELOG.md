@@ -1,4 +1,10 @@
 
+0.10.3
+=============
+2021-06-13
+
+* Fixed error in the retry operation in kubernetes (3d5ddf18)
+
 0.10.2
 =============
 2021-05-28
