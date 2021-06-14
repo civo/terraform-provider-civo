@@ -63,7 +63,9 @@ func resourceKubernetesCluster() *schema.Resource {
 				Optional: true,
 				Description: "a comma separated list of applications to install." +
 					"Spaces within application names are fine, but shouldn't be either side of the comma." +
-					"If you want to remove a default installed application, prefix it with a '-', e.g. -traefik.",
+					"Application names are case-sensitive; the available applications can be listed with the civo CLI:" +
+					"'civo kubernetes applications ls'." +
+					"If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik.",
 			},
 			// Computed resource
 			"instances":              instanceSchema(),
