@@ -24,7 +24,8 @@ func resourceFirewallRule() *schema.Resource {
 			},
 			"protocol": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The protocol choice from tcp, udp or icmp (the default if unspecified is tcp)",
 				ValidateFunc: validation.StringInSlice([]string{
@@ -35,28 +36,32 @@ func resourceFirewallRule() *schema.Resource {
 			},
 			"start_port": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				Description:  "The start of the port range to configure for this rule (or the single port if required)",
 				ValidateFunc: validation.NoZeroValues,
 			},
 			"end_port": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				Description:  "The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)",
 				ValidateFunc: validation.NoZeroValues,
 			},
 			"cidr": {
 				Type:        schema.TypeSet,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (defaults to being globally applied, i.e. 0.0.0.0/0)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"direction": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Will this rule affect ingress traffic",
 				ValidateFunc: validation.StringInSlice([]string{
@@ -66,6 +71,7 @@ func resourceFirewallRule() *schema.Resource {
 			"label": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				Description:  "A string that will be the displayed name/reference for this rule (optional)",
 				ValidateFunc: validation.StringIsNotEmpty,
@@ -73,6 +79,7 @@ func resourceFirewallRule() *schema.Resource {
 			"region": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				Description:  "The region for this rule",
 				ValidateFunc: validation.StringIsNotEmpty,
@@ -119,11 +126,15 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 		config.Label = attr.(string)
 	}
 
+	log.Printf("[INFO] Config: %+v", config)
+
 	log.Printf("[INFO] creating a new firewall rule for firewall %s", d.Get("firewall_id").(string))
 	firewallRule, err := apiClient.NewFirewallRule(config)
 	if err != nil {
 		return fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
 	}
+
+	log.Printf("[INFO] RuleID: %s", firewallRule.ID)
 
 	d.SetId(firewallRule.ID)
 
@@ -139,6 +150,9 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 		apiClient.Region = region.(string)
 	}
 
+	log.Printf("[INFO] firewallID: %s", d.Get("firewall_id").(string))
+	log.Printf("[INFO] RuleID: %s", d.Id())
+
 	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	resp, err := apiClient.FindFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
@@ -150,10 +164,16 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("[ERR] error retrieving firewall rule: %s", err)
 	}
 
+	log.Printf("[INFO] rules %+v", resp)
+
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("protocol", resp.Protocol)
 	d.Set("start_port", resp.StartPort)
-	d.Set("end_port", resp.EndPort)
+
+	if resp.EndPort != "" {
+		d.Set("end_port", resp.EndPort)
+	}
+
 	d.Set("cidr", resp.Cidr)
 	d.Set("direction", resp.Direction)
 	d.Set("label", resp.Label)

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -19,7 +20,8 @@ func resourceKubernetesCluster() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Computed:     true,
 				Description:  "a name for your cluster, must be unique within your account (required)",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
@@ -221,10 +223,16 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	log.Printf("[INFO] configuring a new kubernetes cluster %s", d.Get("name").(string))
+
 	config := &civogo.KubernetesClusterConfig{
-		Name:        d.Get("name").(string),
 		Region:      apiClient.Region,
 		NodeDestroy: "",
+	}
+
+	if name, ok := d.GetOk("name"); ok {
+		config.Name = name.(string)
+	} else {
+		config.Name = utils.RandomName()
 	}
 
 	if networtID, ok := d.GetOk("network_id"); ok {

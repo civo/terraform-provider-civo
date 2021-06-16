@@ -25,6 +25,7 @@ func resourceFirewall() *schema.Resource {
 			"network_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 		},
 		Create: resourceFirewallCreate,

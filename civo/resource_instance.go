@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -25,7 +26,8 @@ func resourceInstance() *schema.Resource {
 			},
 			"hostname": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Computed:     true,
 				Description:  "A fully qualified domain name that should be set as the instance's hostname (required)",
 				ForceNew:     true,
 				ValidateFunc: validateName,
@@ -164,7 +166,11 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("[ERR] failed to create a new config: %s", err)
 	}
 
-	config.Hostname = d.Get("hostname").(string)
+	if hostname, ok := d.GetOk("hostname"); ok {
+		config.Hostname = hostname.(string)
+	} else {
+		config.Hostname = utils.RandomName()
+	}
 
 	if attr, ok := d.GetOk("reverse_dns"); ok {
 		config.ReverseDNS = attr.(string)
