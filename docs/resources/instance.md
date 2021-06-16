@@ -40,7 +40,7 @@ resource "civo_instance" "my-test-instance" {
 The following arguments are supported:
 
 * `region` - (Optional) The region for the instance, if not declare we use the region in declared in the provider.
-* `hostname` - (Required) The Instance hostname.
+* `hostname` - (Required) The Instance hostname, if is not declare the provider will generate one for you
 * `reverse_dns` - (Optional) A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified).
 * `size` - (Optional) The name of the size, from the current list, e.g. g3.k3s.small (required).
 * `public_ip_required` - (Optional) This should be either `create`, `none` or `move_ip_from:intances_id`.

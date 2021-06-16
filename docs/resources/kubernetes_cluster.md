@@ -51,7 +51,7 @@ provider "kubernetes" {
 
 The following arguments are supported:
 
-* `name` - (Required) A name for the Kubernetes cluster.
+* `name` - (Optional) A name for the Kubernetes cluster, if is not declare the provider will generate one for you.
 * `region` - (Optional) The region for the cluster.
 * `num_target_nodes` - (Optional) The number of instances to create (The default at the time of writing is 3).
 * `target_nodes_size` - (Optional) The size of each node (The default is currently g3.k3s.small)
@@ -64,7 +64,7 @@ The following arguments are supported:
 In addition to the arguments listed above, the following additional attributes are exported:
 
 * `id` - A unique ID that can be used to identify and reference a Kubernetes cluster.
-* `name` - The name of your cluster,.
+* `name` - The name of your cluster.
 * `num_target_nodes` - The size of the Kubernetes cluster.
 * `target_nodes_size` - The size of each node.
 * `kubernetes_version` - The version of Kubernetes.
