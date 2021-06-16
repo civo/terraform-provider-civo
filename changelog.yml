@@ -1,3 +1,31 @@
+- semver: 0.10.4
+  date: 2021-06-16T12:34:53.052412+01:00
+  packager: ""
+  changes:
+  - commit: 4abb9b697e0c92235bb769f073725d5c9b280878
+    note: Updated the doc for instance and kubernetes resource
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+  - commit: e41d0b0052d9aefb7d4d07223705e31859ca2fcc
+    note: Merge branch 'master' of https://github.com/civo/terraform-provider-civo
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+  - commit: 077e3d723b89b16e54090006e1fa41fc6c78f291
+    note: Fixed error in the firewall resource and add random name
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
 - semver: 0.10.3
   date: 2021-06-13T15:36:39.748275+01:00
   packager: ""

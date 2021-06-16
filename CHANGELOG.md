@@ -1,4 +1,12 @@
 
+0.10.4
+=============
+2021-06-16
+
+* Updated the doc for instance and kubernetes resource (4abb9b69)
+* Merge branch 'master' of https://github.com/civo/terraform-provider-civo (e41d0b00)
+* Fixed error in the firewall resource and add random name (077e3d72)
+
 0.10.3
 =============
 2021-06-13
