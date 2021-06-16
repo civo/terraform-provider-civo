@@ -65,7 +65,7 @@ The following attributes are exported:
 * `cpu_cores` - Total cpu of the inatance.
 * `ram_mb` - Total ram of the instance.
 * `disk_gb` - The size of the disk.
-* `public_ip_requiered` - This should be either false, true or `move_ip_from:intances_id`.
+* `public_ip_requiered` - This should be either `create`, `none` or `move_ip_from:intances_id`.
 * `network_id` - This will be the ID of the network.
 * `template` - The ID for the template to used to build the instance.
 * `initial_user` - The name of the initial user created on the server.
