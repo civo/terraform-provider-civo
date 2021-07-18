@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -17,7 +18,7 @@ func resourceDNSDomainName() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "A fully qualified domain name",
-				ValidateFunc: validateName,
+				ValidateFunc: utils.ValidateName,
 			},
 			// Computed resource
 			"account_id": {

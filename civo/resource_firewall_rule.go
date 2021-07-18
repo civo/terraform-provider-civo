@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -20,7 +21,7 @@ func resourceFirewallRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateName,
+				ValidateFunc: utils.ValidateName,
 			},
 			"protocol": {
 				Type:        schema.TypeString,
@@ -207,7 +208,7 @@ func resourceFirewallRuleImport(d *schema.ResourceData, m interface{}) ([]*schem
 		apiClient.Region = region.(string)
 	}
 
-	firewallID, firewallRuleID, err := resourceCommonParseID(d.Id())
+	firewallID, firewallRuleID, err := utils.ResourceCommonParseID(d.Id())
 	if err != nil {
 		return nil, err
 	}

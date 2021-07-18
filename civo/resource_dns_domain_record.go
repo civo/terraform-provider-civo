@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -228,7 +228,7 @@ func resourceDNSDomainRecordDelete(d *schema.ResourceData, m interface{}) error 
 func resourceDNSDomainRecordImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
 
-	domainID, DomainRecordID, err := resourceCommonParseID(d.Id())
+	domainID, DomainRecordID, err := utils.ResourceCommonParseID(d.Id())
 	if err != nil {
 		return nil, err
 	}

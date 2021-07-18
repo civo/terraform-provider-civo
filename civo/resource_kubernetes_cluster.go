@@ -11,7 +11,6 @@ import (
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Kubernetes Cluster resource, with this you can manage all cluster from terraform
@@ -23,7 +22,7 @@ func resourceKubernetesCluster() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				Description:  "a name for your cluster, must be unique within your account (required)",
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateFunc: utils.ValidateNameSize,
 			},
 			"region": {
 				Type:        schema.TypeString,
@@ -270,7 +269,11 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if attr, ok := d.GetOk("applications"); ok {
-		config.Applications = attr.(string)
+		if utils.CheckAPPName(attr.(string), apiClient) {
+			config.Applications = attr.(string)
+		} else {
+			return fmt.Errorf("[ERR] the app that tries to install is not valid: %s", attr.(string))
+		}
 	} else {
 		config.Applications = ""
 	}

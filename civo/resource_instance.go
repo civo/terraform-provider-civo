@@ -30,13 +30,13 @@ func resourceInstance() *schema.Resource {
 				Computed:     true,
 				Description:  "A fully qualified domain name that should be set as the instance's hostname (required)",
 				ForceNew:     true,
-				ValidateFunc: validateName,
+				ValidateFunc: utils.ValidateNameSize,
 			},
 			"reverse_dns": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified)",
-				ValidateFunc: validateName,
+				ValidateFunc: utils.ValidateName,
 			},
 			"size": {
 				Type:        schema.TypeString,
@@ -253,7 +253,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		Timeout:        60 * time.Minute,
 		Delay:          3 * time.Second,
 		MinTimeout:     3 * time.Second,
-		NotFoundChecks: 10,
+		NotFoundChecks: 60,
 	}
 	_, err = createStateConf.WaitForStateContext(context.Background())
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -18,7 +19,7 @@ func resourceLoadBalancer() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "the hostname to receive traffic for, e.g. www.example.com (optional: sets hostname to loadbalancer-uuid.civo.com if blank)",
-				ValidateFunc: validateName,
+				ValidateFunc: utils.ValidateName,
 			},
 			"protocol": {
 				Type:        schema.TypeString,
@@ -96,7 +97,7 @@ func resourceLoadBalancer() *schema.Resource {
 						"instance_id": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validateName,
+							ValidateFunc: utils.ValidateName,
 						},
 						"protocol": {
 							Type:     schema.TypeString,

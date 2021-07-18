@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -17,7 +18,7 @@ func resourceSSHKey() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "a string that will be the reference for the SSH key.",
-				ValidateFunc: validateName,
+				ValidateFunc: utils.ValidateName,
 			},
 			"public_key": {
 				Type:        schema.TypeString,

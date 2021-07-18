@@ -9,6 +9,7 @@ import (
 	// "time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/google/uuid"
 
 	// "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -205,7 +206,7 @@ func resourceKubernetesClusterNodePoolDelete(d *schema.ResourceData, m interface
 func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
 
-	clusterID, nodePoolID, err := resourceCommonParseID(d.Id())
+	clusterID, nodePoolID, err := utils.ResourceCommonParseID(d.Id())
 	if err != nil {
 		return nil, err
 	}

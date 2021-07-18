@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -18,7 +19,7 @@ func resourceVolume() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "A name that you wish to use to refer to this volume",
-				ValidateFunc: validateName,
+				ValidateFunc: utils.ValidateName,
 			},
 			"size_gb": {
 				Type:        schema.TypeInt,
