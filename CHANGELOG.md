@@ -1,4 +1,12 @@
 
+0.10.6
+=============
+2021-07-19
+
+* Fixed error in the format of the code (33ad2484)
+* Fixed error reported in github (4e438002)
+* Update release.yml (34d310f7)
+
 0.10.4
 =============
 2021-06-16

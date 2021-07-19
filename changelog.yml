@@ -1,3 +1,37 @@
+- semver: 0.10.6
+  date: 2021-07-19T09:39:43.851556+01:00
+  packager: ""
+  changes:
+  - commit: 33ad24848ffa4f7b455159cd2cae601f96f4595b
+    note: Fixed error in the format of the code
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+  - commit: 4e438002f2a28ded1e92ab3a47e5f7c038e02b9d
+    note: |-
+      Fixed error reported in github
+      Removed utils and put in the right folder, updated the civogo lib to the last version
+      Close #39
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+  - commit: 34d310f73ceece473e83c874b478b0ceed61b5ac
+    note: |-
+      Update release.yml
+
+      Update the Go version to create the binary for M1 arch for Apple
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandro@civo.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
 - semver: 0.10.4
   date: 2021-06-16T12:34:53.052412+01:00
   packager: ""
