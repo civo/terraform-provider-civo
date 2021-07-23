@@ -1,3 +1,15 @@
+- semver: 0.10.7
+  date: 2021-07-23T10:58:15.768366+01:00
+  packager: ""
+  changes:
+  - commit: ba0089be2f8157a07a0d60ddd19e3a63b5d69614
+    note: Fixed error in the ValidateNameSize function
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
 - semver: 0.10.6
   date: 2021-07-19T09:39:43.851556+01:00
   packager: ""

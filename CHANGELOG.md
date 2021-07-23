@@ -1,4 +1,10 @@
 
+0.10.7
+=============
+2021-07-23
+
+* Fixed error in the ValidateNameSize function (ba0089be)
+
 0.10.6
 =============
 2021-07-19
