@@ -41,8 +41,8 @@ func ValidateNameSize(v interface{}, k string) (ws []string, es []error) {
 		return warns, errs
 	}
 
-	if len(value) > 36 {
-		errs = append(errs, fmt.Errorf("the len of the name has to be less than 36. Got %d", len(value)))
+	if len(value) > 63 {
+		errs = append(errs, fmt.Errorf("the len of the name has to be less than 63. Got %d", len(value)))
 		return warns, errs
 	}
 
