@@ -96,10 +96,6 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"built_at": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -343,7 +339,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("api_endpoint", resp.APIEndPoint)
 	d.Set("master_ip", resp.MasterIP)
 	d.Set("dns_entry", resp.DNSEntry)
-	d.Set("built_at", resp.BuiltAt.UTC().String())
+	// d.Set("built_at", resp.BuiltAt.UTC().String())
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 
 	if err := d.Set("instances", flattenInstances(resp.Instances)); err != nil {

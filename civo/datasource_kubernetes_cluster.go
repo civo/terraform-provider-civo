@@ -80,10 +80,6 @@ func dataSourceKubernetesCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"built_at": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -231,8 +227,11 @@ func dataSourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("api_endpoint", foundCluster.APIEndPoint)
 	d.Set("master_ip", foundCluster.MasterIP)
 	d.Set("dns_entry", foundCluster.DNSEntry)
-	d.Set("built_at", foundCluster.BuiltAt.UTC().String())
 	d.Set("created_at", foundCluster.CreatedAt.UTC().String())
+
+	if err := d.Set("pools", flattenNodePool(foundCluster)); err != nil {
+		return fmt.Errorf("[ERR] error retrieving the pools for kubernetes cluster error: %#v", err)
+	}
 
 	if err := d.Set("instances", flattenInstances(foundCluster.Instances)); err != nil {
 		return fmt.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)

@@ -27,6 +27,12 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				Description:  "The id of your cluster (required)",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
+			"region": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The region of the node pool, has to match that of the cluster (required)",
+				ValidateFunc: validation.StringIsNotEmpty,
+			},
 			"num_target_nodes": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -75,6 +81,7 @@ func resourceKubernetesClusterNodePoolCreate(d *schema.ResourceData, m interface
 		size = "g3.k3s.medium"
 	}
 
+	log.Printf("[INFO] getting kubernetes cluster %s in the region %s", cluster_id, apiClient.Region)
 	getKubernetesCluster, err := apiClient.GetKubernetesCluster(cluster_id)
 	if err != nil {
 		return err

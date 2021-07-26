@@ -101,7 +101,6 @@ In addition to the arguments listed above, the following additional attributes a
 * `api_endpoint` - The base URL of the API server on the Kubernetes master node.
 * `master_ip` - The Ip of the Kubernetes master node.
 * `dns_entry` - The unique dns entry for the cluster in this case point to the master.
-* `built_at` - The date where the Kubernetes cluster was build.
 * `created_at` - The date where the Kubernetes cluster was create.
 
 
