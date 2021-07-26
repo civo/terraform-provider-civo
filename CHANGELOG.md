@@ -1,4 +1,10 @@
 
+0.10.8
+=============
+2021-07-26
+
+* Fixed error in the provider in the cluster resource and datasource (3d0923dd)
+
 0.10.7
 =============
 2021-07-23

@@ -1,3 +1,17 @@
+- semver: 0.10.8
+  date: 2021-07-26T12:54:54.015588+01:00
+  packager: ""
+  changes:
+  - commit: 3d0923ddb706a1c1a1fd2ad195cee047f6f0a189
+    note: |-
+      Fixed error in the provider in the cluster resource and datasource
+      close #45
+    author:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
+    committer:
+      name: Alejandro J. Nuñez Madrazo
+      email: alejandrojnm@gmail.com
 - semver: 0.10.7
   date: 2021-07-23T10:58:15.768366+01:00
   packager: ""
