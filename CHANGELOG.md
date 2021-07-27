@@ -1,4 +1,10 @@
 
+0.10.9
+=============
+2021-07-27
+
+* Fixed error in the instance resource and update the doc for the template datasource (d0b506a2)
+
 0.10.8
 =============
 2021-07-26
