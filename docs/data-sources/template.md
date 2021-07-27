@@ -53,11 +53,36 @@ resource "civo_instance" "foo-host" {
 }
 ```
 
+It is similar to the previous one with the difference that in this one we use region to only look for the templates of that region.
+The Instance/Kubernetes cluster where you use this data source must be in the same region.
+
+```hcl
+data "civo_template" "debian" {
+   region = "LON1"
+   filter {
+        key = "name"
+        values = ["debian"]
+        match_by = "re"
+   }
+    sort {
+        key = "version"
+        direction = "asc"
+    }
+}
+
+resource "civo_instance" "foo-host" {
+    region = "LON1"
+    hostname = "foo.com"
+    size = element(data.civo_instances_size.small.sizes, 0).name
+    template = element(data.civo_template.debian.templates, 0).id
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `region` - (Optional) If is used, them all instances will be from that region.
+* `region` - (Optional) If is used, them all template will be from that region, has to be declared here if is not declared in the provider
 * `filter` - (Optional) Filter the results. The `filter` block is documented below.
 * `sort` - (Optional) Sort the results. The `sort` block is documented below.
 

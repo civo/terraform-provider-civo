@@ -59,6 +59,7 @@ func resourceInstance() *schema.Resource {
 			"template": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The ID for the template to use to build the instance",
 			},
 			"initial_user": {
@@ -80,6 +81,7 @@ func resourceInstance() *schema.Resource {
 			"firewall_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
 			"tags": {
@@ -326,7 +328,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("notes", resp.Notes)
 
 	if _, ok := d.GetOk("template"); ok {
-		d.Set("template", resp.TemplateID)
+		d.Set("template", d.Get("template").(string))
 	}
 
 	return nil
