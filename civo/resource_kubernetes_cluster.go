@@ -368,6 +368,14 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 
 	config := &civogo.KubernetesClusterConfig{}
 
+	if d.HasChange("target_nodes_size") {
+		errMsg := []string{
+			"[ERR] Unable to update 'target_nodes_size' after creation.",
+			"Please create a new node pool with the new node size.",
+		}
+		return fmt.Errorf(strings.Join(errMsg, " "))
+	}
+
 	if d.HasChange("num_target_nodes") {
 		config.NumTargetNodes = d.Get("num_target_nodes").(int)
 		config.Region = apiClient.Region
