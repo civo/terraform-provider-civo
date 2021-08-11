@@ -212,26 +212,44 @@ func resourceKubernetesClusterNodePoolDelete(d *schema.ResourceData, m interface
 // custom import to able to add a node pool to the terraform
 func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
+	regions, err := apiClient.ListRegions()
+	if err != nil {
+		return nil, err
+	}
 
 	clusterID, nodePoolID, err := utils.ResourceCommonParseID(d.Id())
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[INFO] retriving the node pool %s", nodePoolID)
-	resp, err := apiClient.GetKubernetesCluster(clusterID)
-	if err != nil {
-		if resp != nil {
-			return nil, err
+	poolFound := false
+	for _, region := range regions {
+		if poolFound {
+			break
+		}
+
+		currentRegionCode := region.Code
+		apiClient.Region = currentRegionCode
+		log.Printf("[INFO] Retriving the node pool %s from region %s", nodePoolID, currentRegionCode)
+		resp, err := apiClient.GetKubernetesCluster(clusterID)
+		if err != nil {
+			continue // move on and find in another region
+		}
+
+		for _, v := range resp.Pools {
+			if v.ID == nodePoolID {
+				poolFound = true
+				d.SetId(v.ID)
+				d.Set("cluster_id", resp.ID)
+				d.Set("region", currentRegionCode)
+				d.Set("num_target_nodes", v.Count)
+				d.Set("target_nodes_size", v.Size)
+			}
 		}
 	}
 
-	d.Set("cluster_id", resp.ID)
-	for _, v := range resp.Pools {
-		if v.ID == nodePoolID {
-			d.Set("num_target_nodes", v.Count)
-			d.Set("target_nodes_size", v.Size)
-		}
+	if !poolFound {
+		return nil, fmt.Errorf("[ERR] Node pool %s not found", nodePoolID)
 	}
 
 	return []*schema.ResourceData{d}, nil
