@@ -13,6 +13,17 @@ Provides a Civo Kubernetes cluster resource. This can be used to create, delete,
 ## Example Usage
 
 ```hcl
+data "civo_instances_size" "small" {
+    filter {
+        key = "type"
+        values = ["kubernetes"]
+    }
+
+    sort {
+        key = "ram"
+        direction = "asc"
+    }
+}
 
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
@@ -20,6 +31,25 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     num_target_nodes = 4
     target_nodes_size = element(data.civo_instances_size.small.sizes, 0).name
 }
+```
+
+## Node Sizes
+
+Apart from using Data Source to find `target_nodes_size`, you can also use [Civo CLI](https://github.com/civo/cli) to list all Kubernetes node sizes.
+
+```
+$ civo kubernetes sizes
+
++----------------+-------------+------------+-----+-------+-----+------------+
+| Name           | Description | Type       | CPU | RAM   | SSD | Selectable |
++----------------+-------------+------------+-----+-------+-----+------------+
+| g3.k3s.xsmall  | Extra Small | Kubernetes |   1 |  1024 |  15 | Yes        |
+| g3.k3s.small   | Small       | Kubernetes |   1 |  2048 |  15 | Yes        |
+| g3.k3s.medium  | Medium      | Kubernetes |   2 |  4096 |  15 | Yes        |
+| g3.k3s.large   | Large       | Kubernetes |   4 |  8192 |  15 | Yes        |
+| g3.k3s.xlarge  | Extra Large | Kubernetes |   6 | 16384 |  15 | Yes        |
+| g3.k3s.2xlarge | 2X Large    | Kubernetes |   8 | 32768 |  15 | Yes        |
++----------------+-------------+------------+-----+-------+-----+------------+
 ```
 
 ### Kubernetes Terraform Provider Example
