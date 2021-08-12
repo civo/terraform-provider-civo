@@ -119,8 +119,9 @@ func resourceInstance() *schema.Resource {
 				Computed: true,
 			},
 			"initial_password": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"private_ip": {
 				Type:     schema.TypeString,
