@@ -42,7 +42,7 @@ func resourceInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "g3.xsmall",
-				Description: "The name of the size, from the current list, e.g. g2.small (required)",
+				Description: "The name of the size, from the current list, e.g. g3.xsmall",
 			},
 			"public_ip_required": {
 				Type:        schema.TypeString,
@@ -365,7 +365,12 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 				return resource.RetryableError(fmt.Errorf("[ERR] expected instance to be resizing but was in state %s", resp.Status))
 			}
 
-			return resource.NonRetryableError(resourceInstanceRead(d, m))
+			err = resourceInstanceRead(d, m)
+			if err != nil {
+				return resource.NonRetryableError(err)
+			}
+
+			return nil
 		})
 	}
 
