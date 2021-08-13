@@ -24,7 +24,6 @@ func resourceSSHKey() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "a string containing the SSH public key.",
-				Sensitive:   true,
 				ForceNew:    true,
 			},
 			"fingerprint": {
