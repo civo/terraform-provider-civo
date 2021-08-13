@@ -81,8 +81,9 @@ func resourceKubernetesCluster() *schema.Resource {
 				Computed: true,
 			},
 			"kubeconfig": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"api_endpoint": {
 				Type:     schema.TypeString,
