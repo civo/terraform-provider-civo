@@ -37,10 +37,11 @@ func resourceKubernetesCluster() *schema.Resource {
 				Description: "The network for the cluster, if not declare we use the default one",
 			},
 			"num_target_nodes": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Computed:    true,
-				Description: "the number of instances to create (optional, the default at the time of writing is 3)",
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				Description:  "the number of instances to create (optional, the default at the time of writing is 3)",
+				ValidateFunc: utils.ValidateNumTargetNodes,
 			},
 			"target_nodes_size": {
 				Type:        schema.TypeString,
@@ -377,8 +378,26 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if d.HasChange("num_target_nodes") {
-		config.NumTargetNodes = d.Get("num_target_nodes").(int)
+		numTargetNodes := d.Get("num_target_nodes").(int)
+
 		config.Region = apiClient.Region
+		kubernetesCluster, err := apiClient.FindKubernetesCluster(d.Id())
+		if err != nil {
+			return err
+		}
+
+		targetNodePool := ""
+		nodePools := []civogo.KubernetesClusterPoolConfig{}
+		for _, v := range kubernetesCluster.Pools {
+			nodePools = append(nodePools, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size})
+
+			if targetNodePool == "" && v.Size == d.Get("target_nodes_size").(string) {
+				targetNodePool = v.ID
+			}
+		}
+
+		nodePools = updateNodePool(nodePools, targetNodePool, numTargetNodes)
+		config.Pools = nodePools
 	}
 
 	if d.HasChange("kubernetes_version") {
@@ -401,6 +420,7 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())
+	log.Printf("[DEBUG] KubernetesClusterConfig: %+v\n", config)
 	_, err := apiClient.UpdateKubernetesCluster(d.Id(), config)
 	if err != nil {
 		return fmt.Errorf("[ERR] failed to update kubernetes cluster: %s", err)

@@ -49,6 +49,16 @@ func ValidateNameSize(v interface{}, k string) (ws []string, es []error) {
 	return warns, errs
 }
 
+func ValidateNumTargetNodes(value interface{}, key string) (warns []string, errs []error) {
+	v := value.(int)
+	if v <= 0 {
+		errs = append(errs, fmt.Errorf("%q cannot be zero or negative, got: %d", key, v))
+		return warns, errs
+	}
+
+	return
+}
+
 // util function to help the import function
 func ResourceCommonParseID(id string) (string, string, error) {
 	parts := strings.SplitN(id, ":", 2)
