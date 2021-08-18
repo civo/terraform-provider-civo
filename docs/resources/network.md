@@ -6,7 +6,7 @@ description: |-
   Provides a Civo Network resource. This can be used to create, modify, and delete Networks.
 ---
 
-# civo\_loadbalancer
+# civo\_network
 
 Provides a Civo Network resource. This can be used to create,
 modify, and delete Networks.
