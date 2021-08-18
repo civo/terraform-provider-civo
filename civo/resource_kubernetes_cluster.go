@@ -11,6 +11,7 @@ import (
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Kubernetes Cluster resource, with this you can manage all cluster from terraform
@@ -41,7 +42,7 @@ func resourceKubernetesCluster() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				Description:  "the number of instances to create (optional, the default at the time of writing is 3)",
-				ValidateFunc: utils.ValidateNumTargetNodes,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"target_nodes_size": {
 				Type:        schema.TypeString,
