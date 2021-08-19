@@ -254,7 +254,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	if attr, ok := d.GetOk("target_nodes_size"); ok {
 		config.TargetNodesSize = attr.(string)
 	} else {
-		config.TargetNodesSize = "g3.k3s.small"
+		config.TargetNodesSize = "g3.k3s.medium"
 	}
 
 	if attr, ok := d.GetOk("kubernetes_version"); ok {
