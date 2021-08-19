@@ -1,4 +1,21 @@
 
+0.10.10
+=============
+2021-08-19
+
+* Change default node size to "g3.k3s.medium" (#66) (a4b13884)
+* Fix cluster primary nodepool scaling bug (#63) (6d4088fe)
+* Update network.md (#64) (07600561)
+* Make 'kubeconfig' field sensitive (#60) (858b0d37)
+* Fix imported node pool's scaling issue (#55) (8a123992)
+* Fix "empty non-retryable error received" error when updating IaaS node size (#61) (40fc2155)
+* making public key non sensitive (#59) (49bfe0e5)
+* Mark IaaS password as sensitive (#56) (6ced3757)
+* Update kubernetes_cluster.md (#54) (dabc8950)
+* Run 'go mod tidy' (a94327e0)
+* Show an error message when nodes size is changed (9922b3bb)
+* Update kubernetes_cluster.md (c1b08c4c)
+
 0.10.9
 =============
 2021-07-27

@@ -1,3 +1,108 @@
+- semver: 0.10.10
+  date: 2021-08-19T03:42:51.581463+01:00
+  packager: ""
+  changes:
+  - commit: a4b13884af5dafc952a27e46e13ec861cab81848
+    note: Change default node size to "g3.k3s.medium" (#66)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 6d4088fef95a59483fe1006a0bed36f2b99912db
+    note: |-
+      Fix cluster primary nodepool scaling bug (#63)
+
+      * Fix cluster primary nodepool scaling bug
+
+      * Change validation method for "num_target_nodes"
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 076005617496bc63a5cfe523a61b611d0ae32c4e
+    note: Update network.md (#64)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 858b0d37be731b4917a58644125f6c4dc3b6074d
+    note: Make 'kubeconfig' field sensitive (#60)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 8a12399278d247d0a90acf1a3c746faf64797971
+    note: Fix imported node pool's scaling issue (#55)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 40fc21551d189a2776820e2b1c00710425f0699f
+    note: Fix "empty non-retryable error received" error when updating IaaS node size (#61)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 49bfe0e52143ba00f3bd39e819c3b71788dc61e3
+    note: making public key non sensitive (#59)
+    author:
+      name: Saiyam Pathak
+      email: saiyam@civo.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 6ced37570cd70e693cc427602a0fa1368a363bf2
+    note: Mark IaaS password as sensitive (#56)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: dabc8950eec8f7beb2780c92e92ffd3c4d340aa7
+    note: Update kubernetes_cluster.md (#54)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: a94327e06524723ad7ae08ac1da8a4ce822370a7
+    note: Run 'go mod tidy'
+    author:
+      name: Zulhilmi Zainudin
+      email: zulh@civo.com
+    committer:
+      name: Saiyam Pathak
+      email: saiyam911@gmail.com
+  - commit: 9922b3bb7f96cd2d8552063a584d1dae48a43ed7
+    note: Show an error message when nodes size is changed
+    author:
+      name: Zulhilmi Zainudin
+      email: zulh@civo.com
+    committer:
+      name: Saiyam Pathak
+      email: saiyam911@gmail.com
+  - commit: c1b08c4cec029e2a15946e644db2f97161555bea
+    note: Update kubernetes_cluster.md
+    author:
+      name: Zulhilmi Zainudin
+      email: zulh@civo.com
+    committer:
+      name: Saiyam Pathak
+      email: saiyam911@gmail.com
 - semver: 0.10.9
   date: 2021-07-27T12:37:41.09538+01:00
   packager: ""
