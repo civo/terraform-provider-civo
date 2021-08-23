@@ -26,11 +26,6 @@ func resourceVolume() *schema.Resource {
 				Required:    true,
 				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes ",
 			},
-			"bootable": {
-				Type:        schema.TypeBool,
-				Required:    true,
-				Description: "Mark the volume as bootable",
-			},
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -67,7 +62,7 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	log.Printf("[INFO] configuring the volume %s", d.Get("name").(string))
-	config := &civogo.VolumeConfig{Name: d.Get("name").(string), SizeGigabytes: d.Get("size_gb").(int), Bootable: d.Get("bootable").(bool)}
+	config := &civogo.VolumeConfig{Name: d.Get("name").(string), SizeGigabytes: d.Get("size_gb").(int), Bootable: false}
 
 	volume, err := apiClient.NewVolume(config)
 	if err != nil {
@@ -100,7 +95,6 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("name", resp.Name)
 	d.Set("size_gb", resp.SizeGigabytes)
-	d.Set("bootable", resp.Bootable)
 	d.Set("mount_point", resp.MountPoint)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 
