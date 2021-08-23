@@ -100,6 +100,7 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", resp.Name)
+	d.Set("network_id", resp.NetworkID)
 	d.Set("size_gb", resp.SizeGigabytes)
 	d.Set("mount_point", resp.MountPoint)
 
@@ -217,7 +218,6 @@ func resourceVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 				d.Set("region", currentRegion)
 				d.Set("size_gb", volume.SizeGigabytes)
 				d.Set("mount_point", volume.MountPoint)
-				// TODO - Set `network_id` after it gets added to API response. Tracked internally at Civo (for Civo staff: as issue 12 in civo/api).
 			}
 		}
 	}
