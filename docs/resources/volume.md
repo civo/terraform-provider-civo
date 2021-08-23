@@ -24,9 +24,9 @@ resource "civo_volume" "db" {
 
 The following arguments are supported:
 
-* `name` - (Required) A name that you wish to use to refer to this volume .
-* `size_gb` - (Required) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes .
-* `bootable` - (Required) Mark the volume as bootable.
+* `name` - (Required) A name that you wish to use to refer to this volume.
+* `size_gb` - (Required) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes.
+* `network_id` - (Required) The network that the volume belongs to.
 
 ## Attributes Reference
 
@@ -35,9 +35,8 @@ The following attributes are exported:
 * `id` - The unique identifier for the volume.
 * `name` - Name of the volume.
 * `size_gb` - The size of the volume.
-* `bootable` - if is bootable or not.
-* `mount_point` - The mount point of the volume. 
-* `created_at` - The date of the creation of the volume.
+* `mount_point` - The mount point of the volume.
+* `network_id` - The network that the volume belongs to.
 
 ## Import
 
