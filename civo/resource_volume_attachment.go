@@ -28,6 +28,12 @@ func resourceVolumeAttachment() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.NoZeroValues,
 			},
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The region for the volume attachment",
+			},
 		},
 		Create: resourceVolumeAttachmentCreate,
 		Read:   resourceVolumeAttachmentRead,
@@ -38,6 +44,11 @@ func resourceVolumeAttachment() *schema.Resource {
 // function to create the new volume
 func resourceVolumeAttachmentCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	instanceID := d.Get("instance_id").(string)
 	volumeID := d.Get("volume_id").(string)
@@ -66,6 +77,11 @@ func resourceVolumeAttachmentCreate(d *schema.ResourceData, m interface{}) error
 func resourceVolumeAttachmentRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	instanceID := d.Get("instance_id").(string)
 	volumeID := d.Get("volume_id").(string)
 
@@ -91,6 +107,11 @@ func resourceVolumeAttachmentRead(d *schema.ResourceData, m interface{}) error {
 // function to delete the volume
 func resourceVolumeAttachmentDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	volumeID := d.Get("volume_id").(string)
 
