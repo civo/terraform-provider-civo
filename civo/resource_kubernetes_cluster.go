@@ -70,6 +70,11 @@ func resourceKubernetesCluster() *schema.Resource {
 					"'civo kubernetes applications ls'." +
 					"If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik.",
 			},
+			"firewall_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The existing firewall ID to use for this cluster",
+			},
 			// Computed resource
 			"instances":              instanceSchema(),
 			"installed_applications": applicationSchema(),
@@ -275,6 +280,10 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 		}
 	} else {
 		config.Applications = ""
+	}
+
+	if attr, ok := d.GetOk("firewall_id"); ok {
+		config.InstanceFirewall = attr.(string)
 	}
 
 	log.Printf("[INFO] creating a new kubernetes cluster %s", d.Get("name").(string))
