@@ -53,10 +53,9 @@ func resourceFirewallRule() *schema.Resource {
 			},
 			"cidr": {
 				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
+				Required:    true,
 				ForceNew:    true,
-				Description: "The IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (defaults to being globally applied, i.e. 0.0.0.0/0)",
+				Description: "The IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (e.g. 0.0.0.0/0)",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"direction": {
@@ -127,15 +126,13 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 		config.Label = attr.(string)
 	}
 
-	log.Printf("[INFO] Config: %+v", config)
-
-	log.Printf("[INFO] creating a new firewall rule for firewall %s", d.Get("firewall_id").(string))
+	log.Printf("[INFO] Creating a new firewall rule for firewall %s with config: %+v", d.Get("firewall_id").(string), config)
 	firewallRule, err := apiClient.NewFirewallRule(config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
+		return fmt.Errorf("[ERR] failed to create a new firewall rule: %s", err)
 	}
 
-	log.Printf("[INFO] RuleID: %s", firewallRule.ID)
+	log.Printf("[INFO] Firewall rule created with ID: %s", firewallRule.ID)
 
 	d.SetId(firewallRule.ID)
 
@@ -151,10 +148,8 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 		apiClient.Region = region.(string)
 	}
 
-	log.Printf("[INFO] firewallID: %s", d.Get("firewall_id").(string))
-	log.Printf("[INFO] RuleID: %s", d.Id())
+	log.Printf("[INFO] Reading firewall rule %s from firewall %s", d.Id(), d.Get("firewall_id").(string))
 
-	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	resp, err := apiClient.FindFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
 		if resp == nil {
@@ -165,7 +160,7 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("[ERR] error retrieving firewall rule: %s", err)
 	}
 
-	log.Printf("[INFO] rules %+v", resp)
+	log.Printf("[INFO] Rules response: %+v", resp)
 
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("protocol", resp.Protocol)
