@@ -44,8 +44,9 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 	networkID := ""
 
-	if attr, ok := d.GetOk("region"); ok {
-		apiClient.Region = attr.(string)
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
 	}
 
 	if attr, ok := d.GetOk("network_id"); ok {
@@ -73,6 +74,11 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] retriving the firewall %s", d.Id())
 	resp, err := apiClient.FindFirewall(d.Id())
 	if err != nil {
@@ -94,6 +100,11 @@ func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	if d.HasChange("name") {
 		if d.Get("name").(string) != "" {
 			firewall := civogo.FirewallConfig{
@@ -114,10 +125,23 @@ func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceFirewallDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
 
-	log.Printf("[INFO] deleting the firewall %s", d.Id())
-	_, err := apiClient.DeleteFirewall(d.Id())
+	// overwrite the region if it's defined
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
+	firewallID := d.Id()
+	log.Printf("[INFO] Checking if firewall %s exists", firewallID)
+	_, err := apiClient.FindFirewall(firewallID)
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete the firewall %s, %s", d.Id(), err)
+		log.Printf("[INFO] Unable to find firewall %s - probably it's been deleted", firewallID)
+		return nil
+	}
+
+	log.Printf("[INFO] deleting the firewall %s", firewallID)
+	_, err = apiClient.DeleteFirewall(firewallID)
+	if err != nil {
+		return fmt.Errorf("[ERR] an error occurred while tring to delete the firewall %s, %s", firewallID, err)
 	}
 	return nil
 }
