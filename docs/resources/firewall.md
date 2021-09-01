@@ -18,11 +18,28 @@ resource "civo_firewall" "www" {
   name = "www"
 }
 ```
+
 ### Example with region
+
 ```hcl
 resource "civo_firewall" "www" {
   name = "www"
   region = "NYC1"
+}
+```
+
+## Example Usage With Other Resources
+
+```hcl
+# Create a network
+resource "civo_network" "custom_net" {
+    label = "my-custom-network"
+}
+
+# Create a firewall
+resource "civo_firewall" "www" {
+  name = "www"
+  network_id = civo_network.custom_net.id
 }
 ```
 
