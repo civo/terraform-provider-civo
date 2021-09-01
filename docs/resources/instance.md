@@ -111,7 +111,6 @@ The following attributes are exported:
 * `initial_password` - Instance initial password
 * `private_ip` - The private ip.
 * `public_ip` - The public ip.
-* `pseudo_ip` - Is the ip that is used to route the public ip from the internet to the instance using NAT 
 * `status` - The status of the instance
 * `script` - the contents of a script uploaded
 * `created_at` - The date of creation of the instance
