@@ -32,7 +32,7 @@ The following arguments are supported:
 
 * `name` - (Required) The Firewall name
 * `region` - (Optional) The Firewall region, if is not defined we use the global defined in the provider
-* `nertwork_id` - (Optional) The Firewall network, if is not defined we use the default network
+* `network_id` - (Optional) The Firewall network, if is not defined we use the default network
 
 
 ## Attributes Reference
