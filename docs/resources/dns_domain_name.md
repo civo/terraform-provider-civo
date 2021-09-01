@@ -31,7 +31,7 @@ The following attributes are exported:
 
 * `id` - A unique ID that can be used to identify and reference a domain.
 * `name` - The name of the domain.
-* `account_id` - The id account of the domain
+* `account_id` - The account ID of the domain
 
 ## Import
 
