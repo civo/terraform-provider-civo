@@ -25,7 +25,7 @@ resource "civo_instance" "my-test-instance" {
 ```
 
 ```hcl
-# Create a new Web instances in a expecific region
+# Create a new Web instances in a specific region
 resource "civo_instance" "my-test-instance" {
     region = "LON1"
     hostname = "foo.com"
@@ -35,6 +35,43 @@ resource "civo_instance" "my-test-instance" {
     template = element(data.civo_template.debian.templates, 0).id
 }
 ```
+
+## Example Usage With Other Resources
+
+```hcl
+# Query small instance size
+data "civo_instances_size" "small" {
+    filter {
+        key = "name"
+        values = ["g3.small"]
+        match_by = "re"
+    }
+
+    filter {
+        key = "type"
+        values = ["instance"]
+    }
+
+}
+
+# Query instance template
+data "civo_template" "debian" {
+   filter {
+        key = "name"
+        values = ["debian-10"]
+   }
+}
+
+# Create a new instance
+resource "civo_instance" "foo" {
+    hostname = "foo.com"
+    tags = ["python", "nginx"]
+    notes = "this is a note for the server"
+    size = element(data.civo_instances_size.small.sizes, 0).name
+    template = element(data.civo_template.debian.templates, 0).id
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -63,7 +100,7 @@ The following attributes are exported:
 * `cpu_cores` - Total cpu of the inatance.
 * `ram_mb` - Total ram of the instance.
 * `disk_gb` - The size of the disk.
-* `public_ip_requiered` - This should be either `create`, `none` or `move_ip_from:intances_id`.
+* `public_ip_required` - This should be either `create`, `none` or `move_ip_from:intances_id`.
 * `network_id` - This will be the ID of the network.
 * `template` - The ID for the template to used to build the instance.
 * `initial_user` - The name of the initial user created on the server.
