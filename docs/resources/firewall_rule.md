@@ -40,7 +40,7 @@ The following arguments are supported:
 * `protocol` (Required) This may be one of "tcp", "udp", or "icmp".
 * `start_port` (Required) The start port where traffic to be allowed.
 * `end_port` (Required) The end port where traffic to be allowed.
-* `cidr` (Required) the IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR (e.g. 0.0.0.0/0).
+* `cidr` (Required) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address.
 * `direction` (Required) will this rule affect ingress traffic
 * `label` (Optional) a string that will be the displayed name/reference for this rule (optional)
 
@@ -53,7 +53,7 @@ The following attributes are exported:
 * `protocol` This may be one of "tcp", "udp", or "icmp".
 * `start_port` The start port where traffic to be allowed.
 * `end_port` The end port where traffic to be allowed.
-* `cidr` A list of IP address of the other end (i.e. not your instance) to affect, or a valid network CIDR.
+* `cidr` A list of CIDR notations of the other end to affect.
 * `direction` Will this rule affect ingress traffic
 * `label` A string that will be the displayed name/reference for this rule (optional)
 
