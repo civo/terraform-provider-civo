@@ -13,7 +13,8 @@ Provides a Civo Kubernetes cluster resource. This can be used to create, delete,
 ## Example Usage
 
 ```hcl
-data "civo_instances_size" "small" {
+# Query xsmall instance size
+data "civo_instances_size" "xsmall" {
     filter {
         key = "type"
         values = ["kubernetes"]
@@ -25,11 +26,12 @@ data "civo_instances_size" "small" {
     }
 }
 
+# Create a cluster
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
-    applications = "Portainer,Traefik"
-    num_target_nodes = 4
-    target_nodes_size = element(data.civo_instances_size.small.sizes, 0).name
+    applications = "Portainer,Linkerd:Linkerd & Jaeger"
+    num_target_nodes = 2
+    target_nodes_size = element(data.civo_instances_size.xsmall.sizes, 0).name
 }
 ```
 
