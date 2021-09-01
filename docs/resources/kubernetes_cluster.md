@@ -56,23 +56,53 @@ $ civo kubernetes sizes
 
 ### Kubernetes Terraform Provider Example
 
-The cluster's kubeconfig is exported as an attribute allowing you to use it with the [Kubernetes Terraform provider](https://www.terraform.io/docs/providers/kubernetes/index.html). For example:
+The cluster's kubeconfig is exported as an attribute allowing you to use it with the [Kubernetes Terraform provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs). For example:
 
 ```hcl
+# Query xsmall instance size
+data "civo_instances_size" "xsmall" {
+    filter {
+        key = "type"
+        values = ["kubernetes"]
+    }
 
-resource "civo_kubernetes_cluster" "my-cluster" {
-    name = "my-cluster"
-    region = "NYC1"
-    applications = "Portainer,Traefik"
-    num_target_nodes = 4
-    target_nodes_size = element(data.civo_instances_size.small.sizes, 0).name
+    sort {
+        key = "ram"
+        direction = "asc"
+    }
 }
 
+# Create a cluster
+resource "civo_kubernetes_cluster" "my-cluster" {
+    name = "my-cluster"
+    applications = "Portainer,Linkerd:Linkerd & Jaeger"
+    num_target_nodes = 2
+    target_nodes_size = element(data.civo_instances_size.xsmall.sizes, 0).name
+}
+
+# Define Kubernetes provider
 provider "kubernetes" {
   host  = civo_kubernetes_cluster.my-cluster.api_endpoint
   client_certificate     = base64decode(yamldecode(civo_kubernetes_cluster.my-cluster.kubeconfig).users[0].user.client-certificate-data)
   client_key             = base64decode(yamldecode(civo_kubernetes_cluster.my-cluster.kubeconfig).users[0].user.client-key-data)
   cluster_ca_certificate = base64decode(yamldecode(civo_kubernetes_cluster.my-cluster.kubeconfig).clusters[0].cluster.certificate-authority-data)
+}
+
+# Query all namespaces in cluster
+data "kubernetes_all_namespaces" "allns" {
+    depends_on = [
+      civo_kubernetes_cluster.my-cluster
+    ]
+}
+
+# Display all namespaces
+output "all-ns" {
+  value = data.kubernetes_all_namespaces.allns.namespaces
+}
+
+# Check if "kube-system" namespace if present and display the result
+output "ns-present" {
+  value = contains(data.kubernetes_all_namespaces.allns.namespaces, "kube-system")
 }
 ```
 
