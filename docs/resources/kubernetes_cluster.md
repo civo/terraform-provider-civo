@@ -152,10 +152,10 @@ In addition to the arguments listed above, the following additional attributes a
 * `installed_applications` - A unique ID that can be used to identify and reference a Kubernetes cluster.
     - `application` - The name of the application
     - `version` - The version of the application
-    - `installed` - if installed or not
+    - `installed` - If installed or not
     - `category` - The category of the application
 * `status` - The status of Kubernetes cluster.
-* `ready` -If the Kubernetes cluster is ready.
+* `ready` - If the Kubernetes cluster is ready.
 * `kubeconfig` - A representation of the Kubernetes cluster's kubeconfig in yaml format.
 * `api_endpoint` - The base URL of the API server on the Kubernetes master node.
 * `master_ip` - The Ip of the Kubernetes master node.
