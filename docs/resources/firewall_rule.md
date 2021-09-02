@@ -97,12 +97,13 @@ resource "civo_firewall_rule" "custom_port" {
 The following arguments are supported:
 
 * `firewall_id` - (Required) The Firewall id
-* `protocol` (Required) This may be one of "tcp", "udp", or "icmp".
-* `start_port` (Required) The start port where traffic to be allowed.
-* `end_port` (Required) The end port where traffic to be allowed.
-* `cidr` (Required) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address.
-* `direction` (Required) will this rule affect ingress traffic
-* `label` (Optional) a string that will be the displayed name/reference for this rule (optional)
+* `protocol` - (Required) This may be one of "tcp", "udp", or "icmp".
+* `start_port` - (Required) The start port where traffic to be allowed.
+* `end_port` - (Required) The end port where traffic to be allowed.
+* `cidr` - (Required) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address.
+* `direction` - (Required) Will this rule affect ingress traffic
+* `label` - (Optional) A string that will be the displayed name/reference for this rule
+* `region` - (Optional) Region for the rule, if is not defined we use the global defined in the provider
 
 ## Attributes Reference
 
@@ -110,12 +111,12 @@ The following attributes are exported:
 
 * `id` - A unique ID that can be used to identify and reference a Firewall Rule.
 * `firewall_id` - The Firewall id
-* `protocol` This may be one of "tcp", "udp", or "icmp".
-* `start_port` The start port where traffic to be allowed.
-* `end_port` The end port where traffic to be allowed.
-* `cidr` A list of CIDR notations of the other end to affect.
-* `direction` Will this rule affect ingress traffic
-* `label` A string that will be the displayed name/reference for this rule (optional)
+* `protocol` - This may be one of "tcp", "udp", or "icmp".
+* `start_port` - The start port where traffic to be allowed.
+* `end_port` - The end port where traffic to be allowed.
+* `cidr` - A list of CIDR notations of the other end to affect.
+* `direction` - Will this rule affect ingress traffic
+* `label` - A string that will be the displayed name/reference for this rule
 
 ## Import
 
