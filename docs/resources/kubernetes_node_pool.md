@@ -33,7 +33,7 @@ The following arguments are supported:
 
 * `cluster_id` - (Required) The ID of the Kubernetes cluster to which the node pool is associated.
 * `region` - (Required) The region of the node pool, has to match that of the cluster.
-* `target_nodes_size` - (Optional) The size of each node.
+* `target_nodes_size` - (Optional) The size of each node (The default is currently g3.k3s.medium).
 * `num_target_nodes` - (Optional) The number of instances to create (The default at the time of writing is 3).
 
 ## Attributes Reference
