@@ -13,10 +13,19 @@ Provides a Civo volume which can be attached to a Instance in order to provide e
 ## Example Usage
 
 ```hcl
+# Get network
+data "civo_network" "default_network" {
+    label = "Default"
+}
+
+# Create volume
 resource "civo_volume" "db" {
-     name = "backup-data"
-     size_gb = 60
-     bootable = false
+    name = "backup-data"
+    size_gb = 5
+    network_id = data.civo_network.default_network.id
+    depends_on = [
+      data.civo_network.default_network
+    ]
 }
 ```
 
@@ -27,6 +36,7 @@ The following arguments are supported:
 * `name` - (Required) A name that you wish to use to refer to this volume.
 * `size_gb` - (Required) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes.
 * `network_id` - (Required) The network that the volume belongs to.
+* `region` - (Optional) The region for the volume, if not declare we use the region in declared in the provider.
 
 ## Attributes Reference
 
