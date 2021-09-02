@@ -94,6 +94,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `id` - A unique ID that can be used to identify and reference an instance.
 * `hostname` - The Instance hostname.
 * `reverse_dns` - A fully qualified domain name.
 * `size` - The name of the size.
