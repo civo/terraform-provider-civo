@@ -6,7 +6,7 @@ description: |-
   Provides a Civo Kubernetes cluster node pool resource.
 ---
 
-# civo\_kubernetes\_node_\pool
+# civo\_kubernetes\_node\_pool
 
 Provides a Civo Kubernetes node pool resource. While the default node pool must be defined in the civo_kubernetes_cluster resource, this resource can be used to add additional ones to a cluster.
 
