@@ -24,7 +24,7 @@ resource "civo_network" "custom_net" {
 The following arguments are supported:
 
 * `label` - (Required) The Network label
-
+* `region` - (Optional) The region of the network
 
 ## Attributes Reference
 
