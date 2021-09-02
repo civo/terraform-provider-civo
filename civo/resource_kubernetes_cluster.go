@@ -70,6 +70,11 @@ func resourceKubernetesCluster() *schema.Resource {
 					"'civo kubernetes applications ls'." +
 					"If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik.",
 			},
+			"firewall_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The existing firewall ID to use for this cluster",
+			},
 			// Computed resource
 			"instances":              instanceSchema(),
 			"installed_applications": applicationSchema(),
@@ -277,6 +282,20 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 		config.Applications = ""
 	}
 
+	if attr, ok := d.GetOk("firewall_id"); ok {
+		firewallID := attr.(string)
+		firewall, err := apiClient.FindFirewall(firewallID)
+		if err != nil {
+			return fmt.Errorf("[ERR] unable to find firewall - %s", err)
+		}
+
+		if firewall.NetworkID != config.NetworkID {
+			return fmt.Errorf("[ERR] firewall %s is not part of network %s", firewall.ID, config.NetworkID)
+		}
+
+		config.InstanceFirewall = firewallID
+	}
+
 	log.Printf("[INFO] creating a new kubernetes cluster %s", d.Get("name").(string))
 	log.Printf("[INFO] kubernertes config %+v", config)
 	resp, err := apiClient.NewKubernetesClusters(config)
@@ -344,6 +363,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("dns_entry", resp.DNSEntry)
 	// d.Set("built_at", resp.BuiltAt.UTC().String())
 	d.Set("created_at", resp.CreatedAt.UTC().String())
+	d.Set("firewall_id", resp.FirewallID)
 
 	if err := d.Set("instances", flattenInstances(resp.Instances)); err != nil {
 		return fmt.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
@@ -370,6 +390,14 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	config := &civogo.KubernetesClusterConfig{}
+
+	if d.HasChange("network_id") {
+		return fmt.Errorf("[ERR] Network change (%q) for existing cluster is not available at this moment", "network_id")
+	}
+
+	if d.HasChange("firewall_id") {
+		return fmt.Errorf("[ERR] Firewall change (%q) for existing cluster is not available at this moment", "firewall_id")
+	}
 
 	if d.HasChange("target_nodes_size") {
 		errMsg := []string{
