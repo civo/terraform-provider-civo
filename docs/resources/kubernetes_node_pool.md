@@ -23,6 +23,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 resource "civo_kubernetes_node_pool" "front-end" {
    cluster_id = civo_kubernetes_cluster.my-cluster.id
    num_target_nodes = 4
+   region = "LON1"
 }
 
 ```
