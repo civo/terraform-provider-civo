@@ -87,7 +87,7 @@ The following arguments are supported:
 * `notes` - (Optional) Add some notes to the instance.
 * `sshkey_id` - (Optional) The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field).
 * `firewall_id` - (Optional) The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all).
-* `script` - (Optional) the contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, read/write/executable only by root and then will be executed at the end of the cloud initialization
+* `script` - (Optional) The contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, read/write/executable only by root and then will be executed at the end of the cloud initialization
 * `tags` - (Optional) An optional list of tags, represented as a key, value pair.
 
 ## Attributes Reference
@@ -113,7 +113,7 @@ The following attributes are exported:
 * `private_ip` - The private ip.
 * `public_ip` - The public ip.
 * `status` - The status of the instance
-* `script` - the contents of a script uploaded
+* `script` - The contents of a script uploaded
 * `created_at` - The date of creation of the instance
 
 ## Import
