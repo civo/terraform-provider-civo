@@ -8,7 +8,7 @@ description: |-
 
 # civo\_dns_domain_name
 
-Provides a Civo dns domain name resource.
+Provides a Civo DNS domain name resource.
 
 ## Example Usage
 

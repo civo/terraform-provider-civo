@@ -8,10 +8,7 @@ description: |-
 
 # civo\_firewall_rule
 
-Provides a Civo Cloud Firewall Rule resource. 
-This can be used to create, modify, and delete Firewalls Rules.
-This resource don't have an update option because the backend don't have the
-support for that, so in this case we use ForceNew for all object in the resource.
+Provides a Civo Firewall Rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because the backend don't have the support for that, so in this case we use ForceNew for all object in the resource.
 
 ## Example Usage
 

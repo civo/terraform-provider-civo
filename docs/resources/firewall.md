@@ -8,8 +8,7 @@ description: |-
 
 # civo\_firewall
 
-Provides a Civo Cloud Firewall resource. This can be used to create,
-modify, and delete Firewalls.
+Provides a Civo Firewall resource. This can be used to create, modify, and delete firewalls.
 
 ## Example Usage
 

@@ -8,7 +8,7 @@ description: |-
 
 # civo\_volume
 
-Provides a Civo volume which can be attached to a Instance in order to provide expanded storage.
+Provides a Civo Volume which can be attached to an instance in order to provide expanded storage.
 
 ## Example Usage
 

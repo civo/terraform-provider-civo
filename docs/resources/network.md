@@ -8,8 +8,7 @@ description: |-
 
 # civo\_network
 
-Provides a Civo Network resource. This can be used to create,
-modify, and delete Networks.
+Provides a Civo Network resource. This can be used to create, modify, and delete networks.
 
 ## Example Usage
 

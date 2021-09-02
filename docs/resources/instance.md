@@ -8,8 +8,7 @@ description: |-
 
 # civo\_instance
 
-Provides a Civo Instance resource. This can be used to create,
-modify, and delete Instances.
+Provides a Civo Instance resource. This can be used to create, modify, and delete instances.
 
 ## Example Usage
 
