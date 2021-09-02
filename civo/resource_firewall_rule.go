@@ -52,12 +52,11 @@ func resourceFirewallRule() *schema.Resource {
 				ValidateFunc: validation.NoZeroValues,
 			},
 			"cidr": {
-				Type:         schema.TypeSet,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)",
-				Elem:         &schema.Schema{Type: schema.TypeString},
-				ValidateFunc: validation.IsCIDR,
+				Type:        schema.TypeSet,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"direction": {
 				Type:        schema.TypeString,
