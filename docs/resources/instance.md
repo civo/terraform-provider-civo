@@ -43,7 +43,7 @@ The following arguments are supported:
 * `hostname` - (Required) The Instance hostname, if is not declare the provider will generate one for you
 * `reverse_dns` - (Optional) A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified).
 * `size` - (Optional) The name of the size, from the current list, e.g. g3.k3s.small (required).
-* `public_ip_required` - (Optional) This should be either `create`, `none` or `move_ip_from:intances_id`.
+* `public_ip_required` - (Optional) This should be either `create` or `none` (default: `create`).
 * `network_id` - (Optional) This must be the ID of the network from the network listing (optional; default network used when not specified).
 * `template` - (Optional) The ID for the template to use to build the instance.
 * `initial_user` - (Optional) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo).
@@ -63,7 +63,7 @@ The following attributes are exported:
 * `cpu_cores` - Total cpu of the inatance.
 * `ram_mb` - Total ram of the instance.
 * `disk_gb` - The size of the disk.
-* `public_ip_requiered` - This should be either `create`, `none` or `move_ip_from:intances_id`.
+* `public_ip_requiered` - This should be either `create` or `none`.
 * `network_id` - This will be the ID of the network.
 * `template` - The ID for the template to used to build the instance.
 * `initial_user` - The name of the initial user created on the server.
