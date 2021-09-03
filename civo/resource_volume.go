@@ -70,6 +70,11 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 		config.Region = currentRegion
 	}
 
+	_, err := apiClient.FindNetwork(config.NetworkID)
+	if err != nil {
+		return fmt.Errorf("[ERR] Unable to find network ID %q in %q region", config.NetworkID, config.Region)
+	}
+
 	volume, err := apiClient.NewVolume(config)
 	if err != nil {
 		return fmt.Errorf("[ERR] failed to create a new volume: %s", err)
