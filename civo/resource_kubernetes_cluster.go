@@ -354,7 +354,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("num_target_nodes", resp.NumTargetNode)
 	d.Set("target_nodes_size", resp.TargetNodeSize)
 	d.Set("kubernetes_version", resp.KubernetesVersion)
-	d.Set("tags", strings.Join(resp.Tags, ", "))
+	d.Set("tags", strings.Join(resp.Tags, " ")) // space separated tags
 	d.Set("status", resp.Status)
 	d.Set("ready", resp.Ready)
 	d.Set("kubeconfig", resp.KubeConfig)
