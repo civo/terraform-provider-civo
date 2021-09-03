@@ -61,9 +61,12 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 		Name:          d.Get("name").(string),
 		SizeGigabytes: d.Get("size_gb").(int),
 		NetworkID:     d.Get("network_id").(string),
+
+		// if "region" is set at provider level, use it
+		Region: apiClient.Region,
 	}
 
-	// overwrite the region if is define in the datasource
+	// if "region" is set in configuration file, use it
 	if region, ok := d.GetOk("region"); ok {
 		currentRegion := region.(string)
 		apiClient.Region = currentRegion

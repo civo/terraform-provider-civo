@@ -19,18 +19,19 @@ func dataSourceNetwork() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				ExactlyOneOf: []string{"id", "label", "region"},
+				AtLeastOneOf: []string{"id", "label", "region"},
 			},
 			"label": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				ExactlyOneOf: []string{"id", "label", "region"},
+				AtLeastOneOf: []string{"id", "label", "region"},
 			},
 			"region": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
+				AtLeastOneOf: []string{"id", "label", "region"},
 			},
 			// Computed resource
 			"name": {
