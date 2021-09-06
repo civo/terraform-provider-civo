@@ -73,6 +73,7 @@ func resourceKubernetesCluster() *schema.Resource {
 			"firewall_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The existing firewall ID to use for this cluster",
 			},
 			// Computed resource
