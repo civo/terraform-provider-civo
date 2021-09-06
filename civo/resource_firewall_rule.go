@@ -109,12 +109,17 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 		cird[i] = tfCird.(string)
 	}
 
+	direction := d.Get("direction").(string)
+	if direction == "" {
+		direction = "ingress"
+	}
+
 	log.Printf("[INFO] configuring a new firewall rule for firewall %s", d.Get("firewall_id").(string))
 	config := &civogo.FirewallRuleConfig{
 		FirewallID: d.Get("firewall_id").(string),
 		Protocol:   d.Get("protocol").(string),
 		StartPort:  d.Get("start_port").(string),
-		Direction:  d.Get("direction").(string),
+		Direction:  direction,
 		Cidr:       cird,
 	}
 
