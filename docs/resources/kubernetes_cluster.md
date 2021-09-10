@@ -3,12 +3,12 @@
 page_title: "civo_kubernetes_cluster Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides a Civo Kubernetes cluster resource. This can be used to create, delete, and modify clusters.
 ---
 
 # civo_kubernetes_cluster (Resource)
 
-
+Provides a Civo Kubernetes cluster resource. This can be used to create, delete, and modify clusters.
 
 ## Example Usage
 
@@ -40,29 +40,29 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 
 ### Optional
 
-- **applications** (String) a comma separated list of applications to install.Spaces within application names are fine, but shouldn't be either side of the comma.Application names are case-sensitive; the available applications can be listed with the civo CLI:'civo kubernetes applications ls'.If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik.
+- **applications** (String) Comma separated list of applications to install.Spaces within application names are fine, but shouldn't be either side of the comma.Application names are case-sensitive; the available applications can be listed with the civo CLI:'civo kubernetes applications ls'.If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik.
 - **firewall_id** (String) The existing firewall ID to use for this cluster
-- **id** (String) The ID of this resource.
-- **kubernetes_version** (String) the version of k3s to install (optional, the default is currently the latest available)
-- **name** (String) a name for your cluster, must be unique within your account (required)
+- **kubernetes_version** (String) The version of k3s to install (optional, the default is currently the latest available)
+- **name** (String) Name for your cluster, must be unique within your account (required)
 - **network_id** (String) The network for the cluster, if not declare we use the default one
-- **num_target_nodes** (Number) the number of instances to create (optional, the default at the time of writing is 3)
+- **num_target_nodes** (Number) The number of instances to create (optional, the default at the time of writing is 3)
 - **region** (String) The region for the cluster, if not declare we use the region in declared in the provider
-- **tags** (String) a space separated list of tags, to be used freely as required (optional)
-- **target_nodes_size** (String) the size of each node (optional, the default is currently g2.k3s.medium)
+- **tags** (String) Space separated list of tags, to be used freely as required (optional)
+- **target_nodes_size** (String) The size of each node (optional, the default is currently g2.k3s.medium)
 
 ### Read-Only
 
-- **api_endpoint** (String)
-- **created_at** (String)
-- **dns_entry** (String)
+- **api_endpoint** (String) The API server endpoint of the cluster
+- **created_at** (String) The timestamp when the cluster was created
+- **dns_entry** (String) The DNS name of the cluster
+- **id** (String) The ID of this resource.
 - **installed_applications** (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
 - **instances** (List of Object) (see [below for nested schema](#nestedatt--instances))
-- **kubeconfig** (String, Sensitive)
-- **master_ip** (String)
+- **kubeconfig** (String, Sensitive) The kubeconfig of the cluster
+- **master_ip** (String) The IP address of the master node
 - **pools** (List of Object) (see [below for nested schema](#nestedatt--pools))
-- **ready** (Boolean)
-- **status** (String)
+- **ready** (Boolean) When cluster is ready, this will return `true`
+- **status** (String) Status of the cluster
 
 <a id="nestedatt--installed_applications"></a>
 ### Nested Schema for `installed_applications`
