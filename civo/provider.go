@@ -16,12 +16,14 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_TOKEN", ""),
+				Description: "This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.",
 			},
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_REGION", ""),
+				Description: "If region is not set, then no region will be used and them you need expensify in every resource even if you expensify here you can overwrite in a resource.",
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
