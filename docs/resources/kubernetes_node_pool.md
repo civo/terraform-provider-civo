@@ -3,12 +3,12 @@
 page_title: "civo_kubernetes_node_pool Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides a Civo Kubernetes Node Pool resource. While the default node pool must be defined in the civo_kubernetes_cluster resource, this resource can be used to add additional ones to a cluster.
 ---
 
 # civo_kubernetes_node_pool (Resource)
 
-
+Provides a Civo Kubernetes Node Pool resource. While the default node pool must be defined in the `civo_kubernetes_cluster` resource, this resource can be used to add additional ones to a cluster.
 
 ## Example Usage
 
@@ -46,13 +46,16 @@ resource "civo_kubernetes_node_pool" "front-end" {
 
 ### Required
 
-- **cluster_id** (String) The id of your cluster (required)
-- **region** (String) The region of the node pool, has to match that of the cluster (required)
+- **cluster_id** (String) The ID of your cluster
+- **region** (String) The region of the node pool, has to match that of the cluster
 
 ### Optional
 
-- **id** (String) The ID of this resource.
 - **num_target_nodes** (Number) the number of instances to create (optional, the default at the time of writing is 3)
 - **target_nodes_size** (String) the size of each node (optional, the default is currently g2.k3s.medium)
+
+### Read-Only
+
+- **id** (String) The ID of this resource.
 
 

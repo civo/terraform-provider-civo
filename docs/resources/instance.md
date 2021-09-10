@@ -52,7 +52,7 @@ resource "civo_instance" "foo" {
 ### Optional
 
 - **firewall_id** (String) The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)
-- **hostname** (String) A fully qualified domain name that should be set as the instance's hostname (required)
+- **hostname** (String) A fully qualified domain name that should be set as the instance's hostname
 - **initial_user** (String) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)
 - **network_id** (String) This must be the ID of the network from the network listing (optional; default network used when not specified)
 - **notes** (String) Add some notes to the instance
