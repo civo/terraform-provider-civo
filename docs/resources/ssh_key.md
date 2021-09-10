@@ -3,12 +3,12 @@
 page_title: "civo_ssh_key Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides a Civo SSH Key resource to allow you to manage SSH keys for instance access. Keys created with this resource can be referenced in your instance configuration via their ID.
 ---
 
 # civo_ssh_key (Resource)
 
-
+Provides a Civo SSH Key resource to allow you to manage SSH keys for instance access. Keys created with this resource can be referenced in your instance configuration via their ID.
 
 ## Example Usage
 
@@ -27,12 +27,9 @@ resource "civo_ssh_key" "my-user"{
 - **name** (String) a string that will be the reference for the SSH key.
 - **public_key** (String) a string containing the SSH public key.
 
-### Optional
-
-- **id** (String) The ID of this resource.
-
 ### Read-Only
 
 - **fingerprint** (String) a string containing the SSH finger print.
+- **id** (String) The ID of this resource.
 
 
