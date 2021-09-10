@@ -14,14 +14,15 @@ import (
 // this resource don't have an update option because the backend don't have the
 // support for that, so in this case we use ForceNew for all object in the resource
 func resourceFirewallRule() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo Firewall Rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because the backend don't have the support for that, so in this case we use ForceNew for all object in the resource.",
 		Schema: map[string]*schema.Schema{
 			"firewall_id": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: utils.ValidateName,
+				Description:  "The Firewall ID",
 			},
 			"protocol": {
 				Type:        schema.TypeString,
@@ -83,6 +84,12 @@ func resourceFirewallRule() *schema.Resource {
 				ForceNew:     true,
 				Description:  "The region for this rule",
 				ValidateFunc: validation.StringIsNotEmpty,
+			},
+			// Computed resource
+			"id": {
+				Description: "The ID of this resource.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 		Create: resourceFirewallRuleCreate,

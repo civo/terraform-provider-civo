@@ -3,12 +3,12 @@
 page_title: "civo_firewall_rule Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides a Civo Firewall Rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because the backend don't have the support for that, so in this case we use ForceNew for all object in the resource.
 ---
 
 # civo_firewall_rule (Resource)
 
-
+Provides a Civo Firewall Rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because the backend don't have the support for that, so in this case we use ForceNew for all object in the resource.
 
 ## Example Usage
 
@@ -74,16 +74,19 @@ resource "civo_firewall_rule" "custom_port" {
 ### Required
 
 - **cidr** (Set of String) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
-- **firewall_id** (String)
+- **firewall_id** (String) The Firewall ID
 
 ### Optional
 
 - **direction** (String) Will this rule affect ingress traffic
 - **end_port** (String) The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)
-- **id** (String) The ID of this resource.
 - **label** (String) A string that will be the displayed name/reference for this rule (optional)
 - **protocol** (String) The protocol choice from tcp, udp or icmp (the default if unspecified is tcp)
 - **region** (String) The region for this rule
 - **start_port** (String) The start of the port range to configure for this rule (or the single port if required)
+
+### Read-Only
+
+- **id** (String) The ID of this resource.
 
 
