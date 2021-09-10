@@ -3,12 +3,12 @@
 page_title: "civo_firewall Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides a Civo Firewall resource. This can be used to create, modify, and delete firewalls.
 ---
 
 # civo_firewall (Resource)
 
-
+Provides a Civo Firewall resource. This can be used to create, modify, and delete firewalls.
 
 ## Example Usage
 
@@ -30,12 +30,15 @@ resource "civo_firewall" "www" {
 
 ### Required
 
-- **name** (String)
+- **name** (String) The firewall name
 
 ### Optional
 
+- **network_id** (String) The firewall network, if is not defined we use the default network
+- **region** (String) The firewall region, if is not defined we use the global defined in the provider
+
+### Read-Only
+
 - **id** (String) The ID of this resource.
-- **network_id** (String)
-- **region** (String)
 
 
