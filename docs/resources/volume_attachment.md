@@ -3,12 +3,12 @@
 page_title: "civo_volume_attachment Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Manages volume attachment/detachment to an instance.
 ---
 
 # civo_volume_attachment (Resource)
 
-
+Manages volume attachment/detachment to an instance.
 
 ## Example Usage
 
@@ -64,12 +64,15 @@ resource "civo_volume_attachment" "foobar" {
 
 ### Required
 
-- **instance_id** (String)
-- **volume_id** (String)
+- **instance_id** (String) The ID of target instance for attachment
+- **volume_id** (String) The ID of target volume for attachment
 
 ### Optional
 
-- **id** (String) The ID of this resource.
 - **region** (String) The region for the volume attachment
+
+### Read-Only
+
+- **id** (String) The ID of this resource.
 
 
