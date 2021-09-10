@@ -3,12 +3,12 @@
 page_title: "civo_network Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides a Civo Network resource. This can be used to create, modify, and delete networks.
 ---
 
 # civo_network (Resource)
 
-
+Provides a Civo Network resource. This can be used to create, modify, and delete networks.
 
 ## Example Usage
 
@@ -27,12 +27,12 @@ resource "civo_network" "custom_net" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
 - **region** (String) Name of the region
 
 ### Read-Only
 
-- **default** (Boolean)
-- **name** (String)
+- **default** (Boolean) If the network is default, this will be `true`
+- **id** (String) The ID of this resource
+- **name** (String) The name of the network
 
 
