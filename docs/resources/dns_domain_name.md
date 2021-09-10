@@ -3,12 +3,12 @@
 page_title: "civo_dns_domain_name Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides a Civo DNS domain name resource.
 ---
 
 # civo_dns_domain_name (Resource)
 
-
+Provides a Civo DNS domain name resource.
 
 
 
@@ -17,14 +17,11 @@ description: |-
 
 ### Required
 
-- **name** (String) A fully qualified domain name
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- **name** (String) The name of the domain
 
 ### Read-Only
 
-- **account_id** (String)
+- **account_id** (String) The account ID of the domain
+- **id** (String) The ID of this resource.
 
 
