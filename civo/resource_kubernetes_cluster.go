@@ -23,7 +23,7 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				Description:  "Name for your cluster, must be unique within your account (required)",
+				Description:  "Name for your cluster, must be unique within your account",
 				ValidateFunc: utils.ValidateNameSize,
 			},
 			"region": {

@@ -29,7 +29,7 @@ func resourceInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				Description:  "A fully qualified domain name that should be set as the instance's hostname (required)",
+				Description:  "A fully qualified domain name that should be set as the instance's hostname",
 				ForceNew:     true,
 				ValidateFunc: utils.ValidateNameSize,
 			},
