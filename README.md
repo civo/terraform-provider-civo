@@ -1,16 +1,11 @@
-Terraform Provider ![Travis build](https://travis-ci.org/civo/terraform-provider-civo.svg?branch=master)
+Terraform Provider
 ==================
-
-- Website: https://www.terraform.io
-- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- [![Build Status](https://github.com/civo/terraform-provider-civo/workflows/Go/badge.svg)](https://github.com/civo/terraform-provider-civo/actions)
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
 Requirements
 ------------
 
 -   [Terraform](https://www.terraform.io/downloads.html) 0.13.x
--   [Go](https://golang.org/doc/install) 1.14.x (to build the provider plugin)
+-   [Go](https://golang.org/doc/install) 1.14.x or later (to build the provider plugin)
 
 Building The Provider
 ---------------------
@@ -32,14 +27,13 @@ $ make build
 Using the provider
 ----------------------
 
-When the provider is out of beta the documentation will be at [Civo Provider documentation](https://registry.terraform.io/providers/civo/civo/latest/docs),
-but during the beta the best resource for learning about it is [this guide](https://www.civo.com/learn/using-the-civo-terraform-provider)
+The documentation is available at [Civo Provider documentation](https://registry.terraform.io/providers/civo/civo/latest/docs)
 
 
 Developing the Provider
 ---------------------------
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.11+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.14.x (or later) is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
@@ -71,3 +65,8 @@ $ make testacc TESTARGS='-run=TestAccCivoDomain_Basic'
 ```
 
 For information about writing acceptance tests, see the main Terraform [contributing guide](https://github.com/hashicorp/terraform/blob/master/.github/CONTRIBUTING.md#writing-acceptance-tests).
+
+Documenting the Provider
+---------------------------
+
+As of 10th September 2021, we decided to use [tfplugindocs](https://github.com/hashicorp/terraform-plugin-docs) to auto-generate [docs](docs) from the provider code and [examples](examples). For reference, you can see an example of the templates and output in [paultyng/terraform-provider-unifi](https://github.com/paultyng/terraform-provider-unifi) and browse the generated docs in the [Terraform Registry](https://registry.terraform.io/providers/paultyng/unifi/latest/docs).
