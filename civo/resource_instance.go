@@ -18,6 +18,7 @@ import (
 // and with it you can handle the instances created with Terraform
 func resourceInstance() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides a Civo Instance resource. This can be used to create, modify, and delete instances.",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:        schema.TypeString,
@@ -107,50 +108,61 @@ func resourceInstance() *schema.Resource {
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			// Computed resource
+			"id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The ID of this resource.",
+			},
 			"cpu_cores": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Instance's CPU cores",
 			},
 			"ram_mb": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Instance's RAM (MB)",
 			},
 			"disk_gb": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Instance's disk (GB)",
 			},
 			"source_type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's source type",
 			},
 			"source_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's source ID",
 			},
 			"initial_password": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "Initial password for login",
 			},
 			"private_ip": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's private IP address",
 			},
 			"public_ip": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"pseudo_ip": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's public IP address",
 			},
 			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Instance's status",
 			},
 			"created_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Timestamp when the instance was created",
 			},
 		},
 		Create: resourceInstanceCreate,
@@ -341,7 +353,6 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("public_ip", resp.PublicIP)
 	d.Set("network_id", resp.NetworkID)
 	d.Set("firewall_id", resp.FirewallID)
-	// d.Set("pseudo_ip", resp.PseudoIP)
 	d.Set("status", resp.Status)
 	d.Set("script", resp.Script)
 	d.Set("created_at", resp.CreatedAt.UTC().String())

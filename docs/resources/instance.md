@@ -3,12 +3,12 @@
 page_title: "civo_instance Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides a Civo Instance resource. This can be used to create, modify, and delete instances.
 ---
 
 # civo_instance (Resource)
 
-
+Provides a Civo Instance resource. This can be used to create, modify, and delete instances.
 
 ## Example Usage
 
@@ -53,7 +53,6 @@ resource "civo_instance" "foo" {
 
 - **firewall_id** (String) The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)
 - **hostname** (String) A fully qualified domain name that should be set as the instance's hostname (required)
-- **id** (String) The ID of this resource.
 - **initial_user** (String) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)
 - **network_id** (String) This must be the ID of the network from the network listing (optional; default network used when not specified)
 - **notes** (String) Add some notes to the instance
@@ -68,16 +67,16 @@ resource "civo_instance" "foo" {
 
 ### Read-Only
 
-- **cpu_cores** (Number)
-- **created_at** (String)
-- **disk_gb** (Number)
-- **initial_password** (String, Sensitive)
-- **private_ip** (String)
-- **pseudo_ip** (String)
-- **public_ip** (String)
-- **ram_mb** (Number)
-- **source_id** (String)
-- **source_type** (String)
-- **status** (String)
+- **cpu_cores** (Number) Instance's CPU cores
+- **created_at** (String) Timestamp when the instance was created
+- **disk_gb** (Number) Instance's disk (GB)
+- **id** (String) The ID of this resource.
+- **initial_password** (String, Sensitive) Initial password for login
+- **private_ip** (String) Instance's private IP address
+- **public_ip** (String) Instance's public IP address
+- **ram_mb** (Number) Instance's RAM (MB)
+- **source_id** (String) Instance's source ID
+- **source_type** (String) Instance's source type
+- **status** (String) Instance's status
 
 
