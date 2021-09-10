@@ -47,4 +47,11 @@ resource "civo_volume" "db" {
 - **id** (String) The ID of this resource.
 - **mount_point** (String) The mount point of the volume (from instance's perspective)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# using ID
+terraform import civo_volume.db 506f78a4-e098-11e5-ad9f-000f53306ae1
+```

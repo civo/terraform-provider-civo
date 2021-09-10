@@ -31,4 +31,11 @@ resource "civo_dns_domain_name" "main" {
 - **account_id** (String) The account ID of the domain
 - **id** (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# using domain name
+terraform import civo_dns_domain_name.main mydomain.com
+```

@@ -32,4 +32,11 @@ resource "civo_ssh_key" "my-user"{
 - **fingerprint** (String) a string containing the SSH finger print.
 - **id** (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# using ID
+terraform import civo_ssh_key.mykey 87ca2ee4-57d3-4420-b9b6-411b0b4b2a0e
+```

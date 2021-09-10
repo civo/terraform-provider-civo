@@ -35,4 +35,11 @@ resource "civo_network" "custom_net" {
 - **id** (String) The ID of this resource
 - **name** (String) The name of the network
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# using ID
+terraform import civo_network.custom_net b8ecd2ab-2267-4a5e-8692-cbf1d32583e3
+```
