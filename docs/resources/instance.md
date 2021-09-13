@@ -59,7 +59,7 @@ resource "civo_instance" "foo" {
 - **public_ip_required** (String) This should be either 'none' or 'create' (default: 'create')
 - **region** (String) The region for the instance, if not declare we use the region in declared in the provider
 - **reverse_dns** (String) A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified)
-- **script** (String) the contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, read/write/executable only by root and then will be executed at the end of the cloud initialization
+- **script** (String) The contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, read/write/executable only by root and then will be executed at the end of the cloud initialization
 - **size** (String) The name of the size, from the current list, e.g. g3.xsmall
 - **sshkey_id** (String) The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)
 - **tags** (Set of String) An optional list of tags, represented as a key, value pair

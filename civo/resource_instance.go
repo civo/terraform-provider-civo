@@ -103,7 +103,7 @@ func resourceInstance() *schema.Resource {
 			"script": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Description: "the contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, " +
+				Description: "The contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, " +
 					"read/write/executable only by root and then will be executed at the end of the cloud initialization",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},

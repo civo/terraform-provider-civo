@@ -27,7 +27,7 @@ resource "civo_network" "custom_net" {
 
 ### Optional
 
-- **region** (String) Name of the region
+- **region** (String) The region of the network
 
 ### Read-Only
 

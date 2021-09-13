@@ -40,7 +40,7 @@ resource "civo_volume" "db" {
 
 ### Optional
 
-- **region** (String) The region for the volume
+- **region** (String) The region for the volume, if not declare we use the region in declared in the provider.
 
 ### Read-Only
 

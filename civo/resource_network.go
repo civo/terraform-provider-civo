@@ -23,7 +23,7 @@ func resourceNetwork() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of the region",
+				Description: "The region of the network",
 			},
 			// Computed resource
 			"name": {

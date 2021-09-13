@@ -44,7 +44,7 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "the size of each node (optional, the default is currently g2.k3s.medium)",
+				Description: "the size of each node (optional, the default is currently g3.k3s.medium)",
 			},
 			"id": {
 				Type:        schema.TypeString,

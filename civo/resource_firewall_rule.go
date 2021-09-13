@@ -29,7 +29,7 @@ func resourceFirewallRule() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "The protocol choice from tcp, udp or icmp (the default if unspecified is tcp)",
+				Description: "The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)",
 				ValidateFunc: validation.StringInSlice([]string{
 					"tcp",
 					"udp",
@@ -64,7 +64,7 @@ func resourceFirewallRule() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "Will this rule affect ingress traffic",
+				Description: "Will this rule affect ingress traffic (only `ingress` is supported now)",
 				ValidateFunc: validation.StringInSlice([]string{
 					"ingress",
 				}, false),
@@ -74,7 +74,7 @@ func resourceFirewallRule() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				Description:  "A string that will be the displayed name/reference for this rule (optional)",
+				Description:  "A string that will be the displayed name/reference for this rule",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"region": {

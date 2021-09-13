@@ -49,7 +49,7 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "The size of each node (optional, the default is currently g2.k3s.medium)",
+				Description: "The size of each node (optional, the default is currently g3.k3s.medium)",
 			},
 			"kubernetes_version": {
 				Type:        schema.TypeString,
@@ -60,16 +60,19 @@ func resourceKubernetesCluster() *schema.Resource {
 			"tags": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Space separated list of tags, to be used freely as required (optional)",
+				Description: "Space separated list of tags, to be used freely as required",
 			},
 			"applications": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Description: "Comma separated list of applications to install." +
-					"Spaces within application names are fine, but shouldn't be either side of the comma." +
-					"Application names are case-sensitive; the available applications can be listed with the civo CLI:" +
-					"'civo kubernetes applications ls'." +
+				Description: strings.Join([]string{
+					"Comma separated list of applications to install.",
+					"Spaces within application names are fine, but shouldn't be either side of the comma.",
+					"Application names are case-sensitive; the available applications can be listed with the Civo CLI:",
+					"'civo kubernetes applications ls'.",
 					"If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik.",
+					"For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'.",
+				}, " "),
 			},
 			"firewall_id": {
 				Type:        schema.TypeString,

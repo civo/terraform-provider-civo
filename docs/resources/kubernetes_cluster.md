@@ -40,15 +40,15 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 
 ### Optional
 
-- **applications** (String) Comma separated list of applications to install.Spaces within application names are fine, but shouldn't be either side of the comma.Application names are case-sensitive; the available applications can be listed with the civo CLI:'civo kubernetes applications ls'.If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik.
+- **applications** (String) Comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. Application names are case-sensitive; the available applications can be listed with the Civo CLI: 'civo kubernetes applications ls'. If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik. For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'.
 - **firewall_id** (String) The existing firewall ID to use for this cluster
 - **kubernetes_version** (String) The version of k3s to install (optional, the default is currently the latest available)
 - **name** (String) Name for your cluster, must be unique within your account
 - **network_id** (String) The network for the cluster, if not declare we use the default one
 - **num_target_nodes** (Number) The number of instances to create (optional, the default at the time of writing is 3)
 - **region** (String) The region for the cluster, if not declare we use the region in declared in the provider
-- **tags** (String) Space separated list of tags, to be used freely as required (optional)
-- **target_nodes_size** (String) The size of each node (optional, the default is currently g2.k3s.medium)
+- **tags** (String) Space separated list of tags, to be used freely as required
+- **target_nodes_size** (String) The size of each node (optional, the default is currently g3.k3s.medium)
 
 ### Read-Only
 

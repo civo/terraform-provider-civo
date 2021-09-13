@@ -78,10 +78,10 @@ resource "civo_firewall_rule" "custom_port" {
 
 ### Optional
 
-- **direction** (String) Will this rule affect ingress traffic
+- **direction** (String) Will this rule affect ingress traffic (only `ingress` is supported now)
 - **end_port** (String) The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)
-- **label** (String) A string that will be the displayed name/reference for this rule (optional)
-- **protocol** (String) The protocol choice from tcp, udp or icmp (the default if unspecified is tcp)
+- **label** (String) A string that will be the displayed name/reference for this rule
+- **protocol** (String) The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)
 - **region** (String) The region for this rule
 - **start_port** (String) The start of the port range to configure for this rule (or the single port if required)
 

@@ -28,7 +28,7 @@ func resourceVolume() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The region for the volume",
+				Description: "The region for the volume, if not declare we use the region in declared in the provider.",
 			},
 			"network_id": {
 				Type:        schema.TypeString,
