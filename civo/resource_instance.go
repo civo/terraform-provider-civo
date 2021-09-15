@@ -57,10 +57,19 @@ func resourceInstance() *schema.Resource {
 				Description: "This must be the ID of the network from the network listing (optional; default network used when not specified)",
 			},
 			"template": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The ID for the template to use to build the instance",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"template", "disk_image"},
+				Deprecated:   "\"template\" attribute is deprecated. Moving forward, please use \"disk_image\" attribute.",
+				Description:  "The ID for the template to use to build the instance",
+			},
+			"disk_image": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"template", "disk_image"},
+				Description:  "The ID for the disk image to use to build the instance",
 			},
 			"initial_user": {
 				Type:        schema.TypeString,
@@ -215,6 +224,16 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		config.TemplateID = templateID
 	}
 
+	if attr, ok := d.GetOk("disk_image"); ok {
+		diskImageID := ""
+		findDiskImage, err := apiClient.FindDiskImage(attr.(string))
+		if err != nil {
+			return fmt.Errorf("[ERR] failed to get the disk image: %s", err)
+		}
+		diskImageID = findDiskImage.ID
+		config.TemplateID = diskImageID
+	}
+
 	if attr, ok := d.GetOk("initial_user"); ok {
 		config.InitialUser = attr.(string)
 	}
@@ -330,6 +349,10 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 
 	if _, ok := d.GetOk("template"); ok {
 		d.Set("template", d.Get("template").(string))
+	}
+
+	if _, ok := d.GetOk("disk_image"); ok {
+		d.Set("disk_image", d.Get("disk_image").(string))
 	}
 
 	return nil

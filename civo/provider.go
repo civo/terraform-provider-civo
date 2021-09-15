@@ -26,6 +26,7 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"civo_template":           dataSourceTemplate(),
+			"civo_disk_image":         dataSourceDiskImage(),
 			"civo_kubernetes_version": dataSourceKubernetesVersion(),
 			"civo_kubernetes_cluster": dataSourceKubernetesCluster(),
 			"civo_instances_size":     dataSourceInstancesSize(),
@@ -51,7 +52,6 @@ func Provider() *schema.Provider {
 			"civo_firewall_rule":        resourceFirewallRule(),
 			"civo_loadbalancer":         resourceLoadBalancer(),
 			"civo_ssh_key":              resourceSSHKey(),
-			"civo_template":             resourceTemplate(),
 			"civo_snapshot":             resourceSnapshot(),
 			"civo_kubernetes_cluster":   resourceKubernetesCluster(),
 			"civo_kubernetes_node_pool": resourceKubernetesClusterNodePool(),

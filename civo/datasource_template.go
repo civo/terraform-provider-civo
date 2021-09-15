@@ -33,8 +33,9 @@ func dataSourceTemplate() *schema.Resource {
 		GetRecords:          getTemplates,
 	}
 
-	return datalist.NewResource(dataListConfig)
-
+	sr := datalist.NewResource(dataListConfig)
+	sr.DeprecationMessage = "\"civo_template\" data source is deprecated. Moving forward, please use \"civo_disk_image\" data source."
+	return sr
 }
 
 func getTemplates(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
