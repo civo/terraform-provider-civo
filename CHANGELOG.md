@@ -1,4 +1,20 @@
 
+0.10.11
+=============
+2021-09-17
+
+* Deprecate `civo_template` (#94) (dec823ba)
+* Set firewall rule `direction` to `ingress` if it's not set (#91) (8d2f4c5b)
+* Remove "move IP" from schema and docs (#90) (e7f5333f)
+* Set `firewall_id` in cluster resource as computed (#89) (2bb4fac9)
+* Save cluster tags in space separated format (#87) (e45ce14e)
+* Check network before creating volume (#86) (3fe8f235)
+* Allow network datasource query by ID/label/region (#85) (37e3d50d)
+* Make CIDR required in 'civo_firewall_rule' (#75) (0bbeab84)
+* Check if firewall exists before deleting (#78) (b176aeff)
+* Add firewall support for Kubernetes cluster (#73) (bbcb175b)
+* Volumes management (#69) (0dcfc1c5)
+
 0.10.10
 =============
 2021-08-19

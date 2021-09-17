@@ -1,3 +1,124 @@
+- semver: 0.10.11
+  date: 2021-09-17T09:51:48.442422+01:00
+  packager: ""
+  changes:
+  - commit: dec823bac85b173e98f2664fac4f2c10b27c1db2
+    note: Deprecate `civo_template` (#94)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 8d2f4c5b7412cb8c1ff5f4109f48914799a0da34
+    note: Set firewall rule `direction` to `ingress` if it's not set (#91)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: e7f5333f13d1f62c09f80426ace48e52e347cacb
+    note: Remove "move IP" from schema and docs (#90)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 2bb4fac9f194d0d8030e7be2450c7ac6cc0fda3a
+    note: Set `firewall_id` in cluster resource as computed (#89)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: e45ce14e77cadd2a67e867a9300dbad0263fcc3f
+    note: Save cluster tags in space separated format (#87)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 3fe8f2353515b946810a76f9bd2cb7308d893aa5
+    note: Check network before creating volume (#86)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 37e3d50d0634a70b186b392699808225b4973adb
+    note: Allow network datasource query by ID/label/region (#85)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 0bbeab845ba77fc0d69ea676ec23b4cce0a7a7f1
+    note: |-
+      Make CIDR required in 'civo_firewall_rule' (#75)
+
+      * Make CIDR required in 'civo_firewall_rule'
+
+      * Add CIDR validation to firewall rule resource
+
+      * Remove CIDR validation because ValidateFunc only works for primitive types
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: b176aeff49c47dd65e795fc777552bcc9f2b1820
+    note: Check if firewall exists before deleting (#78)
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: bbcb175b68700d6f08e8f1b1279e8fce7eab1bf8
+    note: |-
+      Add firewall support for Kubernetes cluster (#73)
+
+      * Take existing firewall when creating a cluster
+
+      * Save 'firewall_id' to state and add validations for it
+
+      * Update civogo
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
+  - commit: 0dcfc1c5fecc48f0002c063fe2fc80f8999bb0e3
+    note: |-
+      Volumes management (#69)
+
+      * Remove 'bootable' field (it was OpenStack field)
+
+      * Various fixes for volume resource
+
+      * Add custom volume import function
+      * Add 'network_id' when creating volume
+      * Disable volume resize until it's ready on Civo side
+      * Disable volume 'name' and 'network_id' change
+      * Docs update
+
+      * Set 'network_id' when reading volume
+
+      * Add 'region' field to volume attachment
+    author:
+      name: Zulh
+      email: 75463191+zulh-civo@users.noreply.github.com
+    committer:
+      name: GitHub
+      email: noreply@github.com
 - semver: 0.10.10
   date: 2021-08-19T03:42:51.581463+01:00
   packager: ""
