@@ -6,7 +6,9 @@ description: |-
   Get information on a Civo template.
 ---
 
-# civo\_template
+# civo\_template (DEPRECATED)
+
+`civo_template` data source is deprecated. Moving forward, please use `civo_disk_image` data source.
 
 Get information on an template for use in other resources (e.g. creating a Instance).
 This is useful if the template in question is not managed by Terraform or 
