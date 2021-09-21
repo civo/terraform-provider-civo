@@ -32,7 +32,7 @@ func filterSchema(resultAttributeName string, allowedKeys []string) *schema.Sche
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringInSlice(allowedKeys, false),
-					Description:  fmt.Sprintf("Filter %s by this key. This may be one of %s", resultAttributeName, utils.GetCommaSeparatedAllowedKeys(allowedKeys)),
+					Description:  fmt.Sprintf("Filter %s by this key. This may be one of %s.", resultAttributeName, utils.GetCommaSeparatedAllowedKeys(allowedKeys)),
 				},
 				"values": {
 					Type:        schema.TypeList,

@@ -51,7 +51,7 @@ resource "civo_instance" "my-test-instance" {
 
 Required:
 
-- **key** (String) Filter templates by this key. This may be one of `id`, `label`, `name`, `version`
+- **key** (String) Filter templates by this key. This may be one of `id`, `label`, `name`, `version`.
 - **values** (List of String) Only retrieves `templates` which keys has value that matches one of the values provided here
 
 Optional:
@@ -65,7 +65,7 @@ Optional:
 
 Required:
 
-- **key** (String) Sort templates by this key. This may be one of `id`, `label`, `name`, `version`
+- **key** (String) Sort templates by this key. This may be one of `id`, `label`, `name`, `version`.
 
 Optional:
 

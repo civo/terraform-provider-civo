@@ -48,7 +48,7 @@ resource "civo_instance" "my-test-instance" {
 
 Required:
 
-- **key** (String) Filter regions by this key. This may be one of `code`, `country`, `default`, `name`
+- **key** (String) Filter regions by this key. This may be one of `code`, `country`, `default`, `name`.
 - **values** (List of String) Only retrieves `regions` which keys has value that matches one of the values provided here
 
 Optional:
@@ -62,7 +62,7 @@ Optional:
 
 Required:
 
-- **key** (String) Sort regions by this key. This may be one of `code`, `country`, `default`, `name`
+- **key** (String) Sort regions by this key. This may be one of `code`, `country`, `default`, `name`.
 
 Optional:
 

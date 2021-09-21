@@ -39,7 +39,7 @@ data "civo_kubernetes_version" "stable" {
 
 Required:
 
-- **key** (String) Filter versions by this key. This may be one of `default`, `label`, `type`, `version`
+- **key** (String) Filter versions by this key. This may be one of `default`, `label`, `type`, `version`.
 - **values** (List of String) Only retrieves `versions` which keys has value that matches one of the values provided here
 
 Optional:
@@ -53,7 +53,7 @@ Optional:
 
 Required:
 
-- **key** (String) Sort versions by this key. This may be one of `default`, `label`, `type`, `version`
+- **key** (String) Sort versions by this key. This may be one of `default`, `label`, `type`, `version`.
 
 Optional:
 

@@ -34,7 +34,7 @@ func sortSchema(resultAttributeName string, allowedKeys []string) *schema.Schema
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringInSlice(allowedKeys, false),
-					Description:  fmt.Sprintf("Sort %s by this key. This may be one of %s", resultAttributeName, utils.GetCommaSeparatedAllowedKeys(allowedKeys)),
+					Description:  fmt.Sprintf("Sort %s by this key. This may be one of %s.", resultAttributeName, utils.GetCommaSeparatedAllowedKeys(allowedKeys)),
 				},
 				"direction": {
 					Type:         schema.TypeString,

@@ -48,7 +48,7 @@ resource "civo_instance" "my-test-instance" {
 
 Required:
 
-- **key** (String) Filter diskimages by this key. This may be one of `id`, `label`, `name`, `version`
+- **key** (String) Filter diskimages by this key. This may be one of `id`, `label`, `name`, `version`.
 - **values** (List of String) Only retrieves `diskimages` which keys has value that matches one of the values provided here
 
 Optional:
@@ -62,7 +62,7 @@ Optional:
 
 Required:
 
-- **key** (String) Sort diskimages by this key. This may be one of `id`, `label`, `name`, `version`
+- **key** (String) Sort diskimages by this key. This may be one of `id`, `label`, `name`, `version`.
 
 Optional:
 
