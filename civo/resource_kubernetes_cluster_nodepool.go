@@ -20,7 +20,7 @@ import (
 // Kubernetes Cluster resource, with this you can manage all cluster from terraform
 func resourceKubernetesClusterNodePool() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides a Civo Kubernetes Node Pool resource. While the default node pool must be defined in the `civo_kubernetes_cluster` resource, this resource can be used to add additional ones to a cluster.",
+		Description: "Provides a Civo Kubernetes node pool resource. While the default node pool must be defined in the `civo_kubernetes_cluster` resource, this resource can be used to add additional ones to a cluster.",
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:         schema.TypeString,

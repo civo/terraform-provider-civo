@@ -3,12 +3,15 @@
 page_title: "civo_dns_domain_record Data Source - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Get information on a DNS record. This data source provides the name, TTL, and zone file as configured on your Civo account.
+  An error will be raised if the provided domain name or record are not in your Civo account.
 ---
 
 # civo_dns_domain_record (Data Source)
 
+Get information on a DNS record. This data source provides the name, TTL, and zone file as configured on your Civo account.
 
+An error will be raised if the provided domain name or record are not in your Civo account.
 
 ## Example Usage
 
@@ -36,8 +39,8 @@ output "record_ttl" {
 
 ### Required
 
-- **domain_id** (String)
-- **name** (String)
+- **domain_id** (String) The ID of the domain
+- **name** (String) The name of the record
 
 ### Optional
 
@@ -45,12 +48,12 @@ output "record_ttl" {
 
 ### Read-Only
 
-- **account_id** (String)
-- **created_at** (String)
-- **priority** (Number)
-- **ttl** (Number)
-- **type** (String)
-- **updated_at** (String)
-- **value** (String)
+- **account_id** (String) The ID account of the domain
+- **created_at** (String) The date when it was created in UTC format
+- **priority** (Number) The priority of the record
+- **ttl** (Number) How long caching DNS servers should cache this record
+- **type** (String) The choice of record type from A, CNAME, MX, SRV or TXT
+- **updated_at** (String) The date when it was updated in UTC format
+- **value** (String) The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
 
 

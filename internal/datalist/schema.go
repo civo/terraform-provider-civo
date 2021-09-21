@@ -36,6 +36,9 @@ type ResourceConfig struct {
 
 	// Extra parameters to expose on the datasource alongside `filter` and `sort`.
 	ExtraQuerySchema map[string]*schema.Schema
+
+	// Description for schema
+	Description string
 }
 
 // Returns a new "data list" resource given the specified configuration. This
@@ -63,8 +66,8 @@ func NewResource(config *ResourceConfig) *schema.Resource {
 	sortKeys := computeSortKeys(recordSchema)
 
 	datasourceSchema := map[string]*schema.Schema{
-		"filter": filterSchema(filterKeys),
-		"sort":   sortSchema(sortKeys),
+		"filter": filterSchema(config.ResultAttributeName, filterKeys),
+		"sort":   sortSchema(config.ResultAttributeName, sortKeys),
 		config.ResultAttributeName: {
 			Type:     schema.TypeList,
 			Computed: true,
@@ -81,6 +84,7 @@ func NewResource(config *ResourceConfig) *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataListResourceRead(config),
 		Schema:      datasourceSchema,
+		Description: config.Description,
 	}
 }
 

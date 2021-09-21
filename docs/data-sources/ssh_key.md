@@ -3,12 +3,15 @@
 page_title: "civo_ssh_key Data Source - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Get information on a SSH key. This data source provides the name, and fingerprint as configured on your Civo account.
+  An error will be raised if the provided SSH key name does not exist in your Civo account.
 ---
 
 # civo_ssh_key (Data Source)
 
+Get information on a SSH key. This data source provides the name, and fingerprint as configured on your Civo account.
 
+An error will be raised if the provided SSH key name does not exist in your Civo account.
 
 ## Example Usage
 
@@ -22,7 +25,7 @@ resource "civo_instance" "my-test-instance" {
     tags = ["python", "nginx"]
     notes = "this is a note for the server"
     size = element(data.civo_instances_size.small.sizes, 0).name
-    template = element(data.civo_template.debian.templates, 0).id
+    disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
     sshkey_id = data.civo_ssh_key.example.id
 }
 ```
@@ -33,10 +36,10 @@ resource "civo_instance" "my-test-instance" {
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **name** (String)
+- **name** (String) The name of the SSH key
 
 ### Read-Only
 
-- **fingerprint** (String)
+- **fingerprint** (String) The fingerprint of the public key of the SSH key
 
 

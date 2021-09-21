@@ -3,12 +3,12 @@
 page_title: "civo_firewall_rule Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  Provides a Civo Firewall Rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because the backend don't have the support for that, so in this case we use ForceNew for all object in the resource.
+  Provides a Civo firewall rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because Civo backend doesn't support it at this moment. In that case, we use ForceNew for all object in the resource.
 ---
 
 # civo_firewall_rule (Resource)
 
-Provides a Civo Firewall Rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because the backend don't have the support for that, so in this case we use ForceNew for all object in the resource.
+Provides a Civo firewall rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because Civo backend doesn't support it at this moment. In that case, we use `ForceNew` for all object in the resource.
 
 ## Example Usage
 
@@ -28,8 +28,8 @@ data "civo_instances_size" "small" {
 
 }
 
-# Query instance template
-data "civo_template" "debian" {
+# Query instance disk image
+data "civo_disk_image" "debian" {
    filter {
         key = "name"
         values = ["debian-10"]
@@ -40,7 +40,7 @@ data "civo_template" "debian" {
 resource "civo_instance" "foo" {
     hostname = "foo.com"
     size = element(data.civo_instances_size.small.sizes, 0).name
-    template = element(data.civo_template.debian.templates, 0).id
+    disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
 # Create a network

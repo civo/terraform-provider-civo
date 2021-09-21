@@ -12,7 +12,7 @@ import (
 // Firewall resource with this we can create and manage all firewall
 func resourceFirewall() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides a Civo Firewall resource. This can be used to create, modify, and delete firewalls.",
+		Description: "Provides a Civo firewall resource. This can be used to create, modify, and delete firewalls.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,

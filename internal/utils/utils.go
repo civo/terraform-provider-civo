@@ -6,6 +6,7 @@ package utils
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/civo/civogo"
@@ -74,4 +75,14 @@ func CheckAPPName(appName string, client *civogo.Client) bool {
 	}
 
 	return false
+}
+
+// GetCommaSeparatedAllowedKeys is used by "tfplugindocs" CLI to generate Markdown docs
+func GetCommaSeparatedAllowedKeys(allowedKeys []string) string {
+	res := []string{}
+	for _, ak := range allowedKeys {
+		res = append(res, fmt.Sprintf("`%s`", ak))
+	}
+	sort.Strings(res)
+	return strings.Join(res, ", ")
 }

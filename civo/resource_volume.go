@@ -12,7 +12,7 @@ import (
 // Volume resource, with this we can create and manage all volume
 func resourceVolume() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides a Civo Volume which can be attached to an instance in order to provide expanded storage.",
+		Description: "Provides a Civo volume which can be attached to an instance in order to provide expanded storage.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,

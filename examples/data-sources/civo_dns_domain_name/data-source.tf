@@ -5,6 +5,7 @@ data "civo_dns_domain_name" "domain" {
 output "domain_output" {
   value = data.civo_dns_domain_name.domain.name
 }
+
 output "domain_id_output" {
   value = data.civo_dns_domain_name.domain.id
 }

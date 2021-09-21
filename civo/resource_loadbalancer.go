@@ -12,8 +12,8 @@ import (
 
 // This resource represent a load balancer in the system
 func resourceLoadBalancer() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo load balancer resource. This can be used to create, modify, and delete load balancers.",
 		Schema: map[string]*schema.Schema{
 			"hostname": {
 				Type:         schema.TypeString,

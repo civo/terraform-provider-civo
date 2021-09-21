@@ -28,8 +28,8 @@ data "civo_instances_size" "small" {
 
 }
 
-# Query instance template
-data "civo_template" "debian" {
+# Query instance disk image
+data "civo_disk_image" "debian" {
    filter {
         key = "name"
         values = ["debian-10"]
@@ -40,7 +40,7 @@ data "civo_template" "debian" {
 resource "civo_instance" "foo" {
     hostname = "foo.com"
     size = element(data.civo_instances_size.small.sizes, 0).name
-    template = element(data.civo_template.debian.templates, 0).id
+    disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
 # Create a new domain name

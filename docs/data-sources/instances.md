@@ -3,12 +3,15 @@
 page_title: "civo_instances Data Source - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Get information on instances for use in other resources, with the ability to filter and sort the results. If no filters are specified, all instances will be returned.
+  Note: You can use the civo_instance data source to obtain metadata about a single instance if you already know the id, unique hostname, or unique tag to retrieve.
 ---
 
 # civo_instances (Data Source)
 
+Get information on instances for use in other resources, with the ability to filter and sort the results. If no filters are specified, all instances will be returned.
 
+Note: You can use the `civo_instance` data source to obtain metadata about a single instance if you already know the id, unique hostname, or unique tag to retrieve.
 
 ## Example Usage
 
@@ -29,7 +32,7 @@ data "civo_instances" "small-size" {
 
 - **filter** (Block Set) One or more key/value pairs on which to filter results (see [below for nested schema](#nestedblock--filter))
 - **id** (String) The ID of this resource.
-- **region** (String)
+- **region** (String) If used, all instances will be from the provided region
 - **sort** (Block List) One or more key/direction pairs on which to sort results (see [below for nested schema](#nestedblock--sort))
 
 ### Read-Only
@@ -41,13 +44,13 @@ data "civo_instances" "small-size" {
 
 Required:
 
-- **key** (String)
-- **values** (List of String)
+- **key** (String) Filter instances by this key. This may be one of `cpu_cores`, `created_at`, `disk_gb`, `firewall_id`, `hostname`, `id`, `initial_password`, `initial_user`, `network_id`, `notes`, `private_ip`, `pseudo_ip`, `public_ip`, `ram_mb`, `region`, `reverse_dns`, `script`, `size`, `sshkey_id`, `status`, `tags`, `template`
+- **values** (List of String) Only retrieves `instances` which keys has value that matches one of the values provided here
 
 Optional:
 
-- **all** (Boolean)
-- **match_by** (String)
+- **all** (Boolean) Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.
+- **match_by** (String) One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.
 
 
 <a id="nestedblock--sort"></a>
@@ -55,11 +58,11 @@ Optional:
 
 Required:
 
-- **key** (String)
+- **key** (String) Sort instances by this key. This may be one of `cpu_cores`, `created_at`, `disk_gb`, `firewall_id`, `hostname`, `id`, `initial_password`, `initial_user`, `network_id`, `notes`, `private_ip`, `pseudo_ip`, `public_ip`, `ram_mb`, `region`, `reverse_dns`, `script`, `size`, `sshkey_id`, `status`, `template`
 
 Optional:
 
-- **direction** (String)
+- **direction** (String) The sort direction. This may be either `asc` or `desc`.
 
 
 <a id="nestedatt--instances"></a>

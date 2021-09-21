@@ -1,15 +1,8 @@
-data "civo_instances_size" "small" {
-    filter {
+data "civo_disk_image" "debian" {
+   filter {
         key = "name"
-        values = ["g3.small"]
-        match_by = "re"
-    }
-
-    filter {
-        key = "type"
-        values = ["instance"]
-    }
-
+        values = ["debian-10"]
+   }
 }
 
 resource "civo_instance" "my-test-instance" {

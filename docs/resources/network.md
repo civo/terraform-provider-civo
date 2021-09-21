@@ -3,12 +3,12 @@
 page_title: "civo_network Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  Provides a Civo Network resource. This can be used to create, modify, and delete networks.
+  Provides a Civo network resource. This can be used to create, modify, and delete networks.
 ---
 
 # civo_network (Resource)
 
-Provides a Civo Network resource. This can be used to create, modify, and delete networks.
+Provides a Civo network resource. This can be used to create, modify, and delete networks.
 
 ## Example Usage
 

@@ -3,12 +3,12 @@
 page_title: "civo_instances_size Data Source - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Retrieves information about the instance sizes that Civo supports, with the ability to filter the results.
 ---
 
 # civo_instances_size (Data Source)
 
-
+Retrieves information about the instance sizes that Civo supports, with the ability to filter the results.
 
 ## Example Usage
 
@@ -32,7 +32,7 @@ resource "civo_instance" "my-test-instance" {
     tags = ["python", "nginx"]
     notes = "this is a note for the server"
     size = element(data.civo_instances_size.small.sizes, 0).name
-    template = element(data.civo_template.debian.templates, 0).id
+    disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 ```
 
@@ -54,13 +54,13 @@ resource "civo_instance" "my-test-instance" {
 
 Required:
 
-- **key** (String)
-- **values** (List of String)
+- **key** (String) Filter sizes by this key. This may be one of `cpu`, `description`, `disk`, `name`, `ram`, `selectable`, `type`
+- **values** (List of String) Only retrieves `sizes` which keys has value that matches one of the values provided here
 
 Optional:
 
-- **all** (Boolean)
-- **match_by** (String)
+- **all** (Boolean) Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.
+- **match_by** (String) One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.
 
 
 <a id="nestedblock--sort"></a>
@@ -68,11 +68,11 @@ Optional:
 
 Required:
 
-- **key** (String)
+- **key** (String) Sort sizes by this key. This may be one of `cpu`, `description`, `disk`, `name`, `ram`, `selectable`, `type`
 
 Optional:
 
-- **direction** (String)
+- **direction** (String) The sort direction. This may be either `asc` or `desc`.
 
 
 <a id="nestedatt--sizes"></a>

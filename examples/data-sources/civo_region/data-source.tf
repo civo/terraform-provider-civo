@@ -11,5 +11,5 @@ resource "civo_instance" "my-test-instance" {
     tags = ["python", "nginx"]
     notes = "this is a note for the server"
     size = element(data.civo_instances_size.small.sizes, 0).name
-    template = element(data.civo_template.debian.templates, 0).id
+    disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }

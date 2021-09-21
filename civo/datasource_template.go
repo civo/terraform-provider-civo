@@ -2,6 +2,7 @@ package civo
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
@@ -21,6 +22,10 @@ type TemplateDisk struct {
 func dataSourceTemplate() *schema.Resource {
 
 	dataListConfig := &datalist.ResourceConfig{
+		Description: strings.Join([]string{
+			"`civo_template` data source is deprecated. Moving forward, please use `civo_disk_image` data source.",
+			"Get information on an template for use in other resources (e.g. creating a instance) with the ability to filter the results.",
+		}, "\n\n"),
 		RecordSchema: templateSchema(),
 		ExtraQuerySchema: map[string]*schema.Schema{
 			"region": {
@@ -99,20 +104,24 @@ func templateSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "ID of disk image/template",
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Name of disk image/template",
 		},
 		"version": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Version of disk image/template",
 		},
 		"label": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Label of disk image/template",
 		},
 	}
 }

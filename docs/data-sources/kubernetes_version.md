@@ -3,12 +3,12 @@
 page_title: "civo_kubernetes_version Data Source - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Provides access to the available Civo Kubernetes versions, with the ability to filter the results.
 ---
 
 # civo_kubernetes_version (Data Source)
 
-
+Provides access to the available Civo Kubernetes versions, with the ability to filter the results.
 
 ## Example Usage
 
@@ -39,13 +39,13 @@ data "civo_kubernetes_version" "stable" {
 
 Required:
 
-- **key** (String)
-- **values** (List of String)
+- **key** (String) Filter versions by this key. This may be one of `default`, `label`, `type`, `version`
+- **values** (List of String) Only retrieves `versions` which keys has value that matches one of the values provided here
 
 Optional:
 
-- **all** (Boolean)
-- **match_by** (String)
+- **all** (Boolean) Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.
+- **match_by** (String) One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.
 
 
 <a id="nestedblock--sort"></a>
@@ -53,11 +53,11 @@ Optional:
 
 Required:
 
-- **key** (String)
+- **key** (String) Sort versions by this key. This may be one of `default`, `label`, `type`, `version`
 
 Optional:
 
-- **direction** (String)
+- **direction** (String) The sort direction. This may be either `asc` or `desc`.
 
 
 <a id="nestedatt--versions"></a>

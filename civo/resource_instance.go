@@ -18,7 +18,7 @@ import (
 // and with it you can handle the instances created with Terraform
 func resourceInstance() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides a Civo Instance resource. This can be used to create, modify, and delete instances.",
+		Description: "Provides a Civo instance resource. This can be used to create, modify, and delete instances.",
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:        schema.TypeString,

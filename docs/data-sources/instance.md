@@ -3,12 +3,15 @@
 page_title: "civo_instance Data Source - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Get information on an instance for use in other resources. This data source provides all of the instance's properties as configured on your Civo account.
+  Note: This data source returns a single instance. When specifying a hostname, an error will be raised if more than one instances found.
 ---
 
 # civo_instance (Data Source)
 
+Get information on an instance for use in other resources. This data source provides all of the instance's properties as configured on your Civo account.
 
+Note: This data source returns a single instance. When specifying a hostname, an error will be raised if more than one instances found.
 
 ## Example Usage
 
@@ -27,30 +30,30 @@ output "instance_output" {
 
 ### Optional
 
-- **hostname** (String)
+- **hostname** (String) The hostname of the Instance
 - **id** (String) The ID of this resource.
-- **region** (String)
+- **region** (String) The region of an existing Instance
 
 ### Read-Only
 
-- **cpu_cores** (Number)
-- **created_at** (String)
-- **disk_gb** (Number)
-- **firewall_id** (String)
-- **initial_password** (String)
-- **initial_user** (String)
-- **network_id** (String)
-- **notes** (String)
-- **private_ip** (String)
-- **pseudo_ip** (String)
-- **public_ip** (String)
-- **ram_mb** (Number)
-- **reverse_dns** (String)
-- **script** (String)
-- **size** (String)
-- **sshkey_id** (String)
-- **status** (String)
-- **tags** (Set of String)
-- **template** (String)
+- **cpu_cores** (Number) Total cpu of the inatance
+- **created_at** (String) The date of creation of the instance
+- **disk_gb** (Number) The size of the disk
+- **firewall_id** (String) The ID of the firewall used
+- **initial_password** (String) Instance initial password
+- **initial_user** (String) The name of the initial user created on the server
+- **network_id** (String) his will be the ID of the network
+- **notes** (String) The notes of the instance
+- **private_ip** (String) The private IP
+- **pseudo_ip** (String) Is the ip that is used to route the public ip from the internet to the instance using NAT
+- **public_ip** (String) The public IP
+- **ram_mb** (Number) Total ram of the instance
+- **reverse_dns** (String) A fully qualified domain name
+- **script** (String) The contents of a script uploaded
+- **size** (String) The name of the size
+- **sshkey_id** (String) The ID SSH key
+- **status** (String) The status of the instance
+- **tags** (Set of String) An optional list of tags
+- **template** (String) The ID for the disk image/template to used to build the instance
 
 

@@ -69,4 +69,12 @@ For information about writing acceptance tests, see the main Terraform [contribu
 Documenting the Provider
 ---------------------------
 
-As of 10th September 2021, we decided to use [tfplugindocs](https://github.com/hashicorp/terraform-plugin-docs) to auto-generate [docs](docs) from the provider code and [examples](examples). For reference, you can see an example of the templates and output in [paultyng/terraform-provider-unifi](https://github.com/paultyng/terraform-provider-unifi) and browse the generated docs in the [Terraform Registry](https://registry.terraform.io/providers/paultyng/unifi/latest/docs).
+As of 10th September 2021, we decided to use [tfplugindocs](https://github.com/hashicorp/terraform-plugin-docs) to auto-generate [docs](docs) from the provider code and [examples](examples).
+
+For reference, you can see an example of the templates and output in [paultyng/terraform-provider-unifi](https://github.com/paultyng/terraform-provider-unifi) and browse the generated docs in the [Terraform Registry](https://registry.terraform.io/providers/paultyng/unifi/latest/docs).
+
+Another example would be [https://github.com/fastly/terraform-provider-fastly](https://github.com/fastly/terraform-provider-fastly) - which rendered in the [Terraform Registry](https://registry.terraform.io/providers/fastly/fastly/latest/docs).
+
+**Caveat**
+
+While the `tfplugindocs` is still in active development by the Hashicorp and works fine for most cases, except when it comes to generating attribute descriptions located in nested schemas. We think this isn't too critical since the attribute keys are self explanatory. However, we will still watch the [issue](https://github.com/hashicorp/terraform-plugin-docs/issues/28) and update the [docs](docs) once it's fixed.

@@ -3,12 +3,12 @@
 page_title: "civo_firewall Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  Provides a Civo Firewall resource. This can be used to create, modify, and delete firewalls.
+  Provides a Civo firewall resource. This can be used to create, modify, and delete firewalls.
 ---
 
 # civo_firewall (Resource)
 
-Provides a Civo Firewall resource. This can be used to create, modify, and delete firewalls.
+Provides a Civo firewall resource. This can be used to create, modify, and delete firewalls.
 
 ## Example Usage
 

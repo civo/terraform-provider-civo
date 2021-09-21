@@ -3,12 +3,12 @@
 page_title: "civo_instance Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  Provides a Civo Instance resource. This can be used to create, modify, and delete instances.
+  Provides a Civo instance resource. This can be used to create, modify, and delete instances.
 ---
 
 # civo_instance (Resource)
 
-Provides a Civo Instance resource. This can be used to create, modify, and delete instances.
+Provides a Civo instance resource. This can be used to create, modify, and delete instances.
 
 ## Example Usage
 
@@ -28,8 +28,8 @@ data "civo_instances_size" "small" {
 
 }
 
-# Query instance template
-data "civo_template" "debian" {
+# Query instance disk image
+data "civo_disk_image" "debian" {
    filter {
         key = "name"
         values = ["debian-10"]
@@ -42,7 +42,7 @@ resource "civo_instance" "foo" {
     tags = ["python", "nginx"]
     notes = "this is a note for the server"
     size = element(data.civo_instances_size.small.sizes, 0).name
-    template = element(data.civo_template.debian.templates, 0).id
+    disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 ```
 
@@ -51,6 +51,7 @@ resource "civo_instance" "foo" {
 
 ### Optional
 
+- **disk_image** (String) The ID for the disk image to use to build the instance
 - **firewall_id** (String) The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)
 - **hostname** (String) A fully qualified domain name that should be set as the instance's hostname
 - **initial_user** (String) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)
@@ -63,7 +64,7 @@ resource "civo_instance" "foo" {
 - **size** (String) The name of the size, from the current list, e.g. g3.xsmall
 - **sshkey_id** (String) The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)
 - **tags** (Set of String) An optional list of tags, represented as a key, value pair
-- **template** (String) The ID for the template to use to build the instance
+- **template** (String, Deprecated) The ID for the template to use to build the instance
 
 ### Read-Only
 

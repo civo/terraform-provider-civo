@@ -3,12 +3,15 @@
 page_title: "civo_template Data Source - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  civo_template data source is deprecated. Moving forward, please use civo_disk_image data source.
+  Get information on an template for use in other resources (e.g. creating a instance) with the ability to filter the results.
 ---
 
 # civo_template (Data Source)
 
+`civo_template` data source is deprecated. Moving forward, please use `civo_disk_image` data source.
 
+Get information on an template for use in other resources (e.g. creating a instance) with the ability to filter the results.
 
 ## Example Usage
 
@@ -48,13 +51,13 @@ resource "civo_instance" "my-test-instance" {
 
 Required:
 
-- **key** (String)
-- **values** (List of String)
+- **key** (String) Filter templates by this key. This may be one of `id`, `label`, `name`, `version`
+- **values** (List of String) Only retrieves `templates` which keys has value that matches one of the values provided here
 
 Optional:
 
-- **all** (Boolean)
-- **match_by** (String)
+- **all** (Boolean) Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.
+- **match_by** (String) One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.
 
 
 <a id="nestedblock--sort"></a>
@@ -62,11 +65,11 @@ Optional:
 
 Required:
 
-- **key** (String)
+- **key** (String) Sort templates by this key. This may be one of `id`, `label`, `name`, `version`
 
 Optional:
 
-- **direction** (String)
+- **direction** (String) The sort direction. This may be either `asc` or `desc`.
 
 
 <a id="nestedatt--templates"></a>

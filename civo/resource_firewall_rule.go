@@ -15,7 +15,7 @@ import (
 // support for that, so in this case we use ForceNew for all object in the resource
 func resourceFirewallRule() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides a Civo Firewall Rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because the backend don't have the support for that, so in this case we use ForceNew for all object in the resource.",
+		Description: "Provides a Civo firewall rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because Civo backend doesn't support it at this moment. In that case, we use `ForceNew` for all object in the resource.",
 		Schema: map[string]*schema.Schema{
 			"firewall_id": {
 				Type:         schema.TypeString,

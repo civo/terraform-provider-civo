@@ -3,12 +3,15 @@
 page_title: "civo_dns_domain_name Data Source - terraform-provider-civo"
 subcategory: ""
 description: |-
-  
+  Get information on a domain. This data source provides the name and the id.
+  An error will be raised if the provided domain name is not in your Civo account.
 ---
 
 # civo_dns_domain_name (Data Source)
 
+Get information on a domain. This data source provides the name and the id.
 
+An error will be raised if the provided domain name is not in your Civo account.
 
 ## Example Usage
 
@@ -20,6 +23,7 @@ data "civo_dns_domain_name" "domain" {
 output "domain_output" {
   value = data.civo_dns_domain_name.domain.name
 }
+
 output "domain_id_output" {
   value = data.civo_dns_domain_name.domain.id
 }
@@ -31,6 +35,6 @@ output "domain_id_output" {
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **name** (String)
+- **name** (String) The name of the domain
 
 

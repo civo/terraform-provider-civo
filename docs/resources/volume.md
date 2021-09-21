@@ -3,12 +3,12 @@
 page_title: "civo_volume Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  Provides a Civo Volume which can be attached to an instance in order to provide expanded storage.
+  Provides a Civo volume which can be attached to an instance in order to provide expanded storage.
 ---
 
 # civo_volume (Resource)
 
-Provides a Civo Volume which can be attached to an instance in order to provide expanded storage.
+Provides a Civo volume which can be attached to an instance in order to provide expanded storage.
 
 ## Example Usage
 
