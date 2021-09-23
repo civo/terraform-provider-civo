@@ -3,6 +3,7 @@ package civo
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -13,6 +14,10 @@ import (
 // using the id or the name of the domain
 func dataSourceDNSDomainName() *schema.Resource {
 	return &schema.Resource{
+		Description: strings.Join([]string{
+			"Get information on a domain. This data source provides the name and the id.",
+			"An error will be raised if the provided domain name is not in your Civo account.",
+		}, "\n\n"),
 		Read: dataSourceDNSDomainNameRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -26,6 +31,7 @@ func dataSourceDNSDomainName() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
 				ExactlyOneOf: []string{"id", "name"},
+				Description:  "The name of the domain",
 			},
 		},
 	}

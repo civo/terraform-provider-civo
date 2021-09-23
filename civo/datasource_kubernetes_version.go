@@ -13,6 +13,7 @@ import (
 // moment of the cluster creation in resourceKubernetesCluster
 func dataSourceKubernetesVersion() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
+		Description:         "Provides access to the available Civo Kubernetes versions, with the ability to filter the results.",
 		RecordSchema:        KubernetesVersionSchema(),
 		ResultAttributeName: "versions",
 		FlattenRecord:       flattenKubernetesVersion,
@@ -54,20 +55,24 @@ func KubernetesVersionSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"version": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "A version of the Kubernetes",
 		},
 		"label": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The label of this version",
 		},
 		"type": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The type of the version - can be `stable`, `legacy` & etc",
 		},
 		"default": {
-			Type:     schema.TypeBool,
-			Computed: true,
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "If is the default version used in all cluster, this will return `true`",
 		},
 	}
 }

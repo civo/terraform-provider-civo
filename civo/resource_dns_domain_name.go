@@ -11,19 +11,25 @@ import (
 
 // Dns Domain resource, with this we can create and manage DNS Domain
 func resourceDNSDomainName() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo DNS domain name resource.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "A fully qualified domain name",
+				Description:  "The name of the domain",
 				ValidateFunc: utils.ValidateName,
 			},
 			// Computed resource
+			"id": {
+				Description: "The ID of this resource.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
 			"account_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The account ID of the domain",
 			},
 		},
 		Create: resourceDNSDomainNameCreate,

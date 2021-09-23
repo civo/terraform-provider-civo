@@ -14,21 +14,22 @@ import (
 // this resource don't have an update option because the backend don't have the
 // support for that, so in this case we use ForceNew for all object in the resource
 func resourceFirewallRule() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo firewall rule resource. This can be used to create, modify, and delete firewalls rules. This resource don't have an update option because Civo backend doesn't support it at this moment. In that case, we use `ForceNew` for all object in the resource.",
 		Schema: map[string]*schema.Schema{
 			"firewall_id": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: utils.ValidateName,
+				Description:  "The Firewall ID",
 			},
 			"protocol": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "The protocol choice from tcp, udp or icmp (the default if unspecified is tcp)",
+				Description: "The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)",
 				ValidateFunc: validation.StringInSlice([]string{
 					"tcp",
 					"udp",
@@ -63,7 +64,7 @@ func resourceFirewallRule() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "Will this rule affect ingress traffic",
+				Description: "Will this rule affect ingress traffic (only `ingress` is supported now)",
 				ValidateFunc: validation.StringInSlice([]string{
 					"ingress",
 				}, false),
@@ -73,7 +74,7 @@ func resourceFirewallRule() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				Description:  "A string that will be the displayed name/reference for this rule (optional)",
+				Description:  "A string that will be the displayed name/reference for this rule",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"region": {
@@ -83,6 +84,12 @@ func resourceFirewallRule() *schema.Resource {
 				ForceNew:     true,
 				Description:  "The region for this rule",
 				ValidateFunc: validation.StringIsNotEmpty,
+			},
+			// Computed resource
+			"id": {
+				Description: "The ID of this resource.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 		Create: resourceFirewallRuleCreate,

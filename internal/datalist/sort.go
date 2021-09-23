@@ -7,10 +7,13 @@ Source: https://github.com/terraform-providers/terraform-provider-digitalocean
 package datalist
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var (
@@ -22,7 +25,7 @@ type commonSort struct {
 	direction string
 }
 
-func sortSchema(allowedKeys []string) *schema.Schema {
+func sortSchema(resultAttributeName string, allowedKeys []string) *schema.Schema {
 	return &schema.Schema{
 		Type: schema.TypeList,
 		Elem: &schema.Resource{
@@ -31,11 +34,13 @@ func sortSchema(allowedKeys []string) *schema.Schema {
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringInSlice(allowedKeys, false),
+					Description:  fmt.Sprintf("Sort %s by this key. This may be one of %s.", resultAttributeName, utils.GetCommaSeparatedAllowedKeys(allowedKeys)),
 				},
 				"direction": {
 					Type:         schema.TypeString,
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(sortKeys, false),
+					Description:  "The sort direction. This may be either `asc` or `desc`.",
 				},
 			},
 		},

@@ -24,6 +24,7 @@ type SizeList struct {
 // use to define the size in resourceInstance
 func dataSourceInstancesSize() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
+		Description:         "Retrieves information about the instance sizes that Civo supports, with the ability to filter the results.",
 		RecordSchema:        instancesSizeSchema(),
 		ResultAttributeName: "sizes",
 		FlattenRecord:       flattenInstancesSize,
@@ -94,32 +95,39 @@ func flattenInstancesSize(size, m interface{}, extra map[string]interface{}) (ma
 func instancesSizeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The name of the instance size",
 		},
 		"type": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "A human name of the instance size",
 		},
 		"cpu": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "Total of CPU in the instance",
 		},
 		"ram": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "Total of RAM of the instance",
 		},
 		"disk": {
-			Type:     schema.TypeInt,
-			Computed: true,
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "The instance size of SSD",
 		},
 		"description": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "A description of the instance size",
 		},
 		"selectable": {
-			Type:     schema.TypeBool,
-			Computed: true,
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "If can use the instance size",
 		},
 	}
 }

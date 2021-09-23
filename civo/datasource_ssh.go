@@ -3,6 +3,7 @@ package civo
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -13,6 +14,10 @@ import (
 // using the id or the name
 func dataSourceSSHKey() *schema.Resource {
 	return &schema.Resource{
+		Description: strings.Join([]string{
+			"Get information on a SSH key. This data source provides the name, and fingerprint as configured on your Civo account.",
+			"An error will be raised if the provided SSH key name does not exist in your Civo account.",
+		}, "\n\n"),
 		Read: dataSourceSSHKeyRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -26,11 +31,13 @@ func dataSourceSSHKey() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
 				ExactlyOneOf: []string{"id", "name"},
+				Description:  "The name of the SSH key",
 			},
 			// Computed resource
 			"fingerprint": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The fingerprint of the public key of the SSH key",
 			},
 		},
 	}

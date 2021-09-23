@@ -12,22 +12,27 @@ import (
 // use to define the region in the rest of the resource or datasource
 func dataSourceRegion() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
+		Description: "Retrieves information about the region that Civo supports, with the ability to filter the results.",
 		RecordSchema: map[string]*schema.Schema{
 			"code": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The code of the region",
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "A human name of the region",
 			},
 			"country": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The country of the region",
 			},
 			"default": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "If the region is the default region, this will return `true`",
 			},
 		},
 		ResultAttributeName: "regions",

@@ -15,7 +15,8 @@ import (
 // using the id or the name
 func dataSourceSnapshot() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSnapshotRead,
+		Description: "Snapshots are saved instances of a block storage volume. Use this data source to retrieve the ID of a Civo snapshot for use in other resources.",
+		Read:        dataSourceSnapshotRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -28,51 +29,63 @@ func dataSourceSnapshot() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
 				ExactlyOneOf: []string{"id", "name"},
+				Description:  "The name of the snapshot",
 			},
 			// Computed resource
 			"instance_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The ID of the instance from which the snapshot was be taken",
 			},
 			"safe": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "If `true`, the instance will be shut down during the snapshot",
 			},
 			"cron_timing": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "A string with the cron format",
 			},
 			"hostname": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The hostname of the instance",
 			},
 			"template_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The disk image/template ID",
 			},
 			"region": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The region where the snapshot was taken",
 			},
 			"size_gb": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The size of the snapshot in GB",
 			},
 			"state": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The status of the snapshot",
 			},
 			"next_execution": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "If cron was define this date will be the next execution date",
 			},
 			"requested_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The date where the snapshot was requested",
 			},
 			"completed_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The date where the snapshot was completed",
 			},
 		},
 	}

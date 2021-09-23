@@ -12,14 +12,15 @@ import (
 
 // Volume resource, with this we can create and manage all volume
 func resourceVolumeAttachment() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Manages volume attachment/detachment to an instance.",
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.NoZeroValues,
+				Description:  "The ID of target instance for attachment",
 			},
 
 			"volume_id": {
@@ -27,12 +28,19 @@ func resourceVolumeAttachment() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.NoZeroValues,
+				Description:  "The ID of target volume for attachment",
 			},
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
 				Description: "The region for the volume attachment",
+			},
+			// Computed resource
+			"id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The ID of this resource.",
 			},
 		},
 		Create: resourceVolumeAttachmentCreate,

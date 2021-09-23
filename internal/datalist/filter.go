@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -22,7 +23,7 @@ type commonFilter struct {
 	matchBy string
 }
 
-func filterSchema(allowedKeys []string) *schema.Schema {
+func filterSchema(resultAttributeName string, allowedKeys []string) *schema.Schema {
 	return &schema.Schema{
 		Type: schema.TypeSet,
 		Elem: &schema.Resource{
@@ -31,22 +32,26 @@ func filterSchema(allowedKeys []string) *schema.Schema {
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringInSlice(allowedKeys, false),
+					Description:  fmt.Sprintf("Filter %s by this key. This may be one of %s.", resultAttributeName, utils.GetCommaSeparatedAllowedKeys(allowedKeys)),
 				},
 				"values": {
-					Type:     schema.TypeList,
-					Required: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
+					Type:        schema.TypeList,
+					Required:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					Description: fmt.Sprintf("Only retrieves `%s` which keys has value that matches one of the values provided here", resultAttributeName),
 				},
 				"all": {
-					Type:     schema.TypeBool,
-					Optional: true,
-					Default:  false,
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Default:     false,
+					Description: "Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.",
 				},
 				"match_by": {
 					Type:         schema.TypeString,
 					Optional:     true,
 					Default:      "exact",
 					ValidateFunc: validation.StringInSlice([]string{"exact", "re", "substring"}, false),
+					Description:  "One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.",
 				},
 			},
 		},

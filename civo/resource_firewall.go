@@ -11,22 +11,31 @@ import (
 
 // Firewall resource with this we can create and manage all firewall
 func resourceFirewall() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo firewall resource. This can be used to create, modify, and delete firewalls.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: utils.ValidateName,
+				Description:  "The firewall name",
 			},
 			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The firewall region, if is not defined we use the global defined in the provider",
 			},
 			"network_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The firewall network, if is not defined we use the default network",
+			},
+			// Computed resource
+			"id": {
+				Description: "The ID of this resource.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 		Create: resourceFirewallCreate,

@@ -11,8 +11,8 @@ import (
 
 // The resource network represent a network inside the cloud
 func resourceNetwork() *schema.Resource {
-	fmt.Print()
 	return &schema.Resource{
+		Description: "Provides a Civo network resource. This can be used to create, modify, and delete networks.",
 		Schema: map[string]*schema.Schema{
 			"label": {
 				Type:         schema.TypeString,
@@ -23,16 +23,23 @@ func resourceNetwork() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Name of the region",
+				Description: "The region of the network",
 			},
 			// Computed resource
 			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The name of the network",
 			},
 			"default": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "If the network is default, this will be `true`",
+			},
+			"id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The ID of this resource",
 			},
 		},
 		Create: resourceNetworkCreate,

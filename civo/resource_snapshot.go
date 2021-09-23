@@ -17,6 +17,7 @@ import (
 // in any value will be recreate the resource
 func resourceSnapshot() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides a resource which can be used to create a snapshot from an existing Civo instance.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
