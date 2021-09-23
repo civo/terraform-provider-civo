@@ -1,0 +1,5 @@
+{
+    "template": ".auto-changelog-template.hbs",
+    "commitLimit": 100,
+    "ignoreCommitPattern": "Update docs and CHANGELOG.md"
+}
