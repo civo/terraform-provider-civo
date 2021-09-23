@@ -432,8 +432,9 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if d.HasChange("kubernetes_version") {
-		config.KubernetesVersion = d.Get("kubernetes_version").(string)
-		config.Region = apiClient.Region
+		// config.KubernetesVersion = d.Get("kubernetes_version").(string)
+		// config.Region = apiClient.Region
+		return fmt.Errorf("[ERR] Kubernetes version upgrade (%q attribute) is not supported yet", "kubernetes_version")
 	}
 
 	if d.HasChange("applications") {
@@ -442,7 +443,7 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if d.HasChange("name") {
-		config.Applications = d.Get("name").(string)
+		config.Name = d.Get("name").(string)
 		config.Region = apiClient.Region
 	}
 
