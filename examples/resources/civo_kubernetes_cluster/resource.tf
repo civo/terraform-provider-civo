@@ -11,10 +11,27 @@ data "civo_instances_size" "xsmall" {
     }
 }
 
+# Create a firewall
+resource "civo_firewall" "my-firewall" {
+    name = "my-firewall"
+}
+
+# Create a firewall rule
+resource "civo_firewall_rule" "kubernetes" {
+    firewall_id = civo_firewall.my-firewall.id
+    protocol = "tcp"
+    start_port = "6443"
+    end_port = "6443"
+    cidr = ["0.0.0.0/0"]
+    direction = "ingress"
+    label = "kubernetes-api-server"
+}
+
 # Create a cluster
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     num_target_nodes = 2
     target_nodes_size = element(data.civo_instances_size.xsmall.sizes, 0).name
+    firewall_id = civo_firewall.my-firewall.id
 }
