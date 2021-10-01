@@ -24,10 +24,11 @@ $ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-civo
 $ make build
 ```
 
-Using the provider
+Documentation
 ----------------------
 
-The documentation is available at [Civo Provider documentation](https://registry.terraform.io/providers/civo/civo/latest/docs)
+* For new Terraform users, we have guides written for you on [Civo website](https://www.civo.com/docs/terraform)
+* For experienced Terraform users, the documentation is available at [Terraform Registry](https://registry.terraform.io/providers/civo/civo/latest/docs)
 
 
 Developing the Provider
