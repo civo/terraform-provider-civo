@@ -1,6 +1,3 @@
-
-## [v1.0.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.0) (11 October 2021)
-
 ## [v0.10.12](https://github.com/civo/terraform-provider-civo/releases/tag/v0.10.12) (1 October 2021)
 
 ### Merged
