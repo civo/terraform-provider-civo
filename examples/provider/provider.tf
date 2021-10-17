@@ -1,7 +1,7 @@
 # Set the variable value in *.tfvars file or using -var="civo_token=..." CLI flag
 variable "civo_token" {}
 
-# Specify required provider
+# Specify required provider as maintained by civo
 terraform {
   required_providers {
     civo = {
