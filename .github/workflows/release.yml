@@ -50,7 +50,7 @@ jobs:
 
       - name: Create a tag and push
         run: |
-          git pull origin master
+          git pull -r origin master
           git tag -a ${{ github.event.inputs.newVersionTag }} -m ""
           git push origin master --follow-tags
       
