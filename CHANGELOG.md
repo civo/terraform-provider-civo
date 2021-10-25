@@ -1,4 +1,12 @@
 
+## [v1.0.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.1) (25 October 2021)
+
+### Merged
+- [#101](https://github.com/civo/terraform-provider-civo/pull/101) - Add missing required provider section in terraform docs provider example
+
+### Commits
+- [0624a66](https://github.com/civo/terraform-provider-civo/commit/0624a667282e2535f2f3f91498f524341324f67e) - Update release script
+
 ## [v1.0.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.0) (11 October 2021)
 
 ### Commits
