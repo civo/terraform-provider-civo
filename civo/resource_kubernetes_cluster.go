@@ -80,11 +80,6 @@ func resourceKubernetesCluster() *schema.Resource {
 				Description: "The existing firewall ID to use for this cluster",
 			},
 			// Computed resource
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of this resource.",
-			},
 			"instances":              instanceSchema(),
 			"installed_applications": applicationSchema(),
 			"pools":                  nodePoolSchema(),
@@ -190,11 +185,6 @@ func nodePoolSchema() *schema.Schema {
 		Computed: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"id": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "Nodepool ID",
-				},
 				"count": {
 					Type:        schema.TypeInt,
 					Computed:    true,

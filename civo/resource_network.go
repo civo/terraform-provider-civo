@@ -36,11 +36,6 @@ func resourceNetwork() *schema.Resource {
 				Computed:    true,
 				Description: "If the network is default, this will be `true`",
 			},
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of this resource",
-			},
 		},
 		Create: resourceNetworkCreate,
 		Read:   resourceNetworkRead,

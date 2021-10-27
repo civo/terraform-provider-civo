@@ -108,11 +108,6 @@ func resourceInstance() *schema.Resource {
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			// Computed resource
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of this resource.",
-			},
 			"cpu_cores": {
 				Type:        schema.TypeInt,
 				Computed:    true,
