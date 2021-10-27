@@ -72,13 +72,13 @@ resource "civo_dns_domain_record" "www" {
 
 ### Optional
 
+- **id** (String) The ID of this resource.
 - **priority** (Number) Useful for MX records only, the priority mail should be attempted it (defaults to 10)
 
 ### Read-Only
 
 - **account_id** (String) The account ID of this resource
 - **created_at** (String) Timestamp when this resource was created
-- **id** (String) The ID of this resource.
 - **updated_at** (String) Timestamp when this resource was updated
 
 ## Import

@@ -27,12 +27,12 @@ resource "civo_network" "custom_net" {
 
 ### Optional
 
+- **id** (String) The ID of this resource.
 - **region** (String) The region of the network
 
 ### Read-Only
 
 - **default** (Boolean) If the network is default, this will be `true`
-- **id** (String) The ID of this resource
 - **name** (String) The name of the network
 
 ## Import

@@ -1,4 +1,9 @@
 
+## [v1.0.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.2) (27 October 2021)
+
+### Merged
+- [#102](https://github.com/civo/terraform-provider-civo/pull/102) - Remove newly added id attributes in resources
+
 ## [v1.0.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.1) (25 October 2021)
 
 ### Merged

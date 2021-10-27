@@ -69,10 +69,7 @@ resource "civo_volume_attachment" "foobar" {
 
 ### Optional
 
-- **region** (String) The region for the volume attachment
-
-### Read-Only
-
 - **id** (String) The ID of this resource.
+- **region** (String) The region for the volume attachment
 
 

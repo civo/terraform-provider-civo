@@ -34,12 +34,9 @@ resource "civo_firewall" "www" {
 
 ### Optional
 
+- **id** (String) The ID of this resource.
 - **network_id** (String) The firewall network, if is not defined we use the default network
 - **region** (String) The firewall region, if is not defined we use the global defined in the provider
-
-### Read-Only
-
-- **id** (String) The ID of this resource.
 
 ## Import
 

@@ -62,6 +62,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 ### Optional
 
 - **applications** (String) Comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. Application names are case-sensitive; the available applications can be listed with the Civo CLI: 'civo kubernetes applications ls'. If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik. For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'.
+- **id** (String) The ID of this resource.
 - **kubernetes_version** (String) The version of k3s to install (optional, the default is currently the latest available)
 - **name** (String) Name for your cluster, must be unique within your account
 - **network_id** (String) The network for the cluster, if not declare we use the default one
@@ -75,7 +76,6 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 - **api_endpoint** (String) The API server endpoint of the cluster
 - **created_at** (String) The timestamp when the cluster was created
 - **dns_entry** (String) The DNS name of the cluster
-- **id** (String) The ID of this resource.
 - **installed_applications** (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
 - **instances** (List of Object) (see [below for nested schema](#nestedatt--instances))
 - **kubeconfig** (String, Sensitive) The kubeconfig of the cluster
@@ -115,7 +115,6 @@ Read-Only:
 Read-Only:
 
 - **count** (Number)
-- **id** (String)
 - **instance_names** (Set of String)
 - **instances** (List of Object) (see [below for nested schema](#nestedobjatt--pools--instances))
 - **size** (String)
