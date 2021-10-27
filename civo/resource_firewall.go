@@ -31,12 +31,6 @@ func resourceFirewall() *schema.Resource {
 				Computed:    true,
 				Description: "The firewall network, if is not defined we use the default network",
 			},
-			// Computed resource
-			"id": {
-				Description: "The ID of this resource.",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
 		},
 		Create: resourceFirewallCreate,
 		Read:   resourceFirewallRead,

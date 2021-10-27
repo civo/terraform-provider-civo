@@ -32,11 +32,6 @@ func resourceSSHKey() *schema.Resource {
 				Computed:    true,
 				Description: "a string containing the SSH finger print.",
 			},
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of this resource.",
-			},
 		},
 		Create: resourceSSHKeyCreate,
 		Read:   resourceSSHKeyRead,

@@ -57,11 +57,6 @@ func resourceDNSDomainRecord() *schema.Resource {
 				Description:  "How long caching DNS servers should cache this record for, in seconds (the minimum is 600 and the default if unspecified is 600)",
 			},
 			// Computed resource
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of this resource.",
-			},
 			"account_id": {
 				Type:        schema.TypeString,
 				Computed:    true,

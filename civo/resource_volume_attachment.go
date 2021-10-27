@@ -36,12 +36,6 @@ func resourceVolumeAttachment() *schema.Resource {
 				ForceNew:    true,
 				Description: "The region for the volume attachment",
 			},
-			// Computed resource
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of this resource.",
-			},
 		},
 		Create: resourceVolumeAttachmentCreate,
 		Read:   resourceVolumeAttachmentRead,
