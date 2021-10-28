@@ -41,11 +41,6 @@ func resourceVolume() *schema.Resource {
 				Computed:    true,
 				Description: "The mount point of the volume (from instance's perspective)",
 			},
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of this resource.",
-			},
 		},
 		Create: resourceVolumeCreate,
 		Read:   resourceVolumeRead,
