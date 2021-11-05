@@ -185,6 +185,11 @@ func nodePoolSchema() *schema.Schema {
 		Computed: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Nodepool ID",
+				},
 				"count": {
 					Type:        schema.TypeInt,
 					Computed:    true,
@@ -543,6 +548,7 @@ func flattenInstances(instances []civogo.KubernetesInstance) []interface{} {
 
 // function to flatten all instances inside the cluster
 func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
+
 	if cluster.Pools == nil {
 		return nil
 	}
@@ -552,14 +558,12 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 		flattenedPoolInstance := make([]interface{}, 0)
 		for _, v := range pool.Instances {
 
-			instanceData := searchInstance(cluster.Instances, v.Hostname)
-
 			rawPoolInstance := map[string]interface{}{
 				"hostname":  v.Hostname,
 				"size":      pool.Size,
-				"cpu_cores": instanceData.CPUCores,
-				"ram_mb":    instanceData.RAMMegabytes,
-				"disk_gb":   instanceData.DiskGigabytes,
+				"cpu_cores": v.CPUCores,
+				"ram_mb":    v.RAMMegabytes,
+				"disk_gb":   v.DiskGigabytes,
 				"status":    v.Status,
 				"tags":      v.Tags,
 			}
@@ -601,13 +605,4 @@ func flattenInstalledApplication(apps []civogo.KubernetesInstalledApplication) [
 	}
 
 	return flattenedInstalledApplication
-}
-
-func searchInstance(instanceList []civogo.KubernetesInstance, hostname string) civogo.KubernetesInstance {
-	for _, v := range instanceList {
-		if strings.Contains(v.Hostname, hostname) {
-			return v
-		}
-	}
-	return civogo.KubernetesInstance{}
 }
