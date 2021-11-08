@@ -215,19 +215,11 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 
 	if attr, ok := d.GetOk("template"); ok {
 		templateID := ""
-		if apiClient.Region == "SVG1" {
-			findTemplate, err := apiClient.FindTemplate(attr.(string))
-			if err != nil {
-				return fmt.Errorf("[ERR] failed to get the template: %s", err)
-			}
-			templateID = findTemplate.ID
-		} else {
-			findTemplate, err := apiClient.FindDiskImage(attr.(string))
-			if err != nil {
-				return fmt.Errorf("[ERR] failed to get the template: %s", err)
-			}
-			templateID = findTemplate.ID
+		findTemplate, err := apiClient.FindDiskImage(attr.(string))
+		if err != nil {
+			return fmt.Errorf("[ERR] failed to get the template: %s", err)
 		}
+		templateID = findTemplate.ID
 		config.TemplateID = templateID
 	}
 
