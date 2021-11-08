@@ -1,4 +1,12 @@
 
+## [v1.0.4](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.4) (8 November 2021)
+
+### Merged
+- [#103](https://github.com/civo/terraform-provider-civo/pull/103) - Add support to use non-production API server URL
+
+### Commits
+- [08d2fbb](https://github.com/civo/terraform-provider-civo/commit/08d2fbb51e5da24155774a72d62a15207569e850) - Fix error by the reformat code in one file
+
 ## [v1.0.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.3) (2 November 2021)
 
 ## [v1.0.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.2) (27 October 2021)
