@@ -2,6 +2,8 @@ package civo
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -77,10 +79,24 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, fmt.Errorf("[ERR] token not found")
 	}
 
-	client, err := civogo.NewClient(tokenValue, regionValue)
+	var client *civogo.Client
+	var err error
+
+	apiURL, envExists := os.LookupEnv("CIVO_API_URL")
+	if envExists && apiURL != "" {
+		client, err = civogo.NewClientWithURL(tokenValue, apiURL, regionValue)
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
+		return client, nil
+	}
+
+	client, err = civogo.NewClient(tokenValue, regionValue)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[DEBUG] Civo API URL: %s\n", "https://api.civo.com")
 	return client, nil
 
 }
