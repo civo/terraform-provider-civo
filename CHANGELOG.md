@@ -1,4 +1,9 @@
 
+## [v1.0.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.5) (9 November 2021)
+
+### Merged
+- [#105](https://github.com/civo/terraform-provider-civo/pull/105) - Bump civogo to v0.2.57 and disable loadbalancer, template and snapshot files
+
 ## [v1.0.4](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.4) (8 November 2021)
 
 ### Merged
