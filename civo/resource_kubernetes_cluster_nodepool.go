@@ -29,10 +29,10 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"region": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "The region of the node pool, has to match that of the cluster",
-				ValidateFunc: validation.StringIsNotEmpty,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The region for the cluster, if not declare we use the region in declared in the provider",
 			},
 			"num_target_nodes": {
 				Type:        schema.TypeInt,
@@ -116,6 +116,12 @@ func resourceKubernetesClusterNodePoolCreate(d *schema.ResourceData, m interface
 // function to read the kubernetes cluster
 func resourceKubernetesClusterNodePoolRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	cluster_id := d.Get("cluster_id").(string)
 
 	log.Printf("[INFO] retrieving the kubernetes cluster %s", cluster_id)
@@ -184,6 +190,11 @@ func resourceKubernetesClusterNodePoolUpdate(d *schema.ResourceData, m interface
 // function to delete the kubernetes cluster
 func resourceKubernetesClusterNodePoolDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	cluster_id := d.Get("cluster_id").(string)
 	getKubernetesCluster, err := apiClient.GetKubernetesCluster(cluster_id)
