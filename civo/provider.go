@@ -40,6 +40,7 @@ func Provider() *schema.Provider {
 			"civo_dns_domain_record":  dataSourceDNSDomainRecord(),
 			"civo_network":            dataSourceNetwork(),
 			"civo_volume":             dataSourceVolume(),
+			"civo_firewall":           dataSourceFirewall(),
 			// "civo_loadbalancer":       dataSourceLoadBalancer(),
 			"civo_ssh_key": dataSourceSSHKey(),
 			// "civo_snapshot":           dataSourceSnapshot(),
