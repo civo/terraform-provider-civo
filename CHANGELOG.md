@@ -1,4 +1,10 @@
 
+## [v1.0.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.6) (9 December 2021)
+
+### Merged
+- [#113](https://github.com/civo/terraform-provider-civo/pull/113) - Add Data source for civo_firewall
+- [#108](https://github.com/civo/terraform-provider-civo/pull/108) - Replace the firewall if network id changes
+
 ## [v1.0.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.5) (9 November 2021)
 
 ### Merged
