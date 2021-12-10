@@ -17,7 +17,7 @@ func dataSourceFirewall() *schema.Resource {
 		Description: strings.Join([]string{
 			"Retrieve information about a firewall for use in other resources.",
 			"This data source provides all of the firewall's properties as configured on your Civo account.",
-			"Firewalls may be looked up by id or label, and you can optionally pass region if you want to make a lookup for an expecific firewall inside that region.",
+			"Firewalls may be looked up by id or name, and you can optionally pass region if you want to make a lookup for an expecific firewall inside that region.",
 		}, "\n\n"),
 		Read: dataSourceFirewallRead,
 		Schema: map[string]*schema.Schema{
@@ -32,13 +32,13 @@ func dataSourceFirewall() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
 				ExactlyOneOf: []string{"id", "name"},
-				Description:  "The name of the Kubernetes Cluster",
+				Description:  "The name of the firewall",
 			},
 			"region": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				Description:  "The region where cluster is running",
+				Description:  "The region where the firewall is",
 			},
 			// Computed resource
 			"network_id": {
