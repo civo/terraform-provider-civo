@@ -25,10 +25,13 @@ func resourceFirewall() *schema.Resource {
 				Optional:    true,
 				Description: "The firewall region, if is not defined we use the global defined in the provider",
 			},
+			// As the backend has no support for updating network ID we replace it if the
+			// network_id changes
 			"network_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "The firewall network, if is not defined we use the default network",
 			},
 		},

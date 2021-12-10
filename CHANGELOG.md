@@ -1,4 +1,23 @@
 
+## [v1.0.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.6) (9 December 2021)
+
+### Merged
+- [#113](https://github.com/civo/terraform-provider-civo/pull/113) - Add Data source for civo_firewall
+- [#108](https://github.com/civo/terraform-provider-civo/pull/108) - Replace the firewall if network id changes
+
+## [v1.0.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.5) (9 November 2021)
+
+### Merged
+- [#105](https://github.com/civo/terraform-provider-civo/pull/105) - Bump civogo to v0.2.57 and disable loadbalancer, template and snapshot files
+
+## [v1.0.4](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.4) (8 November 2021)
+
+### Merged
+- [#103](https://github.com/civo/terraform-provider-civo/pull/103) - Add support to use non-production API server URL
+
+### Commits
+- [08d2fbb](https://github.com/civo/terraform-provider-civo/commit/08d2fbb51e5da24155774a72d62a15207569e850) - Fix error by the reformat code in one file
+
 ## [v1.0.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.3) (2 November 2021)
 
 ## [v1.0.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.2) (27 October 2021)
