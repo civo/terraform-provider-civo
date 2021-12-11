@@ -484,7 +484,7 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"SCALING"},
+		Pending: []string{"BUILDING"},
 		Target:  []string{"ACTIVE"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.GetKubernetesCluster(d.Id())
