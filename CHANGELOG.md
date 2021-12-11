@@ -1,4 +1,10 @@
 
+## [v1.0.7](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.7) (11 December 2021)
+
+### Merged
+- [#115](https://github.com/civo/terraform-provider-civo/pull/115) - Fixed error when you sending to scaling a kubernetes cluster
+- [#114](https://github.com/civo/terraform-provider-civo/pull/114) - update docs for datasource civo_firewall
+
 ## [v1.0.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.6) (9 December 2021)
 
 ### Merged
