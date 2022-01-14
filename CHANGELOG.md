@@ -1,4 +1,9 @@
 
+## [v1.0.8](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.8) (14 January 2022)
+
+### Merged
+- [#116](https://github.com/civo/terraform-provider-civo/pull/116) - Added the custom CNI to the Kubernetes cluster
+
 ## [v1.0.7](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.7) (11 December 2021)
 
 ### Merged
