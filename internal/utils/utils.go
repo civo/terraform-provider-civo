@@ -28,6 +28,28 @@ func ValidateName(v interface{}, k string) (ws []string, es []error) {
 	return warns, errs
 }
 
+func ValidateCNIName(v interface{}, k string) (ws []string, es []error) {
+	var errs []error
+	var warns []string
+	value, ok := v.(string)
+	if !ok {
+		errs = append(errs, fmt.Errorf("expected CNI to be string"))
+		return warns, errs
+	}
+	whiteSpace := regexp.MustCompile(`\s+`)
+	if whiteSpace.Match([]byte(value)) {
+		errs = append(errs, fmt.Errorf("CNI cannot contain whitespace. Got %s", value))
+		return warns, errs
+	}
+
+	if value != "flannel" && value != "cilium" {
+		errs = append(errs, fmt.Errorf("CNI plugin provided isn't valid/supported"))
+		return warns, errs
+	}
+
+	return warns, errs
+}
+
 func ValidateNameSize(v interface{}, k string) (ws []string, es []error) {
 	var errs []error
 	var warns []string
