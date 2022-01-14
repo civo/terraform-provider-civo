@@ -57,6 +57,13 @@ func resourceKubernetesCluster() *schema.Resource {
 				Computed:    true,
 				Description: "The version of k3s to install (optional, the default is currently the latest available)",
 			},
+			"cni": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Default:    "flannel",
+				Description: "The cni for the k3s to install (the default is `flannel`) valid options are `calico` or `flannel`",
+				ValidateFunc: utils.ValidateCNIName,
+			},
 			"tags": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -298,6 +305,10 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 		config.Tags = ""
 	}
 
+	if attr, ok := d.GetOk("cni"); ok {
+		config.CNIPlugin = attr.(string)
+	} 
+
 	if attr, ok := d.GetOk("applications"); ok {
 		if utils.CheckAPPName(attr.(string), apiClient) {
 			config.Applications = attr.(string)
@@ -380,6 +391,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("num_target_nodes", resp.NumTargetNode)
 	d.Set("target_nodes_size", resp.TargetNodeSize)
 	d.Set("kubernetes_version", resp.KubernetesVersion)
+	d.Set("cni", resp.CNIPlugin)
 	d.Set("tags", strings.Join(resp.Tags, " ")) // space separated tags
 	d.Set("status", resp.Status)
 	d.Set("ready", resp.Ready)

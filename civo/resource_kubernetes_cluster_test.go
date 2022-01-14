@@ -107,6 +107,63 @@ func TestAccCivoKubernetesClusterSize_update(t *testing.T) {
 	})
 }
 
+func TestAccCivoKubernetesClusterCNI(t *testing.T) {
+	var kubernetes civogo.KubernetesCluster
+
+	// generate a random name for each test run
+	resName := "civo_kubernetes_cluster.foobar"
+	var kubernetesClusterName = acctest.RandomWithPrefix("tf-test") + ".example"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCivoInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckCivoKubernetesClusterConfigCNI(kubernetesClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					// query the API to retrieve the widget object
+					testAccCheckCivoKubernetesClusterResourceExists(resName, &kubernetes),
+					// verify remote values
+					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
+					// verify local values
+					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
+					resource.TestCheckResourceAttr(resName, "num_target_nodes", "2"),
+					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
+					resource.TestCheckResourceAttr(resName, "cni", "calico"),
+					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
+					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
+					resource.TestCheckResourceAttrSet(resName, "master_ip"),
+					resource.TestCheckResourceAttrSet(resName, "dns_entry"),
+					resource.TestCheckResourceAttrSet(resName, "built_at"),
+					resource.TestCheckResourceAttrSet(resName, "created_at"),
+				),
+			},
+			{
+				// use a dynamic configuration with the random name from above
+				Config: testAccCheckCivoKubernetesClusterConfigCNI(kubernetesClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					// query the API to retrieve the widget object
+					testAccCheckCivoKubernetesClusterResourceExists(resName, &kubernetes),
+					// verify remote values
+					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
+					// verify local values
+					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
+					resource.TestCheckResourceAttr(resName, "num_target_nodes", "4"),
+					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
+					resource.TestCheckResourceAttr(resName, "cni", "calico"),
+					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
+					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
+					resource.TestCheckResourceAttrSet(resName, "master_ip"),
+					resource.TestCheckResourceAttrSet(resName, "dns_entry"),
+					resource.TestCheckResourceAttrSet(resName, "built_at"),
+					resource.TestCheckResourceAttrSet(resName, "created_at"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccCivoKubernetesClusterTags_update(t *testing.T) {
 	var kubernetes civogo.KubernetesCluster
 
@@ -235,5 +292,16 @@ resource "civo_kubernetes_cluster" "foobar" {
 	name = "%s"
 	num_target_nodes = 2
 	tags = "foo"
+}`, name)
+}
+
+
+func testAccCheckCivoKubernetesClusterConfigCNI(name string) string {
+	return fmt.Sprintf(`
+resource "civo_kubernetes_cluster" "foobar" {
+	name = "%s"
+	num_target_nodes = 2
+	tags = "foo"
+	cni = "calico"
 }`, name)
 }
