@@ -38,6 +38,7 @@ output "kubernetes_cluster_output" {
 
 - **api_endpoint** (String) The base URL of the API server on the Kubernetes master node
 - **applications** (String) A list of application installed
+- **cni** (String) The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
 - **created_at** (String) The date where the Kubernetes cluster was create
 - **dns_entry** (String) The unique dns entry for the cluster in this case point to the master
 - **installed_applications** (List of Object) (see [below for nested schema](#nestedatt--installed_applications))

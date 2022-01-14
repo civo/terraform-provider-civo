@@ -62,7 +62,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 ### Optional
 
 - **applications** (String) Comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. Application names are case-sensitive; the available applications can be listed with the Civo CLI: 'civo kubernetes applications ls'. If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik. For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'.
-- **cni** (String) The cni for the k3s to install (the default is `flannel`) valid options are `calico` or `flannel`
+- **cni** (String) The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
 - **id** (String) The ID of this resource.
 - **kubernetes_version** (String) The version of k3s to install (optional, the default is currently the latest available)
 - **name** (String) Name for your cluster, must be unique within your account

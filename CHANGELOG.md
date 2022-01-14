@@ -4,6 +4,9 @@
 ### Merged
 - [#116](https://github.com/civo/terraform-provider-civo/pull/116) - Added the custom CNI to the Kubernetes cluster
 
+### Commits
+- [eaeff80](https://github.com/civo/terraform-provider-civo/commit/eaeff806a20b74d096047b1bbba2b3e038904281) - Fixed the descrition in the resource and added cni to the datasource
+
 ## [v1.0.7](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.7) (11 December 2021)
 
 ### Merged
