@@ -58,10 +58,10 @@ func resourceKubernetesCluster() *schema.Resource {
 				Description: "The version of k3s to install (optional, the default is currently the latest available)",
 			},
 			"cni": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Default:    "flannel",
-				Description: "The cni for the k3s to install (the default is `flannel`) valid options are `calico` or `flannel`",
+				Type:         schema.TypeString,
+				Computed:     true,
+				Default:      "flannel",
+				Description:  "The cni for the k3s to install (the default is `flannel`) valid options are `calico` or `flannel`",
 				ValidateFunc: utils.ValidateCNIName,
 			},
 			"tags": {
@@ -307,7 +307,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 
 	if attr, ok := d.GetOk("cni"); ok {
 		config.CNIPlugin = attr.(string)
-	} 
+	}
 
 	if attr, ok := d.GetOk("applications"); ok {
 		if utils.CheckAPPName(attr.(string), apiClient) {

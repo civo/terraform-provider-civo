@@ -45,7 +45,7 @@ func ValidateCNIName(v interface{}, k string) (ws []string, es []error) {
 	if value != "flannel" && value != "cilium" {
 		errs = append(errs, fmt.Errorf("CNI plugin provided isn't valid/supported"))
 		return warns, errs
-	} 
+	}
 
 	return warns, errs
 }

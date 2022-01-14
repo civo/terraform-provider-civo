@@ -295,7 +295,6 @@ resource "civo_kubernetes_cluster" "foobar" {
 }`, name)
 }
 
-
 func testAccCheckCivoKubernetesClusterConfigCNI(name string) string {
 	return fmt.Sprintf(`
 resource "civo_kubernetes_cluster" "foobar" {
