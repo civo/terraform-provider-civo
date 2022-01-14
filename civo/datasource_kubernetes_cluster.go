@@ -55,6 +55,11 @@ func dataSourceKubernetesCluster() *schema.Resource {
 				Computed:    true,
 				Description: "The version of Kubernetes",
 			},
+			"cni": {
+				Type:         schema.TypeString,
+				Computed:     true,
+				Description:  "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
+			},
 			"tags": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -254,6 +259,7 @@ func dataSourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("num_target_nodes", foundCluster.NumTargetNode)
 	d.Set("target_nodes_size", foundCluster.TargetNodeSize)
 	d.Set("kubernetes_version", foundCluster.KubernetesVersion)
+	d.Set("cni", foundCluster.CNIPlugin)
 	d.Set("tags", foundCluster.Tags)
 	d.Set("status", foundCluster.Status)
 	d.Set("ready", foundCluster.Ready)

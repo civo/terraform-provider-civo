@@ -61,7 +61,7 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				Description:  "The cni for the k3s to install (the default is `flannel`) valid options are `calico` or `flannel`",
+				Description:  "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
 				ValidateFunc: utils.ValidateCNIName,
 			},
 			"tags": {
