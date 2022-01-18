@@ -42,11 +42,11 @@ func TestAccCivoKubernetesClusterNodePool_basic(t *testing.T) {
 					// query the API to retrieve the widget object
 					testAccCheckCivoKubernetesClusterNodePoolResourceExists(resPoolName, &kubernetes, &kubernetesNodePool),
 					// verify remote values
-					testAccCheckCivoKubernetesClusterNodePoolValues(&kubernetesNodePool, "g3.k3s.medium"),
+					testAccCheckCivoKubernetesClusterNodePoolValues(&kubernetesNodePool, "g4s.kube.medium"),
 					// verify local values
 					// resource.TestCheckResourceAttr(resPoolName, "cluster_id", kubernetes.ID),
 					resource.TestCheckResourceAttr(resPoolName, "num_target_nodes", "3"),
-					resource.TestCheckResourceAttr(resPoolName, "target_nodes_size", "g3.k3s.medium"),
+					resource.TestCheckResourceAttr(resPoolName, "target_nodes_size", "g4s.kube.medium"),
 				),
 			},
 		},

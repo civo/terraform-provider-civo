@@ -52,7 +52,7 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 		switch {
 		case strings.Contains(v.Name, "db"):
 			typeName = "database"
-		case strings.Contains(v.Name, "k3s"):
+		case strings.Contains(v.Name, "kube"):
 			typeName = "kubernetes"
 		default:
 			typeName = "instance"

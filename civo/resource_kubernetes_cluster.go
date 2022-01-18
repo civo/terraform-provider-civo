@@ -49,7 +49,7 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "The size of each node (optional, the default is currently g3.k3s.medium)",
+				Description: "The size of each node (optional, the default is currently g4s.kube.medium)",
 			},
 			"kubernetes_version": {
 				Type:        schema.TypeString,
@@ -292,7 +292,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	if attr, ok := d.GetOk("target_nodes_size"); ok {
 		config.TargetNodesSize = attr.(string)
 	} else {
-		config.TargetNodesSize = "g3.k3s.medium"
+		config.TargetNodesSize = "g4s.kube.medium"
 	}
 
 	if attr, ok := d.GetOk("kubernetes_version"); ok {
