@@ -34,6 +34,7 @@ func Provider() *schema.Provider {
 			"civo_kubernetes_version": dataSourceKubernetesVersion(),
 			"civo_kubernetes_cluster": dataSourceKubernetesCluster(),
 			"civo_instances_size":     dataSourceInstancesSize(),
+			"civo_size":               dataSourceSize(),
 			"civo_instances":          dataSourceInstances(),
 			"civo_instance":           dataSourceInstance(),
 			"civo_dns_domain_name":    dataSourceDNSDomainName(),
