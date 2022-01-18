@@ -44,7 +44,7 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "the size of each node (optional, the default is currently g3.k3s.medium)",
+				Description: "the size of each node (optional, the default is currently g4s.kube.medium)",
 			},
 		},
 		Create: resourceKubernetesClusterNodePoolCreate,
@@ -79,7 +79,7 @@ func resourceKubernetesClusterNodePoolCreate(d *schema.ResourceData, m interface
 	if attr, ok := d.GetOk("target_nodes_size"); ok {
 		size = attr.(string)
 	} else {
-		size = "g3.k3s.medium"
+		size = "g4s.kube.medium"
 	}
 
 	log.Printf("[INFO] getting kubernetes cluster %s in the region %s", cluster_id, apiClient.Region)

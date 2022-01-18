@@ -10,7 +10,7 @@ import (
 )
 
 // SizeList is a temporal struct to save all size
-type SizeList struct {
+type Size struct {
 	Name        string
 	Description string
 	Type        string
@@ -22,23 +22,20 @@ type SizeList struct {
 
 // Data source to get and filter all instances size
 // use to define the size in resourceInstance
-func dataSourceInstancesSize() *schema.Resource {
+func dataSourceSize() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
-		Description:         "Retrieves information about the instance sizes that Civo supports, with the ability to filter the results.",
-		RecordSchema:        instancesSizeSchema(),
+		Description:         "Retrieves information about the sizes that Civo supports, with the ability to filter the results.",
+		RecordSchema:        SizeSchema(),
 		ResultAttributeName: "sizes",
-		FlattenRecord:       flattenInstancesSize,
-		GetRecords:          getInstancesSizes,
+		FlattenRecord:       flattenSize,
+		GetRecords:          getSizes,
 	}
 
-	instanceSizeResource := datalist.NewResource(dataListConfig)
-	instanceSizeResource.DeprecationMessage = "Use the civo_size datasource instead"
-
-	return instanceSizeResource
+	return datalist.NewResource(dataListConfig)
 
 }
 
-func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
+func getSizes(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
 	sizes := []interface{}{}
@@ -47,7 +44,7 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 		return nil, fmt.Errorf("[ERR] error retrieving sizes: %s", err)
 	}
 
-	sizeList := []SizeList{}
+	sizeList := []Size{}
 
 	for _, v := range partialSizes {
 		if !v.Selectable {
@@ -65,7 +62,7 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 			typeName = "instance"
 		}
 
-		sizeList = append(sizeList, SizeList{
+		sizeList = append(sizeList, Size{
 			Name:        v.Name,
 			Description: v.Description,
 			Type:        typeName,
@@ -83,9 +80,9 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 	return sizes, nil
 }
 
-func flattenInstancesSize(size, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
+func flattenSize(size, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
 
-	s := size.(SizeList)
+	s := size.(Size)
 
 	flattenedSize := map[string]interface{}{}
 	flattenedSize["name"] = s.Name
@@ -99,7 +96,7 @@ func flattenInstancesSize(size, m interface{}, extra map[string]interface{}) (ma
 	return flattenedSize, nil
 }
 
-func instancesSizeSchema() map[string]*schema.Schema {
+func SizeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
 			Type:        schema.TypeString,
