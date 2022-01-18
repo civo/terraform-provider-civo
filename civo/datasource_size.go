@@ -50,7 +50,7 @@ func getSizes(m interface{}, extra map[string]interface{}) ([]interface{}, error
 		if !v.Selectable {
 			continue
 		}
-		
+
 		typeName := ""
 
 		switch {

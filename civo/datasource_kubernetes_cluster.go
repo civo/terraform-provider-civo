@@ -56,9 +56,9 @@ func dataSourceKubernetesCluster() *schema.Resource {
 				Description: "The version of Kubernetes",
 			},
 			"cni": {
-				Type:         schema.TypeString,
-				Computed:     true,
-				Description:  "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
 			},
 			"tags": {
 				Type:        schema.TypeString,

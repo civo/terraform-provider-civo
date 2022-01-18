@@ -53,7 +53,7 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 		if !v.Selectable {
 			continue
 		}
-		
+
 		typeName := ""
 
 		switch {
