@@ -53,7 +53,7 @@ resource "civo_kubernetes_node_pool" "front-end" {
 
 - **id** (String) The ID of this resource.
 - **num_target_nodes** (Number) the number of instances to create (optional, the default at the time of writing is 3)
-- **target_nodes_size** (String) the size of each node (optional, the default is currently g3.k3s.medium)
+- **target_nodes_size** (String) the size of each node (optional, the default is currently g4s.kube.medium)
 
 ## Import
 

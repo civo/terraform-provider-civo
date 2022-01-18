@@ -1,4 +1,9 @@
 
+## [v1.0.9](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.9) (18 January 2022)
+
+### Merged
+- [#118](https://github.com/civo/terraform-provider-civo/pull/118) - Added a new datasource for the civo size
+
 ## [v1.0.8](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.8) (14 January 2022)
 
 ### Merged

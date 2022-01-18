@@ -70,7 +70,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 - **num_target_nodes** (Number) The number of instances to create (optional, the default at the time of writing is 3)
 - **region** (String) The region for the cluster, if not declare we use the region in declared in the provider
 - **tags** (String) Space separated list of tags, to be used freely as required
-- **target_nodes_size** (String) The size of each node (optional, the default is currently g3.k3s.medium)
+- **target_nodes_size** (String) The size of each node (optional, the default is currently g4s.kube.medium)
 
 ### Read-Only
 
