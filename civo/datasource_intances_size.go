@@ -47,12 +47,16 @@ func getInstancesSizes(m interface{}, extra map[string]interface{}) ([]interface
 	sizeList := []SizeList{}
 
 	for _, v := range partialSizes {
+		if !v.Selectable {
+			continue
+		}
+		
 		typeName := ""
 
 		switch {
 		case strings.Contains(v.Name, "db"):
 			typeName = "database"
-		case strings.Contains(v.Name, "kube"):
+		case strings.Contains(v.Name, "kube") || strings.Contains(v.Name, "k3s"):
 			typeName = "kubernetes"
 		default:
 			typeName = "instance"
