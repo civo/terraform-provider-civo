@@ -40,11 +40,11 @@ resource "civo_volume" "db" {
 
 ### Optional
 
+- **id** (String) The ID of this resource.
 - **region** (String) The region for the volume, if not declare we use the region in declared in the provider.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
 - **mount_point** (String) The mount point of the volume (from instance's perspective)
 
 ## Import

@@ -1,4 +1,9 @@
 
+## [v1.0.10](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.10) (7 February 2022)
+
+### Merged
+- [#119](https://github.com/civo/terraform-provider-civo/pull/119) - Removing the duplicate id parameter from civo volume
+
 ## [v1.0.9](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.9) (18 January 2022)
 
 ### Merged
