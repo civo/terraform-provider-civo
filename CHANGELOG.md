@@ -1,4 +1,9 @@
 
+## [v1.0.11](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.11) (16 February 2022)
+
+### Merged
+- [#120](https://github.com/civo/terraform-provider-civo/pull/120) - Added the egress rules and create_default_rules option to firewall
+
 ## [v1.0.10](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.10) (7 February 2022)
 
 ### Merged

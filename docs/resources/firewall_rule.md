@@ -73,12 +73,13 @@ resource "civo_firewall_rule" "custom_port" {
 
 ### Required
 
+- **action** (String) the action of the rule can be allow or deny
 - **cidr** (Set of String) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
+- **direction** (String) The direction of the rule can be ingress or egress
 - **firewall_id** (String) The Firewall ID
 
 ### Optional
 
-- **direction** (String) Will this rule affect ingress traffic (only `ingress` is supported now)
 - **end_port** (String) The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)
 - **id** (String) The ID of this resource.
 - **label** (String) A string that will be the displayed name/reference for this rule

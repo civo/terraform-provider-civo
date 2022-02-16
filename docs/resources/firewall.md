@@ -34,6 +34,7 @@ resource "civo_firewall" "www" {
 
 ### Optional
 
+- **create_default_rules** (Boolean) The create rules flag is used to create the default firewall rules, if is not defined will be set to true
 - **id** (String) The ID of this resource.
 - **network_id** (String) The firewall network, if is not defined we use the default network
 - **region** (String) The firewall region, if is not defined we use the global defined in the provider
