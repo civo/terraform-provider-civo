@@ -2,10 +2,9 @@ module github.com/civo/terraform-provider-civo
 
 require (
 	github.com/aws/aws-sdk-go v1.29.22 // indirect
-	github.com/civo/civogo v0.2.59
+	github.com/civo/civogo v0.2.70
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/google/uuid v1.2.0
-	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.5.0
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect

@@ -25,6 +25,13 @@ func resourceFirewall() *schema.Resource {
 				Optional:    true,
 				Description: "The firewall region, if is not defined we use the global defined in the provider",
 			},
+			"create_default_rules": {
+				Type:        schema.TypeBool,
+				Default:     true,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The create rules flag is used to create the default firewall rules, if is not defined will be set to true",
+			},
 			// As the backend has no support for updating network ID we replace it if the
 			// network_id changes
 			"network_id": {
@@ -48,7 +55,8 @@ func resourceFirewall() *schema.Resource {
 // function to create a firewall
 func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*civogo.Client)
-	networkID := ""
+	var networkID string
+	var CreateRules bool
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
@@ -65,8 +73,11 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 		networkID = network.ID
 	}
 
+	CreateRules = d.Get("create_default_rules").(bool)
+	
 	log.Printf("[INFO] creating a new firewall %s", d.Get("name").(string))
-	firewall, err := apiClient.NewFirewall(d.Get("name").(string), networkID)
+
+	firewall, err := apiClient.NewFirewall(d.Get("name").(string), networkID, &CreateRules)
 	if err != nil {
 		return fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
 	}

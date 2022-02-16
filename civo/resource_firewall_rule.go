@@ -61,12 +61,20 @@ func resourceFirewallRule() *schema.Resource {
 			},
 			"direction": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
+				Required:    true,
 				ForceNew:    true,
-				Description: "Will this rule affect ingress traffic (only `ingress` is supported now)",
+				Description: "The direction of the rule can be ingress or egress",
 				ValidateFunc: validation.StringInSlice([]string{
-					"ingress",
+					"ingress", "egress",
+				}, false),
+			},
+			"action": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "the action of the rule can be allow or deny",
+				ValidateFunc: validation.StringInSlice([]string{
+					"allow", "deny",
 				}, false),
 			},
 			"label": {
@@ -110,17 +118,13 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 		cird[i] = tfCird.(string)
 	}
 
-	direction := d.Get("direction").(string)
-	if direction == "" {
-		direction = "ingress"
-	}
-
 	log.Printf("[INFO] configuring a new firewall rule for firewall %s", d.Get("firewall_id").(string))
 	config := &civogo.FirewallRuleConfig{
 		FirewallID: d.Get("firewall_id").(string),
 		Protocol:   d.Get("protocol").(string),
 		StartPort:  d.Get("start_port").(string),
-		Direction:  direction,
+		Direction:  d.Get("direction").(string),
+		Action:     d.Get("action").(string),
 		Cidr:       cird,
 	}
 
@@ -178,6 +182,7 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("cidr", resp.Cidr)
 	d.Set("direction", resp.Direction)
+	d.Set("action", resp.Action)
 	d.Set("label", resp.Label)
 
 	return nil
@@ -229,6 +234,7 @@ func resourceFirewallRuleImport(d *schema.ResourceData, m interface{}) ([]*schem
 	d.Set("end_port", resp.EndPort)
 	d.Set("cidr", resp.Cidr)
 	d.Set("direction", resp.Direction)
+	d.Set("action", resp.Action)
 	d.Set("label", resp.Label)
 
 	return []*schema.ResourceData{d}, nil

@@ -60,6 +60,7 @@ func TestAccCivoFirewallRule_update(t *testing.T) {
 					resource.TestCheckResourceAttr(resName, "protocol", "tcp"),
 					resource.TestCheckResourceAttr(resName, "start_port", "80"),
 					resource.TestCheckResourceAttr(resName, "label", "web"),
+					resource.TestCheckResourceAttr(resName, "action", "allow"),
 				),
 			},
 			{
@@ -71,6 +72,7 @@ func TestAccCivoFirewallRule_update(t *testing.T) {
 					resource.TestCheckResourceAttr(resName, "protocol", "tcp"),
 					resource.TestCheckResourceAttr(resName, "start_port", "443"),
 					resource.TestCheckResourceAttr(resName, "label", "web_server"),
+					resource.TestCheckResourceAttr(resName, "action", "allow"),
 				),
 			},
 		},
@@ -155,6 +157,7 @@ resource "civo_firewall_rule" "testrule" {
 	end_port = "80"
 	cidr = ["192.168.1.2/32"]
 	direction = "ingress"
+	action = "allow"
 	label = "web"
 }
 
@@ -174,6 +177,7 @@ resource "civo_firewall_rule" "testrule" {
 	end_port = "443"
 	cidr = ["192.168.1.2/32"]
 	direction = "ingress"
+	action = "allow"
 	label = "web_server"
 }
 `, name)
