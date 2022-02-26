@@ -23,7 +23,6 @@ func Provider() *schema.Provider {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_REGION", ""),
 				Description: "If region is not set, then no region will be used and them you need expensify in every resource even if you expensify here you can overwrite in a resource.",
 			},
