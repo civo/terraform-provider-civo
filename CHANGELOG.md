@@ -1,4 +1,10 @@
 
+## [v1.0.12](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.12) (26 February 2022)
+
+### Merged
+- [#117](https://github.com/civo/terraform-provider-civo/pull/117) - fix: remove double default
+- [#121](https://github.com/civo/terraform-provider-civo/pull/121) - Enable loab balancer support for datasource
+
 ## [v1.0.11](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.11) (16 February 2022)
 
 ### Merged
