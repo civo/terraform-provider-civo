@@ -55,9 +55,9 @@ func dataSourceLoadBalancer() *schema.Resource {
 				Description: "The session affinity config timeout of the load balancer",
 			},
 			"enable_proxy_protocol": {
-				Type:        schema.TypeBool,
+				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Whether the load balancer is configured to proxy protocol",
+				Description: "The enabled proxy protocol of the load balancer",
 			},
 			"private_ip": {
 				Type:        schema.TypeString,
