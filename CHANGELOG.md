@@ -1,4 +1,12 @@
 
+## [v1.0.13](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.13) (28 February 2022)
+
+### Merged
+- [#122](https://github.com/civo/terraform-provider-civo/pull/122) - Fix lb enable proxy protocol type
+
+### Commits
+- [a06a034](https://github.com/civo/terraform-provider-civo/commit/a06a03405dd6e78cde30dd44e84ce586a523f03f) - Added the lb example for the doc
+
 ## [v1.0.12](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.12) (26 February 2022)
 
 ### Merged
