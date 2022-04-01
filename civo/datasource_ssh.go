@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -18,7 +19,7 @@ func dataSourceSSHKey() *schema.Resource {
 			"Get information on a SSH key. This data source provides the name, and fingerprint as configured on your Civo account.",
 			"An error will be raised if the provided SSH key name does not exist in your Civo account.",
 		}, "\n\n"),
-		Read: dataSourceSSHKeyRead,
+		ReadContext: dataSourceSSHKeyRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -43,7 +44,7 @@ func dataSourceSSHKey() *schema.Resource {
 	}
 }
 
-func dataSourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	var searchBy string
@@ -58,7 +59,7 @@ func dataSourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 
 	sshKey, err := apiClient.FindSSHKey(searchBy)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to retrive network: %s", err)
+		return diag.Errorf("[ERR] failed to retrive network: %s", err)
 	}
 
 	d.SetId(sshKey.ID)

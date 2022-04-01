@@ -1,10 +1,12 @@
 package civo
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -17,7 +19,7 @@ func dataSourceDNSDomainRecord() *schema.Resource {
 			"Get information on a DNS record. This data source provides the name, TTL, and zone file as configured on your Civo account.",
 			"An error will be raised if the provided domain name or record are not in your Civo account.",
 		}, "\n\n"),
-		Read: dataSourceDNSDomainRecordRead,
+		ReadContext: dataSourceDNSDomainRecordRead,
 		Schema: map[string]*schema.Schema{
 			"domain_id": {
 				Type:         schema.TypeString,
@@ -71,19 +73,19 @@ func dataSourceDNSDomainRecord() *schema.Resource {
 	}
 }
 
-func dataSourceDNSDomainRecordRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceDNSDomainRecordRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 	domain := d.Get("domain_id").(string)
 	name := d.Get("name").(string)
 
 	allRecords, err := apiClient.ListDNSRecords(domain)
 	if err != nil {
-		return fmt.Errorf("error retrieving all domain records: %s", err)
+		return diag.Errorf("error retrieving all domain records: %s", err)
 	}
 
 	record, err := getRecordByName(allRecords, name)
 	if err != nil {
-		return err
+		return diag.Errorf("Error retrieving records by name: %s", err)
 	}
 
 	d.SetId(record.ID)

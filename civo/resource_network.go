@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -37,11 +38,10 @@ func resourceNetwork() *schema.Resource {
 				Description: "If the network is default, this will be `true`",
 			},
 		},
-		Create: resourceNetworkCreate,
-		Read:   resourceNetworkRead,
-		Update: resourceNetworkUpdate,
-		Delete: resourceNetworkDelete,
-		//Exists: resourceExistsItem,
+		CreateContext: resourceNetworkCreate,
+		ReadContext:   resourceNetworkRead,
+		UpdateContext: resourceNetworkUpdate,
+		DeleteContext: resourceNetworkDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -49,7 +49,7 @@ func resourceNetwork() *schema.Resource {
 }
 
 // function to create a new network
-func resourceNetworkCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -60,16 +60,16 @@ func resourceNetworkCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
 	network, err := apiClient.NewNetwork(d.Get("label").(string))
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create a new network: %s", err)
+		return diag.Errorf("[ERR] failed to create a new network: %s", err)
 	}
 
 	d.SetId(network.ID)
 
-	return resourceNetworkRead(d, m)
+	return resourceNetworkRead(ctx, d, m)
 }
 
 // function to read a network
-func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
+func resourceNetworkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -87,7 +87,7 @@ func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[ERR] failed to list the network: %s", err)
+		return diag.Errorf("[ERR] failed to list the network: %s", err)
 	}
 
 	for _, net := range resp {
@@ -104,7 +104,7 @@ func resourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // function to update the network
-func resourceNetworkUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -116,15 +116,15 @@ func resourceNetworkUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] updating the network %s", d.Id())
 		_, err := apiClient.RenameNetwork(d.Get("label").(string), d.Id())
 		if err != nil {
-			return fmt.Errorf("[ERR] An error occurred while rename the network %s", d.Id())
+			return diag.Errorf("[ERR] An error occurred while rename the network %s", d.Id())
 		}
-		return resourceNetworkRead(d, m)
+		return resourceNetworkRead(ctx, d, m)
 	}
-	return resourceNetworkRead(d, m)
+	return resourceNetworkRead(ctx, d, m)
 }
 
 // function to delete a network
-func resourceNetworkDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNetworkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -135,7 +135,7 @@ func resourceNetworkDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] deleting the network %s", d.Id())
 	_, err := apiClient.DeleteNetwork(d.Id())
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete the network %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while tring to delete the network %s", d.Id())
 	}
 	return nil
 }

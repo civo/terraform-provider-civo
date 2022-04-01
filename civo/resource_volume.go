@@ -1,11 +1,13 @@
 package civo
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -42,11 +44,10 @@ func resourceVolume() *schema.Resource {
 				Description: "The mount point of the volume (from instance's perspective)",
 			},
 		},
-		Create: resourceVolumeCreate,
-		Read:   resourceVolumeRead,
-		Update: resourceVolumeUpdate,
-		Delete: resourceVolumeDelete,
-		//Exists: resourceExistsItem,
+		CreateContext: resourceVolumeCreate,
+		ReadContext:   resourceVolumeRead,
+		UpdateContext: resourceVolumeUpdate,
+		DeleteContext: resourceVolumeDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceVolumeImport,
 		},
@@ -54,7 +55,7 @@ func resourceVolume() *schema.Resource {
 }
 
 // function to create the new volume
-func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
+func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] configuring the volume %s", d.Get("name").(string))
@@ -76,21 +77,21 @@ func resourceVolumeCreate(d *schema.ResourceData, m interface{}) error {
 
 	_, err := apiClient.FindNetwork(config.NetworkID)
 	if err != nil {
-		return fmt.Errorf("[ERR] Unable to find network ID %q in %q region", config.NetworkID, config.Region)
+		return diag.Errorf("[ERR] Unable to find network ID %q in %q region", config.NetworkID, config.Region)
 	}
 
 	volume, err := apiClient.NewVolume(config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create a new volume: %s", err)
+		return diag.Errorf("[ERR] failed to create a new volume: %s", err)
 	}
 
 	d.SetId(volume.ID)
 
-	return resourceVolumeRead(d, m)
+	return resourceVolumeRead(ctx, d, m)
 }
 
 // function to read the volume
-func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
+func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -105,7 +106,7 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("[ERR] failed retrieving the volume: %s", err)
+		return diag.Errorf("[ERR] failed retrieving the volume: %s", err)
 	}
 
 	d.Set("name", resp.Name)
@@ -117,24 +118,23 @@ func resourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // function to update the volume
-func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
-	/*
-		apiClient := m.(*civogo.Client)
+func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-		// overwrite the region if is define in the datasource
-		if region, ok := d.GetOk("region"); ok {
-			apiClient.Region = region.(string)
-		}
+	// apiClient := m.(*civogo.Client)
 
-		log.Printf("[INFO] retrieving the volume %s", d.Id())
-		resp, err := apiClient.FindVolume(d.Id())
-		if err != nil {
-			return fmt.Errorf("[ERR] failed retrieving the volume: %s", err)
-		}
-	*/
+	// // overwrite the region if is define in the datasource
+	// if region, ok := d.GetOk("region"); ok {
+	// 	apiClient.Region = region.(string)
+	// }
+
+	// log.Printf("[INFO] retrieving the volume %s", d.Id())
+	// resp, err := apiClient.FindVolume(d.Id())
+	// if err != nil {
+	// 	return fmt.Errorf("[ERR] failed retrieving the volume: %s", err)
+	// }
 
 	if d.HasChange("size_gb") {
-		return fmt.Errorf("[ERR] Resize operation is not available at this moment - we are working to re-enable it soon")
+		return diag.Errorf("[ERR] Resize operation is not available at this moment - we are working to re-enable it soon")
 
 		/*
 			if resp.InstanceID != "" {
@@ -169,18 +169,18 @@ func resourceVolumeUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if d.HasChange("network_id") {
-		return fmt.Errorf("[ERR] Network change for volume is not supported at this moment")
+		return diag.Errorf("[ERR] Network change for volume is not supported at this moment")
 	}
 
 	if d.HasChange("name") {
-		return fmt.Errorf("[ERR] Name change for volume is not supported at this moment")
+		return diag.Errorf("[ERR] Name change for volume is not supported at this moment")
 	}
 
-	return resourceVolumeRead(d, m)
+	return resourceVolumeRead(ctx, d, m)
 }
 
 // function to delete the volume
-func resourceVolumeDelete(d *schema.ResourceData, m interface{}) error {
+func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -191,7 +191,7 @@ func resourceVolumeDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] deleting the volume %s", d.Id())
 	_, err := apiClient.DeleteVolume(d.Id())
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete the volume %s", err)
+		return diag.Errorf("[ERR] an error occurred while tring to delete the volume %s", err)
 	}
 	return nil
 }

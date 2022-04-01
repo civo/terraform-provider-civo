@@ -1,18 +1,17 @@
 package civo
 
 import (
-	// "context"
+	"context"
 	"fmt"
 	"log"
 	"strings"
-
-	// "time"
+	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/google/uuid"
 
-	// "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -37,28 +36,45 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 			"num_target_nodes": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Deprecated:  "This field is deprecated, please use `node_count` instead",
+				Description: "the number of instances to create (optional, the default at the time of writing is 3)",
+			},
+			"node_count": {
+				Type:        schema.TypeInt,
+				Optional:    true,
 				Computed:    true,
 				Description: "the number of instances to create (optional, the default at the time of writing is 3)",
 			},
 			"target_nodes_size": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Deprecated:  "This field is deprecated, please use `size` instead",
+				Description: "the size of each node (optional, the default is currently g4s.kube.medium)",
+			},
+			"size": {
+				Type:        schema.TypeString,
+				Optional:    true,
 				Computed:    true,
 				Description: "the size of each node (optional, the default is currently g4s.kube.medium)",
 			},
 		},
-		Create: resourceKubernetesClusterNodePoolCreate,
-		Read:   resourceKubernetesClusterNodePoolRead,
-		Update: resourceKubernetesClusterNodePoolUpdate,
-		Delete: resourceKubernetesClusterNodePoolDelete,
+		CreateContext: resourceKubernetesClusterNodePoolCreate,
+		ReadContext:   resourceKubernetesClusterNodePoolRead,
+		UpdateContext: resourceKubernetesClusterNodePoolUpdate,
+		DeleteContext: resourceKubernetesClusterNodePoolDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceKubernetesClusterNodePoolImport,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 	}
 }
 
 // function to create a new cluster
-func resourceKubernetesClusterNodePoolCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -66,26 +82,28 @@ func resourceKubernetesClusterNodePoolCreate(d *schema.ResourceData, m interface
 		apiClient.Region = region.(string)
 	}
 
-	cluster_id := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 
 	count := 0
-	if attr, ok := d.GetOk("num_target_nodes"); ok {
+	if attr, ok := d.GetOk("node_count"); ok {
 		count = attr.(int)
 	} else {
 		count = 3
 	}
 
 	size := ""
-	if attr, ok := d.GetOk("target_nodes_size"); ok {
+	if attr, ok := d.GetOk("size"); ok {
 		size = attr.(string)
 	} else {
 		size = "g4s.kube.medium"
 	}
 
-	log.Printf("[INFO] getting kubernetes cluster %s in the region %s", cluster_id, apiClient.Region)
-	getKubernetesCluster, err := apiClient.GetKubernetesCluster(cluster_id)
+	timeout := d.Timeout(schema.TimeoutCreate)
+
+	log.Printf("[INFO] getting kubernetes cluster %s in the region %s", clusterID, apiClient.Region)
+	getKubernetesCluster, err := apiClient.GetKubernetesCluster(clusterID)
 	if err != nil {
-		return err
+		return diag.Errorf("[INFO] error getting kubernetes cluster: %s", clusterID)
 	}
 
 	newPool := []civogo.KubernetesClusterPoolConfig{}
@@ -96,43 +114,49 @@ func resourceKubernetesClusterNodePoolCreate(d *schema.ResourceData, m interface
 	poolID := uuid.NewString()
 	newPool = append(newPool, civogo.KubernetesClusterPoolConfig{ID: poolID, Count: count, Size: size})
 
-	log.Printf("[INFO] configuring kubernetes cluster %s to add pool %s", cluster_id, poolID[:6])
+	log.Printf("[INFO] configuring kubernetes cluster %s to add pool %s", getKubernetesCluster.ID, poolID[:6])
 	config := &civogo.KubernetesClusterConfig{
-		Pools: newPool,
+		Pools:  newPool,
+		Region: apiClient.Region,
 	}
 
 	log.Printf("[INFO] Creating a new kubernetes cluster pool %s", poolID[:6])
-	_, err = apiClient.UpdateKubernetesCluster(cluster_id, config)
+	_, err = apiClient.UpdateKubernetesCluster(getKubernetesCluster.ID, config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create the kubernetes cluster: %s", err)
+		return diag.Errorf("[ERR] failed to create the kubernetes cluster: %s", err)
 	}
 
 	d.SetId(poolID)
 
-	return resourceKubernetesClusterNodePoolRead(d, m)
+	err = waitForKubernetesNodePoolCreate(apiClient, timeout, getKubernetesCluster.ID, poolID)
+	if err != nil {
+		return diag.Errorf("Error creating Kubernetes node pool: %s", err)
+	}
+
+	return resourceKubernetesClusterNodePoolRead(ctx, d, m)
 
 }
 
 // function to read the kubernetes cluster
-func resourceKubernetesClusterNodePoolRead(d *schema.ResourceData, m interface{}) error {
+func resourceKubernetesClusterNodePoolRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
-	cluster_id := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 
-	log.Printf("[INFO] retrieving the kubernetes cluster %s", cluster_id)
-	resp, err := apiClient.GetKubernetesCluster(cluster_id)
+	log.Printf("[INFO] retrieving the kubernetes cluster %s", clusterID)
+	resp, err := apiClient.GetKubernetesCluster(clusterID)
 	if err != nil {
 		if resp == nil {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
+		return diag.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
 	}
 
 	d.Set("cluster_id", resp.ID)
 	for _, v := range resp.Pools {
 		if v.ID == d.Id() {
-			d.Set("num_target_nodes", v.Count)
-			d.Set("target_nodes_size", v.Size)
+			d.Set("node_count", v.Count)
+			d.Set("size", v.Size)
 		}
 	}
 
@@ -140,7 +164,7 @@ func resourceKubernetesClusterNodePoolRead(d *schema.ResourceData, m interface{}
 }
 
 // function to update the kubernetes cluster
-func resourceKubernetesClusterNodePoolUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -148,16 +172,23 @@ func resourceKubernetesClusterNodePoolUpdate(d *schema.ResourceData, m interface
 		apiClient.Region = region.(string)
 	}
 
-	cluster_id := d.Get("cluster_id").(string)
-	count := 0
-
-	if d.HasChange("num_target_nodes") {
-		count = d.Get("num_target_nodes").(int)
+	old, new := d.GetChange("size")
+	if old != new {
+		return diag.Errorf("[ERR] Size change (%q) for existing pool is not available at this moment", "size")
 	}
 
-	getKubernetesCluster, err := apiClient.GetKubernetesCluster(cluster_id)
+	clusterID := d.Get("cluster_id").(string)
+	count := 0
+
+	if d.HasChange("node_count") {
+		count = d.Get("node_count").(int)
+	}
+
+	timeout := d.Timeout(schema.TimeoutUpdate)
+
+	getKubernetesCluster, err := apiClient.GetKubernetesCluster(clusterID)
 	if err != nil {
-		return err
+		return diag.Errorf("[INFO] error getting kubernetes cluster: %s", clusterID)
 	}
 
 	nodePool := []civogo.KubernetesClusterPoolConfig{}
@@ -169,26 +200,37 @@ func resourceKubernetesClusterNodePoolUpdate(d *schema.ResourceData, m interface
 
 	log.Printf("[INFO] configuring kubernetes cluster %s to add pool", d.Id()[:6])
 	config := &civogo.KubernetesClusterConfig{
-		Pools: nodePool,
+		Pools:  nodePool,
+		Region: apiClient.Region,
 	}
 
 	log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())
-	_, err = apiClient.UpdateKubernetesCluster(cluster_id, config)
+	_, err = apiClient.UpdateKubernetesCluster(getKubernetesCluster.ID, config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
+		return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
-	return resourceKubernetesClusterNodePoolRead(d, m)
+	err = waitForKubernetesNodePoolCreate(apiClient, timeout, getKubernetesCluster.ID, d.Id())
+	if err != nil {
+		return diag.Errorf("Error creating Kubernetes node pool: %s", err)
+	}
+
+	return resourceKubernetesClusterNodePoolRead(ctx, d, m)
 }
 
 // function to delete the kubernetes cluster
-func resourceKubernetesClusterNodePoolDelete(d *schema.ResourceData, m interface{}) error {
+func resourceKubernetesClusterNodePoolDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	cluster_id := d.Get("cluster_id").(string)
-	getKubernetesCluster, err := apiClient.GetKubernetesCluster(cluster_id)
+	clusterID := d.Get("cluster_id").(string)
+	getKubernetesCluster, err := apiClient.GetKubernetesCluster(clusterID)
 	if err != nil {
-		return err
+		return diag.Errorf("[INFO] error getting kubernetes cluster: %s", clusterID)
+	}
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
 	}
 
 	nodePool := []civogo.KubernetesClusterPoolConfig{}
@@ -198,16 +240,22 @@ func resourceKubernetesClusterNodePoolDelete(d *schema.ResourceData, m interface
 
 	nodePool = removeNodePool(nodePool, d.Id())
 	config := &civogo.KubernetesClusterConfig{
-		Pools: nodePool,
+		Pools:  nodePool,
+		Region: apiClient.Region,
 	}
 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
-	_, err = apiClient.UpdateKubernetesCluster(cluster_id, config)
+	_, err = apiClient.UpdateKubernetesCluster(getKubernetesCluster.ID, config)
 	if err != nil {
-		return fmt.Errorf("[INFO] an error occurred while tring to delete the kubernetes cluster pool %s", err)
+		return diag.Errorf("[INFO] an error occurred while tring to delete the kubernetes cluster pool %s", err)
 	}
 
-	return nil
+	err = waitForKubernetesNodePoolDelete(apiClient, d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceKubernetesClusterNodePoolRead(ctx, d, m)
 }
 
 // custom import to able to add a node pool to the terraform
@@ -258,16 +306,13 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 
 // RemoveNodePool is a utility function to remove node pool from a kuberentes cluster
 func removeNodePool(s []civogo.KubernetesClusterPoolConfig, id string) []civogo.KubernetesClusterPoolConfig {
-	key := 0
 	for k, v := range s {
 		if strings.Contains(v.ID, id) {
-			key = k
-			break
+			s[len(s)-1], s[k] = s[k], s[len(s)-1]
+			return s[:len(s)-1]
 		}
 	}
-
-	s[len(s)-1], s[key] = s[key], s[len(s)-1]
-	return s[:len(s)-1]
+	return s
 }
 
 // UpdateNodePool is a utility function to update node pool from a kuberentes cluster
@@ -279,4 +324,114 @@ func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int
 		}
 	}
 	return s
+}
+
+// inPool is a utility function to check if a node pool is in a kubernetes cluster
+func inPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
+	for _, b := range list {
+		if b.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
+// waitForKubernetesNodePoolCreate is a utility function to wait for a node pool to be created
+func waitForKubernetesNodePoolCreate(client *civogo.Client, duration time.Duration, clusterID string, poolID string) error {
+	var (
+		tickerInterval        = 10 * time.Second
+		timeoutSeconds        = duration.Seconds()
+		timeout               = int(timeoutSeconds / tickerInterval.Seconds())
+		n                     = 0
+		totalRequiredInstance = 0
+		totalRunningInstance  = 0
+		ticker                = time.NewTicker(tickerInterval)
+	)
+
+	for range ticker.C {
+
+		cluster, err := client.GetKubernetesCluster(clusterID)
+		if err != nil {
+			ticker.Stop()
+			return fmt.Errorf("Error trying to read cluster state: %s", err)
+		}
+
+		for _, v := range cluster.RequiredPools {
+			if v.ID == poolID {
+				totalRequiredInstance = v.Count
+				break
+			}
+		}
+
+		for _, v := range cluster.Pools {
+			if v.ID == poolID {
+				totalRunningInstance = v.Count
+				break
+			}
+		}
+
+		allRunning := totalRunningInstance == totalRequiredInstance
+		for _, n := range cluster.Pools {
+			if n.ID == poolID {
+				for _, node := range n.Instances {
+					if node.Status == "BUILDING" {
+						allRunning = false
+					}
+				}
+			}
+		}
+
+		if allRunning {
+			ticker.Stop()
+			return nil
+		}
+
+		if n > timeout {
+			ticker.Stop()
+			break
+		}
+
+		n++
+	}
+
+	return fmt.Errorf("Timeout waiting to create nodepool")
+}
+
+// waitForKubernetesNodePoolDelete is a utility function to wait for a node pool to be deleted
+func waitForKubernetesNodePoolDelete(client *civogo.Client, d *schema.ResourceData) error {
+	var (
+		tickerInterval = 10 * time.Second
+		timeoutSeconds = d.Timeout(schema.TimeoutDelete).Seconds()
+		timeout        = int(timeoutSeconds / tickerInterval.Seconds())
+		n              = 0
+		ticker         = time.NewTicker(tickerInterval)
+	)
+
+	for range ticker.C {
+
+		cluster, err := client.GetKubernetesCluster(d.Get("cluster_id").(string))
+		if err != nil {
+			ticker.Stop()
+			return fmt.Errorf("Error trying to read cluster state: %s", err)
+		}
+
+		nodePool := []civogo.KubernetesClusterPoolConfig{}
+		for _, v := range cluster.Pools {
+			nodePool = append(nodePool, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size})
+		}
+
+		if !inPool(d.Id(), nodePool) {
+			ticker.Stop()
+			return nil
+		}
+
+		if n > timeout {
+			ticker.Stop()
+			break
+		}
+
+		n++
+	}
+
+	return fmt.Errorf("Timeout waiting to delete nodepool")
 }

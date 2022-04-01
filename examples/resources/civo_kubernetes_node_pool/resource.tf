@@ -14,13 +14,18 @@ data "civo_instances_size" "xsmall" {
 # Create a cluster
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
-    num_target_nodes = 1
-    target_nodes_size = element(data.civo_instances_size.xsmall.sizes, 0).name
+    applications = "Portainer,Linkerd:Linkerd & Jaeger"
+    firewall_id = civo_firewall.my-firewall.id
+    pools {
+        size = element(data.civo_instances_size.xsmall.sizes, 0).name
+        node_count = 3
+    }
 }
 
 # Add a node pool
 resource "civo_kubernetes_node_pool" "front-end" {
    cluster_id = civo_kubernetes_cluster.my-cluster.id
-   num_target_nodes = 1
+   node_count = 1 // Optional
+   size = element(data.civo_instances_size.xsmall.sizes, 0).name // Optional
    region = "LON1"
 }

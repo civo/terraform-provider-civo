@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -27,10 +28,10 @@ func resourceDNSDomainName() *schema.Resource {
 				Description: "The account ID of the domain",
 			},
 		},
-		Create: resourceDNSDomainNameCreate,
-		Read:   resourceDNSDomainNameRead,
-		Update: resourceDNSDomainNameUpdate,
-		Delete: resourceDNSDomainNameDelete,
+		CreateContext: resourceDNSDomainNameCreate,
+		ReadContext:   resourceDNSDomainNameRead,
+		UpdateContext: resourceDNSDomainNameUpdate,
+		DeleteContext: resourceDNSDomainNameDelete,
 		//Exists: resourceExistsItem,
 		Importer: &schema.ResourceImporter{
 			State: resourceDNSDomainImport,
@@ -39,22 +40,22 @@ func resourceDNSDomainName() *schema.Resource {
 }
 
 // function to create a new domain in your account
-func resourceDNSDomainNameCreate(d *schema.ResourceData, m interface{}) error {
+func resourceDNSDomainNameCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Creating the domain %s", d.Get("name").(string))
 	dnsDomain, err := apiClient.CreateDNSDomain(d.Get("name").(string))
 	if err != nil {
-		return fmt.Errorf("failed to create a new domains: %s", err)
+		return diag.Errorf("failed to create a new domains: %s", err)
 	}
 
 	d.SetId(dnsDomain.ID)
 
-	return resourceDNSDomainNameRead(d, m)
+	return resourceDNSDomainNameRead(ctx, d, m)
 }
 
 // function to read a domain from your account
-func resourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
+func resourceDNSDomainNameRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] retriving the domain %s", d.Get("name").(string))
@@ -65,7 +66,7 @@ func resourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[ERR] error retrieving domain: %s", err)
+		return diag.Errorf("[ERR] error retrieving domain: %s", err)
 	}
 
 	d.Set("name", resp.Name)
@@ -75,7 +76,7 @@ func resourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // function to update a specific domain
-func resourceDNSDomainNameUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceDNSDomainNameUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Searching the domain %s", d.Get("name").(string))
@@ -91,16 +92,16 @@ func resourceDNSDomainNameUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Renaming the domain to %s", d.Get("name").(string))
 		_, err := apiClient.UpdateDNSDomain(resp, name)
 		if err != nil {
-			return fmt.Errorf("[WARN] an error occurred while renamed the domain (%s)", d.Id())
+			return diag.Errorf("[WARN] an error occurred while renamed the domain (%s)", d.Id())
 		}
 
 	}
 
-	return resourceDNSDomainNameRead(d, m)
+	return resourceDNSDomainNameRead(ctx, d, m)
 }
 
 // function to delete a specific domain
-func resourceDNSDomainNameDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDNSDomainNameDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Searching the domain to %s", d.Get("name").(string))
@@ -114,7 +115,7 @@ func resourceDNSDomainNameDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Deleting the domain %s", d.Get("name").(string))
 	_, err = apiClient.DeleteDNSDomain(resp)
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete the domain %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while tring to delete the domain %s", d.Id())
 	}
 	return nil
 }

@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -19,7 +20,7 @@ func dataSourceNetwork() *schema.Resource {
 			"This data source provides all of the network's properties as configured on your Civo account.",
 			"Networks may be looked up by id or label, and you can optionally pass region if you want to make a lookup for an expecific network inside that region.",
 		}, "\n\n"),
-		Read: dataSourceNetworkRead,
+		ReadContext: dataSourceNetworkRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -56,7 +57,7 @@ func dataSourceNetwork() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNetworkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -70,7 +71,7 @@ func dataSourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the network by id")
 		network, err := apiClient.FindNetwork(id.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive network: %s", err)
+			return diag.Errorf("[ERR] failed to retrive network: %s", err)
 		}
 
 		foundNetwork = network
@@ -78,7 +79,7 @@ func dataSourceNetworkRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the network by label")
 		network, err := apiClient.FindNetwork(label.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive network: %s", err)
+			return diag.Errorf("[ERR] failed to retrive network: %s", err)
 		}
 
 		foundNetwork = network

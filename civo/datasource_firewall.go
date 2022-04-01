@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -19,7 +20,7 @@ func dataSourceFirewall() *schema.Resource {
 			"This data source provides all of the firewall's properties as configured on your Civo account.",
 			"Firewalls may be looked up by id or name, and you can optionally pass region if you want to make a lookup for an expecific firewall inside that region.",
 		}, "\n\n"),
-		Read: dataSourceFirewallRead,
+		ReadContext: dataSourceFirewallRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -50,7 +51,7 @@ func dataSourceFirewall() *schema.Resource {
 	}
 }
 
-func dataSourceFirewallRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -64,7 +65,7 @@ func dataSourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the firewall by id")
 		firewall, err := apiClient.FindFirewall(id.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive firewall: %s", err)
+			return diag.Errorf("[ERR] failed to retrive firewall: %s", err)
 		}
 
 		foundFirewall = firewall
@@ -72,7 +73,7 @@ func dataSourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the firewall by name")
 		firewall, err := apiClient.FindFirewall(name.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive firewall: %s", err)
+			return diag.Errorf("[ERR] failed to retrive firewall: %s", err)
 		}
 
 		foundFirewall = firewall

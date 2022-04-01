@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -33,10 +34,10 @@ func resourceSSHKey() *schema.Resource {
 				Description: "a string containing the SSH finger print.",
 			},
 		},
-		Create: resourceSSHKeyCreate,
-		Read:   resourceSSHKeyRead,
-		Update: resourceSSHKeyUpdate,
-		Delete: resourceSSHKeyDelete,
+		CreateContext: resourceSSHKeyCreate,
+		ReadContext:   resourceSSHKeyRead,
+		UpdateContext: resourceSSHKeyUpdate,
+		DeleteContext: resourceSSHKeyDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -44,22 +45,22 @@ func resourceSSHKey() *schema.Resource {
 }
 
 // function to create a new ssh key
-func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
+func resourceSSHKeyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] creating the new ssh key %s", d.Get("name").(string))
 	sshKey, err := apiClient.NewSSHKey(d.Get("name").(string), d.Get("public_key").(string))
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create a new ssh key: %s", err)
+		return diag.Errorf("[ERR] failed to create a new ssh key: %s", err)
 	}
 
 	d.SetId(sshKey.ID)
 
-	return resourceSSHKeyRead(d, m)
+	return resourceSSHKeyRead(ctx, d, m)
 }
 
 // function to read a ssh key
-func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
+func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] retrieving the new ssh key %s", d.Get("name").(string))
@@ -70,7 +71,7 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[ERR] error retrieving ssh key: %s", err)
+		return diag.Errorf("[ERR] error retrieving ssh key: %s", err)
 	}
 
 	d.Set("name", sshKey.Name)
@@ -80,7 +81,7 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // function to update the ssh key
-func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceSSHKeyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	if d.HasChange("name") {
@@ -88,22 +89,22 @@ func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 			log.Printf("[INFO] updating the ssh key %s", d.Get("name").(string))
 			_, err := apiClient.UpdateSSHKey(d.Get("name").(string), d.Id())
 			if err != nil {
-				return fmt.Errorf("[ERR] an error occurred while tring to rename the ssh key %s", d.Id())
+				return diag.Errorf("[ERR] an error occurred while tring to rename the ssh key %s", d.Id())
 			}
 		}
 	}
 
-	return resourceSSHKeyRead(d, m)
+	return resourceSSHKeyRead(ctx, d, m)
 }
 
 // function to delete the ssh key
-func resourceSSHKeyDelete(d *schema.ResourceData, m interface{}) error {
+func resourceSSHKeyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] deleting the ssh key %s", d.Id())
 	_, err := apiClient.DeleteSSHKey(d.Id())
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete the ssh key %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while tring to delete the ssh key %s", d.Id())
 	}
 	return nil
 }

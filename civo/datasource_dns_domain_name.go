@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -18,7 +19,7 @@ func dataSourceDNSDomainName() *schema.Resource {
 			"Get information on a domain. This data source provides the name and the id.",
 			"An error will be raised if the provided domain name is not in your Civo account.",
 		}, "\n\n"),
-		Read: dataSourceDNSDomainNameRead,
+		ReadContext: dataSourceDNSDomainNameRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -37,7 +38,7 @@ func dataSourceDNSDomainName() *schema.Resource {
 	}
 }
 
-func dataSourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceDNSDomainNameRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	var foundDomain *civogo.DNSDomain
@@ -46,7 +47,7 @@ func dataSourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the domain by id")
 		domain, err := apiClient.FindDNSDomain(id.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive domain: %s", err)
+			return diag.Errorf("[ERR] failed to retrive domain: %s", err)
 		}
 
 		foundDomain = domain
@@ -54,7 +55,7 @@ func dataSourceDNSDomainNameRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the domain by name")
 		image, err := apiClient.FindDNSDomain(name.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive domain: %s", err)
+			return diag.Errorf("[ERR] failed to retrive domain: %s", err)
 		}
 
 		foundDomain = image

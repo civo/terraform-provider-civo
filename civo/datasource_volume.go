@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -18,7 +19,7 @@ func dataSourceVolume() *schema.Resource {
 			"Get information on a volume for use in other resources. This data source provides all of the volumes properties as configured on your Civo account.",
 			"An error will be raised if the provided volume name does not exist in your Civo account.",
 		}, "\n\n"),
-		Read: dataSourceVolumeRead,
+		ReadContext: dataSourceVolumeRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -59,7 +60,7 @@ func dataSourceVolume() *schema.Resource {
 	}
 }
 
-func dataSourceVolumeRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -73,7 +74,7 @@ func dataSourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the volume by id")
 		volume, err := apiClient.FindVolume(id.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive volume: %s", err)
+			return diag.Errorf("[ERR] failed to retrive volume: %s", err)
 		}
 
 		foundVolume = volume
@@ -81,7 +82,7 @@ func dataSourceVolumeRead(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] Getting the volume by name")
 		volume, err := apiClient.FindVolume(name.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive volume: %s", err)
+			return diag.Errorf("[ERR] failed to retrive volume: %s", err)
 		}
 
 		foundVolume = volume
