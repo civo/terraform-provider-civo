@@ -1,4 +1,9 @@
 
+## [v1.0.14](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.14) (1 April 2022)
+
+### Merged
+- [#125](https://github.com/civo/terraform-provider-civo/pull/125) - Updated the terraform SDK in all resources
+
 ## [v1.0.13](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.13) (28 February 2022)
 
 ### Merged

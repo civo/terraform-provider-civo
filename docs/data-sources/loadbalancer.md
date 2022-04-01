@@ -20,6 +20,7 @@ An error will be raised if the provided load balancer name does not exist in you
 data civo_loadbalancer "my-lb" {
   #id = "c385638f-6bb7-4d74-840c-4d98f3d15082" // Optional
   name = "lb-name"
+  region = "LON1" // Optional
 }
 
 output "civo_loadbalancer_output" {
@@ -34,6 +35,7 @@ output "civo_loadbalancer_output" {
 
 - **id** (String) The id of the load balancer to retrieve (You can find this id from service annotations 'kubernetes.civo.com/loadbalancer-id')
 - **name** (String) The name of the load balancer (You can find this name from service annotations 'kubernetes.civo.com/loadbalancer-name')
+- **region** (String) The region of the load balancer, if you delcare this field, the datasource will use this value instead of the one defined in the provider
 
 ### Read-Only
 

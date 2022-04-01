@@ -29,14 +29,19 @@ data "civo_instances_size" "xsmall" {
 # Create a cluster
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
-    num_target_nodes = 1
-    target_nodes_size = element(data.civo_instances_size.xsmall.sizes, 0).name
+    applications = "Portainer,Linkerd:Linkerd & Jaeger"
+    firewall_id = civo_firewall.my-firewall.id
+    pools {
+        size = element(data.civo_instances_size.xsmall.sizes, 0).name
+        node_count = 3
+    }
 }
 
 # Add a node pool
 resource "civo_kubernetes_node_pool" "front-end" {
    cluster_id = civo_kubernetes_cluster.my-cluster.id
-   num_target_nodes = 1
+   node_count = 1 // Optional
+   size = element(data.civo_instances_size.xsmall.sizes, 0).name // Optional
    region = "LON1"
 }
 ```
@@ -52,8 +57,20 @@ resource "civo_kubernetes_node_pool" "front-end" {
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **num_target_nodes** (Number) the number of instances to create (optional, the default at the time of writing is 3)
-- **target_nodes_size** (String) the size of each node (optional, the default is currently g4s.kube.medium)
+- **node_count** (Number) the number of instances to create (optional, the default at the time of writing is 3)
+- **num_target_nodes** (Number, Deprecated) the number of instances to create (optional, the default at the time of writing is 3)
+- **size** (String) the size of each node (optional, the default is currently g4s.kube.medium)
+- **target_nodes_size** (String, Deprecated) the size of each node (optional, the default is currently g4s.kube.medium)
+- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- **create** (String)
+- **delete** (String)
+- **update** (String)
 
 ## Import
 

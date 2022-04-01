@@ -66,6 +66,7 @@ resource "civo_instance" "foo" {
 - **sshkey_id** (String) The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)
 - **tags** (Set of String) An optional list of tags, represented as a key, value pair
 - **template** (String, Deprecated) The ID for the template to use to build the instance
+- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -79,6 +80,13 @@ resource "civo_instance" "foo" {
 - **source_id** (String) Instance's source ID
 - **source_type** (String) Instance's source type
 - **status** (String) Instance's status
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- **create** (String)
 
 ## Import
 

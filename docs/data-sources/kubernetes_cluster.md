@@ -46,12 +46,12 @@ output "kubernetes_cluster_output" {
 - **kubeconfig** (String) A representation of the Kubernetes cluster's kubeconfig in yaml format
 - **kubernetes_version** (String) The version of Kubernetes
 - **master_ip** (String) The IP of the Kubernetes master node
-- **num_target_nodes** (Number) The size of the Kubernetes cluster
+- **num_target_nodes** (Number, Deprecated) The size of the Kubernetes cluster
 - **pools** (List of Object) (see [below for nested schema](#nestedatt--pools))
 - **ready** (Boolean) If the Kubernetes cluster is ready
 - **status** (String) The status of Kubernetes cluster
 - **tags** (String) A list of tags
-- **target_nodes_size** (String) The size of each node
+- **target_nodes_size** (String, Deprecated) The size of each node
 
 <a id="nestedatt--installed_applications"></a>
 ### Nested Schema for `installed_applications`
@@ -83,10 +83,10 @@ Read-Only:
 
 Read-Only:
 
-- **count** (Number)
 - **id** (String)
 - **instance_names** (Set of String)
 - **instances** (List of Object) (see [below for nested schema](#nestedobjatt--pools--instances))
+- **node_count** (Number)
 - **size** (String)
 
 <a id="nestedobjatt--pools--instances"></a>

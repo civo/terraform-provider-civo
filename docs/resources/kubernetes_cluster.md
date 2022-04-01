@@ -46,9 +46,11 @@ resource "civo_firewall_rule" "kubernetes" {
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
-    num_target_nodes = 2
-    target_nodes_size = element(data.civo_instances_size.xsmall.sizes, 0).name
     firewall_id = civo_firewall.my-firewall.id
+    pools {
+        size = element(data.civo_instances_size.xsmall.sizes, 0).name
+        node_count = 3
+    }
 }
 ```
 
@@ -58,6 +60,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 ### Required
 
 - **firewall_id** (String) The existing firewall ID to use for this cluster
+- **pools** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--pools))
 
 ### Optional
 
@@ -67,10 +70,10 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 - **kubernetes_version** (String) The version of k3s to install (optional, the default is currently the latest available)
 - **name** (String) Name for your cluster, must be unique within your account
 - **network_id** (String) The network for the cluster, if not declare we use the default one
-- **num_target_nodes** (Number) The number of instances to create (optional, the default at the time of writing is 3)
+- **num_target_nodes** (Number, Deprecated) The number of instances to create (optional, the default at the time of writing is 3)
 - **region** (String) The region for the cluster, if not declare we use the region in declared in the provider
 - **tags** (String) Space separated list of tags, to be used freely as required
-- **target_nodes_size** (String) The size of each node (optional, the default is currently g4s.kube.medium)
+- **target_nodes_size** (String, Deprecated) The size of each node (optional, the default is currently g4s.kube.medium)
 
 ### Read-Only
 
@@ -81,9 +84,37 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 - **instances** (List of Object) (see [below for nested schema](#nestedatt--instances))
 - **kubeconfig** (String, Sensitive) The kubeconfig of the cluster
 - **master_ip** (String) The IP address of the master node
-- **pools** (List of Object) (see [below for nested schema](#nestedatt--pools))
 - **ready** (Boolean) When cluster is ready, this will return `true`
 - **status** (String) Status of the cluster
+
+<a id="nestedblock--pools"></a>
+### Nested Schema for `pools`
+
+Required:
+
+- **node_count** (Number) Number of nodes in the nodepool
+- **size** (String) Size of the nodes in the nodepool
+
+Read-Only:
+
+- **id** (String) Nodepool ID
+- **instance_names** (Set of String) Instance names in the nodepool
+- **instances** (List of Object) (see [below for nested schema](#nestedatt--pools--instances))
+
+<a id="nestedatt--pools--instances"></a>
+### Nested Schema for `pools.instances`
+
+Read-Only:
+
+- **cpu_cores** (Number)
+- **disk_gb** (Number)
+- **hostname** (String)
+- **ram_mb** (Number)
+- **size** (String)
+- **status** (String)
+- **tags** (Set of String)
+
+
 
 <a id="nestedatt--installed_applications"></a>
 ### Nested Schema for `installed_applications`
@@ -98,31 +129,6 @@ Read-Only:
 
 <a id="nestedatt--instances"></a>
 ### Nested Schema for `instances`
-
-Read-Only:
-
-- **cpu_cores** (Number)
-- **disk_gb** (Number)
-- **hostname** (String)
-- **ram_mb** (Number)
-- **size** (String)
-- **status** (String)
-- **tags** (Set of String)
-
-
-<a id="nestedatt--pools"></a>
-### Nested Schema for `pools`
-
-Read-Only:
-
-- **count** (Number)
-- **id** (String)
-- **instance_names** (Set of String)
-- **instances** (List of Object) (see [below for nested schema](#nestedobjatt--pools--instances))
-- **size** (String)
-
-<a id="nestedobjatt--pools--instances"></a>
-### Nested Schema for `pools.instances`
 
 Read-Only:
 
