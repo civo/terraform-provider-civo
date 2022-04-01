@@ -2,13 +2,14 @@ package civo
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -42,6 +43,7 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
+				Deprecated:   "This field will be deprecated in the next major release, please use the 'pools' field instead",
 				Description:  "The number of instances to create (optional, the default at the time of writing is 3)",
 				ValidateFunc: validation.IntAtLeast(1),
 			},
@@ -49,6 +51,7 @@ func resourceKubernetesCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
+				Deprecated:  "This field will be deprecated in the next major release, please use the 'pools' field instead",
 				Description: "The size of each node (optional, the default is currently g4s.kube.medium)",
 			},
 			"kubernetes_version": {
@@ -127,10 +130,10 @@ func resourceKubernetesCluster() *schema.Resource {
 				Description: "The timestamp when the cluster was created",
 			},
 		},
-		Create: resourceKubernetesClusterCreate,
-		Read:   resourceKubernetesClusterRead,
-		Update: resourceKubernetesClusterUpdate,
-		Delete: resourceKubernetesClusterDelete,
+		CreateContext: resourceKubernetesClusterCreate,
+		ReadContext:   resourceKubernetesClusterRead,
+		UpdateContext: resourceKubernetesClusterUpdate,
+		DeleteContext: resourceKubernetesClusterDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -189,7 +192,9 @@ func instanceSchema() *schema.Schema {
 func nodePoolSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
-		Computed: true,
+		Required: true,
+		MinItems: 1,
+		MaxItems: 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"id": {
@@ -197,14 +202,14 @@ func nodePoolSchema() *schema.Schema {
 					Computed:    true,
 					Description: "Nodepool ID",
 				},
-				"count": {
+				"node_count": {
 					Type:        schema.TypeInt,
-					Computed:    true,
+					Required:    true,
 					Description: "Number of nodes in the nodepool",
 				},
 				"size": {
 					Type:        schema.TypeString,
-					Computed:    true,
+					Required:    true,
 					Description: "Size of the nodes in the nodepool",
 				},
 				"instance_names": {
@@ -252,7 +257,7 @@ func applicationSchema() *schema.Schema {
 }
 
 // function to create a new cluster
-func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) error {
+func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -278,21 +283,9 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	} else {
 		defaultNetwork, err := apiClient.GetDefaultNetwork()
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to get the default network: %s", err)
+			return diag.Errorf("[ERR] failed to get the default network: %s", err)
 		}
 		config.NetworkID = defaultNetwork.ID
-	}
-
-	if attr, ok := d.GetOk("num_target_nodes"); ok {
-		config.NumTargetNodes = attr.(int)
-	} else {
-		config.NumTargetNodes = 3
-	}
-
-	if attr, ok := d.GetOk("target_nodes_size"); ok {
-		config.TargetNodesSize = attr.(string)
-	} else {
-		config.TargetNodesSize = "g4s.kube.medium"
 	}
 
 	if attr, ok := d.GetOk("kubernetes_version"); ok {
@@ -313,7 +306,7 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 		if utils.CheckAPPName(attr.(string), apiClient) {
 			config.Applications = attr.(string)
 		} else {
-			return fmt.Errorf("[ERR] the app that tries to install is not valid: %s", attr.(string))
+			return diag.Errorf("[ERR] the app that tries to install is not valid: %s", attr.(string))
 		}
 	} else {
 		config.Applications = ""
@@ -323,21 +316,24 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 		firewallID := attr.(string)
 		firewall, err := apiClient.FindFirewall(firewallID)
 		if err != nil {
-			return fmt.Errorf("[ERR] unable to find firewall - %s", err)
+			return diag.Errorf("[ERR] unable to find firewall - %s", err)
 		}
 
 		if firewall.NetworkID != config.NetworkID {
-			return fmt.Errorf("[ERR] firewall %s is not part of network %s", firewall.ID, config.NetworkID)
+			return diag.Errorf("[ERR] firewall %s is not part of network %s", firewall.ID, config.NetworkID)
 		}
 
 		config.InstanceFirewall = firewallID
 	}
 
+	pools := expandNodePools(d.Get("pools").([]interface{}))
+	config.Pools = pools
+
 	log.Printf("[INFO] creating a new kubernetes cluster %s", d.Get("name").(string))
 	log.Printf("[INFO] kubernertes config %+v", config)
 	resp, err := apiClient.NewKubernetesClusters(config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create the kubernetes cluster: %s", err)
+		return diag.Errorf("[ERR] failed to create the kubernetes cluster: %s", err)
 	}
 
 	d.SetId(resp.ID)
@@ -359,15 +355,15 @@ func resourceKubernetesClusterCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	_, err = createStateConf.WaitForStateContext(context.Background())
 	if err != nil {
-		return fmt.Errorf("error waiting for cluster (%s) to be created: %s", d.Id(), err)
+		return diag.Errorf("error waiting for cluster (%s) to be created: %s", d.Id(), err)
 	}
 
-	return resourceKubernetesClusterRead(d, m)
+	return resourceKubernetesClusterRead(ctx, d, m)
 
 }
 
 // function to read the kubernetes cluster
-func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error {
+func resourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -382,7 +378,7 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
+		return diag.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
 	}
 
 	d.Set("name", resp.Name)
@@ -404,22 +400,22 @@ func resourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("firewall_id", resp.FirewallID)
 
 	if err := d.Set("instances", flattenInstances(resp.Instances)); err != nil {
-		return fmt.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
+		return diag.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
 	}
 
-	if err := d.Set("pools", flattenNodePool(resp)); err != nil {
-		return fmt.Errorf("[ERR] error retrieving the pool for kubernetes cluster error: %#v", err)
+	if err := d.Set("pools", flattenNodePool(resp, d)); err != nil {
+		return diag.Errorf("[ERR] error retrieving the pool for kubernetes cluster error: %#v", err)
 	}
 
 	if err := d.Set("installed_applications", flattenInstalledApplication(resp.InstalledApplications)); err != nil {
-		return fmt.Errorf("[ERR] error retrieving the installed application for kubernetes cluster error: %#v", err)
+		return diag.Errorf("[ERR] error retrieving the installed application for kubernetes cluster error: %#v", err)
 	}
 
 	return nil
 }
 
 // function to update the kubernetes cluster
-func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -430,48 +426,51 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	config := &civogo.KubernetesClusterConfig{}
 
 	if d.HasChange("network_id") {
-		return fmt.Errorf("[ERR] Network change (%q) for existing cluster is not available at this moment", "network_id")
+		return diag.Errorf("[ERR] Network change (%q) for existing cluster is not available at this moment", "network_id")
 	}
 
 	if d.HasChange("firewall_id") {
-		return fmt.Errorf("[ERR] Firewall change (%q) for existing cluster is not available at this moment", "firewall_id")
+		return diag.Errorf("[ERR] Firewall change (%q) for existing cluster is not available at this moment", "firewall_id")
 	}
 
-	if d.HasChange("target_nodes_size") {
-		errMsg := []string{
-			"[ERR] Unable to update 'target_nodes_size' after creation.",
-			"Please create a new node pool with the new node size.",
+	// Update the node pool if necessary
+	if !d.HasChange("node_pool") {
+		return resourceKubernetesClusterRead(ctx, d, m)
+	}
+
+	if d.HasChange("pools") {
+		old, new := d.GetChange("pools")
+		oldPool := old.([]interface{})[0].(map[string]interface{})
+		newPool := new.([]interface{})[0].(map[string]interface{})
+
+		// if the size is different, then return and error as we can't change the size of a pool
+		if oldPool["size"].(string) != newPool["size"].(string) {
+			return diag.Errorf("[ERR] Size change (%q) for existing cluster is not available at this moment", "size")
 		}
-		return fmt.Errorf(strings.Join(errMsg, " "))
-	}
-
-	if d.HasChange("num_target_nodes") {
-		numTargetNodes := d.Get("num_target_nodes").(int)
 
 		config.Region = apiClient.Region
 		kubernetesCluster, err := apiClient.FindKubernetesCluster(d.Id())
 		if err != nil {
-			return err
+			return diag.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
 		}
 
 		targetNodePool := ""
 		nodePools := []civogo.KubernetesClusterPoolConfig{}
 		for _, v := range kubernetesCluster.Pools {
 			nodePools = append(nodePools, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size})
-
-			if targetNodePool == "" && v.Size == d.Get("target_nodes_size").(string) {
+			if targetNodePool == "" && v.ID == newPool["id"].(string) {
 				targetNodePool = v.ID
 			}
 		}
 
-		nodePools = updateNodePool(nodePools, targetNodePool, numTargetNodes)
+		nodePools = updateNodePool(nodePools, targetNodePool, newPool["node_count"].(int))
 		config.Pools = nodePools
 	}
 
 	if d.HasChange("kubernetes_version") {
 		// config.KubernetesVersion = d.Get("kubernetes_version").(string)
 		// config.Region = apiClient.Region
-		return fmt.Errorf("[ERR] Kubernetes version upgrade (%q attribute) is not supported yet", "kubernetes_version")
+		return diag.Errorf("[ERR] Kubernetes version upgrade (%q attribute) is not supported yet", "kubernetes_version")
 	}
 
 	if d.HasChange("applications") {
@@ -492,7 +491,7 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[DEBUG] KubernetesClusterConfig: %+v\n", config)
 	_, err := apiClient.UpdateKubernetesCluster(d.Id(), config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
+		return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
 	createStateConf := &resource.StateChangeConf{
@@ -512,14 +511,14 @@ func resourceKubernetesClusterUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 	_, err = createStateConf.WaitForStateContext(context.Background())
 	if err != nil {
-		return fmt.Errorf("error waiting for cluster (%s) to be created: %s", d.Id(), err)
+		return diag.Errorf("error waiting for cluster (%s) to be created: %s", d.Id(), err)
 	}
 
-	return resourceKubernetesClusterRead(d, m)
+	return resourceKubernetesClusterRead(ctx, d, m)
 }
 
 // function to delete the kubernetes cluster
-func resourceKubernetesClusterDelete(d *schema.ResourceData, m interface{}) error {
+func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -530,7 +529,7 @@ func resourceKubernetesClusterDelete(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
 	_, err := apiClient.DeleteKubernetesCluster(d.Id())
 	if err != nil {
-		return fmt.Errorf("[INFO] an error occurred while tring to delete the kubernetes cluster %s", err)
+		return diag.Errorf("[INFO] an error occurred while tring to delete the kubernetes cluster %s", err)
 	}
 
 	return nil
@@ -559,40 +558,43 @@ func flattenInstances(instances []civogo.KubernetesInstance) []interface{} {
 }
 
 // function to flatten all instances inside the cluster
-func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
+func flattenNodePool(cluster *civogo.KubernetesCluster, d *schema.ResourceData) []interface{} {
 
 	if cluster.Pools == nil {
 		return nil
 	}
 
+	currentPools := d.Get("pools").([]interface{})[0].(map[string]interface{})
+
 	flattenedPool := make([]interface{}, 0)
 	for _, pool := range cluster.Pools {
-		flattenedPoolInstance := make([]interface{}, 0)
-		for _, v := range pool.Instances {
+		if currentPools["id"].(string) == pool.ID {
+			flattenedPoolInstance := make([]interface{}, 0)
+			for _, v := range pool.Instances {
 
-			rawPoolInstance := map[string]interface{}{
-				"hostname":  v.Hostname,
-				"size":      pool.Size,
-				"cpu_cores": v.CPUCores,
-				"ram_mb":    v.RAMMegabytes,
-				"disk_gb":   v.DiskGigabytes,
-				"status":    v.Status,
-				"tags":      v.Tags,
+				rawPoolInstance := map[string]interface{}{
+					"hostname":  v.Hostname,
+					"size":      pool.Size,
+					"cpu_cores": v.CPUCores,
+					"ram_mb":    v.RAMMegabytes,
+					"disk_gb":   v.DiskGigabytes,
+					"status":    v.Status,
+					"tags":      v.Tags,
+				}
+				flattenedPoolInstance = append(flattenedPoolInstance, rawPoolInstance)
 			}
-			flattenedPoolInstance = append(flattenedPoolInstance, rawPoolInstance)
+			instanceName := append(pool.InstanceNames, pool.InstanceNames...)
+
+			rawPool := map[string]interface{}{
+				"id":             pool.ID,
+				"node_count":     pool.Count,
+				"size":           pool.Size,
+				"instance_names": instanceName,
+				"instances":      flattenedPoolInstance,
+			}
+
+			flattenedPool = append(flattenedPool, rawPool)
 		}
-
-		instanceName := append(pool.InstanceNames, pool.InstanceNames...)
-
-		rawPool := map[string]interface{}{
-			"id":             pool.ID,
-			"count":          pool.Count,
-			"size":           pool.Size,
-			"instance_names": instanceName,
-			"instances":      flattenedPoolInstance,
-		}
-
-		flattenedPool = append(flattenedPool, rawPool)
 	}
 
 	return flattenedPool
@@ -617,4 +619,19 @@ func flattenInstalledApplication(apps []civogo.KubernetesInstalledApplication) [
 	}
 
 	return flattenedInstalledApplication
+}
+
+func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConfig {
+	expandedNodePools := make([]civogo.KubernetesClusterPoolConfig, 0, len(nodePools))
+	for _, rawPool := range nodePools {
+		pool := rawPool.(map[string]interface{})
+		cr := civogo.KubernetesClusterPoolConfig{
+			ID:    uuid.NewString(),
+			Size:  pool["size"].(string),
+			Count: pool["node_count"].(int),
+		}
+		expandedNodePools = append(expandedNodePools, cr)
+	}
+
+	return expandedNodePools
 }

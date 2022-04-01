@@ -2,13 +2,13 @@ package civo
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -160,18 +160,21 @@ func resourceInstance() *schema.Resource {
 				Description: "Timestamp when the instance was created",
 			},
 		},
-		Create: resourceInstanceCreate,
-		Read:   resourceInstanceRead,
-		Update: resourceInstanceUpdate,
-		Delete: resourceInstanceDelete,
+		CreateContext: resourceInstanceCreate,
+		ReadContext:   resourceInstanceRead,
+		UpdateContext: resourceInstanceUpdate,
+		DeleteContext: resourceInstanceDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
 		},
 	}
 }
 
 // function to create a instance
-func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -182,7 +185,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] configuring the instance %s", d.Get("hostname").(string))
 	config, err := apiClient.NewInstanceConfig()
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create a new config: %s", err)
+		return diag.Errorf("[ERR] failed to create a new config: %s", err)
 	}
 
 	if hostname, ok := d.GetOk("hostname"); ok {
@@ -208,7 +211,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		defaultNetwork, err := apiClient.GetDefaultNetwork()
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to get the default network: %s", err)
+			return diag.Errorf("[ERR] failed to get the default network: %s", err)
 		}
 		config.NetworkID = defaultNetwork.ID
 	}
@@ -217,7 +220,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		templateID := ""
 		findTemplate, err := apiClient.FindDiskImage(attr.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to get the template: %s", err)
+			return diag.Errorf("[ERR] failed to get the template: %s", err)
 		}
 		templateID = findTemplate.ID
 		config.TemplateID = templateID
@@ -227,7 +230,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		diskImageID := ""
 		findDiskImage, err := apiClient.FindDiskImage(attr.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to get the disk image: %s", err)
+			return diag.Errorf("[ERR] failed to get the disk image: %s", err)
 		}
 		diskImageID = findDiskImage.ID
 		config.TemplateID = diskImageID
@@ -256,7 +259,7 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
 	instance, err := apiClient.CreateInstance(config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create instance: %s", err)
+		return diag.Errorf("[ERR] failed to create instance: %s", err)
 	}
 
 	d.SetId(instance.ID)
@@ -276,36 +279,36 @@ func resourceInstanceCreate(d *schema.ResourceData, m interface{}) error {
 		MinTimeout:     3 * time.Second,
 		NotFoundChecks: 60,
 	}
-	_, err = createStateConf.WaitForStateContext(context.Background())
+	_, err = createStateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for instance (%s) to be created: %s", d.Id(), err)
+		return diag.Errorf("error waiting for instance (%s) to be created: %s", d.Id(), err)
 	}
 
 	if attr, ok := d.GetOk("firewall_id"); ok {
 		_, errInstance := apiClient.SetInstanceFirewall(d.Id(), attr.(string))
 		if errInstance != nil {
-			return fmt.Errorf("[ERR] updating instance firewall: %s", err)
+			return diag.Errorf("[ERR] updating instance firewall: %s", err)
 		}
 	}
 
 	if attr, ok := d.GetOk("notes"); ok {
 		resp, err := apiClient.GetInstance(d.Id())
 		if err != nil {
-			return fmt.Errorf("[ERR] getting instance: %s", err)
+			return diag.Errorf("[ERR] getting instance: %s", err)
 		}
 		resp.Notes = attr.(string)
 		_, errInstance := apiClient.UpdateInstance(resp)
 		if errInstance != nil {
-			return fmt.Errorf("[ERR] updating instance notes: %s", err)
+			return diag.Errorf("[ERR] updating instance notes: %s", err)
 		}
 	}
 
-	return resourceInstanceRead(d, m)
+	return resourceInstanceRead(ctx, d, m)
 
 }
 
 // function to read the instance
-func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
+func resourceInstanceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -321,7 +324,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[ERR] failed to retriving the instance: %s", err)
+		return diag.Errorf("[ERR] failed to retriving the instance: %s", err)
 	}
 
 	d.Set("hostname", resp.Hostname)
@@ -357,7 +360,7 @@ func resourceInstanceRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // function to update a instance
-func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -372,27 +375,28 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] resizing the instance %s", d.Id())
 		_, err := apiClient.UpgradeInstance(d.Id(), newSize)
 		if err != nil {
-			return fmt.Errorf("[WARN] An error occurred while resizing the instance %s", d.Id())
+			return diag.Errorf("[WARN] An error occurred while resizing the instance %s", d.Id())
 		}
 
-		return resource.RetryContext(context.Background(), d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-			resp, err := apiClient.GetInstance(d.Id())
-
-			if err != nil {
-				return resource.NonRetryableError(fmt.Errorf("[ERR] error geting instance: %s", err))
-			}
-
-			if resp.Status != "ACTIVE" {
-				return resource.RetryableError(fmt.Errorf("[ERR] expected instance to be resizing but was in state %s", resp.Status))
-			}
-
-			err = resourceInstanceRead(d, m)
-			if err != nil {
-				return resource.NonRetryableError(err)
-			}
-
-			return nil
-		})
+		createStateConf := &resource.StateChangeConf{
+			Pending: []string{"BUILDING"},
+			Target:  []string{"ACTIVE"},
+			Refresh: func() (interface{}, string, error) {
+				resp, err := apiClient.GetInstance(d.Id())
+				if err != nil {
+					return 0, "", err
+				}
+				return resp, resp.Status, nil
+			},
+			Timeout:        60 * time.Minute,
+			Delay:          3 * time.Second,
+			MinTimeout:     3 * time.Second,
+			NotFoundChecks: 60,
+		}
+		_, err = createStateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.Errorf("error waiting for instance (%s) to be created: %s", d.Id(), err)
+		}
 	}
 
 	// if has note we add to the instance
@@ -401,7 +405,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		instance, err := apiClient.GetInstance(d.Id())
 		if err != nil {
 			// check if the instance no longer exists.
-			return fmt.Errorf("[ERR] instance %s not found", d.Id())
+			return diag.Errorf("[ERR] instance %s not found", d.Id())
 		}
 
 		instance.Notes = notes
@@ -409,7 +413,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] adding notes to the instance %s", d.Id())
 		_, err = apiClient.UpdateInstance(instance)
 		if err != nil {
-			return fmt.Errorf("[ERR] an error occurred while adding a note to the instance %s", d.Id())
+			return diag.Errorf("[ERR] an error occurred while adding a note to the instance %s", d.Id())
 		}
 	}
 
@@ -421,7 +425,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		_, err := apiClient.SetInstanceFirewall(d.Id(), firewallID)
 		if err != nil {
 			// check if the instance no longer exists.
-			return fmt.Errorf("[ERR] an error occurred while set firewall to the instance %s", d.Id())
+			return diag.Errorf("[ERR] an error occurred while set firewall to the instance %s", d.Id())
 		}
 	}
 
@@ -436,7 +440,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		instance, err := apiClient.GetInstance(d.Id())
 		if err != nil {
 			// check if the instance no longer exists.
-			return fmt.Errorf("[ERR] instance %s not found", d.Id())
+			return diag.Errorf("[ERR] instance %s not found", d.Id())
 		}
 
 		tagsToString := strings.Join(tags, " ")
@@ -444,16 +448,16 @@ func resourceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[INFO] adding tags to the instance %s", d.Id())
 		_, err = apiClient.SetInstanceTags(instance, tagsToString)
 		if err != nil {
-			return fmt.Errorf("[ERR] an error occurred while adding tags to the instance %s", d.Id())
+			return diag.Errorf("[ERR] an error occurred while adding tags to the instance %s", d.Id())
 		}
 
 	}
 
-	return resourceInstanceRead(d, m)
+	return resourceInstanceRead(ctx, d, m)
 }
 
 // function to delete instance
-func resourceInstanceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -464,7 +468,7 @@ func resourceInstanceDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] deleting the instance %s", d.Id())
 	_, err := apiClient.DeleteInstance(d.Id())
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete instance %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while tring to delete instance %s", d.Id())
 	}
 	return nil
 }

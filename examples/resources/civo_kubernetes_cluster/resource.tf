@@ -31,7 +31,9 @@ resource "civo_firewall_rule" "kubernetes" {
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
-    num_target_nodes = 2
-    target_nodes_size = element(data.civo_instances_size.xsmall.sizes, 0).name
     firewall_id = civo_firewall.my-firewall.id
+    pools {
+        size = element(data.civo_instances_size.xsmall.sizes, 0).name
+        node_count = 3
+    }
 }

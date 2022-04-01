@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -17,7 +18,7 @@ func dataSourceLoadBalancer() *schema.Resource {
 			"Get information on a load balancer for use in other resources. This data source provides all of the load balancers properties as configured on your Civo account.",
 			"An error will be raised if the provided load balancer name does not exist in your Civo account.",
 		}, "\n\n"),
-		Read: dataSourceLoadBalancerRead,
+		ReadContext: dataSourceLoadBalancerRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
@@ -28,6 +29,11 @@ func dataSourceLoadBalancer() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The name of the load balancer (You can find this name from service annotations 'kubernetes.civo.com/loadbalancer-name')",
+			},
+			"region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The region of the load balancer, if you delcare this field, the datasource will use this value instead of the one defined in the provider",
 			},
 			"public_ip": {
 				Type:        schema.TypeString,
@@ -117,7 +123,7 @@ func dataSourceLoadBalancer() *schema.Resource {
 	}
 }
 
-func dataSourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceLoadBalancerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -137,7 +143,7 @@ func dataSourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
 
 	lb, err := apiClient.FindLoadBalancer(searchBy)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to retrive LoadBalancer: %s", err)
+		return diag.Errorf("[ERR] failed to retrive LoadBalancer: %s", err)
 	}
 
 	d.SetId(lb.ID)
@@ -154,7 +160,7 @@ func dataSourceLoadBalancerRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("state", lb.State)
 
 	if err := d.Set("backends", flattenLoadBalancerBackend(lb.Backends)); err != nil {
-		return fmt.Errorf("[ERR] error retrieving the backends for load balancer error: %#v", err)
+		return diag.Errorf("[ERR] error retrieving the backends for load balancer error: %#v", err)
 	}
 
 	return nil

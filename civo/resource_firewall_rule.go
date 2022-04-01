@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -94,9 +95,9 @@ func resourceFirewallRule() *schema.Resource {
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 		},
-		Create: resourceFirewallRuleCreate,
-		Read:   resourceFirewallRuleRead,
-		Delete: resourceFirewallRuleDelete,
+		CreateContext: resourceFirewallRuleCreate,
+		ReadContext:   resourceFirewallRuleRead,
+		DeleteContext: resourceFirewallRuleDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceFirewallRuleImport,
 		},
@@ -104,7 +105,7 @@ func resourceFirewallRule() *schema.Resource {
 }
 
 // function to create a new firewall rule
-func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
+func resourceFirewallRuleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -139,18 +140,18 @@ func resourceFirewallRuleCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Creating a new firewall rule for firewall %s with config: %+v", d.Get("firewall_id").(string), config)
 	firewallRule, err := apiClient.NewFirewallRule(config)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create a new firewall rule: %s", err)
+		return diag.Errorf("[ERR] failed to create a new firewall rule: %s", err)
 	}
 
 	log.Printf("[INFO] Firewall rule created with ID: %s", firewallRule.ID)
 
 	d.SetId(firewallRule.ID)
 
-	return resourceFirewallRuleRead(d, m)
+	return resourceFirewallRuleRead(ctx, d, m)
 }
 
 // function to read a firewall rule
-func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
+func resourceFirewallRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -167,7 +168,7 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[ERR] error retrieving firewall rule: %s", err)
+		return diag.Errorf("[ERR] error retrieving firewall rule: %s", err)
 	}
 
 	log.Printf("[INFO] Rules response: %+v", resp)
@@ -189,7 +190,7 @@ func resourceFirewallRuleRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // function to delete a firewall rule
-func resourceFirewallRuleDelete(d *schema.ResourceData, m interface{}) error {
+func resourceFirewallRuleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -200,7 +201,7 @@ func resourceFirewallRuleDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	_, err := apiClient.DeleteFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete firewall rule %s - %v", d.Id(), err)
+		return diag.Errorf("[ERR] an error occurred while tring to delete firewall rule %s - %v", d.Id(), err)
 	}
 	return nil
 }

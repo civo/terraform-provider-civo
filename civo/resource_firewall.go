@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -42,10 +43,10 @@ func resourceFirewall() *schema.Resource {
 				Description: "The firewall network, if is not defined we use the default network",
 			},
 		},
-		Create: resourceFirewallCreate,
-		Read:   resourceFirewallRead,
-		Update: resourceFirewallUpdate,
-		Delete: resourceFirewallDelete,
+		CreateContext: resourceFirewallCreate,
+		ReadContext:   resourceFirewallRead,
+		UpdateContext: resourceFirewallUpdate,
+		DeleteContext: resourceFirewallDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -53,7 +54,7 @@ func resourceFirewall() *schema.Resource {
 }
 
 // function to create a firewall
-func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
+func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 	var networkID string
 	var CreateRules bool
@@ -68,7 +69,7 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		network, err := apiClient.GetDefaultNetwork()
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to get the default network: %s", err)
+			return diag.Errorf("[ERR] failed to get the default network: %s", err)
 		}
 		networkID = network.ID
 	}
@@ -79,16 +80,16 @@ func resourceFirewallCreate(d *schema.ResourceData, m interface{}) error {
 
 	firewall, err := apiClient.NewFirewall(d.Get("name").(string), networkID, &CreateRules)
 	if err != nil {
-		return fmt.Errorf("[ERR] failed to create a new firewall: %s", err)
+		return diag.Errorf("[ERR] failed to create a new firewall: %s", err)
 	}
 
 	d.SetId(firewall.ID)
 
-	return resourceFirewallRead(d, m)
+	return resourceFirewallRead(ctx, d, m)
 }
 
 // function to read a firewall
-func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
+func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if it's defined
@@ -104,7 +105,7 @@ func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("[ERR] error retrieving firewall: %s", err)
+		return diag.Errorf("[ERR] error retrieving firewall: %s", err)
 	}
 
 	d.Set("name", resp.Name)
@@ -114,7 +115,7 @@ func resourceFirewallRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // function to update the firewall
-func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if it's defined
@@ -130,16 +131,16 @@ func resourceFirewallUpdate(d *schema.ResourceData, m interface{}) error {
 			log.Printf("[INFO] updating the firewall name, %s", d.Id())
 			_, err := apiClient.RenameFirewall(d.Id(), &firewall)
 			if err != nil {
-				return fmt.Errorf("[WARN] an error occurred while tring to rename the firewall %s, %s", d.Id(), err)
+				return diag.Errorf("[WARN] an error occurred while tring to rename the firewall %s, %s", d.Id(), err)
 			}
 		}
 	}
 
-	return resourceFirewallRead(d, m)
+	return resourceFirewallRead(ctx, d, m)
 }
 
 // function to delete a firewall
-func resourceFirewallDelete(d *schema.ResourceData, m interface{}) error {
+func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if it's defined
@@ -158,7 +159,7 @@ func resourceFirewallDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] deleting the firewall %s", firewallID)
 	_, err = apiClient.DeleteFirewall(firewallID)
 	if err != nil {
-		return fmt.Errorf("[ERR] an error occurred while tring to delete the firewall %s, %s", firewallID, err)
+		return diag.Errorf("[ERR] an error occurred while tring to delete the firewall %s, %s", firewallID, err)
 	}
 	return nil
 }

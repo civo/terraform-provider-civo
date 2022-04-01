@@ -1,11 +1,12 @@
 package civo
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -18,7 +19,7 @@ func dataSourceKubernetesCluster() *schema.Resource {
 			"Provides a Civo Kubernetes cluster data source.",
 			"Note: This data source returns a single Kubernetes cluster. When specifying a name, an error will be raised if more than one Kubernetes cluster found.",
 		}, "\n\n"),
-		Read: dataSourceKubernetesClusterRead,
+		ReadContext: dataSourceKubernetesClusterRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -42,11 +43,13 @@ func dataSourceKubernetesCluster() *schema.Resource {
 			// computed attributes
 			"num_target_nodes": {
 				Type:        schema.TypeInt,
+				Deprecated:  "This field is deprecated and will be removed in a future version of the provider",
 				Computed:    true,
 				Description: "The size of the Kubernetes cluster",
 			},
 			"target_nodes_size": {
 				Type:        schema.TypeString,
+				Deprecated:  "This field is deprecated and will be removed in a future version of the provider",
 				Computed:    true,
 				Description: "The size of each node",
 			},
@@ -172,7 +175,7 @@ func dataSourcenodePoolSchema() *schema.Schema {
 					Computed:    true,
 					Description: "The ID of the pool",
 				},
-				"count": {
+				"node_count": {
 					Type:        schema.TypeInt,
 					Computed:    true,
 					Description: "The size of the pool",
@@ -226,7 +229,7 @@ func dataSourceApplicationSchema() *schema.Schema {
 	}
 }
 
-func dataSourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -240,15 +243,14 @@ func dataSourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) erro
 		log.Printf("[INFO] Getting the kubernetes Cluster by id")
 		kubeCluster, err := apiClient.FindKubernetesCluster(id.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive kubernetes cluster: %s", err)
+			return diag.Errorf("[ERR] failed to retrive kubernetes cluster: %s", err)
 		}
-
 		foundCluster = kubeCluster
 	} else if name, ok := d.GetOk("name"); ok {
 		log.Printf("[INFO] Getting the kubernetes Cluster by name")
 		kubeCluster, err := apiClient.FindKubernetesCluster(name.(string))
 		if err != nil {
-			return fmt.Errorf("[ERR] failed to retrive kubernetes cluster: %s", err)
+			return diag.Errorf("[ERR] failed to retrive kubernetes cluster: %s", err)
 		}
 
 		foundCluster = kubeCluster
@@ -269,17 +271,56 @@ func dataSourceKubernetesClusterRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("dns_entry", foundCluster.DNSEntry)
 	d.Set("created_at", foundCluster.CreatedAt.UTC().String())
 
-	if err := d.Set("pools", flattenNodePool(foundCluster)); err != nil {
-		return fmt.Errorf("[ERR] error retrieving the pools for kubernetes cluster error: %#v", err)
+	if err := d.Set("pools", dsflattenNodePool(foundCluster)); err != nil {
+		return diag.Errorf("[ERR] error retrieving the pools for kubernetes cluster error: %#v", err)
 	}
 
 	if err := d.Set("instances", flattenInstances(foundCluster.Instances)); err != nil {
-		return fmt.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
+		return diag.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
 	}
 
 	if err := d.Set("installed_applications", flattenInstalledApplication(foundCluster.InstalledApplications)); err != nil {
-		return fmt.Errorf("[ERR] error retrieving the installed application for kubernetes cluster error: %#v", err)
+		return diag.Errorf("[ERR] error retrieving the installed application for kubernetes cluster error: %#v", err)
 	}
 
 	return nil
+}
+
+// function to flatten all instances inside the cluster
+func dsflattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
+
+	if cluster.Pools == nil {
+		return nil
+	}
+
+	flattenedPool := make([]interface{}, 0)
+	for _, pool := range cluster.Pools {
+		flattenedPoolInstance := make([]interface{}, 0)
+		for _, v := range pool.Instances {
+
+			rawPoolInstance := map[string]interface{}{
+				"hostname":  v.Hostname,
+				"size":      pool.Size,
+				"cpu_cores": v.CPUCores,
+				"ram_mb":    v.RAMMegabytes,
+				"disk_gb":   v.DiskGigabytes,
+				"status":    v.Status,
+				"tags":      v.Tags,
+			}
+			flattenedPoolInstance = append(flattenedPoolInstance, rawPoolInstance)
+		}
+		instanceName := append(pool.InstanceNames, pool.InstanceNames...)
+
+		rawPool := map[string]interface{}{
+			"id":             pool.ID,
+			"node_count":     pool.Count,
+			"size":           pool.Size,
+			"instance_names": instanceName,
+			"instances":      flattenedPoolInstance,
+		}
+
+		flattenedPool = append(flattenedPool, rawPool)
+	}
+
+	return flattenedPool
 }
