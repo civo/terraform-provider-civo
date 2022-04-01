@@ -36,7 +36,7 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 			"num_target_nodes": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Deprecated: "This field is deprecated, please use `node_count` instead",
+				Deprecated:  "This field is deprecated, please use `node_count` instead",
 				Description: "the number of instances to create (optional, the default at the time of writing is 3)",
 			},
 			"node_count": {
@@ -48,7 +48,7 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 			"target_nodes_size": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Deprecated: "This field is deprecated, please use `size` instead",
+				Deprecated:  "This field is deprecated, please use `size` instead",
 				Description: "the size of each node (optional, the default is currently g4s.kube.medium)",
 			},
 			"size": {
