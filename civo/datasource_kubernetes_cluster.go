@@ -73,7 +73,6 @@ func dataSourceKubernetesCluster() *schema.Resource {
 				Computed:    true,
 				Description: "A list of application installed",
 			},
-			"instances":              dataSourceInstanceSchema(),
 			"installed_applications": dataSourceApplicationSchema(),
 			"pools":                  dataSourcenodePoolSchema(),
 			"status": {
@@ -115,53 +114,6 @@ func dataSourceKubernetesCluster() *schema.Resource {
 	}
 }
 
-// schema for the instances
-func dataSourceInstanceSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Computed: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"hostname": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "The hostname of the instance",
-				},
-				"size": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "The size of the instance",
-				},
-				"cpu_cores": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "Total CPU of the instance",
-				},
-				"ram_mb": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "Total RAM of the instance",
-				},
-				"disk_gb": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "The size of the instance disk",
-				},
-				"status": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "The status of the instance",
-				},
-				"tags": {
-					Type:        schema.TypeSet,
-					Computed:    true,
-					Description: "The tag of the instance",
-					Elem:        &schema.Schema{Type: schema.TypeString},
-				},
-			},
-		},
-	}
-}
 
 // schema for the node pool in the cluster
 func dataSourcenodePoolSchema() *schema.Schema {
@@ -191,7 +143,6 @@ func dataSourcenodePoolSchema() *schema.Schema {
 					Description: "A list of the instance in the pool",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 				},
-				"instances": dataSourceInstanceSchema(),
 			},
 		},
 	}
@@ -271,12 +222,8 @@ func dataSourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData
 	d.Set("dns_entry", foundCluster.DNSEntry)
 	d.Set("created_at", foundCluster.CreatedAt.UTC().String())
 
-	if err := d.Set("pools", dsflattenNodePool(foundCluster)); err != nil {
+	if err := d.Set("pools", flattenNodePool(foundCluster)); err != nil {
 		return diag.Errorf("[ERR] error retrieving the pools for kubernetes cluster error: %#v", err)
-	}
-
-	if err := d.Set("instances", flattenInstances(foundCluster.Instances)); err != nil {
-		return diag.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
 	}
 
 	if err := d.Set("installed_applications", flattenInstalledApplication(foundCluster.InstalledApplications)); err != nil {
@@ -284,43 +231,4 @@ func dataSourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	return nil
-}
-
-// function to flatten all instances inside the cluster
-func dsflattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
-
-	if cluster.Pools == nil {
-		return nil
-	}
-
-	flattenedPool := make([]interface{}, 0)
-	for _, pool := range cluster.Pools {
-		flattenedPoolInstance := make([]interface{}, 0)
-		for _, v := range pool.Instances {
-
-			rawPoolInstance := map[string]interface{}{
-				"hostname":  v.Hostname,
-				"size":      pool.Size,
-				"cpu_cores": v.CPUCores,
-				"ram_mb":    v.RAMMegabytes,
-				"disk_gb":   v.DiskGigabytes,
-				"status":    v.Status,
-				"tags":      v.Tags,
-			}
-			flattenedPoolInstance = append(flattenedPoolInstance, rawPoolInstance)
-		}
-		instanceName := append(pool.InstanceNames, pool.InstanceNames...)
-
-		rawPool := map[string]interface{}{
-			"id":             pool.ID,
-			"node_count":     pool.Count,
-			"size":           pool.Size,
-			"instance_names": instanceName,
-			"instances":      flattenedPoolInstance,
-		}
-
-		flattenedPool = append(flattenedPool, rawPool)
-	}
-
-	return flattenedPool
 }

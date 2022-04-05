@@ -57,6 +57,12 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				Computed:    true,
 				Description: "the size of each node (optional, the default is currently g4s.kube.medium)",
 			},
+			"instance_names": {
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Instance names in the nodepool",
+			},
 		},
 		CreateContext: resourceKubernetesClusterNodePoolCreate,
 		ReadContext:   resourceKubernetesClusterNodePoolRead,
@@ -154,9 +160,11 @@ func resourceKubernetesClusterNodePoolRead(ctx context.Context, d *schema.Resour
 
 	d.Set("cluster_id", resp.ID)
 	for _, v := range resp.Pools {
+		instanceName := append(v.InstanceNames, v.InstanceNames...)
 		if v.ID == d.Id() {
 			d.Set("node_count", v.Count)
 			d.Set("size", v.Size)
+			d.Set("instance_names", instanceName)
 		}
 	}
 
