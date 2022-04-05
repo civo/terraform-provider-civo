@@ -45,8 +45,8 @@ func TestAccCivoKubernetesClusterNodePool_basic(t *testing.T) {
 					testAccCheckCivoKubernetesClusterNodePoolValues(&kubernetesNodePool, "g4s.kube.medium"),
 					// verify local values
 					// resource.TestCheckResourceAttr(resPoolName, "cluster_id", kubernetes.ID),
-					resource.TestCheckResourceAttr(resPoolName, "num_target_nodes", "3"),
-					resource.TestCheckResourceAttr(resPoolName, "target_nodes_size", "g4s.kube.medium"),
+					resource.TestCheckResourceAttr(resPoolName, "node_count", "3"),
+					resource.TestCheckResourceAttr(resPoolName, "size", "g4s.kube.medium"),
 				),
 			},
 		},
@@ -98,7 +98,8 @@ func testAccCheckCivoKubernetesClusterNodePoolConfigBasic() string {
 	return `
 resource "civo_kubernetes_node_pool" "foobar" {
 	cluster_id = civo_kubernetes_cluster.foobar.id
-	num_target_nodes = 3
+	node_count = 3
+	size = "g4s.kube.medium"
 	depends_on = [civo_kubernetes_cluster.foobar]
 }`
 }

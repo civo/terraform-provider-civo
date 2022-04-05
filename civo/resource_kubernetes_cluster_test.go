@@ -34,12 +34,10 @@ func TestAccCivoKubernetesCluster_basic(t *testing.T) {
 					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
-					resource.TestCheckResourceAttr(resName, "num_target_nodes", "2"),
-					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
-					resource.TestCheckResourceAttr(resName, "instances.0.cpu_cores", "1"),
-					resource.TestCheckResourceAttr(resName, "instances.0.ram_mb", "2048"),
-					resource.TestCheckResourceAttr(resName, "instances.0.disk_gb", "25"),
+					
 					// resource.TestCheckResourceAttrSet(resName, "instances"),
+					resource.TestCheckResourceAttr(resName, "pools.0.node_count", "2"),
+					resource.TestCheckResourceAttr(resName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(resName, "master_ip"),
@@ -73,8 +71,8 @@ func TestAccCivoKubernetesClusterSize_update(t *testing.T) {
 					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
-					resource.TestCheckResourceAttr(resName, "num_target_nodes", "2"),
-					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
+					resource.TestCheckResourceAttr(resName, "pools.0.node_count", "2"),
+					resource.TestCheckResourceAttr(resName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(resName, "master_ip"),
@@ -93,8 +91,8 @@ func TestAccCivoKubernetesClusterSize_update(t *testing.T) {
 					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
-					resource.TestCheckResourceAttr(resName, "num_target_nodes", "4"),
-					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
+					resource.TestCheckResourceAttr(resName, "pools.0.node_count", "2"),
+					resource.TestCheckResourceAttr(resName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(resName, "master_ip"),
@@ -128,9 +126,9 @@ func TestAccCivoKubernetesClusterCNI(t *testing.T) {
 					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
-					resource.TestCheckResourceAttr(resName, "num_target_nodes", "2"),
-					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
 					resource.TestCheckResourceAttr(resName, "cni", "calico"),
+					resource.TestCheckResourceAttr(resName, "pools.0.node_count", "2"),
+					resource.TestCheckResourceAttr(resName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(resName, "master_ip"),
@@ -149,8 +147,8 @@ func TestAccCivoKubernetesClusterCNI(t *testing.T) {
 					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
-					resource.TestCheckResourceAttr(resName, "num_target_nodes", "4"),
-					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
+					resource.TestCheckResourceAttr(resName, "pools.0.node_count", "2"),
+					resource.TestCheckResourceAttr(resName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttr(resName, "cni", "calico"),
 					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
@@ -185,8 +183,8 @@ func TestAccCivoKubernetesClusterTags_update(t *testing.T) {
 					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
-					resource.TestCheckResourceAttr(resName, "num_target_nodes", "2"),
-					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
+					resource.TestCheckResourceAttr(resName, "pools.0.count", "2"),
+					resource.TestCheckResourceAttr(resName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(resName, "master_ip"),
@@ -205,8 +203,8 @@ func TestAccCivoKubernetesClusterTags_update(t *testing.T) {
 					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
-					resource.TestCheckResourceAttr(resName, "num_target_nodes", "2"),
-					resource.TestCheckResourceAttr(resName, "target_nodes_size", "g2.small"),
+					resource.TestCheckResourceAttr(resName, "pools.0.count", "2"),
+					resource.TestCheckResourceAttr(resName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttr(resName, "tags", "foo"),
 					resource.TestCheckResourceAttrSet(resName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(resName, "api_endpoint"),
@@ -274,7 +272,10 @@ func testAccCheckCivoKubernetesClusterConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "civo_kubernetes_cluster" "foobar" {
 	name = "%s"
-	num_target_nodes = 2
+	pools {
+		node_count = 2
+		size = "g2.small"
+	}
 }`, name)
 }
 
@@ -282,7 +283,10 @@ func testAccCheckCivoKubernetesClusterConfigSize(name string) string {
 	return fmt.Sprintf(`
 resource "civo_kubernetes_cluster" "foobar" {
 	name = "%s"
-	num_target_nodes = 4
+	pools {
+		node_count = 2
+		size = "g2.small"
+	}
 }`, name)
 }
 
@@ -290,7 +294,10 @@ func testAccCheckCivoKubernetesClusterConfigTags(name string) string {
 	return fmt.Sprintf(`
 resource "civo_kubernetes_cluster" "foobar" {
 	name = "%s"
-	num_target_nodes = 2
+	pools {
+		node_count = 2
+		size = "g2.small"
+	}
 	tags = "foo"
 }`, name)
 }
@@ -299,7 +306,10 @@ func testAccCheckCivoKubernetesClusterConfigCNI(name string) string {
 	return fmt.Sprintf(`
 resource "civo_kubernetes_cluster" "foobar" {
 	name = "%s"
-	num_target_nodes = 2
+	pools {
+		node_count = 2
+		size = "g2.small"
+	}
 	tags = "foo"
 	cni = "calico"
 }`, name)

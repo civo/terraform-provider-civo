@@ -20,11 +20,8 @@ func TestAccDataSourceCivoKubernetesCluster_basic(t *testing.T) {
 				Config: testAccDataSourceCivoKubernetesClusterConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
-					resource.TestCheckResourceAttr(datasourceName, "num_target_nodes", "2"),
-					resource.TestCheckResourceAttr(datasourceName, "target_nodes_size", "g2.small"),
-					resource.TestCheckResourceAttr(datasourceName, "instances.0.cpu_cores", "1"),
-					resource.TestCheckResourceAttr(datasourceName, "instances.0.ram_mb", "2048"),
-					resource.TestCheckResourceAttr(datasourceName, "instances.0.disk_gb", "25"),
+					resource.TestCheckResourceAttr(datasourceName, "pools.0.node_count", "2"),
+					resource.TestCheckResourceAttr(datasourceName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttrSet(datasourceName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(datasourceName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(datasourceName, "master_ip"),
@@ -46,11 +43,8 @@ func TestAccDataSourceCivoKubernetesClusterByID_basic(t *testing.T) {
 				Config: testAccDataSourceCivoKubernetesClusterByIDConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
-					resource.TestCheckResourceAttr(datasourceName, "num_target_nodes", "2"),
-					resource.TestCheckResourceAttr(datasourceName, "target_nodes_size", "g2.small"),
-					resource.TestCheckResourceAttr(datasourceName, "instances.0.cpu_cores", "1"),
-					resource.TestCheckResourceAttr(datasourceName, "instances.0.ram_mb", "2048"),
-					resource.TestCheckResourceAttr(datasourceName, "instances.0.disk_gb", "25"),
+					resource.TestCheckResourceAttr(datasourceName, "pools.0.node_count", "2"),
+					resource.TestCheckResourceAttr(datasourceName, "pools.0.size", "g2.small"),
 					resource.TestCheckResourceAttrSet(datasourceName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(datasourceName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(datasourceName, "master_ip"),
@@ -64,7 +58,10 @@ func testAccDataSourceCivoKubernetesClusterConfig(name string) string {
 	return fmt.Sprintf(`
 resource "civo_kubernetes_cluster" "my-cluster" {
 	name = "%s"
-	num_target_nodes = 2
+	pools {
+		node_count = 2
+		size = "g2.small"
+	}
 }
 
 data "civo_kubernetes_cluster" "foobar" {
@@ -77,7 +74,10 @@ func testAccDataSourceCivoKubernetesClusterByIDConfig(name string) string {
 	return fmt.Sprintf(`
 resource "civo_kubernetes_cluster" "my-cluster" {
 	name = "%s"
-	num_target_nodes = 2
+	pools {
+		node_count = 2
+		size = "g2.small"
+	}
 }
 
 data "civo_kubernetes_cluster" "foobar" {
