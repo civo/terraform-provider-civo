@@ -139,7 +139,6 @@ func resourceKubernetesCluster() *schema.Resource {
 	}
 }
 
-
 // schema for the node pool in the cluster
 func nodePoolSchema() *schema.Schema {
 	return &schema.Schema{

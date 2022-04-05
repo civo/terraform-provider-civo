@@ -114,7 +114,6 @@ func dataSourceKubernetesCluster() *schema.Resource {
 	}
 }
 
-
 // schema for the node pool in the cluster
 func dataSourcenodePoolSchema() *schema.Schema {
 	return &schema.Schema{
