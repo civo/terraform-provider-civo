@@ -42,7 +42,6 @@ output "kubernetes_cluster_output" {
 - **created_at** (String) The date where the Kubernetes cluster was create
 - **dns_entry** (String) The unique dns entry for the cluster in this case point to the master
 - **installed_applications** (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
-- **instances** (List of Object) (see [below for nested schema](#nestedatt--instances))
 - **kubeconfig** (String) A representation of the Kubernetes cluster's kubeconfig in yaml format
 - **kubernetes_version** (String) The version of Kubernetes
 - **master_ip** (String) The IP of the Kubernetes master node
@@ -64,20 +63,6 @@ Read-Only:
 - **version** (String)
 
 
-<a id="nestedatt--instances"></a>
-### Nested Schema for `instances`
-
-Read-Only:
-
-- **cpu_cores** (Number)
-- **disk_gb** (Number)
-- **hostname** (String)
-- **ram_mb** (Number)
-- **size** (String)
-- **status** (String)
-- **tags** (Set of String)
-
-
 <a id="nestedatt--pools"></a>
 ### Nested Schema for `pools`
 
@@ -85,21 +70,7 @@ Read-Only:
 
 - **id** (String)
 - **instance_names** (Set of String)
-- **instances** (List of Object) (see [below for nested schema](#nestedobjatt--pools--instances))
 - **node_count** (Number)
 - **size** (String)
-
-<a id="nestedobjatt--pools--instances"></a>
-### Nested Schema for `pools.instances`
-
-Read-Only:
-
-- **cpu_cores** (Number)
-- **disk_gb** (Number)
-- **hostname** (String)
-- **ram_mb** (Number)
-- **size** (String)
-- **status** (String)
-- **tags** (Set of String)
 
 

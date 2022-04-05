@@ -1,4 +1,9 @@
 
+## [v1.0.15](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.15) (5 April 2022)
+
+### Merged
+- [#129](https://github.com/civo/terraform-provider-civo/pull/129) - Fixed errors in the Kubernetes resource and remove unnecessary fields
+
 ## [v1.0.14](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.14) (1 April 2022)
 
 ### Merged

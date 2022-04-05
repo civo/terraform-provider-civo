@@ -63,6 +63,10 @@ resource "civo_kubernetes_node_pool" "front-end" {
 - **target_nodes_size** (String, Deprecated) the size of each node (optional, the default is currently g4s.kube.medium)
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
+### Read-Only
+
+- **instance_names** (Set of String) Instance names in the nodepool
+
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 

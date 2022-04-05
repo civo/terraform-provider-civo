@@ -81,7 +81,6 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 - **created_at** (String) The timestamp when the cluster was created
 - **dns_entry** (String) The DNS name of the cluster
 - **installed_applications** (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
-- **instances** (List of Object) (see [below for nested schema](#nestedatt--instances))
 - **kubeconfig** (String, Sensitive) The kubeconfig of the cluster
 - **master_ip** (String) The IP address of the master node
 - **ready** (Boolean) When cluster is ready, this will return `true`
@@ -99,21 +98,6 @@ Read-Only:
 
 - **id** (String) Nodepool ID
 - **instance_names** (Set of String) Instance names in the nodepool
-- **instances** (List of Object) (see [below for nested schema](#nestedatt--pools--instances))
-
-<a id="nestedatt--pools--instances"></a>
-### Nested Schema for `pools.instances`
-
-Read-Only:
-
-- **cpu_cores** (Number)
-- **disk_gb** (Number)
-- **hostname** (String)
-- **ram_mb** (Number)
-- **size** (String)
-- **status** (String)
-- **tags** (Set of String)
-
 
 
 <a id="nestedatt--installed_applications"></a>
@@ -125,20 +109,6 @@ Read-Only:
 - **category** (String)
 - **installed** (Boolean)
 - **version** (String)
-
-
-<a id="nestedatt--instances"></a>
-### Nested Schema for `instances`
-
-Read-Only:
-
-- **cpu_cores** (Number)
-- **disk_gb** (Number)
-- **hostname** (String)
-- **ram_mb** (Number)
-- **size** (String)
-- **status** (String)
-- **tags** (Set of String)
 
 ## Import
 
