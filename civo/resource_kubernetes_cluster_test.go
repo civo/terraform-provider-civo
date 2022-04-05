@@ -34,7 +34,7 @@ func TestAccCivoKubernetesCluster_basic(t *testing.T) {
 					testAccCheckCivoKubernetesClusterValues(&kubernetes, kubernetesClusterName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", kubernetesClusterName),
-					
+
 					// resource.TestCheckResourceAttrSet(resName, "instances"),
 					resource.TestCheckResourceAttr(resName, "pools.0.node_count", "2"),
 					resource.TestCheckResourceAttr(resName, "pools.0.size", "g2.small"),
