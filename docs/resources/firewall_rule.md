@@ -65,7 +65,6 @@ resource "civo_firewall_rule" "custom_port" {
     direction = "ingress"
     label = "custom-application"
     depends_on = [civo_firewall.custom_firewall]
-    action = "allow"
 }
 ```
 

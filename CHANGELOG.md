@@ -1,4 +1,9 @@
 
+## [v1.0.16](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.16) (5 April 2022)
+
+### Merged
+- [#128](https://github.com/civo/terraform-provider-civo/pull/128) - adding action as mandatory field
+
 ## [v1.0.15](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.15) (5 April 2022)
 
 ### Merged
