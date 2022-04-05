@@ -90,7 +90,6 @@ func resourceKubernetesCluster() *schema.Resource {
 				Description: "The existing firewall ID to use for this cluster",
 			},
 			// Computed resource
-			"instances":              instanceSchema(),
 			"installed_applications": applicationSchema(),
 			"pools":                  nodePoolSchema(),
 			"status": {
@@ -140,54 +139,6 @@ func resourceKubernetesCluster() *schema.Resource {
 	}
 }
 
-// schema for the instances
-func instanceSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Computed: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"hostname": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "Instance's hostname",
-				},
-				"size": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "Instance's size",
-				},
-				"cpu_cores": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "Instance's CPU cores",
-				},
-				"ram_mb": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "Instance's RAM (MB)",
-				},
-				"disk_gb": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "Instance's disk (GB)",
-				},
-				"status": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "Instance's status",
-				},
-				"tags": {
-					Type:        schema.TypeSet,
-					Computed:    true,
-					Elem:        &schema.Schema{Type: schema.TypeString},
-					Description: "Instance's tags",
-				},
-			},
-		},
-	}
-}
-
 // schema for the node pool in the cluster
 func nodePoolSchema() *schema.Schema {
 	return &schema.Schema{
@@ -218,7 +169,6 @@ func nodePoolSchema() *schema.Schema {
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					Description: "Instance names in the nodepool",
 				},
-				"instances": instanceSchema(),
 			},
 		},
 	}
@@ -359,7 +309,6 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	return resourceKubernetesClusterRead(ctx, d, m)
-
 }
 
 // function to read the kubernetes cluster
@@ -399,11 +348,7 @@ func resourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData, 
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("firewall_id", resp.FirewallID)
 
-	if err := d.Set("instances", flattenInstances(resp.Instances)); err != nil {
-		return diag.Errorf("[ERR] error retrieving the instances for kubernetes cluster error: %#v", err)
-	}
-
-	if err := d.Set("pools", flattenNodePool(resp, d)); err != nil {
+	if err := d.Set("pools", flattenNodePool(resp)); err != nil {
 		return diag.Errorf("[ERR] error retrieving the pool for kubernetes cluster error: %#v", err)
 	}
 
@@ -536,66 +481,21 @@ func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData
 }
 
 // function to flatten all instances inside the cluster
-func flattenInstances(instances []civogo.KubernetesInstance) []interface{} {
-	if instances == nil {
-		return nil
-	}
-
-	flattenedInstances := make([]interface{}, 0)
-	for _, instance := range instances {
-		rawInstance := map[string]interface{}{
-			"hostname":  instance.Hostname,
-			"cpu_cores": instance.CPUCores,
-			"ram_mb":    instance.RAMMegabytes,
-			"disk_gb":   instance.DiskGigabytes,
-			"status":    instance.Status,
-		}
-
-		flattenedInstances = append(flattenedInstances, rawInstance)
-	}
-
-	return flattenedInstances
-}
-
-// function to flatten all instances inside the cluster
-func flattenNodePool(cluster *civogo.KubernetesCluster, d *schema.ResourceData) []interface{} {
-
+func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 	if cluster.Pools == nil {
 		return nil
 	}
 
-	currentPools := d.Get("pools").([]interface{})[0].(map[string]interface{})
-
 	flattenedPool := make([]interface{}, 0)
-	for _, pool := range cluster.Pools {
-		if currentPools["id"].(string) == pool.ID {
-			flattenedPoolInstance := make([]interface{}, 0)
-			for _, v := range pool.Instances {
-
-				rawPoolInstance := map[string]interface{}{
-					"hostname":  v.Hostname,
-					"size":      pool.Size,
-					"cpu_cores": v.CPUCores,
-					"ram_mb":    v.RAMMegabytes,
-					"disk_gb":   v.DiskGigabytes,
-					"status":    v.Status,
-					"tags":      v.Tags,
-				}
-				flattenedPoolInstance = append(flattenedPoolInstance, rawPoolInstance)
-			}
-			instanceName := append(pool.InstanceNames, pool.InstanceNames...)
-
-			rawPool := map[string]interface{}{
-				"id":             pool.ID,
-				"node_count":     pool.Count,
-				"size":           pool.Size,
-				"instance_names": instanceName,
-				"instances":      flattenedPoolInstance,
-			}
-
-			flattenedPool = append(flattenedPool, rawPool)
-		}
+	instanceName := append(cluster.Pools[0].InstanceNames, cluster.Pools[0].InstanceNames...)
+	rawPool := map[string]interface{}{
+		"id":             cluster.Pools[0].ID,
+		"node_count":     cluster.Pools[0].Count,
+		"size":           cluster.Pools[0].Size,
+		"instance_names": instanceName,
 	}
+
+	flattenedPool = append(flattenedPool, rawPool)
 
 	return flattenedPool
 }
