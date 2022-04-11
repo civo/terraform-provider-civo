@@ -14,7 +14,7 @@ Provides a Civo Kubernetes cluster resource. This can be used to create, delete,
 
 ```terraform
 # Query xsmall instance size
-data "civo_instances_size" "xsmall" {
+data "civo_size" "xsmall" {
     filter {
         key = "type"
         values = ["kubernetes"]
@@ -40,15 +40,17 @@ resource "civo_firewall_rule" "kubernetes" {
     cidr = ["0.0.0.0/0"]
     direction = "ingress"
     label = "kubernetes-api-server"
+    action = "allow"
 }
 
 # Create a cluster
 resource "civo_kubernetes_cluster" "my-cluster" {
+    region = "LON1"
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
     pools {
-        size = element(data.civo_instances_size.xsmall.sizes, 0).name
+        size = element(data.civo_size.xsmall.sizes, 0).name
         node_count = 3
     }
 }
