@@ -63,6 +63,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 
 - **firewall_id** (String) The existing firewall ID to use for this cluster
 - **pools** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--pools))
+- **action** (String) When we set the `action = "allow"`, this is going to add a rule to allow traffic. Similarly, setting `action = "deny"` will deny the traffic.
 
 ### Optional
 
