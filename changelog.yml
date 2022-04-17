@@ -5,10 +5,10 @@
   - commit: dec823bac85b173e98f2664fac4f2c10b27c1db2
     note: Deprecate `civo_template` (#94)
     author:
-      name: Zulh
+      name: whoareYOU
       email: 75463191+zulh-civo@users.noreply.github.com
     committer:
-      name: GitHub
+      name: WhoAreYou
       email: noreply@github.com
   - commit: 8d2f4c5b7412cb8c1ff5f4109f48914799a0da34
     note: Set firewall rule `direction` to `ingress` if it's not set (#91)
@@ -42,6 +42,8 @@
     committer:
       name: GitHub
       email: noreply@github.com
+      email :123noreply@gmail.com
+
   - commit: 3fe8f2353515b946810a76f9bd2cb7308d893aa5
     note: Check network before creating volume (#86)
     author:
