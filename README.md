@@ -45,13 +45,15 @@ $ $GOPATH/bin/terraform-provider-civo
 ...
 ```
 
-In order to test the provider, you can simply run `make test`.
+In order to test the provider, you can simply run "make test".
 
 ```sh
 $ make test
 ```
 
 In order to run the full suite of acceptance tests, run `make testacc`.
+
+"So Please Follow the order"
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
