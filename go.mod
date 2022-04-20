@@ -5,6 +5,7 @@ require (
 	github.com/civo/civogo v0.2.74
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/google/uuid v1.2.0
+	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.5.0
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect

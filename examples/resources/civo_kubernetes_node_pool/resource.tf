@@ -16,15 +16,16 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
-    pools {
+    node_pool {
         size = element(data.civo_instances_size.xsmall.sizes, 0).name
         node_count = 3
     }
 }
 
 # Add a node pool
-resource "civo_kubernetes_node_pool" "front-end" {
+resource "civo_kubernetes_node_pool" "back-end" {
    cluster_id = civo_kubernetes_cluster.my-cluster.id
+   label = "back-end" // Optional
    node_count = 1 // Optional
    size = element(data.civo_instances_size.xsmall.sizes, 0).name // Optional
    region = "LON1"

@@ -27,6 +27,13 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				Description:  "The ID of your cluster",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
+			"label": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: utils.ValidateNameOnlyContainsAlphanumericCharacters,
+				Description:      "Node pool label, if you don't provide one, we will generate one for you",
+			},
 			"region": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -58,9 +65,11 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				Description: "the size of each node (optional, the default is currently g4s.kube.medium)",
 			},
 			"instance_names": {
-				Type:        schema.TypeSet,
-				Computed:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 				Description: "Instance names in the nodepool",
 			},
 		},
@@ -104,7 +113,10 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 		size = "g4s.kube.medium"
 	}
 
-	timeout := d.Timeout(schema.TimeoutCreate)
+	nodePoolLabel := uuid.NewString()
+	if attr, ok := d.GetOk("label"); ok {
+		nodePoolLabel = attr.(string)
+	}
 
 	log.Printf("[INFO] getting kubernetes cluster %s in the region %s", clusterID, apiClient.Region)
 	getKubernetesCluster, err := apiClient.GetKubernetesCluster(clusterID)
@@ -117,24 +129,23 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 		newPool = append(newPool, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size})
 	}
 
-	poolID := uuid.NewString()
-	newPool = append(newPool, civogo.KubernetesClusterPoolConfig{ID: poolID, Count: count, Size: size})
+	newPool = append(newPool, civogo.KubernetesClusterPoolConfig{ID: nodePoolLabel, Count: count, Size: size})
 
-	log.Printf("[INFO] configuring kubernetes cluster %s to add pool %s", getKubernetesCluster.ID, poolID[:6])
+	log.Printf("[INFO] configuring kubernetes cluster %s to add pool %s", getKubernetesCluster.ID, nodePoolLabel)
 	config := &civogo.KubernetesClusterConfig{
 		Pools:  newPool,
 		Region: apiClient.Region,
 	}
 
-	log.Printf("[INFO] Creating a new kubernetes cluster pool %s", poolID[:6])
+	log.Printf("[INFO] Creating a new kubernetes cluster pool %s", nodePoolLabel)
 	_, err = apiClient.UpdateKubernetesCluster(getKubernetesCluster.ID, config)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to create the kubernetes cluster: %s", err)
 	}
 
-	d.SetId(poolID)
+	d.SetId(nodePoolLabel)
 
-	err = waitForKubernetesNodePoolCreate(apiClient, timeout, getKubernetesCluster.ID, poolID)
+	err = waitForKubernetesNodePoolCreate(apiClient, d, false)
 	if err != nil {
 		return diag.Errorf("Error creating Kubernetes node pool: %s", err)
 	}
@@ -148,6 +159,10 @@ func resourceKubernetesClusterNodePoolRead(ctx context.Context, d *schema.Resour
 	apiClient := m.(*civogo.Client)
 	clusterID := d.Get("cluster_id").(string)
 
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+	var poolIndex int
+
 	log.Printf("[INFO] retrieving the kubernetes cluster %s", clusterID)
 	resp, err := apiClient.GetKubernetesCluster(clusterID)
 	if err != nil {
@@ -158,17 +173,25 @@ func resourceKubernetesClusterNodePoolRead(ctx context.Context, d *schema.Resour
 		return diag.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
 	}
 
-	d.Set("cluster_id", resp.ID)
-	for _, v := range resp.Pools {
-		instanceName := append(v.InstanceNames, v.InstanceNames...)
+	for i, v := range resp.Pools {
 		if v.ID == d.Id() {
-			d.Set("node_count", v.Count)
-			d.Set("size", v.Size)
-			d.Set("instance_names", instanceName)
+			poolIndex = i
 		}
 	}
 
-	return nil
+	d.SetId(resp.Pools[poolIndex].ID)
+	d.Set("cluster_id", resp.ID)
+	d.Set("node_count", resp.Pools[poolIndex].Count)
+	d.Set("size", resp.Pools[poolIndex].Size)
+
+	poolInstanceNames := make([]string, 0)
+	for _, v := range resp.Pools[poolIndex].InstanceNames {
+		poolInstanceNames = append(poolInstanceNames, v)
+	}
+
+	d.Set("instance_names", poolInstanceNames)
+
+	return diags
 }
 
 // function to update the kubernetes cluster
@@ -192,8 +215,6 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 		count = d.Get("node_count").(int)
 	}
 
-	timeout := d.Timeout(schema.TimeoutUpdate)
-
 	getKubernetesCluster, err := apiClient.GetKubernetesCluster(clusterID)
 	if err != nil {
 		return diag.Errorf("[INFO] error getting kubernetes cluster: %s", clusterID)
@@ -206,7 +227,7 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 
 	nodePool = updateNodePool(nodePool, d.Id(), count)
 
-	log.Printf("[INFO] configuring kubernetes cluster %s to add pool", d.Id()[:6])
+	log.Printf("[INFO] configuring kubernetes cluster %s to add pool", d.Id())
 	config := &civogo.KubernetesClusterConfig{
 		Pools:  nodePool,
 		Region: apiClient.Region,
@@ -218,9 +239,9 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 		return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
-	err = waitForKubernetesNodePoolCreate(apiClient, timeout, getKubernetesCluster.ID, d.Id())
+	err = waitForKubernetesNodePoolCreate(apiClient, d, true)
 	if err != nil {
-		return diag.Errorf("Error creating Kubernetes node pool: %s", err)
+		return diag.Errorf("Error updating Kubernetes node pool: %s", err)
 	}
 
 	return resourceKubernetesClusterNodePoolRead(ctx, d, m)
@@ -298,9 +319,10 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 				poolFound = true
 				d.SetId(v.ID)
 				d.Set("cluster_id", resp.ID)
+				d.Set("label", v.ID)
+				d.Set("node_count", v.Count)
+				d.Set("size", v.Size)
 				d.Set("region", currentRegionCode)
-				d.Set("num_target_nodes", v.Count)
-				d.Set("target_nodes_size", v.Size)
 			}
 		}
 	}
@@ -334,27 +356,23 @@ func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int
 	return s
 }
 
-// inPool is a utility function to check if a node pool is in a kubernetes cluster
-func inPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
-	for _, b := range list {
-		if b.ID == id {
-			return true
-		}
-	}
-	return false
-}
-
 // waitForKubernetesNodePoolCreate is a utility function to wait for a node pool to be created
-func waitForKubernetesNodePoolCreate(client *civogo.Client, duration time.Duration, clusterID string, poolID string) error {
+func waitForKubernetesNodePoolCreate(client *civogo.Client, d *schema.ResourceData, updatePool bool) error {
 	var (
 		tickerInterval        = 10 * time.Second
-		timeoutSeconds        = duration.Seconds()
+		timeoutSeconds        = d.Timeout(schema.TimeoutCreate).Seconds()
 		timeout               = int(timeoutSeconds / tickerInterval.Seconds())
 		n                     = 0
 		totalRequiredInstance = 0
 		totalRunningInstance  = 0
 		ticker                = time.NewTicker(tickerInterval)
+		clusterID             = d.Get("cluster_id").(string)
+		nodePoolID            = d.Id()
 	)
+
+	if updatePool {
+		timeoutSeconds = d.Timeout(schema.TimeoutUpdate).Seconds()
+	}
 
 	for range ticker.C {
 
@@ -365,14 +383,14 @@ func waitForKubernetesNodePoolCreate(client *civogo.Client, duration time.Durati
 		}
 
 		for _, v := range cluster.RequiredPools {
-			if v.ID == poolID {
+			if v.ID == nodePoolID {
 				totalRequiredInstance = v.Count
 				break
 			}
 		}
 
 		for _, v := range cluster.Pools {
-			if v.ID == poolID {
+			if v.ID == nodePoolID {
 				totalRunningInstance = v.Count
 				break
 			}
@@ -380,9 +398,9 @@ func waitForKubernetesNodePoolCreate(client *civogo.Client, duration time.Durati
 
 		allRunning := totalRunningInstance == totalRequiredInstance
 		for _, n := range cluster.Pools {
-			if n.ID == poolID {
+			if n.ID == nodePoolID {
 				for _, node := range n.Instances {
-					if node.Status == "BUILDING" {
+					if node.Status != "ACTIVE" {
 						allRunning = false
 					}
 				}
@@ -402,7 +420,7 @@ func waitForKubernetesNodePoolCreate(client *civogo.Client, duration time.Durati
 		n++
 	}
 
-	return fmt.Errorf("Timeout waiting to create nodepool")
+	return fmt.Errorf("Timeout waiting to create nodepool %s", nodePoolID)
 }
 
 // waitForKubernetesNodePoolDelete is a utility function to wait for a node pool to be deleted
@@ -413,11 +431,13 @@ func waitForKubernetesNodePoolDelete(client *civogo.Client, d *schema.ResourceDa
 		timeout        = int(timeoutSeconds / tickerInterval.Seconds())
 		n              = 0
 		ticker         = time.NewTicker(tickerInterval)
+		clusterID      = d.Get("cluster_id").(string)
+		nodePoolID     = d.Id()
 	)
 
 	for range ticker.C {
 
-		cluster, err := client.GetKubernetesCluster(d.Get("cluster_id").(string))
+		cluster, err := client.GetKubernetesCluster(clusterID)
 		if err != nil {
 			ticker.Stop()
 			return fmt.Errorf("Error trying to read cluster state: %s", err)
@@ -428,7 +448,7 @@ func waitForKubernetesNodePoolDelete(client *civogo.Client, d *schema.ResourceDa
 			nodePool = append(nodePool, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size})
 		}
 
-		if !inPool(d.Id(), nodePool) {
+		if !utils.InPool(nodePoolID, nodePool) {
 			ticker.Stop()
 			return nil
 		}

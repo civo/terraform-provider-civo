@@ -136,6 +136,11 @@ func resourceKubernetesCluster() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
+		},
 	}
 }
 
@@ -148,15 +153,18 @@ func nodePoolSchema() *schema.Schema {
 		MaxItems: 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"id": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "Nodepool ID",
+				"label": {
+					Type:             schema.TypeString,
+					Optional:         true,
+					Computed:         true,
+					ValidateDiagFunc: utils.ValidateNameOnlyContainsAlphanumericCharacters,
+					Description:      "Node pool label, if you don't provide one, we will generate one for you",
 				},
 				"node_count": {
 					Type:        schema.TypeInt,
 					Required:    true,
 					Description: "Number of nodes in the nodepool",
+					ValidateFunc: validation.IntAtLeast(1),
 				},
 				"size": {
 					Type:        schema.TypeString,
@@ -164,7 +172,7 @@ func nodePoolSchema() *schema.Schema {
 					Description: "Size of the nodes in the nodepool",
 				},
 				"instance_names": {
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 					Computed:    true,
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					Description: "Instance names in the nodepool",
@@ -379,7 +387,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	// Update the node pool if necessary
-	if !d.HasChange("node_pool") {
+	if !d.HasChange("pools") {
 		return resourceKubernetesClusterRead(ctx, d, m)
 	}
 
@@ -403,7 +411,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 		nodePools := []civogo.KubernetesClusterPoolConfig{}
 		for _, v := range kubernetesCluster.Pools {
 			nodePools = append(nodePools, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size})
-			if targetNodePool == "" && v.ID == newPool["id"].(string) {
+			if targetNodePool == "" && v.ID == newPool["label"].(string) {
 				targetNodePool = v.ID
 			}
 		}
@@ -433,30 +441,14 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())
-	log.Printf("[DEBUG] KubernetesClusterConfig: %+v\n", config)
 	_, err := apiClient.UpdateKubernetesCluster(d.Id(), config)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
-	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"BUILDING"},
-		Target:  []string{"ACTIVE"},
-		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.GetKubernetesCluster(d.Id())
-			if err != nil {
-				return 0, "", err
-			}
-			return resp, resp.Status, nil
-		},
-		Timeout:        60 * time.Minute,
-		Delay:          3 * time.Second,
-		MinTimeout:     3 * time.Second,
-		NotFoundChecks: 10,
-	}
-	_, err = createStateConf.WaitForStateContext(context.Background())
+	err = waitForKubernetesNodePoolCreate(apiClient, d, true)
 	if err != nil {
-		return diag.Errorf("error waiting for cluster (%s) to be created: %s", d.Id(), err)
+		return diag.Errorf("Error updating Kubernetes node pool: %s", err)
 	}
 
 	return resourceKubernetesClusterRead(ctx, d, m)
@@ -487,12 +479,17 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 	}
 
 	flattenedPool := make([]interface{}, 0)
-	instanceName := append(cluster.Pools[0].InstanceNames, cluster.Pools[0].InstanceNames...)
+
+	poolInstanceNames := make([]string, 0)
+	for _, v := range cluster.Pools[0].InstanceNames {
+		poolInstanceNames = append(poolInstanceNames, v)
+	}
+
 	rawPool := map[string]interface{}{
-		"id":             cluster.Pools[0].ID,
+		"label":          cluster.Pools[0].ID,
 		"node_count":     cluster.Pools[0].Count,
 		"size":           cluster.Pools[0].Size,
-		"instance_names": instanceName,
+		"instance_names": poolInstanceNames,
 	}
 
 	flattenedPool = append(flattenedPool, rawPool)
@@ -525,8 +522,14 @@ func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConf
 	expandedNodePools := make([]civogo.KubernetesClusterPoolConfig, 0, len(nodePools))
 	for _, rawPool := range nodePools {
 		pool := rawPool.(map[string]interface{})
+
+		poolID := uuid.NewString()
+		if pool["label"].(string) != "" {
+			poolID = pool["label"].(string)
+		}
+
 		cr := civogo.KubernetesClusterPoolConfig{
-			ID:    uuid.NewString(),
+			ID:    poolID,
 			Size:  pool["size"].(string),
 			Count: pool["node_count"].(int),
 		}

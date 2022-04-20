@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 func ValidateName(v interface{}, k string) (ws []string, es []error) {
@@ -107,4 +109,51 @@ func GetCommaSeparatedAllowedKeys(allowedKeys []string) string {
 	}
 	sort.Strings(res)
 	return strings.Join(res, ", ")
+}
+
+// Validate name only contains alphanumeric characters, hyphens, underscores and dots
+func ValidateNameOnlyContainsAlphanumericCharacters(v interface{}, p cty.Path) diag.Diagnostics {
+	value := v.(string)
+	var diags diag.Diagnostics
+
+	_, ok := v.(string)
+	if !ok {
+		diag := diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "wrong value",
+			Detail:   fmt.Sprintf("expected name to be string"),
+		}
+		diags = append(diags, diag)
+	}
+
+	whiteSpace := regexp.MustCompile(`\s+`)
+	if whiteSpace.Match([]byte(value)) {
+		diag := diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "cannot contain whitespace",
+			Detail:   fmt.Sprintf("name cannot contain whitespace. Got %s", value),
+		}
+		diags = append(diags, diag)
+	}
+
+	if !regexp.MustCompile(`^[a-zA-Z0-9-_.]+$`).Match([]byte(value)) {
+		diag := diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "alphanumeric characters",
+			Detail:   fmt.Sprintf("name can only contain alphanumeric characters, hyphens, underscores and dots. Got %s", value),
+		}
+		diags = append(diags, diag)
+	}
+
+	return diags
+}
+
+// inPool is a utility function to check if a node pool is in a kubernetes cluster
+func InPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
+	for _, b := range list {
+		if b.ID == id {
+			return true
+		}
+	}
+	return false
 }
