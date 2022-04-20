@@ -32,7 +32,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
-    node_pool {
+    pools {
         label = "front-end" // Optional
         size = element(data.civo_size.xsmall.sizes, 0).name
         node_count = 3
