@@ -1,5 +1,5 @@
 # Query xsmall instance size
-data "civo_instances_size" "xsmall" {
+data "civo_size" "xsmall" {
     filter {
         key = "type"
         values = ["kubernetes"]
@@ -17,7 +17,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
     node_pool {
-        size = element(data.civo_instances_size.xsmall.sizes, 0).name
+        size = element(data.civo_size.xsmall.sizes, 0).name
         node_count = 3
     }
 }
@@ -27,6 +27,6 @@ resource "civo_kubernetes_node_pool" "back-end" {
    cluster_id = civo_kubernetes_cluster.my-cluster.id
    label = "back-end" // Optional
    node_count = 1 // Optional
-   size = element(data.civo_instances_size.xsmall.sizes, 0).name // Optional
+   size = element(data.civo_size.xsmall.sizes, 0).name // Optional
    region = "LON1"
 }
