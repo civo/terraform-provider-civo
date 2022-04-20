@@ -14,7 +14,7 @@ Provides a Civo firewall rule resource. This can be used to create, modify, and 
 
 ```terraform
 # Query small instance size
-data "civo_instances_size" "small" {
+data "civo_size" "small" {
     filter {
         key = "name"
         values = ["g3.small"]
@@ -39,7 +39,7 @@ data "civo_disk_image" "debian" {
 # Create a new instance
 resource "civo_instance" "foo" {
     hostname = "foo.com"
-    size = element(data.civo_instances_size.small.sizes, 0).name
+    size = element(data.civo_size.small.sizes, 0).name
     disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
@@ -65,6 +65,7 @@ resource "civo_firewall_rule" "custom_port" {
     direction = "ingress"
     label = "custom-application"
     depends_on = [civo_firewall.custom_firewall]
+    action = "allow"
 }
 ```
 
@@ -73,7 +74,7 @@ resource "civo_firewall_rule" "custom_port" {
 
 ### Required
 
-- **action** (String) the action of the rule can be allow or deny
+- **action** (String) the action of the rule can be allow or deny. When we set the `action = "allow"`, this is going to add a rule to allow traffic. Similarly, setting `action = "deny"` will deny the traffic.
 - **cidr** (Set of String) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
 - **direction** (String) The direction of the rule can be ingress or egress
 - **firewall_id** (String) The Firewall ID
