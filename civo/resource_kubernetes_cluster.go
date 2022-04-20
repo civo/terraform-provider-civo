@@ -161,9 +161,9 @@ func nodePoolSchema() *schema.Schema {
 					Description:      "Node pool label, if you don't provide one, we will generate one for you",
 				},
 				"node_count": {
-					Type:        schema.TypeInt,
-					Required:    true,
-					Description: "Number of nodes in the nodepool",
+					Type:         schema.TypeInt,
+					Required:     true,
+					Description:  "Number of nodes in the nodepool",
 					ValidateFunc: validation.IntAtLeast(1),
 				},
 				"size": {
