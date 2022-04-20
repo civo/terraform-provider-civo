@@ -73,7 +73,7 @@ func resourceFirewallRule() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "the action of the rule can be allow or deny",
+				Description: "The action of the rule can be allow or deny. When we set the `action = 'allow'`, this is going to add a rule to allow traffic. Similarly, setting `action = 'deny'` will deny the traffic.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"allow", "deny",
 				}, false),
