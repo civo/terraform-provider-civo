@@ -14,7 +14,7 @@ Provides a Civo Kubernetes node pool resource. While the default node pool must 
 
 ```terraform
 # Query xsmall instance size
-data "civo_instances_size" "xsmall" {
+data "civo_size" "xsmall" {
     filter {
         key = "type"
         values = ["kubernetes"]
@@ -31,17 +31,18 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
-    pools {
-        size = element(data.civo_instances_size.xsmall.sizes, 0).name
+    node_pool {
+        size = element(data.civo_size.xsmall.sizes, 0).name
         node_count = 3
     }
 }
 
 # Add a node pool
-resource "civo_kubernetes_node_pool" "front-end" {
+resource "civo_kubernetes_node_pool" "back-end" {
    cluster_id = civo_kubernetes_cluster.my-cluster.id
+   label = "back-end" // Optional
    node_count = 1 // Optional
-   size = element(data.civo_instances_size.xsmall.sizes, 0).name // Optional
+   size = element(data.civo_size.xsmall.sizes, 0).name // Optional
    region = "LON1"
 }
 ```
@@ -57,6 +58,7 @@ resource "civo_kubernetes_node_pool" "front-end" {
 ### Optional
 
 - **id** (String) The ID of this resource.
+- **label** (String) Node pool label, if you don't provide one, we will generate one for you
 - **node_count** (Number) the number of instances to create (optional, the default at the time of writing is 3)
 - **num_target_nodes** (Number, Deprecated) the number of instances to create (optional, the default at the time of writing is 3)
 - **size** (String) the size of each node (optional, the default is currently g4s.kube.medium)
@@ -65,7 +67,7 @@ resource "civo_kubernetes_node_pool" "front-end" {
 
 ### Read-Only
 
-- **instance_names** (Set of String) Instance names in the nodepool
+- **instance_names** (List of String) Instance names in the nodepool
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

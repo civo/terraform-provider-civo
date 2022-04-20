@@ -40,16 +40,15 @@ resource "civo_firewall_rule" "kubernetes" {
     cidr = ["0.0.0.0/0"]
     direction = "ingress"
     label = "kubernetes-api-server"
-    action = "allow"
 }
 
 # Create a cluster
 resource "civo_kubernetes_cluster" "my-cluster" {
-    region = "LON1"
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
-    pools {
+    node_pool {
+        label = "front-end" // Optional
         size = element(data.civo_size.xsmall.sizes, 0).name
         node_count = 3
     }
@@ -63,7 +62,6 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 
 - **firewall_id** (String) The existing firewall ID to use for this cluster
 - **pools** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--pools))
-- **action** (String) When we set the `action = "allow"`, this is going to add a rule to allow traffic. Similarly, setting `action = "deny"` will deny the traffic.
 
 ### Optional
 
@@ -77,6 +75,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 - **region** (String) The region for the cluster, if not declare we use the region in declared in the provider
 - **tags** (String) Space separated list of tags, to be used freely as required
 - **target_nodes_size** (String, Deprecated) The size of each node (optional, the default is currently g4s.kube.medium)
+- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
@@ -97,10 +96,23 @@ Required:
 - **node_count** (Number) Number of nodes in the nodepool
 - **size** (String) Size of the nodes in the nodepool
 
+Optional:
+
+- **label** (String) Node pool label, if you don't provide one, we will generate one for you
+
 Read-Only:
 
-- **id** (String) Nodepool ID
-- **instance_names** (Set of String) Instance names in the nodepool
+- **instance_names** (List of String) Instance names in the nodepool
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- **create** (String)
+- **delete** (String)
+- **update** (String)
 
 
 <a id="nestedatt--installed_applications"></a>

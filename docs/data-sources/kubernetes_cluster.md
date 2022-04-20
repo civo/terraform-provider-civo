@@ -68,8 +68,8 @@ Read-Only:
 
 Read-Only:
 
-- **id** (String)
 - **instance_names** (Set of String)
+- **label** (String)
 - **node_count** (Number)
 - **size** (String)
 

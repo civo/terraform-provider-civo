@@ -1,4 +1,11 @@
 
+## [v1.0.17](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.17) (20 April 2022)
+
+### Merged
+- [#133](https://github.com/civo/terraform-provider-civo/pull/133) - Fix error in volumen, Kubernetes and node pools resources 
+- [#131](https://github.com/civo/terraform-provider-civo/pull/131) - Update firewall_rule.md
+- [#130](https://github.com/civo/terraform-provider-civo/pull/130) - Update kubernetes_cluster.md
+
 ## [v1.0.16](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.16) (5 April 2022)
 
 ### Merged
