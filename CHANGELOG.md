@@ -1,4 +1,9 @@
 
+## [v1.0.18](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.18) (20 April 2022)
+
+### Commits
+- [a3b25da](https://github.com/civo/terraform-provider-civo/commit/a3b25daae5219e40ff21de81f2d0a7015bd61876) - Fix error in the doc for kubernetes cluster
+
 ## [v1.0.17](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.17) (20 April 2022)
 
 ### Merged
