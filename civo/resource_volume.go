@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -86,6 +88,26 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	d.SetId(volume.ID)
+
+	createStateConf := &resource.StateChangeConf{
+		Pending: []string{"creating"},
+		Target:  []string{"available"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.FindVolume(d.Id())
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, resp.Status, nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err = createStateConf.WaitForStateContext(context.Background())
+	if err != nil {
+		return diag.Errorf("error waiting for volume (%s) to be created: %s", d.Id(), err)
+	}
 
 	return resourceVolumeRead(ctx, d, m)
 }

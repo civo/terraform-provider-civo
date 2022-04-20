@@ -121,10 +121,10 @@ func dataSourcenodePoolSchema() *schema.Schema {
 		Computed: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"id": {
+				"label": {
 					Type:        schema.TypeString,
 					Computed:    true,
-					Description: "The ID of the pool",
+					Description: "Node pool label, if you don't provide one, we will generate one for you",
 				},
 				"node_count": {
 					Type:        schema.TypeInt,
@@ -220,8 +220,9 @@ func dataSourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData
 	d.Set("master_ip", foundCluster.MasterIP)
 	d.Set("dns_entry", foundCluster.DNSEntry)
 	d.Set("created_at", foundCluster.CreatedAt.UTC().String())
+	d.Set("region", apiClient.Region)
 
-	if err := d.Set("pools", flattenNodePool(foundCluster)); err != nil {
+	if err := d.Set("pools", flattenDataSourceNodePool(foundCluster)); err != nil {
 		return diag.Errorf("[ERR] error retrieving the pools for kubernetes cluster error: %#v", err)
 	}
 
@@ -230,4 +231,29 @@ func dataSourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	return nil
+}
+
+// function to flatten all instances inside the cluster
+func flattenDataSourceNodePool(cluster *civogo.KubernetesCluster) []interface{} {
+	if cluster.Pools == nil {
+		return nil
+	}
+
+	flattenedPool := make([]interface{}, 0)
+	for _, pool := range cluster.Pools {
+		poolInstanceNames := make([]string, 0)
+		for _, v := range pool.InstanceNames {
+			poolInstanceNames = append(poolInstanceNames, v)
+		}
+
+		rawPool := map[string]interface{}{
+			"label":          pool.ID,
+			"node_count":     pool.Count,
+			"size":           pool.Size,
+			"instance_names": poolInstanceNames,
+		}
+		flattenedPool = append(flattenedPool, rawPool)
+	}
+
+	return flattenedPool
 }

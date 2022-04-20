@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -72,6 +73,26 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(resource.PrefixedUniqueId(fmt.Sprintf("%s-%s-", instanceID, volumeID)))
+
+	createStateConf := &resource.StateChangeConf{
+		Pending: []string{"attaching"},
+		Target:  []string{"attached"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.FindVolume(volumeID)
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, resp.Status, nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err = createStateConf.WaitForStateContext(context.Background())
+	if err != nil {
+		return diag.Errorf("error waiting for volume (%s) to be attached: %s", d.Id(), err)
+	}
 
 	return resourceVolumeAttachmentRead(ctx, d, m)
 }

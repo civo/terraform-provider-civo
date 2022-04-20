@@ -1,5 +1,5 @@
 # Query small instance size
-data "civo_instances_size" "small" {
+data "civo_size" "small" {
     filter {
         key = "name"
         values = ["g3.small"]
@@ -24,7 +24,7 @@ data "civo_disk_image" "debian" {
 # Create a new instance
 resource "civo_instance" "foo" {
     hostname = "foo.com"
-    size = element(data.civo_instances_size.small.sizes, 0).name
+    size = element(data.civo_size.small.sizes, 0).name
     disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
