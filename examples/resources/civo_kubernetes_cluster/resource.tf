@@ -25,6 +25,7 @@ resource "civo_firewall_rule" "kubernetes" {
     cidr = ["0.0.0.0/0"]
     direction = "ingress"
     label = "kubernetes-api-server"
+    action = "allow"
 }
 
 # Create a cluster
