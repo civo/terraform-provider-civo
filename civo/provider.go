@@ -44,7 +44,8 @@ func Provider() *schema.Provider {
 			"civo_loadbalancer":       dataSourceLoadBalancer(),
 			"civo_ssh_key":            dataSourceSSHKey(),
 			// "civo_snapshot":           dataSourceSnapshot(),
-			"civo_region": dataSourceRegion(),
+			"civo_region":      dataSourceRegion(),
+			"civo_application": dataSourceApplication(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"civo_instance":          resourceInstance(),
@@ -61,6 +62,7 @@ func Provider() *schema.Provider {
 			// "civo_snapshot":             resourceSnapshot(),
 			"civo_kubernetes_cluster":   resourceKubernetesCluster(),
 			"civo_kubernetes_node_pool": resourceKubernetesClusterNodePool(),
+			"civo_application":          resourceApplication(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
