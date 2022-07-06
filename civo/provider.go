@@ -61,6 +61,8 @@ func Provider() *schema.Provider {
 			// "civo_snapshot":             resourceSnapshot(),
 			"civo_kubernetes_cluster":   resourceKubernetesCluster(),
 			"civo_kubernetes_node_pool": resourceKubernetesClusterNodePool(),
+			"civo_reserved_ip": resourceReservedIP(),
+			"civo_instance_reserved_ip_assignment": resourceInstanceReservedIPAssignment(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
