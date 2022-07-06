@@ -177,7 +177,7 @@ func resourceInstanceReservedIPDelete(ctx context.Context, d *schema.ResourceDat
 	}
 	_, err = createStateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("error waiting for ip be unassign (%s)", d.Id(), err)
+		return diag.Errorf("error waiting for ip be unassign (%s): %s", d.Id(), err)
 	}
 
 	return nil
