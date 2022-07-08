@@ -14,7 +14,7 @@ import (
 
 func resourceReservedIP() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides a Civo network resource. This can be used to create, modify, and delete networks.",
+		Description: "Provides a Civo reserved IP to represent a publicly-accessible static IP addresses that can be mapped to one of your Instancesor Load Balancer.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,

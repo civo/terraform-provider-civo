@@ -39,9 +39,6 @@ func resourceInstanceReservedIPAssignment() *schema.Resource {
 		CreateContext: resourceInstanceReservedIPCreate,
 		ReadContext:   resourceInstanceReservedIPRead,
 		DeleteContext: resourceInstanceReservedIPDelete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 		},
@@ -150,18 +147,20 @@ func resourceInstanceReservedIPDelete(ctx context.Context, d *schema.ResourceDat
 		apiClient.Region = region.(string)
 	}
 
+	reservedIP := d.Get("reserved_ip_id").(string)
+
 	// We check if the reserved ip is valid and if it is not we return an error
-	log.Printf("[INFO] unassign the ip (%s) from the instance", d.Id())
-	_, err := apiClient.UnassignIP(d.Id())
+	log.Printf("[INFO] unassign the ip (%s) from the instance", reservedIP)
+	_, err := apiClient.UnassignIP(reservedIP)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to unassign the ip %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while tring to unassign the ip %s: %s", reservedIP, err)
 	}
 
 	createStateConf := &resource.StateChangeConf{
 		Pending: []string{"PENDING"},
 		Target:  []string{"DONE"},
 		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.FindIP(d.Id())
+			resp, err := apiClient.FindIP(reservedIP)
 			if err != nil {
 				return 0, "", err
 			}
