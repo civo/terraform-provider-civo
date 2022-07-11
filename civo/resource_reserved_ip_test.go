@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-
 func TestAccCivoReservedIP_basic(t *testing.T) {
 	var ip civogo.IP
 
