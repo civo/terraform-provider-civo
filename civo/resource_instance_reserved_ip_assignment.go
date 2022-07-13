@@ -73,12 +73,7 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 	// We send to assign the reserved ip to the instance
 	log.Printf("[INFO] assigning the reserved ip %s to the instance %s", d.Get("reserved_ip_id").(string), d.Get("instance_id").(string))
 
-	assignedTo := &civogo.AssignedTo{
-		ID:   instance.ID,
-		Type: "instance",
-		Name: instance.Hostname,
-	}
-	_, err = apiClient.AssignIP(reservedIP.ID, assignedTo)
+	_, err = apiClient.AssignIP(reservedIP.ID, instance.ID, "instance")
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while tring to assign reserved ip %s to instance %s", d.Get("reserved_ip_id").(string), d.Get("instance_id").(string))
 	}
