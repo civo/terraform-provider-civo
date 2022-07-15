@@ -73,7 +73,7 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 	// We send to assign the reserved ip to the instance
 	log.Printf("[INFO] assigning the reserved ip %s to the instance %s", d.Get("reserved_ip_id").(string), d.Get("instance_id").(string))
 
-	_, err = apiClient.AssignIP(reservedIP.ID, instance.ID, "instance")
+	_, err = apiClient.AssignIP(reservedIP.ID, instance.ID, "instance", apiClient.Region)
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while tring to assign reserved ip %s to instance %s", d.Get("reserved_ip_id").(string), d.Get("instance_id").(string))
 	}
@@ -146,7 +146,7 @@ func resourceInstanceReservedIPDelete(ctx context.Context, d *schema.ResourceDat
 
 	// We check if the reserved ip is valid and if it is not we return an error
 	log.Printf("[INFO] unassign the ip (%s) from the instance", reservedIP)
-	_, err := apiClient.UnassignIP(reservedIP)
+	_, err := apiClient.UnassignIP(reservedIP, apiClient.Region)
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while tring to unassign the ip %s: %s", reservedIP, err)
 	}
