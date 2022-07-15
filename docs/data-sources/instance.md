@@ -30,30 +30,30 @@ output "instance_output" {
 
 ### Optional
 
-- **hostname** (String) The hostname of the Instance
-- **id** (String) The ID of this resource.
-- **region** (String) The region of an existing Instance
+- `hostname` (String) The hostname of the Instance
+- `region` (String) The region of an existing Instance
 
 ### Read-Only
 
-- **cpu_cores** (Number) Total cpu of the inatance
-- **created_at** (String) The date of creation of the instance
-- **disk_gb** (Number) The size of the disk
-- **firewall_id** (String) The ID of the firewall used
-- **initial_password** (String) Instance initial password
-- **initial_user** (String) The name of the initial user created on the server
-- **network_id** (String) his will be the ID of the network
-- **notes** (String) The notes of the instance
-- **private_ip** (String) The private IP
-- **pseudo_ip** (String) Is the ip that is used to route the public ip from the internet to the instance using NAT
-- **public_ip** (String) The public IP
-- **ram_mb** (Number) Total ram of the instance
-- **reverse_dns** (String) A fully qualified domain name
-- **script** (String) The contents of a script uploaded
-- **size** (String) The name of the size
-- **sshkey_id** (String) The ID SSH key
-- **status** (String) The status of the instance
-- **tags** (Set of String) An optional list of tags
-- **template** (String) The ID for the disk image/template to used to build the instance
+- `cpu_cores` (Number) Total cpu of the inatance
+- `created_at` (String) The date of creation of the instance
+- `disk_gb` (Number) The size of the disk
+- `firewall_id` (String) The ID of the firewall used
+- `id` (String) The ID of this resource.
+- `initial_password` (String) Instance initial password
+- `initial_user` (String) The name of the initial user created on the server
+- `network_id` (String) his will be the ID of the network
+- `notes` (String) The notes of the instance
+- `private_ip` (String) The private IP
+- `pseudo_ip` (String) Is the ip that is used to route the public ip from the internet to the instance using NAT
+- `public_ip` (String) The public IP
+- `ram_mb` (Number) Total ram of the instance
+- `reverse_dns` (String) A fully qualified domain name
+- `script` (String) The contents of a script uploaded
+- `size` (String) The name of the size
+- `sshkey_id` (String) The ID SSH key
+- `status` (String) The status of the instance
+- `tags` (Set of String) An optional list of tags
+- `template` (String) The ID for the disk image/template to used to build the instance
 
 

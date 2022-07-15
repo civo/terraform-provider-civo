@@ -39,21 +39,18 @@ output "record_ttl" {
 
 ### Required
 
-- **domain_id** (String) The ID of the domain
-- **name** (String) The name of the record
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `domain_id` (String) The ID of the domain
+- `name` (String) The name of the record
 
 ### Read-Only
 
-- **account_id** (String) The ID account of the domain
-- **created_at** (String) The date when it was created in UTC format
-- **priority** (Number) The priority of the record
-- **ttl** (Number) How long caching DNS servers should cache this record
-- **type** (String) The choice of record type from A, CNAME, MX, SRV or TXT
-- **updated_at** (String) The date when it was updated in UTC format
-- **value** (String) The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
+- `account_id` (String) The ID account of the domain
+- `created_at` (String) The date when it was created in UTC format
+- `id` (String) The ID of this resource.
+- `priority` (Number) The priority of the record
+- `ttl` (Number) How long caching DNS servers should cache this record
+- `type` (String) The choice of record type from A, CNAME, MX, SRV or TXT
+- `updated_at` (String) The date when it was updated in UTC format
+- `value` (String) The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
 
 

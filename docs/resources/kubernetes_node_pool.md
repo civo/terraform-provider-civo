@@ -52,31 +52,31 @@ resource "civo_kubernetes_node_pool" "back-end" {
 
 ### Required
 
-- **cluster_id** (String) The ID of your cluster
-- **region** (String) The region of the node pool, has to match that of the cluster
+- `cluster_id` (String) The ID of your cluster
+- `region` (String) The region of the node pool, has to match that of the cluster
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **label** (String) Node pool label, if you don't provide one, we will generate one for you
-- **node_count** (Number) the number of instances to create (optional, the default at the time of writing is 3)
-- **num_target_nodes** (Number, Deprecated) the number of instances to create (optional, the default at the time of writing is 3)
-- **size** (String) the size of each node (optional, the default is currently g4s.kube.medium)
-- **target_nodes_size** (String, Deprecated) the size of each node (optional, the default is currently g4s.kube.medium)
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `label` (String) Node pool label, if you don't provide one, we will generate one for you
+- `node_count` (Number) the number of instances to create (optional, the default at the time of writing is 3)
+- `num_target_nodes` (Number, Deprecated) the number of instances to create (optional, the default at the time of writing is 3)
+- `size` (String) the size of each node (optional, the default is currently g4s.kube.medium)
+- `target_nodes_size` (String, Deprecated) the size of each node (optional, the default is currently g4s.kube.medium)
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **instance_names** (List of String) Instance names in the nodepool
+- `id` (String) The ID of this resource.
+- `instance_names` (List of String) Instance names in the nodepool
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 ## Import
 

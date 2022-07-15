@@ -61,49 +61,49 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 
 ### Required
 
-- **firewall_id** (String) The existing firewall ID to use for this cluster
-- **pools** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--pools))
+- `firewall_id` (String) The existing firewall ID to use for this cluster
+- `pools` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--pools))
 
 ### Optional
 
-- **applications** (String) Comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. Application names are case-sensitive; the available applications can be listed with the Civo CLI: 'civo kubernetes applications ls'. If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik. For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'.
-- **cni** (String) The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
-- **id** (String) The ID of this resource.
-- **kubernetes_version** (String) The version of k3s to install (optional, the default is currently the latest available)
-- **name** (String) Name for your cluster, must be unique within your account
-- **network_id** (String) The network for the cluster, if not declare we use the default one
-- **num_target_nodes** (Number, Deprecated) The number of instances to create (optional, the default at the time of writing is 3)
-- **region** (String) The region for the cluster, if not declare we use the region in declared in the provider
-- **tags** (String) Space separated list of tags, to be used freely as required
-- **target_nodes_size** (String, Deprecated) The size of each node (optional, the default is currently g4s.kube.medium)
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `applications` (String) Comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. Application names are case-sensitive; the available applications can be listed with the Civo CLI: 'civo kubernetes applications ls'. If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik. For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'.
+- `cni` (String) The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
+- `kubernetes_version` (String) The version of k3s to install (optional, the default is currently the latest available)
+- `name` (String) Name for your cluster, must be unique within your account
+- `network_id` (String) The network for the cluster, if not declare we use the default one
+- `num_target_nodes` (Number, Deprecated) The number of instances to create (optional, the default at the time of writing is 3)
+- `region` (String) The region for the cluster, if not declare we use the region in declared in the provider
+- `tags` (String) Space separated list of tags, to be used freely as required
+- `target_nodes_size` (String, Deprecated) The size of each node (optional, the default is currently g4s.kube.medium)
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **api_endpoint** (String) The API server endpoint of the cluster
-- **created_at** (String) The timestamp when the cluster was created
-- **dns_entry** (String) The DNS name of the cluster
-- **installed_applications** (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
-- **kubeconfig** (String, Sensitive) The kubeconfig of the cluster
-- **master_ip** (String) The IP address of the master node
-- **ready** (Boolean) When cluster is ready, this will return `true`
-- **status** (String) Status of the cluster
+- `api_endpoint` (String) The API server endpoint of the cluster
+- `created_at` (String) The timestamp when the cluster was created
+- `dns_entry` (String) The DNS name of the cluster
+- `id` (String) The ID of this resource.
+- `installed_applications` (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
+- `kubeconfig` (String, Sensitive) The kubeconfig of the cluster
+- `master_ip` (String) The IP address of the master node
+- `ready` (Boolean) When cluster is ready, this will return `true`
+- `status` (String) Status of the cluster
 
 <a id="nestedblock--pools"></a>
 ### Nested Schema for `pools`
 
 Required:
 
-- **node_count** (Number) Number of nodes in the nodepool
-- **size** (String) Size of the nodes in the nodepool
+- `node_count` (Number) Number of nodes in the nodepool
+- `size` (String) Size of the nodes in the nodepool
 
 Optional:
 
-- **label** (String) Node pool label, if you don't provide one, we will generate one for you
+- `label` (String) Node pool label, if you don't provide one, we will generate one for you
 
 Read-Only:
 
-- **instance_names** (List of String) Instance names in the nodepool
+- `instance_names` (List of String) Instance names in the nodepool
 
 
 <a id="nestedblock--timeouts"></a>
@@ -111,9 +111,9 @@ Read-Only:
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 
 <a id="nestedatt--installed_applications"></a>
@@ -121,10 +121,10 @@ Optional:
 
 Read-Only:
 
-- **application** (String)
-- **category** (String)
-- **installed** (Boolean)
-- **version** (String)
+- `application` (String)
+- `category` (String)
+- `installed` (Boolean)
+- `version` (String)
 
 ## Import
 

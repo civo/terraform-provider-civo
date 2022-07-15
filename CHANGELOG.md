@@ -1,4 +1,10 @@
 
+## [v1.0.19](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.19) (15 July 2022)
+
+### Merged
+- [#142](https://github.com/civo/terraform-provider-civo/pull/142) - Feature/reserve ip
+- [#135](https://github.com/civo/terraform-provider-civo/pull/135) - docs edit
+
 ## [v1.0.18](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.18) (20 April 2022)
 
 ### Commits
