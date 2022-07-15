@@ -5,6 +5,9 @@
 - [#142](https://github.com/civo/terraform-provider-civo/pull/142) - Feature/reserve ip
 - [#135](https://github.com/civo/terraform-provider-civo/pull/135) - docs edit
 
+### Commits
+- [8701fc5](https://github.com/civo/terraform-provider-civo/commit/8701fc56d2cf7538d4a98a582c824f0fe736d603) - updated gorelease to ignore the pair windows/arm64
+
 ## [v1.0.18](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.18) (20 April 2022)
 
 ### Commits
