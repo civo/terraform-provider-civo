@@ -20,7 +20,4 @@ jobs:
         echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
       shell: bash
     - name: lint
-      run: |
-        go env
-        go install golang.org/x/lint/golint
-        golint -set_exit_status
+      uses: golangci/golangci-lint-action@v3
