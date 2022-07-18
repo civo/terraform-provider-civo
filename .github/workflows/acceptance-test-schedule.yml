@@ -1,0 +1,28 @@
+name: Acceptance Test Schedule
+
+# Runs acceptance tests on a cron schedule
+
+on:
+  schedule:
+    - cron: 0 10 * * MON-FRI # Every weekday at 10:00 UTC (10a Eastern)
+
+concurrency: acceptance_tests
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.x
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: make testacc
+        run: make testacc
+        env:
+          TESTARGS: -parallel 20
+          CIVO_TOKEN: ${{ secrets.ACCEPTANCE_TESTS_TOKEN }}
