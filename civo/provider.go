@@ -7,7 +7,6 @@ import (
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	_ "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // Provider Civo cloud provider

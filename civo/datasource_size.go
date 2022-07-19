@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// SizeList is a temporal struct to save all size
+// Size is a temporal struct to save all size
 type Size struct {
 	Name        string
 	Description string
@@ -25,7 +25,7 @@ type Size struct {
 func dataSourceSize() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
 		Description:         "Retrieves information about the sizes that Civo supports, with the ability to filter the results.",
-		RecordSchema:        SizeSchema(),
+		RecordSchema:        sizeSchema(),
 		ResultAttributeName: "sizes",
 		FlattenRecord:       flattenSize,
 		GetRecords:          getSizes,
@@ -96,7 +96,7 @@ func flattenSize(size, _ interface{}, _ map[string]interface{}) (map[string]inte
 	return flattenedSize, nil
 }
 
-func SizeSchema() map[string]*schema.Schema {
+func sizeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
 			Type:        schema.TypeString,

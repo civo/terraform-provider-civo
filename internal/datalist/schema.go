@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// This is the configuration for a "data list" resource. It represents the schema and operations
+// ResourceConfig this is the configuration for a "data list" resource. It represents the schema and operations
 // needed to create the data list resource.
 type ResourceConfig struct {
 	// The schema for a single instance of the resource.
@@ -41,7 +41,7 @@ type ResourceConfig struct {
 	Description string
 }
 
-// Returns a new "data list" resource given the specified configuration. This
+// NewResource returns a new "data list" resource given the specified configuration. This
 // is a resource with `filter` and `sort` attributes that can select a subset
 // of records from a list of records for a particular type of resource.
 func NewResource(config *ResourceConfig) *schema.Resource {
