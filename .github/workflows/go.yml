@@ -23,34 +23,34 @@ jobs:
     - name: Make test
       run: make test
   
-  acceptance:
-    # Runs the acceptance test suite using the `Acceptance Tests` environment.
-    # The enviroment should be configured to require reviewers approve the
-    # step. This allows the tests to be added as a check to PRs.
-    #
-    # This job has the `continue-on-error` set to true which prevents blocking
-    # PRs if the tests fail.
-      if: github.ref_name == 'master'
-      needs: build
-      runs-on: ubuntu-latest
-      environment:
-        name: Acceptance Tests
+  # acceptance:
+  #   # Runs the acceptance test suite using the `Acceptance Tests` environment.
+  #   # The enviroment should be configured to require reviewers approve the
+  #   # step. This allows the tests to be added as a check to PRs.
+  #   #
+  #   # This job has the `continue-on-error` set to true which prevents blocking
+  #   # PRs if the tests fail.
+  #     if: github.ref_name == 'master'
+  #     needs: build
+  #     runs-on: ubuntu-latest
+  #     environment:
+  #       name: Acceptance Tests
 
-      concurrency: acceptance_tests
+  #     concurrency: acceptance_tests
 
-      continue-on-error: true
+  #     continue-on-error: true
 
-      steps:
-        - name: Install Go
-          uses: actions/setup-go@v2
-          with:
-            go-version: 1.18.x
+  #     steps:
+  #       - name: Install Go
+  #         uses: actions/setup-go@v2
+  #         with:
+  #           go-version: 1.18.x
 
-        - name: Checkout
-          uses: actions/checkout@v2
+  #       - name: Checkout
+  #         uses: actions/checkout@v2
 
-        - name: make testacc
-          run: make testacc
-          env:
-            CIVO_TOKEN: ${{ secrets.ACCEPTANCE_TESTS_TOKEN }}
-            CIVO_REGION: "LON1"
+  #       - name: make testacc
+  #         run: make testacc
+  #         env:
+  #           CIVO_TOKEN: ${{ secrets.ACCEPTANCE_TESTS_TOKEN }}
+  #           CIVO_REGION: "LON1"
