@@ -20,6 +20,7 @@ func TestAccDataSourceCivoVolume_basic(t *testing.T) {
 				Config: testAccDataSourceCivoVolumeConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
+					resource.TestCheckResourceAttrSet(datasourceName, "size_gb"),
 				),
 			},
 		},
@@ -28,14 +29,19 @@ func TestAccDataSourceCivoVolume_basic(t *testing.T) {
 
 func testAccDataSourceCivoVolumeConfig(name string) string {
 	return fmt.Sprintf(`
-resource "civo_volume" "foobar" {
+data "civo_network" "default" {
+	label = "default"
+	region = "LON1"
+}
+
+resource "civo_volume" "newvolume" {
 	name = "%s"
-	size_gb = 60
-	bootable = false
+	size_gb = 10
+	network_id = data.civo_network.default.id
 }
 
 data "civo_volume" "foobar" {
-	name = civo_volume.foobar.name
+	name = civo_volume.newvolume.name
 }
 `, name)
 }

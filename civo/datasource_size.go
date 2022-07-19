@@ -35,7 +35,7 @@ func dataSourceSize() *schema.Resource {
 
 }
 
-func getSizes(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
+func getSizes(m interface{}, _ map[string]interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
 	sizes := []interface{}{}
@@ -80,7 +80,7 @@ func getSizes(m interface{}, extra map[string]interface{}) ([]interface{}, error
 	return sizes, nil
 }
 
-func flattenSize(size, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
+func flattenSize(size, _ interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 
 	s := size.(Size)
 

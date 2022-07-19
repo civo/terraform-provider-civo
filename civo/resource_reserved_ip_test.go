@@ -73,7 +73,7 @@ func TestAccCivoReservedIP_update(t *testing.T) {
 }
 
 func testAccCheckCivoReservedIPValues(ip *civogo.IP, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if ip.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, ip.Name)
 		}
@@ -104,7 +104,7 @@ func testAccCheckCivoReservedIPResourceExists(n string, ip *civogo.IP) resource.
 }
 
 func testAccCheckCivoReservedIPUpdated(ip *civogo.IP, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if ip.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, ip.Name)
 		}

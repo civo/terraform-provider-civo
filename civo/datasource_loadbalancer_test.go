@@ -1,5 +1,6 @@
 package civo
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -62,3 +63,4 @@ data "civo_loadbalancer" "foobar" {
 }
 `, name, name)
 }
+*/

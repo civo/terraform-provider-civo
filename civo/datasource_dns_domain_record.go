@@ -73,7 +73,7 @@ func dataSourceDNSDomainRecord() *schema.Resource {
 	}
 }
 
-func dataSourceDNSDomainRecordRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceDNSDomainRecordRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 	domain := d.Get("domain_id").(string)
 	name := d.Get("name").(string)

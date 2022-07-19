@@ -70,7 +70,7 @@ func getDiskimages(m interface{}, extra map[string]interface{}) ([]interface{}, 
 	return templates, nil
 }
 
-func flattenDiskimage(template, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
+func flattenDiskimage(template, _ interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 
 	s := template.(TemplateDisk)
 

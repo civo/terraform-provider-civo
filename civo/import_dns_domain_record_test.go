@@ -22,7 +22,6 @@ func TestAccCivoDNSDomainRecord_importBasic(t *testing.T) {
 			{
 				Config: testAccCheckCivoDNSDomainNameRecordConfigBasic(domainName, recordName),
 			},
-
 			{
 				ResourceName:      resourceName,
 				ImportState:       true,

@@ -69,7 +69,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 // function to read a network
-func resourceNetworkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -124,7 +124,7 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 // function to delete a network
-func resourceNetworkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource

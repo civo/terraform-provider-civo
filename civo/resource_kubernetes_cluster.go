@@ -297,7 +297,7 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 	d.SetId(resp.ID)
 
 	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"BUILDING"},
+		Pending: []string{"BUILDING", "AVAILABLE"},
 		Target:  []string{"ACTIVE"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.GetKubernetesCluster(d.Id())
@@ -320,7 +320,7 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 }
 
 // function to read the kubernetes cluster
-func resourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -446,7 +446,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
-	err = waitForKubernetesNodePoolCreate(apiClient, d, true)
+	err = waitForKubernetesNodePoolCreate(apiClient, d)
 	if err != nil {
 		return diag.Errorf("Error updating Kubernetes node pool: %s", err)
 	}
@@ -455,7 +455,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 // function to delete the kubernetes cluster
-func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKubernetesClusterDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -481,9 +481,7 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 	flattenedPool := make([]interface{}, 0)
 
 	poolInstanceNames := make([]string, 0)
-	for _, v := range cluster.Pools[0].InstanceNames {
-		poolInstanceNames = append(poolInstanceNames, v)
-	}
+	poolInstanceNames = append(poolInstanceNames, cluster.Pools[0].InstanceNames...)
 
 	rawPool := map[string]interface{}{
 		"label":          cluster.Pools[0].ID,

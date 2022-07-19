@@ -89,7 +89,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 // function to read a firewall
-func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFirewallRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if it's defined
@@ -140,7 +140,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 // function to delete a firewall
-func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if it's defined

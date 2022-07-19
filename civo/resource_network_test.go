@@ -34,6 +34,7 @@ func TestAccCivoNetwork_basic(t *testing.T) {
 					testAccCheckCivoNetworkValues(&network, networkLabel),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "label", networkLabel),
+					resource.TestCheckResourceAttr(resName, "default", "false"),
 				),
 			},
 		},
@@ -74,7 +75,7 @@ func TestAccCivoNetwork_update(t *testing.T) {
 }
 
 func testAccCheckCivoNetworkValues(network *civogo.Network, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if network.Label != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, network.Label)
 		}
@@ -107,7 +108,7 @@ func testAccCheckCivoNetworkResourceExists(n string, network *civogo.Network) re
 }
 
 func testAccCheckCivoNetworkUpdated(network *civogo.Network, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if network.Label != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, network.Label)
 		}
@@ -124,7 +125,7 @@ func testAccCheckCivoNetworkDestroy(s *terraform.State) error {
 		}
 
 		_, err := client.FindNetwork(rs.Primary.ID)
-		if err == nil {
+		if err != nil {
 			return fmt.Errorf("Network still exists")
 		}
 	}
@@ -136,6 +137,7 @@ func testAccCheckCivoNetworkConfigBasic(label string) string {
 	return fmt.Sprintf(`
 resource "civo_network" "foobar" {
 	label = "%s"
+	region = "LON1"
 }`, label)
 }
 
@@ -143,5 +145,6 @@ func testAccCheckCivoNetworkConfigUpdates(label string) string {
 	return fmt.Sprintf(`
 resource "civo_network" "foobar" {
 	label = "%s"
+	region = "LON1"
 }`, label)
 }

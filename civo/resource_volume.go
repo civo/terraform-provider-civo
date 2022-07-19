@@ -60,21 +60,17 @@ func resourceVolume() *schema.Resource {
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
+
 	log.Printf("[INFO] configuring the volume %s", d.Get("name").(string))
 	config := &civogo.VolumeConfig{
 		Name:          d.Get("name").(string),
 		SizeGigabytes: d.Get("size_gb").(int),
 		NetworkID:     d.Get("network_id").(string),
-
-		// if "region" is set at provider level, use it
-		Region: apiClient.Region,
-	}
-
-	// if "region" is set in configuration file, use it
-	if region, ok := d.GetOk("region"); ok {
-		currentRegion := region.(string)
-		apiClient.Region = currentRegion
-		config.Region = currentRegion
+		Region:        apiClient.Region,
 	}
 
 	_, err := apiClient.FindNetwork(config.NetworkID)
@@ -113,7 +109,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 // function to read the volume
-func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -202,7 +198,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 // function to delete the volume
-func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceVolumeDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource

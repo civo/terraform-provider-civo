@@ -22,7 +22,7 @@ func TestAccCivoInstanceReservedIPAssignment_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCivoVolumeAttachmentDestroy,
+		CheckDestroy: testAccCivoInstanceReservedIPAssignmentDestroy,
 		Steps: []resource.TestStep{
 			{
 				// use a dynamic configuration with the random name from above
@@ -54,17 +54,42 @@ func testAccCivoInstanceReservedIPAssignmentDestroy(s *terraform.State) error {
 
 func testAccCivoInstanceReservedIPAssignmentConfigBasic(name string) string {
 	return fmt.Sprintf(`
+data "civo_instances_size" "small" {
+	filter {
+		key = "name"
+		values = ["g3.small"]
+		match_by = "re"
+	}
+
+	filter {
+		key = "type"
+		values = ["instance"]
+	}
+
+}
+
+# Query instance disk image
+data "civo_disk_image" "debian" {
+	filter {
+		key = "name"
+		values = ["debian-10"]
+	}
+}
+
 resource "civo_instance" "vm" {
-	hostname = "instance-%s"
+	hostname = "%s"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
 resource "civo_reserved_ip" "foo" {
 	name = "%s"
+	region = "LON1"
 }
 
 resource "civo_instance_reserved_ip_assignment" "foobar" {
 	instance_id = civo_instance.vm.id
-	reserved_ip_id  = civo_instance.foo.id
+	reserved_ip_id  = civo_reserved_ip.foo.id
 }
 `, name, name)
 }

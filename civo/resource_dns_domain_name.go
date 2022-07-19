@@ -55,7 +55,7 @@ func resourceDNSDomainNameCreate(ctx context.Context, d *schema.ResourceData, m 
 }
 
 // function to read a domain from your account
-func resourceDNSDomainNameRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSDomainNameRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] retriving the domain %s", d.Get("name").(string))
@@ -101,7 +101,7 @@ func resourceDNSDomainNameUpdate(ctx context.Context, d *schema.ResourceData, m 
 }
 
 // function to delete a specific domain
-func resourceDNSDomainNameDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSDomainNameDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Searching the domain to %s", d.Get("name").(string))

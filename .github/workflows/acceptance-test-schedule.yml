@@ -26,3 +26,4 @@ jobs:
         env:
           TESTARGS: -parallel 20
           CIVO_TOKEN: ${{ secrets.ACCEPTANCE_TESTS_TOKEN }}
+          CIVO_REGION: "LON1"

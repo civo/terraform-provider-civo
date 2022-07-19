@@ -77,7 +77,7 @@ func TestAccCivoDNSDomainNameRecord_update(t *testing.T) {
 }
 
 func testAccCheckCivoDNSDomainNameRecordValues(domainRecord *civogo.DNSRecord, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if domainRecord.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, domainRecord.Name)
 		}
@@ -109,7 +109,7 @@ func testAccCheckCivoDNSDomainNameRecordResourceExists(n string, domainRecord *c
 }
 
 func testAccCheckCivoDNSDomainNameRecordUpdated(domainRecord *civogo.DNSRecord, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if domainRecord.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, domainRecord.Name)
 		}
@@ -142,7 +142,7 @@ resource "civo_dns_domain_name" "foobar" {
 
 resource "civo_dns_domain_record" "www" {
     domain_id = civo_dns_domain_name.foobar.id
-    type = "a"
+    type = "A"
     name = "%s"
     value = "10.10.10.1"
     ttl = 600
@@ -158,7 +158,7 @@ resource "civo_dns_domain_name" "foobar" {
 
 resource "civo_dns_domain_record" "www" {
     domain_id = civo_dns_domain_name.foobar.id
-    type = "a"
+    type = "A"
     name = "%s"
     value = "10.10.10.1"
     ttl = 600

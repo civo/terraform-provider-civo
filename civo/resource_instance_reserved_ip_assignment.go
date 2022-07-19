@@ -108,7 +108,7 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 // function to read the instance
-func resourceInstanceReservedIPRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceInstanceReservedIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource

@@ -80,7 +80,7 @@ func TestAccCivoFirewallRule_update(t *testing.T) {
 }
 
 func testAccCheckCivoFirewallRuleValues(firewall *civogo.FirewallRule) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if firewall.Protocol != "tcp" {
 			return fmt.Errorf("bad protocol, expected \"%s\", got: %#v", "tcp", firewall.Protocol)
 		}
@@ -116,7 +116,7 @@ func testAccCheckCivoFirewallRuleResourceExists(n string, firewall *civogo.Firew
 }
 
 func testAccCheckCivoFirewallRuleUpdated(firewall *civogo.FirewallRule) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if firewall.Protocol != "tcp" {
 			return fmt.Errorf("bad protocol, expected \"%s\", got: %#v", "tcp", firewall.Protocol)
 		}
