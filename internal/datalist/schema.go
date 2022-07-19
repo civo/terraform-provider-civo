@@ -89,7 +89,7 @@ func NewResource(config *ResourceConfig) *schema.Resource {
 }
 
 func dataListResourceRead(config *ResourceConfig) schema.ReadContextFunc {
-	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return func(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		extra := map[string]interface{}{}
 		for key := range config.ExtraQuerySchema {
 			extra[key] = d.Get(key)
