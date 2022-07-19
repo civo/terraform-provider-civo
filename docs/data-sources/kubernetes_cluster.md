@@ -49,7 +49,7 @@ output "kubernetes_cluster_output" {
 - `pools` (List of Object) (see [below for nested schema](#nestedatt--pools))
 - `ready` (Boolean) If the Kubernetes cluster is ready
 - `status` (String) The status of Kubernetes cluster
-- `tags` (String) A list of tags
+- `tags` (Set of String) A list of tags
 - `target_nodes_size` (String, Deprecated) The size of each node
 
 <a id="nestedatt--installed_applications"></a>

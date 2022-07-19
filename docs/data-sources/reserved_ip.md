@@ -31,5 +31,6 @@ An error will be raised if the provided domain name is not in your Civo account.
 - `instance_id` (String) The ID of the instance the IP is attached to
 - `instance_name` (String) The name of the instance the IP is attached to
 - `ip` (String) The IP Address requested
+- `region` (String) The region the ip address is in
 
 
