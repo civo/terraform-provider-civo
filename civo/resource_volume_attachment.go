@@ -25,7 +25,6 @@ func resourceVolumeAttachment() *schema.Resource {
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "The ID of target instance for attachment",
 			},
-
 			"volume_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -98,7 +97,7 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 }
 
 // function to read the volume
-func resourceVolumeAttachmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceVolumeAttachmentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if it's defined
@@ -129,7 +128,7 @@ func resourceVolumeAttachmentRead(ctx context.Context, d *schema.ResourceData, m
 }
 
 // function to delete the volume
-func resourceVolumeAttachmentDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceVolumeAttachmentDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if it's defined

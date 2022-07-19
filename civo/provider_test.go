@@ -12,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-const testNamePrefix = "tf-acc-test-"
-
 var testAccProvider *schema.Provider
 var testAccProviders map[string]*schema.Provider
 var testAccProviderFactories map[string]func() (*schema.Provider, error)
@@ -64,5 +62,8 @@ func diagnosticsToString(diags diag.Diagnostics) string {
 func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("CIVO_TOKEN"); v == "" {
 		t.Fatal("CIVO_TOKEN must be set for acceptance tests")
+	}
+	if v := os.Getenv("CIVO_REGION"); v == "" {
+		t.Fatal("CIVO_REGION must be set for acceptance tests")
 	}
 }

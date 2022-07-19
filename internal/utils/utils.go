@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
-func ValidateName(v interface{}, k string) (ws []string, es []error) {
+// ValidateName is a function to check if the name is valid
+func ValidateName(v interface{}, _ string) (ws []string, es []error) {
 	var errs []error
 	var warns []string
 	value, ok := v.(string)
@@ -30,7 +31,8 @@ func ValidateName(v interface{}, k string) (ws []string, es []error) {
 	return warns, errs
 }
 
-func ValidateCNIName(v interface{}, k string) (ws []string, es []error) {
+// ValidateCNIName is a function to check if the cni name is valid
+func ValidateCNIName(v interface{}, _ string) (ws []string, es []error) {
 	var errs []error
 	var warns []string
 	value, ok := v.(string)
@@ -52,7 +54,8 @@ func ValidateCNIName(v interface{}, k string) (ws []string, es []error) {
 	return warns, errs
 }
 
-func ValidateNameSize(v interface{}, k string) (ws []string, es []error) {
+// ValidateNameSize is a function to check the size of a name
+func ValidateNameSize(v interface{}, _ string) (ws []string, es []error) {
 	var errs []error
 	var warns []string
 	value, ok := v.(string)
@@ -74,7 +77,7 @@ func ValidateNameSize(v interface{}, k string) (ws []string, es []error) {
 	return warns, errs
 }
 
-// util function to help the import function
+// ResourceCommonParseID is a function to parse the ID of a resource
 func ResourceCommonParseID(id string) (string, string, error) {
 	parts := strings.SplitN(id, ":", 2)
 
@@ -111,8 +114,8 @@ func GetCommaSeparatedAllowedKeys(allowedKeys []string) string {
 	return strings.Join(res, ", ")
 }
 
-// Validate name only contains alphanumeric characters, hyphens, underscores and dots
-func ValidateNameOnlyContainsAlphanumericCharacters(v interface{}, p cty.Path) diag.Diagnostics {
+// ValidateNameOnlyContainsAlphanumericCharacters validate name only contains alphanumeric characters, hyphens, underscores and dots
+func ValidateNameOnlyContainsAlphanumericCharacters(v interface{}, _ cty.Path) diag.Diagnostics {
 	value := v.(string)
 	var diags diag.Diagnostics
 
@@ -121,7 +124,7 @@ func ValidateNameOnlyContainsAlphanumericCharacters(v interface{}, p cty.Path) d
 		diag := diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "wrong value",
-			Detail:   fmt.Sprintf("expected name to be string"),
+			Detail:   "expected name to be string",
 		}
 		diags = append(diags, diag)
 	}
@@ -148,7 +151,7 @@ func ValidateNameOnlyContainsAlphanumericCharacters(v interface{}, p cty.Path) d
 	return diags
 }
 
-// inPool is a utility function to check if a node pool is in a kubernetes cluster
+// InPool is a utility function to check if a node pool is in a kubernetes cluster
 func InPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
 	for _, b := range list {
 		if b.ID == id {

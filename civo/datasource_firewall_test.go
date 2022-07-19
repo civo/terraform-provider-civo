@@ -33,7 +33,8 @@ resource "civo_firewall" "foobar" {
 }
 
 data "civo_firewall" "foobar" {
-	label = civo_firewall.foobar.name
+	name = civo_firewall.foobar.name
+	region = "LON1"
 }
 `, name)
 }

@@ -38,7 +38,7 @@ func dataSourceDNSDomainName() *schema.Resource {
 	}
 }
 
-func dataSourceDNSDomainNameRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceDNSDomainNameRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	var foundDomain *civogo.DNSDomain

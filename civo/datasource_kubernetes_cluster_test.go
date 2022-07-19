@@ -21,7 +21,8 @@ func TestAccDataSourceCivoKubernetesCluster_basic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 					resource.TestCheckResourceAttr(datasourceName, "pools.0.node_count", "2"),
-					resource.TestCheckResourceAttr(datasourceName, "pools.0.size", "g2.small"),
+					resource.TestCheckResourceAttr(datasourceName, "pools.0.size", "g4s.kube.small"),
+					resource.TestCheckResourceAttrSet(datasourceName, "pools.0.instance_names.#"),
 					resource.TestCheckResourceAttrSet(datasourceName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(datasourceName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(datasourceName, "master_ip"),
@@ -44,7 +45,8 @@ func TestAccDataSourceCivoKubernetesClusterByID_basic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 					resource.TestCheckResourceAttr(datasourceName, "pools.0.node_count", "2"),
-					resource.TestCheckResourceAttr(datasourceName, "pools.0.size", "g2.small"),
+					resource.TestCheckResourceAttr(datasourceName, "pools.0.size", "g4s.kube.small"),
+					resource.TestCheckResourceAttrSet(datasourceName, "pools.0.instance_names.#"),
 					resource.TestCheckResourceAttrSet(datasourceName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(datasourceName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(datasourceName, "master_ip"),
@@ -56,11 +58,17 @@ func TestAccDataSourceCivoKubernetesClusterByID_basic(t *testing.T) {
 
 func testAccDataSourceCivoKubernetesClusterConfig(name string) string {
 	return fmt.Sprintf(`
+data "civo_firewall" "default" {
+	name = "default-default"
+	region = "LON1"
+}
+
 resource "civo_kubernetes_cluster" "my-cluster" {
 	name = "%s"
+	firewall_id = data.civo_firewall.default.id
 	pools {
 		node_count = 2
-		size = "g2.small"
+		size = "g4s.kube.small"
 	}
 }
 
@@ -72,11 +80,17 @@ data "civo_kubernetes_cluster" "foobar" {
 
 func testAccDataSourceCivoKubernetesClusterByIDConfig(name string) string {
 	return fmt.Sprintf(`
+data "civo_firewall" "default" {
+	name = "default-default"
+	region = "LON1"
+}
+
 resource "civo_kubernetes_cluster" "my-cluster" {
 	name = "%s"
+	firewall_id = data.civo_firewall.default.id
 	pools {
 		node_count = 2
-		size = "g2.small"
+		size = "g4s.kube.small"
 	}
 }
 

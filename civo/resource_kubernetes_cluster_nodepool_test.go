@@ -42,11 +42,11 @@ func TestAccCivoKubernetesClusterNodePool_basic(t *testing.T) {
 					// query the API to retrieve the widget object
 					testAccCheckCivoKubernetesClusterNodePoolResourceExists(resPoolName, &kubernetes, &kubernetesNodePool),
 					// verify remote values
-					testAccCheckCivoKubernetesClusterNodePoolValues(&kubernetesNodePool, "g4s.kube.medium"),
+					testAccCheckCivoKubernetesClusterNodePoolValues(&kubernetesNodePool, "g4s.kube.small"),
 					// verify local values
 					// resource.TestCheckResourceAttr(resPoolName, "cluster_id", kubernetes.ID),
 					resource.TestCheckResourceAttr(resPoolName, "node_count", "3"),
-					resource.TestCheckResourceAttr(resPoolName, "size", "g4s.kube.medium"),
+					resource.TestCheckResourceAttr(resPoolName, "size", "g4s.kube.small"),
 				),
 			},
 		},
@@ -54,7 +54,7 @@ func TestAccCivoKubernetesClusterNodePool_basic(t *testing.T) {
 }
 
 func testAccCheckCivoKubernetesClusterNodePoolValues(kubernetes *civogo.KubernetesPool, value string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if kubernetes.Size != value {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", value, kubernetes.Size)
 		}
@@ -99,7 +99,8 @@ func testAccCheckCivoKubernetesClusterNodePoolConfigBasic() string {
 resource "civo_kubernetes_node_pool" "foobar" {
 	cluster_id = civo_kubernetes_cluster.foobar.id
 	node_count = 3
-	size = "g4s.kube.medium"
+	size = "g4s.kube.small"
+	region = "LON1"
 	depends_on = [civo_kubernetes_cluster.foobar]
 }`
 }

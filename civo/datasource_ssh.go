@@ -44,7 +44,7 @@ func dataSourceSSHKey() *schema.Resource {
 	}
 }
 
-func dataSourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceSSHKeyRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	var searchBy string

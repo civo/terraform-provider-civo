@@ -34,42 +34,7 @@ func TestAccCivoVolume_basic(t *testing.T) {
 					testAccCheckCivoVolumeValues(&volume, VolumeName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", VolumeName),
-					resource.TestCheckResourceAttr(resName, "size_gb", "60"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccCivoVolume_update(t *testing.T) {
-	var volume civogo.Volume
-
-	// generate a random name for each test run
-	resName := "civo_volume.foobar"
-	var VolumeName = acctest.RandomWithPrefix("tf-test")
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCivoVolumeDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckCivoVolumeConfigBasic(VolumeName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCivoVolumeResourceExists(resName, &volume),
-					testAccCheckCivoVolumeValues(&volume, VolumeName),
-					resource.TestCheckResourceAttr(resName, "name", VolumeName),
-					resource.TestCheckResourceAttr(resName, "size_gb", "60"),
-				),
-			},
-			{
-				// use a dynamic configuration with the random name from above
-				Config: testAccCheckCivoVolumeConfigUpdates(VolumeName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCivoVolumeResourceExists(resName, &volume),
-					testAccCheckCivoVolumeUpdated(&volume, VolumeName),
-					resource.TestCheckResourceAttr(resName, "name", VolumeName),
-					resource.TestCheckResourceAttr(resName, "size_gb", "80"),
+					resource.TestCheckResourceAttr(resName, "size_gb", "10"),
 				),
 			},
 		},
@@ -77,7 +42,7 @@ func TestAccCivoVolume_update(t *testing.T) {
 }
 
 func testAccCheckCivoVolumeValues(volume *civogo.Volume, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if volume.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, volume.Name)
 		}
@@ -109,15 +74,6 @@ func testAccCheckCivoVolumeResourceExists(n string, volume *civogo.Volume) resou
 	}
 }
 
-func testAccCheckCivoVolumeUpdated(volume *civogo.Volume, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		if volume.Name != name {
-			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, volume.Name)
-		}
-		return nil
-	}
-}
-
 func testAccCheckCivoVolumeDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*civogo.Client)
 
@@ -137,18 +93,14 @@ func testAccCheckCivoVolumeDestroy(s *terraform.State) error {
 
 func testAccCheckCivoVolumeConfigBasic(name string) string {
 	return fmt.Sprintf(`
-resource "civo_volume" "foobar" {
-	name = "%s"
-	size_gb = 60
-	bootable = false
-}`, name)
+data "civo_network" "default" {
+	label = "default"
+	region = "LON1"
 }
 
-func testAccCheckCivoVolumeConfigUpdates(name string) string {
-	return fmt.Sprintf(`
 resource "civo_volume" "foobar" {
 	name = "%s"
-	size_gb = 80
-	bootable = false
+	size_gb = 10
+	network_id = data.civo_network.default.id
 }`, name)
 }

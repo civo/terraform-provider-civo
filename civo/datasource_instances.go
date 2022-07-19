@@ -59,7 +59,7 @@ func getDataSourceInstances(m interface{}, extra map[string]interface{}) ([]inte
 	return instance, nil
 }
 
-func flattenDataSourceInstances(instance, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
+func flattenDataSourceInstances(instance, _ interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
 
 	region, ok := extra["region"].(string)
 	if !ok {

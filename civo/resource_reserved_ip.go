@@ -56,7 +56,8 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	log.Printf("[INFO] creating the new ip address %s", d.Get("name").(string))
 	newIP := &civogo.CreateIPRequest{
-		Name: d.Get("name").(string),
+		Name:   d.Get("name").(string),
+		Region: apiClient.Region,
 	}
 	ipAddress, err := apiClient.NewIP(newIP)
 	if err != nil {
@@ -92,7 +93,7 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 }
 
 // function to read a the IP resource
-func resourceReservedIPRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceReservedIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -142,7 +143,7 @@ func resourceReservedIPUpdate(ctx context.Context, d *schema.ResourceData, m int
 }
 
 // function to delete a network
-func resourceReservedIPDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceReservedIPDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource

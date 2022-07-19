@@ -54,19 +54,49 @@ func testAccCheckCivoVolumeAttachmentDestroy(s *terraform.State) error {
 
 func testAccCheckCivoVolumeAttachmentConfigBasic(name string) string {
 	return fmt.Sprintf(`
+data "civo_instances_size" "small" {
+	filter {
+		key = "name"
+		values = ["g3.small"]
+		match_by = "re"
+	}
+
+	filter {
+		key = "type"
+		values = ["instance"]
+	}
+
+}
+
+# Query instance disk image
+data "civo_disk_image" "debian" {
+	filter {
+		key = "name"
+		values = ["debian-10"]
+	}
+}
+
+data "civo_network" "default" {
+	label = "default"
+	region = "LON1"
+}
+
 resource "civo_instance" "vm" {
 	hostname = "instance-%s"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
 resource "civo_volume" "foo" {
 	name = "%s"
-	size_gb = 60
-	bootable = false
+	size_gb = 10
+	network_id = data.civo_network.default.id
 }
 
 resource "civo_volume_attachment" "foobar" {
 	instance_id = civo_instance.vm.id
 	volume_id  = civo_volume.foo.id
+	region = "LON1"
 }
 `, name, name)
 }

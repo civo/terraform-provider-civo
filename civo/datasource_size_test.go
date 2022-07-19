@@ -96,11 +96,11 @@ func testAccCheckDataSourceCivoSizeFilteredAndSorted(n string) resource.TestChec
 		var prevCPUCore float64
 		for i := 0; i < total; i++ {
 			name := rs.Primary.Attributes[fmt.Sprintf("sizes.%d.name", i)]
-			if !stringInSlice(name, []string{"g2.large", "g2.xlarge", "g2.2xlarge"}) {
+			if !stringInSlice(name, []string{"g3.large", "g3.xlarge", "g3.2xlarge"}) {
 				return fmt.Errorf("Name is not in expected test filter values")
 			}
 
-			CPUCore, _ := strconv.ParseFloat(rs.Primary.Attributes[fmt.Sprintf("sizes.%d.cpu_cores", i)], 64)
+			CPUCore, _ := strconv.ParseFloat(rs.Primary.Attributes[fmt.Sprintf("sizes.%d.cpu", i)], 64)
 			if prevCPUCore > 0 {
 				return fmt.Errorf("Sizes is not sorted by CPU Core in descending order")
 			}
@@ -124,11 +124,11 @@ func testAccDataSourceCivoSizeConfigWhitFilterAndSort() string {
 data "civo_size" "foobar" {
 	filter {
         key = "name"
-        values = ["large"]
+        values = ["g3.large"]
 	}
 	
 	sort {
-        key = "cpu_cores"
+        key = "cpu"
         direction = "desc"
     }
 }

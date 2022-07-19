@@ -20,4 +20,4 @@ jobs:
         echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
       shell: bash
     - name: lint
-      uses: golangci/golangci-lint-action@v3
+      uses: Jerome1337/golint-action@v1.0.2

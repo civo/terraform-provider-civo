@@ -308,7 +308,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 // function to read the instance
-func resourceInstanceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -457,7 +457,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 // function to delete instance
-func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceInstanceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource

@@ -135,7 +135,7 @@ func resourceDNSDomainRecordCreate(ctx context.Context, d *schema.ResourceData, 
 }
 
 // function to read a dns domain record
-func resourceDNSDomainRecordRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSDomainRecordRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] retriving the domain record %s", d.Get("name").(string))
@@ -211,7 +211,7 @@ func resourceDNSDomainRecordUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 //function to delete a dns domain record
-func resourceDNSDomainRecordDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDNSDomainRecordDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Searching the domain record %s", d.Get("name").(string))

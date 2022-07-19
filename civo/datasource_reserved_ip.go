@@ -40,6 +40,11 @@ func dataSourceReservedIP() *schema.Resource {
 				Computed:    true,
 				Description: "The IP Address requested",
 			},
+			"region": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The region the ip address is in",
+			},
 			"instance_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -56,13 +61,8 @@ func dataSourceReservedIP() *schema.Resource {
 }
 
 // function to read a the IP resource
-func dataSourceReservedIPRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceReservedIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
-
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
-	}
 
 	log.Printf("[INFO] retriving the ip address %s", d.Id())
 

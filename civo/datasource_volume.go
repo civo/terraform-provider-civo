@@ -60,7 +60,7 @@ func dataSourceVolume() *schema.Resource {
 	}
 }
 
-func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource

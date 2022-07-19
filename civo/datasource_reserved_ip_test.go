@@ -20,6 +20,8 @@ func TestAccDataSourceReservedIP_basic(t *testing.T) {
 				Config: testAccDataSourceReservedIPConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
+					resource.TestCheckResourceAttrSet(datasourceName, "ip"),
+					resource.TestCheckResourceAttrSet(datasourceName, "region"),
 				),
 			},
 		},
@@ -28,12 +30,13 @@ func TestAccDataSourceReservedIP_basic(t *testing.T) {
 
 func testAccDataSourceReservedIPConfig(name string) string {
 	return fmt.Sprintf(`
-resource "civo_reserved_ip" "foobar" {
+resource "civo_reserved_ip" "newip" {
 	name = "%s"
+	region = "LON1"
 }
 
-data "civo_network" "foobar" {
-	name = civo_network.foobar.name
+data "civo_reserved_ip" "foobar" {
+	name = civo_reserved_ip.newip.name
 }
 `, name)
 }

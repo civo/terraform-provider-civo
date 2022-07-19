@@ -64,8 +64,9 @@ func dataSourceKubernetesCluster() *schema.Resource {
 				Description: "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
 			},
 			"tags": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeSet,
 				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "A list of tags",
 			},
 			"applications": {
@@ -179,7 +180,7 @@ func dataSourceApplicationSchema() *schema.Schema {
 	}
 }
 
-func dataSourceKubernetesClusterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -242,9 +243,7 @@ func flattenDataSourceNodePool(cluster *civogo.KubernetesCluster) []interface{} 
 	flattenedPool := make([]interface{}, 0)
 	for _, pool := range cluster.Pools {
 		poolInstanceNames := make([]string, 0)
-		for _, v := range pool.InstanceNames {
-			poolInstanceNames = append(poolInstanceNames, v)
-		}
+		poolInstanceNames = append(poolInstanceNames, pool.InstanceNames...)
 
 		rawPool := map[string]interface{}{
 			"label":          pool.ID,

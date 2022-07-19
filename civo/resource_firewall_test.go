@@ -75,7 +75,7 @@ func TestAccCivoFirewall_update(t *testing.T) {
 }
 
 func testAccCheckCivoFirewallValues(firewall *civogo.Firewall, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if firewall.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, firewall.Name)
 		}
@@ -108,7 +108,7 @@ func testAccCheckCivoFirewallResourceExists(n string, firewall *civogo.Firewall)
 }
 
 func testAccCheckCivoFirewallUpdated(firewall *civogo.Firewall, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if firewall.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, firewall.Name)
 		}
