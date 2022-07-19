@@ -29,7 +29,7 @@ func TestAccDataSourceCivoFirewall_basic(t *testing.T) {
 func testAccDataSourceCivoFirewallConfig(name string) string {
 	return fmt.Sprintf(`
 resource "civo_firewall" "foobar" {
-	label = "%s"
+	name = "%s"
 }
 
 data "civo_firewall" "foobar" {

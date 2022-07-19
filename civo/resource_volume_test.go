@@ -102,5 +102,6 @@ resource "civo_volume" "foobar" {
 	name = "%s"
 	size_gb = 10
 	network_id = data.civo_network.default.id
+	region = "LON1"
 }`, name)
 }

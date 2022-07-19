@@ -20,7 +20,7 @@ func TestAccDataSourceCivoDNSDomainRecord_basic(t *testing.T) {
 				Config: testAccDataSourceCivoDNSDomainRecordConfigBasic(domain),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", "www"),
-					resource.TestCheckResourceAttr(datasourceName, "type", "A"),
+					resource.TestCheckResourceAttr(datasourceName, "type", "a"),
 					resource.TestCheckResourceAttr(datasourceName, "ttl", "600"),
 					resource.TestCheckResourceAttr(datasourceName, "value", "192.168.1.1"),
 					resource.TestCheckResourceAttrSet(datasourceName, "id"),
