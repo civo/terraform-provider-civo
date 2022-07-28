@@ -42,6 +42,7 @@ func Provider() *schema.Provider {
 			"civo_firewall":           dataSourceFirewall(),
 			"civo_loadbalancer":       dataSourceLoadBalancer(),
 			"civo_ssh_key":            dataSourceSSHKey(),
+			"civo_object_store":       dataSourceObjectStore(),
 			"civo_region":             dataSourceRegion(),
 			"civo_reserved_ip":        dataSourceReservedIP(),
 			// "civo_snapshot":           dataSourceSnapshot(),
@@ -61,6 +62,7 @@ func Provider() *schema.Provider {
 			"civo_reserved_ip":                     resourceReservedIP(),
 			"civo_instance_reserved_ip_assignment": resourceInstanceReservedIPAssignment(),
 			// "civo_loadbalancer":         resourceLoadBalancer(),
+			"civo_object_store": resourceObjectStore(),
 			// "civo_template": resourceTemplate(),
 			// "civo_snapshot":             resourceSnapshot(),
 
