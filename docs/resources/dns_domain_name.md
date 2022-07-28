@@ -24,15 +24,12 @@ resource "civo_dns_domain_name" "main" {
 
 ### Required
 
-- **name** (String) The name of the domain
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `name` (String) The name of the domain
 
 ### Read-Only
 
-- **account_id** (String) The account ID of the domain
+- `account_id` (String) The account ID of the domain
+- `id` (String) The ID of this resource.
 
 ## Import
 

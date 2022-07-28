@@ -26,14 +26,14 @@ data "civo_volume" "mysql" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **name** (String) The name of the volume
-- **region** (String) The region where volume is running
+- `name` (String) The name of the volume
+- `region` (String) The region where volume is running
 
 ### Read-Only
 
-- **created_at** (String) The date of the creation of the volume
-- **mount_point** (String) The mount point of the volume
-- **size_gb** (Number) The size of the volume (in GB)
+- `created_at` (String) The date of the creation of the volume
+- `id` (String) The ID of this resource.
+- `mount_point` (String) The mount point of the volume
+- `size_gb` (Number) The size of the volume (in GB)
 
 

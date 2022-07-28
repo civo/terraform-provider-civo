@@ -75,7 +75,7 @@ func TestAccCivoDNSDomainName_update(t *testing.T) {
 }
 
 func testAccCheckCivoDNSDomainNameValues(domain *civogo.DNSDomain, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if domain.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, domain.Name)
 		}
@@ -108,7 +108,7 @@ func testAccCheckCivoDNSDomainNameResourceExists(n string, domain *civogo.DNSDom
 }
 
 func testAccCheckCivoDNSDomainNameUpdated(domain *civogo.DNSDomain, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if domain.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, domain.Name)
 		}

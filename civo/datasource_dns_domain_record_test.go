@@ -39,7 +39,7 @@ resource "civo_dns_domain_name" "domain" {
 
 resource "civo_dns_domain_record" "record" {
 	domain_id = civo_dns_domain_name.domain.id
-    type = "a"
+    type = "A"
     name = "www"
     value = "192.168.1.1"
     ttl = 600

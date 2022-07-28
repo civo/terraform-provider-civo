@@ -30,13 +30,13 @@ data "civo_network" "test" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **label** (String) The label of an existing network
-- **region** (String) The region of an existing network
+- `label` (String) The label of an existing network
+- `region` (String) The region of an existing network
 
 ### Read-Only
 
-- **default** (Boolean) If is the default network
-- **name** (String) The name of the network
+- `default` (Boolean) If is the default network
+- `id` (String) The ID of this resource.
+- `name` (String) The name of the network
 
 

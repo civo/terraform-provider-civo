@@ -1,4 +1,26 @@
 
+## [v1.0.20](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.20) (19 July 2022)
+
+### Merged
+- [#143](https://github.com/civo/terraform-provider-civo/pull/143) - Hotfix/fixed error test
+
+### Commits
+- [7523ffb](https://github.com/civo/terraform-provider-civo/commit/7523ffb3e53f3f12dc81774d31c6db32a13ee952) - Update all the lib to the last versions
+- [ea780cc](https://github.com/civo/terraform-provider-civo/commit/ea780ccaba868bf6172aaaed113f67d44a1ddc9a) - Added the testacc to the repo
+- [c8a6a26](https://github.com/civo/terraform-provider-civo/commit/c8a6a264041e42a015904186d8550b8ff55f9bef) - reomved the acctest temporally
+- [c393376](https://github.com/civo/terraform-provider-civo/commit/c393376c4834d569ac5e7dc08a8b37fb07ce84f8) - Fixed some errors in the test
+- [c70e666](https://github.com/civo/terraform-provider-civo/commit/c70e666566edbf04537f6c5f702acc33ba13305f) - Update the golint
+- [5c54211](https://github.com/civo/terraform-provider-civo/commit/5c54211ea3e25dc23e2f60df205951ac2de9978f) - Fixed error in the CI
+
+## [v1.0.19](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.19) (15 July 2022)
+
+### Merged
+- [#142](https://github.com/civo/terraform-provider-civo/pull/142) - Feature/reserve ip
+- [#135](https://github.com/civo/terraform-provider-civo/pull/135) - docs edit
+
+### Commits
+- [8701fc5](https://github.com/civo/terraform-provider-civo/commit/8701fc56d2cf7538d4a98a582c824f0fe736d603) - updated gorelease to ignore the pair windows/arm64
+
 ## [v1.0.18](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.18) (20 April 2022)
 
 ### Commits

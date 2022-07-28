@@ -86,7 +86,7 @@ func TestAccCivoSSHKey_update(t *testing.T) {
 }
 
 func testAccCheckCivoSSHKeyValues(SSHKey *civogo.SSHKey, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if SSHKey.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, SSHKey.Name)
 		}
@@ -119,7 +119,7 @@ func testAccCheckCivoSSHKeyResourceExists(n string, SSHKey *civogo.SSHKey) resou
 }
 
 func testAccCheckCivoSSHKeyUpdated(SSHKey *civogo.SSHKey, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if SSHKey.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, SSHKey.Name)
 		}

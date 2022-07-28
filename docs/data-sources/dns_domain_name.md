@@ -34,7 +34,10 @@ output "domain_id_output" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **name** (String) The name of the domain
+- `name` (String) The name of the domain
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 

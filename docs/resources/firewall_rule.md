@@ -73,19 +73,22 @@ resource "civo_firewall_rule" "custom_port" {
 
 ### Required
 
-- **action** (String) The action of the rule can be allow or deny. When we set the `action = 'allow'`, this is going to add a rule to allow traffic. Similarly, setting `action = 'deny'` will deny the traffic.
-- **cidr** (Set of String) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
-- **direction** (String) The direction of the rule can be ingress or egress
-- **firewall_id** (String) The Firewall ID
+- `action` (String) The action of the rule can be allow or deny. When we set the `action = 'allow'`, this is going to add a rule to allow traffic. Similarly, setting `action = 'deny'` will deny the traffic.
+- `cidr` (Set of String) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
+- `direction` (String) The direction of the rule can be ingress or egress
+- `firewall_id` (String) The Firewall ID
 
 ### Optional
 
-- **end_port** (String) The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)
-- **id** (String) The ID of this resource.
-- **label** (String) A string that will be the displayed name/reference for this rule
-- **protocol** (String) The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)
-- **region** (String) The region for this rule
-- **start_port** (String) The start of the port range to configure for this rule (or the single port if required)
+- `end_port` (String) The end of the port range (this is optional, by default it will only apply to the single port listed in start_port)
+- `label` (String) A string that will be the displayed name/reference for this rule
+- `protocol` (String) The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)
+- `region` (String) The region for this rule
+- `start_port` (String) The start of the port range to configure for this rule (or the single port if required)
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 ## Import
 

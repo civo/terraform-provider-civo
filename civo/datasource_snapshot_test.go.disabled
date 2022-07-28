@@ -44,3 +44,4 @@ data "civo_snapshot" "foobar" {
 }
 `, name, name)
 }
+

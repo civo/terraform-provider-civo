@@ -30,12 +30,12 @@ data "civo_firewall" "test" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **name** (String) The name of the firewall
-- **region** (String) The region where the firewall is
+- `name` (String) The name of the firewall
+- `region` (String) The region where the firewall is
 
 ### Read-Only
 
-- **network_id** (String) The id of the associated network
+- `id` (String) The ID of this resource.
+- `network_id` (String) The id of the associated network
 
 

@@ -30,37 +30,37 @@ output "kubernetes_cluster_output" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **name** (String) The name of the Kubernetes Cluster
-- **region** (String) The region where cluster is running
+- `name` (String) The name of the Kubernetes Cluster
+- `region` (String) The region where cluster is running
 
 ### Read-Only
 
-- **api_endpoint** (String) The base URL of the API server on the Kubernetes master node
-- **applications** (String) A list of application installed
-- **cni** (String) The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
-- **created_at** (String) The date where the Kubernetes cluster was create
-- **dns_entry** (String) The unique dns entry for the cluster in this case point to the master
-- **installed_applications** (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
-- **kubeconfig** (String) A representation of the Kubernetes cluster's kubeconfig in yaml format
-- **kubernetes_version** (String) The version of Kubernetes
-- **master_ip** (String) The IP of the Kubernetes master node
-- **num_target_nodes** (Number, Deprecated) The size of the Kubernetes cluster
-- **pools** (List of Object) (see [below for nested schema](#nestedatt--pools))
-- **ready** (Boolean) If the Kubernetes cluster is ready
-- **status** (String) The status of Kubernetes cluster
-- **tags** (String) A list of tags
-- **target_nodes_size** (String, Deprecated) The size of each node
+- `api_endpoint` (String) The base URL of the API server on the Kubernetes master node
+- `applications` (String) A list of application installed
+- `cni` (String) The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
+- `created_at` (String) The date where the Kubernetes cluster was create
+- `dns_entry` (String) The unique dns entry for the cluster in this case point to the master
+- `id` (String) The ID of this resource.
+- `installed_applications` (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
+- `kubeconfig` (String) A representation of the Kubernetes cluster's kubeconfig in yaml format
+- `kubernetes_version` (String) The version of Kubernetes
+- `master_ip` (String) The IP of the Kubernetes master node
+- `num_target_nodes` (Number, Deprecated) The size of the Kubernetes cluster
+- `pools` (List of Object) (see [below for nested schema](#nestedatt--pools))
+- `ready` (Boolean) If the Kubernetes cluster is ready
+- `status` (String) The status of Kubernetes cluster
+- `tags` (Set of String) A list of tags
+- `target_nodes_size` (String, Deprecated) The size of each node
 
 <a id="nestedatt--installed_applications"></a>
 ### Nested Schema for `installed_applications`
 
 Read-Only:
 
-- **application** (String)
-- **category** (String)
-- **installed** (Boolean)
-- **version** (String)
+- `application` (String)
+- `category` (String)
+- `installed` (Boolean)
+- `version` (String)
 
 
 <a id="nestedatt--pools"></a>
@@ -68,9 +68,9 @@ Read-Only:
 
 Read-Only:
 
-- **instance_names** (Set of String)
-- **label** (String)
-- **node_count** (Number)
-- **size** (String)
+- `instance_names` (Set of String)
+- `label` (String)
+- `node_count` (Number)
+- `size` (String)
 
 

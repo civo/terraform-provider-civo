@@ -30,27 +30,27 @@ data "civo_instances" "small-size" {
 
 ### Optional
 
-- **filter** (Block Set) One or more key/value pairs on which to filter results (see [below for nested schema](#nestedblock--filter))
-- **id** (String) The ID of this resource.
-- **region** (String) If used, all instances will be from the provided region
-- **sort** (Block List) One or more key/direction pairs on which to sort results (see [below for nested schema](#nestedblock--sort))
+- `filter` (Block Set) One or more key/value pairs on which to filter results (see [below for nested schema](#nestedblock--filter))
+- `region` (String) If used, all instances will be from the provided region
+- `sort` (Block List) One or more key/direction pairs on which to sort results (see [below for nested schema](#nestedblock--sort))
 
 ### Read-Only
 
-- **instances** (List of Object) (see [below for nested schema](#nestedatt--instances))
+- `id` (String) The ID of this resource.
+- `instances` (List of Object) (see [below for nested schema](#nestedatt--instances))
 
 <a id="nestedblock--filter"></a>
 ### Nested Schema for `filter`
 
 Required:
 
-- **key** (String) Filter instances by this key. This may be one of `cpu_cores`, `created_at`, `disk_gb`, `firewall_id`, `hostname`, `id`, `initial_password`, `initial_user`, `network_id`, `notes`, `private_ip`, `pseudo_ip`, `public_ip`, `ram_mb`, `region`, `reverse_dns`, `script`, `size`, `sshkey_id`, `status`, `tags`, `template`.
-- **values** (List of String) Only retrieves `instances` which keys has value that matches one of the values provided here
+- `key` (String) Filter instances by this key. This may be one of `cpu_cores`, `created_at`, `disk_gb`, `firewall_id`, `hostname`, `id`, `initial_password`, `initial_user`, `network_id`, `notes`, `private_ip`, `pseudo_ip`, `public_ip`, `ram_mb`, `region`, `reverse_dns`, `script`, `size`, `sshkey_id`, `status`, `tags`, `template`.
+- `values` (List of String) Only retrieves `instances` which keys has value that matches one of the values provided here
 
 Optional:
 
-- **all** (Boolean) Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.
-- **match_by** (String) One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.
+- `all` (Boolean) Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.
+- `match_by` (String) One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.
 
 
 <a id="nestedblock--sort"></a>
@@ -58,11 +58,11 @@ Optional:
 
 Required:
 
-- **key** (String) Sort instances by this key. This may be one of `cpu_cores`, `created_at`, `disk_gb`, `firewall_id`, `hostname`, `id`, `initial_password`, `initial_user`, `network_id`, `notes`, `private_ip`, `pseudo_ip`, `public_ip`, `ram_mb`, `region`, `reverse_dns`, `script`, `size`, `sshkey_id`, `status`, `template`.
+- `key` (String) Sort instances by this key. This may be one of `cpu_cores`, `created_at`, `disk_gb`, `firewall_id`, `hostname`, `id`, `initial_password`, `initial_user`, `network_id`, `notes`, `private_ip`, `pseudo_ip`, `public_ip`, `ram_mb`, `region`, `reverse_dns`, `script`, `size`, `sshkey_id`, `status`, `template`.
 
 Optional:
 
-- **direction** (String) The sort direction. This may be either `asc` or `desc`.
+- `direction` (String) The sort direction. This may be either `asc` or `desc`.
 
 
 <a id="nestedatt--instances"></a>
@@ -70,27 +70,27 @@ Optional:
 
 Read-Only:
 
-- **cpu_cores** (Number)
-- **created_at** (String)
-- **disk_gb** (Number)
-- **firewall_id** (String)
-- **hostname** (String)
-- **id** (String)
-- **initial_password** (String)
-- **initial_user** (String)
-- **network_id** (String)
-- **notes** (String)
-- **private_ip** (String)
-- **pseudo_ip** (String)
-- **public_ip** (String)
-- **ram_mb** (Number)
-- **region** (String)
-- **reverse_dns** (String)
-- **script** (String)
-- **size** (String)
-- **sshkey_id** (String)
-- **status** (String)
-- **tags** (Set of String)
-- **template** (String)
+- `cpu_cores` (Number)
+- `created_at` (String)
+- `disk_gb` (Number)
+- `firewall_id` (String)
+- `hostname` (String)
+- `id` (String)
+- `initial_password` (String)
+- `initial_user` (String)
+- `network_id` (String)
+- `notes` (String)
+- `private_ip` (String)
+- `pseudo_ip` (String)
+- `public_ip` (String)
+- `ram_mb` (Number)
+- `region` (String)
+- `reverse_dns` (String)
+- `script` (String)
+- `size` (String)
+- `sshkey_id` (String)
+- `status` (String)
+- `tags` (Set of String)
+- `template` (String)
 
 

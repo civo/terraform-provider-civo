@@ -34,15 +34,14 @@ func TestAccCivoInstance_basic(t *testing.T) {
 					testAccCheckCivoInstanceValues(&instance, instanceHostname),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "hostname", instanceHostname),
-					resource.TestCheckResourceAttr(resName, "size", "g2.xsmall"),
+					resource.TestCheckResourceAttr(resName, "size", "g3.small"),
 					resource.TestCheckResourceAttr(resName, "initial_user", "civo"),
 					resource.TestCheckResourceAttr(resName, "cpu_cores", "1"),
-					resource.TestCheckResourceAttr(resName, "ram_mb", "1024"),
+					resource.TestCheckResourceAttr(resName, "ram_mb", "2048"),
 					resource.TestCheckResourceAttr(resName, "disk_gb", "25"),
 					resource.TestCheckResourceAttrSet(resName, "initial_password"),
 					resource.TestCheckResourceAttrSet(resName, "private_ip"),
 					resource.TestCheckResourceAttrSet(resName, "public_ip"),
-					resource.TestCheckResourceAttrSet(resName, "pseudo_ip"),
 					resource.TestCheckResourceAttrSet(resName, "created_at"),
 				),
 			},
@@ -68,15 +67,14 @@ func TestAccCivoInstanceSize_update(t *testing.T) {
 					testAccCheckCivoInstanceResourceExists(resName, &instance),
 					testAccCheckCivoInstanceValues(&instance, instanceHostname),
 					resource.TestCheckResourceAttr(resName, "hostname", instanceHostname),
-					resource.TestCheckResourceAttr(resName, "size", "g2.xsmall"),
+					resource.TestCheckResourceAttr(resName, "size", "g3.small"),
 					resource.TestCheckResourceAttr(resName, "initial_user", "civo"),
 					resource.TestCheckResourceAttr(resName, "cpu_cores", "1"),
-					resource.TestCheckResourceAttr(resName, "ram_mb", "1024"),
+					resource.TestCheckResourceAttr(resName, "ram_mb", "2048"),
 					resource.TestCheckResourceAttr(resName, "disk_gb", "25"),
 					resource.TestCheckResourceAttrSet(resName, "initial_password"),
 					resource.TestCheckResourceAttrSet(resName, "private_ip"),
 					resource.TestCheckResourceAttrSet(resName, "public_ip"),
-					resource.TestCheckResourceAttrSet(resName, "pseudo_ip"),
 					resource.TestCheckResourceAttrSet(resName, "created_at"),
 				),
 			},
@@ -87,15 +85,14 @@ func TestAccCivoInstanceSize_update(t *testing.T) {
 					testAccCheckCivoInstanceResourceExists(resName, &instance),
 					testAccCheckCivoInstanceUpdated(&instance, instanceHostname),
 					resource.TestCheckResourceAttr(resName, "hostname", instanceHostname),
-					resource.TestCheckResourceAttr(resName, "size", "g2.large"),
+					resource.TestCheckResourceAttr(resName, "size", "g3.medium"),
 					resource.TestCheckResourceAttr(resName, "initial_user", "civo"),
-					resource.TestCheckResourceAttr(resName, "cpu_cores", "4"),
-					resource.TestCheckResourceAttr(resName, "ram_mb", "8192"),
-					resource.TestCheckResourceAttr(resName, "disk_gb", "100"),
+					resource.TestCheckResourceAttr(resName, "cpu_cores", "2"),
+					resource.TestCheckResourceAttr(resName, "ram_mb", "4096"),
+					resource.TestCheckResourceAttr(resName, "disk_gb", "50"),
 					resource.TestCheckResourceAttrSet(resName, "initial_password"),
 					resource.TestCheckResourceAttrSet(resName, "private_ip"),
 					resource.TestCheckResourceAttrSet(resName, "public_ip"),
-					resource.TestCheckResourceAttrSet(resName, "pseudo_ip"),
 					resource.TestCheckResourceAttrSet(resName, "created_at"),
 				),
 			},
@@ -121,16 +118,15 @@ func TestAccCivoInstanceNotes_update(t *testing.T) {
 					testAccCheckCivoInstanceResourceExists(resName, &instance),
 					testAccCheckCivoInstanceValues(&instance, instanceHostname),
 					resource.TestCheckResourceAttr(resName, "hostname", instanceHostname),
-					resource.TestCheckResourceAttr(resName, "size", "g2.xsmall"),
+					resource.TestCheckResourceAttr(resName, "size", "g3.small"),
 					resource.TestCheckResourceAttr(resName, "initial_user", "civo"),
 					resource.TestCheckResourceAttr(resName, "cpu_cores", "1"),
-					resource.TestCheckResourceAttr(resName, "ram_mb", "1024"),
+					resource.TestCheckResourceAttr(resName, "ram_mb", "2048"),
 					resource.TestCheckResourceAttr(resName, "disk_gb", "25"),
 					resource.TestCheckResourceAttr(resName, "notes", ""),
 					resource.TestCheckResourceAttrSet(resName, "initial_password"),
 					resource.TestCheckResourceAttrSet(resName, "private_ip"),
 					resource.TestCheckResourceAttrSet(resName, "public_ip"),
-					resource.TestCheckResourceAttrSet(resName, "pseudo_ip"),
 					resource.TestCheckResourceAttrSet(resName, "created_at"),
 				),
 			},
@@ -141,16 +137,15 @@ func TestAccCivoInstanceNotes_update(t *testing.T) {
 					testAccCheckCivoInstanceResourceExists(resName, &instance),
 					testAccCheckCivoInstanceUpdated(&instance, instanceHostname),
 					resource.TestCheckResourceAttr(resName, "hostname", instanceHostname),
-					resource.TestCheckResourceAttr(resName, "size", "g2.xsmall"),
+					resource.TestCheckResourceAttr(resName, "size", "g3.small"),
 					resource.TestCheckResourceAttr(resName, "initial_user", "civo"),
 					resource.TestCheckResourceAttr(resName, "cpu_cores", "1"),
-					resource.TestCheckResourceAttr(resName, "ram_mb", "1024"),
+					resource.TestCheckResourceAttr(resName, "ram_mb", "2048"),
 					resource.TestCheckResourceAttr(resName, "disk_gb", "25"),
 					resource.TestCheckResourceAttr(resName, "notes", "the_test_notes"),
 					resource.TestCheckResourceAttrSet(resName, "initial_password"),
 					resource.TestCheckResourceAttrSet(resName, "private_ip"),
 					resource.TestCheckResourceAttrSet(resName, "public_ip"),
-					resource.TestCheckResourceAttrSet(resName, "pseudo_ip"),
 					resource.TestCheckResourceAttrSet(resName, "created_at"),
 				),
 			},
@@ -177,15 +172,14 @@ func TestAccCivoInstanceFirewall_update(t *testing.T) {
 					testAccCheckCivoInstanceResourceExists(resName, &instance),
 					testAccCheckCivoInstanceValues(&instance, instanceHostname),
 					resource.TestCheckResourceAttr(resName, "hostname", instanceHostname),
-					resource.TestCheckResourceAttr(resName, "size", "g2.xsmall"),
+					resource.TestCheckResourceAttr(resName, "size", "g3.small"),
 					resource.TestCheckResourceAttr(resName, "initial_user", "civo"),
 					resource.TestCheckResourceAttr(resName, "cpu_cores", "1"),
-					resource.TestCheckResourceAttr(resName, "ram_mb", "1024"),
+					resource.TestCheckResourceAttr(resName, "ram_mb", "2048"),
 					resource.TestCheckResourceAttr(resName, "disk_gb", "25"),
 					resource.TestCheckResourceAttrSet(resName, "initial_password"),
 					resource.TestCheckResourceAttrSet(resName, "private_ip"),
 					resource.TestCheckResourceAttrSet(resName, "public_ip"),
-					resource.TestCheckResourceAttrSet(resName, "pseudo_ip"),
 					resource.TestCheckResourceAttrSet(resName, "created_at"),
 				),
 			},
@@ -197,16 +191,15 @@ func TestAccCivoInstanceFirewall_update(t *testing.T) {
 					testAccCheckCivoFirewallResourceExists("civo_firewall.foobar", &firewall),
 					testAccCheckCivoInstanceUpdated(&instance, instanceHostname),
 					resource.TestCheckResourceAttr(resName, "hostname", instanceHostname),
-					resource.TestCheckResourceAttr(resName, "size", "g2.xsmall"),
+					resource.TestCheckResourceAttr(resName, "size", "g3.small"),
 					resource.TestCheckResourceAttr(resName, "initial_user", "civo"),
 					resource.TestCheckResourceAttr(resName, "cpu_cores", "1"),
-					resource.TestCheckResourceAttr(resName, "ram_mb", "1024"),
+					resource.TestCheckResourceAttr(resName, "ram_mb", "2048"),
 					resource.TestCheckResourceAttr(resName, "disk_gb", "25"),
 					resource.TestCheckResourceAttrSet(resName, "firewall_id"),
 					resource.TestCheckResourceAttrSet(resName, "initial_password"),
 					resource.TestCheckResourceAttrSet(resName, "private_ip"),
 					resource.TestCheckResourceAttrSet(resName, "public_ip"),
-					resource.TestCheckResourceAttrSet(resName, "pseudo_ip"),
 					resource.TestCheckResourceAttrSet(resName, "created_at"),
 				),
 			},
@@ -215,7 +208,7 @@ func TestAccCivoInstanceFirewall_update(t *testing.T) {
 }
 
 func testAccCheckCivoInstanceValues(instance *civogo.Instance, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if instance.Hostname != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, instance.Hostname)
 		}
@@ -248,7 +241,7 @@ func testAccCheckCivoInstanceResourceExists(n string, instance *civogo.Instance)
 }
 
 func testAccCheckCivoInstanceUpdated(instance *civogo.Instance, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+	return func(_ *terraform.State) error {
 		if instance.Hostname != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, instance.Hostname)
 		}
@@ -265,7 +258,7 @@ func testAccCheckCivoInstanceDestroy(s *terraform.State) error {
 		}
 
 		_, err := client.GetInstance(rs.Primary.ID)
-		if err == nil {
+		if err != nil {
 			return fmt.Errorf("Instance still exists")
 		}
 	}
@@ -275,38 +268,129 @@ func testAccCheckCivoInstanceDestroy(s *terraform.State) error {
 
 func testAccCheckCivoInstanceConfigBasic(hostname string) string {
 	return fmt.Sprintf(`
+data "civo_instances_size" "small" {
+	filter {
+		key = "name"
+		values = ["g3.small"]
+		match_by = "re"
+	}
+
+	filter {
+		key = "type"
+		values = ["instance"]
+	}
+
+}
+
+# Query instance disk image
+data "civo_disk_image" "debian" {
+	filter {
+		key = "name"
+		values = ["debian-10"]
+	}
+}
+
 resource "civo_instance" "foobar" {
 	hostname = "%s"
-	size = "g2.xsmall"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+    disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }`, hostname)
 }
 
 func testAccCheckCivoInstanceConfigUpdates(hostname string) string {
 	return fmt.Sprintf(`
+data "civo_instances_size" "medium" {
+	filter {
+		key = "name"
+		values = ["g3.medium"]
+		match_by = "re"
+	}
+
+	filter {
+		key = "type"
+		values = ["instance"]
+	}
+
+}
+
+# Query instance disk image
+data "civo_disk_image" "debian" {
+	filter {
+		key = "name"
+		values = ["debian-10"]
+	}
+}
+
 resource "civo_instance" "foobar" {
 	hostname = "%s"
-	size = "g2.large"
+	size = element(data.civo_instances_size.medium.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }`, hostname)
 }
 
 func testAccCheckCivoInstanceConfigNotes(hostname string) string {
 	return fmt.Sprintf(`
+data "civo_instances_size" "small" {
+	filter {
+		key = "name"
+		values = ["g3.small"]
+		match_by = "re"
+	}
+
+	filter {
+		key = "type"
+		values = ["instance"]
+	}
+
+}
+
+# Query instance disk image
+data "civo_disk_image" "debian" {
+	filter {
+		key = "name"
+		values = ["debian-10"]
+	}
+}
 resource "civo_instance" "foobar" {
 	hostname = "%s"
-	size = "g2.xsmall"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 	notes = "the_test_notes"
 }`, hostname)
 }
 
 func testAccCheckCivoInstanceConfigFirewall(hostname string) string {
 	return fmt.Sprintf(`
+data "civo_instances_size" "small" {
+	filter {
+		key = "name"
+		values = ["g3.small"]
+		match_by = "re"
+	}
+
+	filter {
+		key = "type"
+		values = ["instance"]
+	}
+
+}
+
+# Query instance disk image
+data "civo_disk_image" "debian" {
+	filter {
+		key = "name"
+		values = ["debian-10"]
+	}
+}
+
 resource "civo_firewall" "foobar" {
 	name = "fw-foobar"
 }
 
 resource "civo_instance" "foobar" {
 	hostname = "%s"
-	size = "g2.xsmall"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 	firewall_id = civo_firewall.foobar.id
 }`, hostname)
 }

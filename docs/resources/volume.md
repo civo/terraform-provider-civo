@@ -34,18 +34,18 @@ resource "civo_volume" "db" {
 
 ### Required
 
-- **name** (String) A name that you wish to use to refer to this volume
-- **network_id** (String) The network that the volume belongs to
-- **size_gb** (Number) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes
+- `name` (String) A name that you wish to use to refer to this volume
+- `network_id` (String) The network that the volume belongs to
+- `size_gb` (Number) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **region** (String) The region for the volume, if not declare we use the region in declared in the provider.
+- `region` (String) The region for the volume, if not declare we use the region in declared in the provider.
 
 ### Read-Only
 
-- **mount_point** (String) The mount point of the volume (from instance's perspective)
+- `id` (String) The ID of this resource.
+- `mount_point` (String) The mount point of the volume (from instance's perspective)
 
 ## Import
 

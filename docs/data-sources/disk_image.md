@@ -34,27 +34,27 @@ resource "civo_instance" "my-test-instance" {
 
 ### Optional
 
-- **filter** (Block Set) One or more key/value pairs on which to filter results (see [below for nested schema](#nestedblock--filter))
-- **id** (String) The ID of this resource.
-- **region** (String) If is used, all disk image will be from this region. Required if no region is set in provider.
-- **sort** (Block List) One or more key/direction pairs on which to sort results (see [below for nested schema](#nestedblock--sort))
+- `filter` (Block Set) One or more key/value pairs on which to filter results (see [below for nested schema](#nestedblock--filter))
+- `region` (String) If is used, all disk image will be from this region. Required if no region is set in provider.
+- `sort` (Block List) One or more key/direction pairs on which to sort results (see [below for nested schema](#nestedblock--sort))
 
 ### Read-Only
 
-- **diskimages** (List of Object) (see [below for nested schema](#nestedatt--diskimages))
+- `diskimages` (List of Object) (see [below for nested schema](#nestedatt--diskimages))
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--filter"></a>
 ### Nested Schema for `filter`
 
 Required:
 
-- **key** (String) Filter diskimages by this key. This may be one of `id`, `label`, `name`, `version`.
-- **values** (List of String) Only retrieves `diskimages` which keys has value that matches one of the values provided here
+- `key` (String) Filter diskimages by this key. This may be one of `id`, `label`, `name`, `version`.
+- `values` (List of String) Only retrieves `diskimages` which keys has value that matches one of the values provided here
 
 Optional:
 
-- **all** (Boolean) Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.
-- **match_by** (String) One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.
+- `all` (Boolean) Set to `true` to require that a field match all of the `values` instead of just one or more of them. This is useful when matching against multi-valued fields such as lists or sets where you want to ensure that all of the `values` are present in the list or set.
+- `match_by` (String) One of `exact` (default), `re`, or `substring`. For string-typed fields, specify `re` to match by using the `values` as regular expressions, or specify `substring` to match by treating the `values` as substrings to find within the string field.
 
 
 <a id="nestedblock--sort"></a>
@@ -62,11 +62,11 @@ Optional:
 
 Required:
 
-- **key** (String) Sort diskimages by this key. This may be one of `id`, `label`, `name`, `version`.
+- `key` (String) Sort diskimages by this key. This may be one of `id`, `label`, `name`, `version`.
 
 Optional:
 
-- **direction** (String) The sort direction. This may be either `asc` or `desc`.
+- `direction` (String) The sort direction. This may be either `asc` or `desc`.
 
 
 <a id="nestedatt--diskimages"></a>
@@ -74,9 +74,9 @@ Optional:
 
 Read-Only:
 
-- **id** (String)
-- **label** (String)
-- **name** (String)
-- **version** (String)
+- `id` (String)
+- `label` (String)
+- `name` (String)
+- `version` (String)
 
 

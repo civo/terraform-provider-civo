@@ -33,33 +33,33 @@ output "civo_loadbalancer_output" {
 
 ### Optional
 
-- **id** (String) The id of the load balancer to retrieve (You can find this id from service annotations 'kubernetes.civo.com/loadbalancer-id')
-- **name** (String) The name of the load balancer (You can find this name from service annotations 'kubernetes.civo.com/loadbalancer-name')
-- **region** (String) The region of the load balancer, if you delcare this field, the datasource will use this value instead of the one defined in the provider
+- `id` (String) The id of the load balancer to retrieve (You can find this id from service annotations 'kubernetes.civo.com/loadbalancer-id')
+- `name` (String) The name of the load balancer (You can find this name from service annotations 'kubernetes.civo.com/loadbalancer-name')
+- `region` (String) The region of the load balancer, if you delcare this field, the datasource will use this value instead of the one defined in the provider
 
 ### Read-Only
 
-- **algorithm** (String) The algorithm used by the load balancer
-- **backends** (List of Object) (see [below for nested schema](#nestedatt--backends))
-- **cluster_id** (String) The cluster id of the load balancer
-- **enable_proxy_protocol** (String) The enabled proxy protocol of the load balancer
-- **external_traffic_policy** (String) The external traffic policy of the load balancer
-- **firewall_id** (String) The firewall id of the load balancer
-- **private_ip** (String) The private ip of the load balancer
-- **public_ip** (String) The public ip of the load balancer
-- **session_affinity** (String) The session affinity of the load balancer
-- **session_affinity_config_timeout** (Number) The session affinity config timeout of the load balancer
-- **state** (String) The state of the load balancer
+- `algorithm` (String) The algorithm used by the load balancer
+- `backends` (List of Object) (see [below for nested schema](#nestedatt--backends))
+- `cluster_id` (String) The cluster id of the load balancer
+- `enable_proxy_protocol` (String) The enabled proxy protocol of the load balancer
+- `external_traffic_policy` (String) The external traffic policy of the load balancer
+- `firewall_id` (String) The firewall id of the load balancer
+- `private_ip` (String) The private ip of the load balancer
+- `public_ip` (String) The public ip of the load balancer
+- `session_affinity` (String) The session affinity of the load balancer
+- `session_affinity_config_timeout` (Number) The session affinity config timeout of the load balancer
+- `state` (String) The state of the load balancer
 
 <a id="nestedatt--backends"></a>
 ### Nested Schema for `backends`
 
 Read-Only:
 
-- **health_check_port** (Number)
-- **ip** (String)
-- **protocol** (String)
-- **source_port** (Number)
-- **target_port** (Number)
+- `health_check_port` (Number)
+- `ip` (String)
+- `protocol` (String)
+- `source_port` (Number)
+- `target_port` (Number)
 
 

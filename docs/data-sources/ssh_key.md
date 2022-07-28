@@ -35,11 +35,11 @@ resource "civo_instance" "my-test-instance" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **name** (String) The name of the SSH key
+- `name` (String) The name of the SSH key
 
 ### Read-Only
 
-- **fingerprint** (String) The fingerprint of the public key of the SSH key
+- `fingerprint` (String) The fingerprint of the public key of the SSH key
+- `id` (String) The ID of this resource.
 
 

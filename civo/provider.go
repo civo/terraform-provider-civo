@@ -7,7 +7,6 @@ import (
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	_ "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // Provider Civo cloud provider
@@ -44,25 +43,30 @@ func Provider() *schema.Provider {
 			"civo_loadbalancer":       dataSourceLoadBalancer(),
 			"civo_ssh_key":            dataSourceSSHKey(),
 			"civo_object_store":       dataSourceObjectStore(),
+			"civo_region":             dataSourceRegion(),
+			"civo_reserved_ip":        dataSourceReservedIP(),
 			// "civo_snapshot":           dataSourceSnapshot(),
-			"civo_region": dataSourceRegion(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"civo_instance":          resourceInstance(),
-			"civo_network":           resourceNetwork(),
-			"civo_volume":            resourceVolume(),
-			"civo_volume_attachment": resourceVolumeAttachment(),
-			"civo_dns_domain_name":   resourceDNSDomainName(),
-			"civo_dns_domain_record": resourceDNSDomainRecord(),
-			"civo_firewall":          resourceFirewall(),
-			"civo_firewall_rule":     resourceFirewallRule(),
+			"civo_instance":                        resourceInstance(),
+			"civo_network":                         resourceNetwork(),
+			"civo_volume":                          resourceVolume(),
+			"civo_volume_attachment":               resourceVolumeAttachment(),
+			"civo_dns_domain_name":                 resourceDNSDomainName(),
+			"civo_dns_domain_record":               resourceDNSDomainRecord(),
+			"civo_firewall":                        resourceFirewall(),
+			"civo_firewall_rule":                   resourceFirewallRule(),
+			"civo_ssh_key":                         resourceSSHKey(),
+			"civo_kubernetes_cluster":              resourceKubernetesCluster(),
+			"civo_kubernetes_node_pool":            resourceKubernetesClusterNodePool(),
+			"civo_reserved_ip":                     resourceReservedIP(),
+			"civo_instance_reserved_ip_assignment": resourceInstanceReservedIPAssignment(),
 			// "civo_loadbalancer":         resourceLoadBalancer(),
 			"civo_ssh_key":      resourceSSHKey(),
 			"civo_object_store": resourceObjectStore(),
 			// "civo_template": resourceTemplate(),
 			// "civo_snapshot":             resourceSnapshot(),
-			"civo_kubernetes_cluster":   resourceKubernetesCluster(),
-			"civo_kubernetes_node_pool": resourceKubernetesClusterNodePool(),
+
 		},
 		ConfigureFunc: providerConfigure,
 	}

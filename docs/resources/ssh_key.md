@@ -24,16 +24,13 @@ resource "civo_ssh_key" "my-user"{
 
 ### Required
 
-- **name** (String) a string that will be the reference for the SSH key.
-- **public_key** (String) a string containing the SSH public key.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `name` (String) a string that will be the reference for the SSH key.
+- `public_key` (String) a string containing the SSH public key.
 
 ### Read-Only
 
-- **fingerprint** (String) a string containing the SSH finger print.
+- `fingerprint` (String) a string containing the SSH finger print.
+- `id` (String) The ID of this resource.
 
 ## Import
 

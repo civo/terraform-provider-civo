@@ -151,7 +151,7 @@ func resourceFirewallRuleCreate(ctx context.Context, d *schema.ResourceData, m i
 }
 
 // function to read a firewall rule
-func resourceFirewallRuleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFirewallRuleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -190,7 +190,7 @@ func resourceFirewallRuleRead(ctx context.Context, d *schema.ResourceData, m int
 }
 
 // function to delete a firewall rule
-func resourceFirewallRuleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFirewallRuleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource

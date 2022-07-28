@@ -14,7 +14,7 @@ import (
 func dataSourceKubernetesVersion() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
 		Description:         "Provides access to the available Civo Kubernetes versions, with the ability to filter the results.",
-		RecordSchema:        KubernetesVersionSchema(),
+		RecordSchema:        kubernetesVersionSchema(),
 		ResultAttributeName: "versions",
 		FlattenRecord:       flattenKubernetesVersion,
 		GetRecords:          getKubernetesVersions,
@@ -23,7 +23,7 @@ func dataSourceKubernetesVersion() *schema.Resource {
 	return datalist.NewResource(dataListConfig)
 }
 
-func getKubernetesVersions(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
+func getKubernetesVersions(m interface{}, _ map[string]interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
 	versions := []interface{}{}
@@ -39,7 +39,7 @@ func getKubernetesVersions(m interface{}, extra map[string]interface{}) ([]inter
 	return versions, nil
 }
 
-func flattenKubernetesVersion(version, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
+func flattenKubernetesVersion(version, _ interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 
 	s := version.(civogo.KubernetesVersion)
 
@@ -51,7 +51,7 @@ func flattenKubernetesVersion(version, m interface{}, extra map[string]interface
 	return flattenedVersion, nil
 }
 
-func KubernetesVersionSchema() map[string]*schema.Schema {
+func kubernetesVersionSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"version": {

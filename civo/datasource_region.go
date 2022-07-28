@@ -44,7 +44,7 @@ func dataSourceRegion() *schema.Resource {
 
 }
 
-func getRegios(m interface{}, extra map[string]interface{}) ([]interface{}, error) {
+func getRegios(m interface{}, _ map[string]interface{}) ([]interface{}, error) {
 	apiClient := m.(*civogo.Client)
 
 	regions := []interface{}{}
@@ -60,7 +60,7 @@ func getRegios(m interface{}, extra map[string]interface{}) ([]interface{}, erro
 	return regions, nil
 }
 
-func flattenRegions(region, m interface{}, extra map[string]interface{}) (map[string]interface{}, error) {
+func flattenRegions(region, _ interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 
 	s := region.(civogo.Region)
 

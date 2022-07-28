@@ -30,10 +30,12 @@ func testAccDataSourceCivoNetworkConfig(name string) string {
 	return fmt.Sprintf(`
 resource "civo_network" "foobar" {
 	label = "%s"
+	region = "LON1"
 }
 
 data "civo_network" "foobar" {
 	label = civo_network.foobar.name
+	region = "LON1"
 }
 `, name)
 }

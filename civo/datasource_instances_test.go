@@ -33,24 +33,76 @@ func TestAccDataSourceCivoInstances_basic(t *testing.T) {
 
 func testAccDataSourceCivoInstancesConfig(name string, name2 string) string {
 	return fmt.Sprintf(`
+data "civo_instances_size" "small" {
+	filter {
+		key = "name"
+		values = ["g3.small"]
+		match_by = "re"
+	}
+
+	filter {
+		key = "type"
+		values = ["instance"]
+	}
+
+}
+
+# Query instance disk image
+data "civo_disk_image" "debian" {
+	filter {
+		key = "name"
+		values = ["debian-10"]
+	}
+}
+
 resource "civo_instance" "foo" {
 	hostname = "%s"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
 resource "civo_instance" "bar" {
 	hostname = "%s"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 `, name, name2)
 }
 
 func testAccDataSourceCivoInstancesDataConfig(name string, name2 string) string {
 	return fmt.Sprintf(`
+data "civo_instances_size" "small" {
+	filter {
+		key = "name"
+		values = ["g3.small"]
+		match_by = "re"
+	}
+
+	filter {
+		key = "type"
+		values = ["instance"]
+	}
+
+}
+
+# Query instance disk image
+data "civo_disk_image" "debian" {
+	filter {
+		key = "name"
+		values = ["debian-10"]
+	}
+}
+
 resource "civo_instance" "foo" {
 	hostname = "%s"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
 resource "civo_instance" "bar" {
 	hostname = "%s"
+	size = element(data.civo_instances_size.small.sizes, 0).name
+	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
 data "civo_instances" "result" {

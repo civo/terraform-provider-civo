@@ -64,22 +64,22 @@ resource "civo_dns_domain_record" "www" {
 
 ### Required
 
-- **domain_id** (String) ID from domain name
-- **name** (String) The portion before the domain name (e.g. www) or an @ for the apex/root domain (you cannot use an A record with an amex/root domain)
-- **ttl** (Number) How long caching DNS servers should cache this record for, in seconds (the minimum is 600 and the default if unspecified is 600)
-- **type** (String) The choice of RR type from a, cname, mx or txt
-- **value** (String) The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
+- `domain_id` (String) ID from domain name
+- `name` (String) The portion before the domain name (e.g. www) or an @ for the apex/root domain (you cannot use an A record with an amex/root domain)
+- `ttl` (Number) How long caching DNS servers should cache this record for, in seconds (the minimum is 600 and the default if unspecified is 600)
+- `type` (String) The choice of RR type from a, cname, mx or txt
+- `value` (String) The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **priority** (Number) Useful for MX records only, the priority mail should be attempted it (defaults to 10)
+- `priority` (Number) Useful for MX records only, the priority mail should be attempted it (defaults to 10)
 
 ### Read-Only
 
-- **account_id** (String) The account ID of this resource
-- **created_at** (String) Timestamp when this resource was created
-- **updated_at** (String) Timestamp when this resource was updated
+- `account_id` (String) The account ID of this resource
+- `created_at` (String) Timestamp when this resource was created
+- `id` (String) The ID of this resource.
+- `updated_at` (String) Timestamp when this resource was updated
 
 ## Import
 
