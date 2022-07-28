@@ -10,7 +10,7 @@ import (
 
 func TestAccDataSourceCivoObjectStore_basic(t *testing.T) {
 	datasourceName := "data.civo_object_store.foobar"
-	name := acctest.RandomWithPrefix("object_store")
+	name := acctest.RandomWithPrefix("objectstore")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -20,6 +20,11 @@ func TestAccDataSourceCivoObjectStore_basic(t *testing.T) {
 				Config: testAccDataSourceCivoObjectStoreConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
+					resource.TestCheckResourceAttrSet(datasourceName, "max_size_gb"),
+					resource.TestCheckResourceAttrSet(datasourceName, "access_key_id"),
+					resource.TestCheckResourceAttrSet(datasourceName, "secret_access_key"),
+					resource.TestCheckResourceAttrSet(datasourceName, "endpoint"),
+					resource.TestCheckResourceAttr(datasourceName, "status", "ready"),
 				),
 			},
 		},

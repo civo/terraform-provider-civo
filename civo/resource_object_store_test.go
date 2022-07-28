@@ -22,11 +22,11 @@ func TestAccCivoObjectStore_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCivoVolumeDestroy,
+		CheckDestroy: testAccCheckCivoObjectStoreDestroy,
 		Steps: []resource.TestStep{
 			{
 				// use a dynamic configuration with the random name from above
-				Config: testAccCheckCivoVolumeConfigBasic(storeName),
+				Config: testAccCheckCivoObjectStoreConfigBasic(storeName),
 				// compose a basic test, checking both remote and local values
 				Check: resource.ComposeTestCheckFunc(
 					// query the API to retrieve the widget object
@@ -35,7 +35,11 @@ func TestAccCivoObjectStore_basic(t *testing.T) {
 					testAccCheckCivoObjectStoreValues(&store, storeName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", storeName),
-					resource.TestCheckResourceAttr(resName, "max_size_gb", strconv.Itoa(500)),
+					resource.TestCheckResourceAttrSet(resName, "max_size_gb"),
+					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
+					resource.TestCheckResourceAttrSet(resName, "secret_access_key"),
+					resource.TestCheckResourceAttrSet(resName, "endpoint"),
+					resource.TestCheckResourceAttr(resName, "status", "ready"),
 				),
 			},
 		},
@@ -140,6 +144,7 @@ func testAccCheckCivoObjectStoreConfigBasic(name string) string {
 resource "civo_object_store" "foobar" {
 	name = "%s"
 	max_size_gb = 500
+	region = "LON1"
 }`, name)
 }
 
@@ -148,5 +153,6 @@ func testAccCheckCivoObjectStoreConfigUpdates(name string) string {
 resource "civo_object_store" "foobar" {
 	name = "%s"
 	max_size_gb = 1000
+	region = "LON1"
 }`, name)
 }

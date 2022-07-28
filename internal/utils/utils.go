@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/civo/civogo"
@@ -149,6 +150,16 @@ func ValidateNameOnlyContainsAlphanumericCharacters(v interface{}, _ cty.Path) d
 	}
 
 	return diags
+}
+
+// StringToInt converts a string to an int
+func StringToInt(s string) (int, error) {
+	s = strings.Replace(s, "G", "", 1)
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
 }
 
 // InPool is a utility function to check if a node pool is in a kubernetes cluster

@@ -62,7 +62,6 @@ func Provider() *schema.Provider {
 			"civo_reserved_ip":                     resourceReservedIP(),
 			"civo_instance_reserved_ip_assignment": resourceInstanceReservedIPAssignment(),
 			// "civo_loadbalancer":         resourceLoadBalancer(),
-			"civo_ssh_key":      resourceSSHKey(),
 			"civo_object_store": resourceObjectStore(),
 			// "civo_template": resourceTemplate(),
 			// "civo_snapshot":             resourceSnapshot(),

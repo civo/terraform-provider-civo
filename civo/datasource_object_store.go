@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -23,12 +24,12 @@ func dataSourceObjectStore() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The ID of the Object Store",
 			},
 			"name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "The name of the Object Store",
 			},
@@ -41,12 +42,6 @@ func dataSourceObjectStore() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The generated name of the Object Store",
-			},
-			"max_objects": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     1000,
-				Description: "The maximum number of objects that can be stored in the Object Store",
 			},
 			"max_size_gb": {
 				Type:        schema.TypeInt,
@@ -64,7 +59,7 @@ func dataSourceObjectStore() *schema.Resource {
 				Computed:    true,
 				Description: "The secret access key of the Object Store",
 			},
-			"objectstore_endpoint": {
+			"endpoint": {
 				Type:        schema.TypeString,
 				Description: "The endpoint of the Object Store",
 				Computed:    true,
@@ -98,14 +93,28 @@ func dataSourceObjectStoreRead(ctx context.Context, d *schema.ResourceData, m in
 		foundStore = store
 	}
 
+	if id, ok := d.GetOk("id"); ok {
+		log.Printf("[INFO] Getting the Object Store by name")
+		store, err := apiClient.FindObjectStore(id.(string))
+		if err != nil {
+			return diag.Errorf("[ERR] failed to retrive Object Store: %s", err)
+		}
+
+		foundStore = store
+	}
+
+	maxSize, err := utils.StringToInt(foundStore.MaxSize)
+	if err != nil {
+		return diag.Errorf("[ERR] failed to convert the max size to int: %s", err)
+	}
+
 	d.SetId(foundStore.ID)
 	d.Set("name", foundStore.Name)
 	d.Set("generated_name", foundStore.GeneratedName)
-	d.Set("max_objects", foundStore.MaxObjects)
-	d.Set("max_size_gb", foundStore.MaxSize)
+	d.Set("max_size_gb", maxSize)
 	d.Set("access_key_id", foundStore.AccessKeyID)
 	d.Set("secret_access_key", foundStore.SecretAccessKey)
-	d.Set("objectstore_endpoint", foundStore.ObjectStoreEndpoint)
+	d.Set("endpoint", foundStore.ObjectStoreEndpoint)
 	d.Set("status", foundStore.Status)
 
 	return nil
