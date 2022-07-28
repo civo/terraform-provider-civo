@@ -1,4 +1,9 @@
 
+## [v1.0.21](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.21) (28 July 2022)
+
+### Merged
+- [#141](https://github.com/civo/terraform-provider-civo/pull/141) - Draft: Add support for Object Store in Terraform
+
 ## [v1.0.20](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.20) (19 July 2022)
 
 ### Merged
