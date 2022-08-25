@@ -78,7 +78,12 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] creating a new firewall %s", d.Get("name").(string))
 
-	firewall, err := apiClient.NewFirewall(d.Get("name").(string), networkID, &CreateRules)
+	firewallConfig := civogo.FirewallConfig{
+		Name:        d.Get("name").(string),
+		NetworkID:   networkID,
+		CreateRules: &CreateRules,
+	}
+	firewall, err := apiClient.NewFirewall(&firewallConfig)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to create a new firewall: %s", err)
 	}
