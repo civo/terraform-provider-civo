@@ -49,16 +49,6 @@ func dataSourceObjectStore() *schema.Resource {
 				Default:     500,
 				Description: "The maximum size of the Object Store",
 			},
-			"access_key_id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The access key id of the Object Store",
-			},
-			"secret_access_key": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The secret access key of the Object Store",
-			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Description: "The endpoint of the Object Store",
@@ -112,8 +102,6 @@ func dataSourceObjectStoreRead(ctx context.Context, d *schema.ResourceData, m in
 	d.Set("name", foundStore.Name)
 	d.Set("generated_name", foundStore.GeneratedName)
 	d.Set("max_size_gb", maxSize)
-	d.Set("access_key_id", foundStore.AccessKeyID)
-	d.Set("secret_access_key", foundStore.SecretAccessKey)
 	d.Set("endpoint", foundStore.ObjectStoreEndpoint)
 	d.Set("status", foundStore.Status)
 

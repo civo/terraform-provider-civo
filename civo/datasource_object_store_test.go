@@ -21,8 +21,6 @@ func TestAccDataSourceCivoObjectStore_basic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 					resource.TestCheckResourceAttrSet(datasourceName, "max_size_gb"),
-					resource.TestCheckResourceAttrSet(datasourceName, "access_key_id"),
-					resource.TestCheckResourceAttrSet(datasourceName, "secret_access_key"),
 					resource.TestCheckResourceAttrSet(datasourceName, "endpoint"),
 					resource.TestCheckResourceAttr(datasourceName, "status", "ready"),
 				),

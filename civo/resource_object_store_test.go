@@ -36,8 +36,6 @@ func TestAccCivoObjectStore_basic(t *testing.T) {
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", storeName),
 					resource.TestCheckResourceAttrSet(resName, "max_size_gb"),
-					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
-					resource.TestCheckResourceAttrSet(resName, "secret_access_key"),
 					resource.TestCheckResourceAttrSet(resName, "endpoint"),
 					resource.TestCheckResourceAttr(resName, "status", "ready"),
 				),
