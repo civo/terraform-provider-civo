@@ -210,7 +210,7 @@ func resourceDNSDomainRecordUpdate(ctx context.Context, d *schema.ResourceData, 
 	return resourceDNSDomainRecordRead(ctx, d, m)
 }
 
-//function to delete a dns domain record
+// function to delete a dns domain record
 func resourceDNSDomainRecordDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 

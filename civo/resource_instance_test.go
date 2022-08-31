@@ -268,7 +268,7 @@ func testAccCheckCivoInstanceDestroy(s *terraform.State) error {
 
 func testAccCheckCivoInstanceConfigBasic(hostname string) string {
 	return fmt.Sprintf(`
-data "civo_instances_size" "small" {
+data "civo_size" "small" {
 	filter {
 		key = "name"
 		values = ["g3.small"]
@@ -279,7 +279,6 @@ data "civo_instances_size" "small" {
 		key = "type"
 		values = ["instance"]
 	}
-
 }
 
 # Query instance disk image
@@ -292,14 +291,15 @@ data "civo_disk_image" "debian" {
 
 resource "civo_instance" "foobar" {
 	hostname = "%s"
-	size = element(data.civo_instances_size.small.sizes, 0).name
+	region = "FAKE"
+	size = element(data.civo_size.small.sizes, 0).name
     disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }`, hostname)
 }
 
 func testAccCheckCivoInstanceConfigUpdates(hostname string) string {
 	return fmt.Sprintf(`
-data "civo_instances_size" "medium" {
+data "civo_size" "medium" {
 	filter {
 		key = "name"
 		values = ["g3.medium"]
