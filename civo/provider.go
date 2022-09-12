@@ -5,8 +5,9 @@ import (
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
-	"os"
 )
+
+const ProdAPI = "https://api.civo.com"
 
 // Provider Civo cloud provider
 func Provider() *schema.Provider {
@@ -95,15 +96,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if api_url, ok := d.GetOk("api_url"); ok {
 		apiURL = api_url.(string)
 	} else {
-		apiURL, envExists := os.LookupEnv("CIVO_API_URL")
-		if envExists && apiURL != "" {
-			client, err = civogo.NewClientWithURL(tokenValue, apiURL, regionValue)
-			if err != nil {
-				return nil, err
-			}
-			log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
-			return client, nil
-		}
+		apiURL = ProdAPI
 	}
 
 	client, err = civogo.NewClientWithURL(tokenValue, apiURL, regionValue)
