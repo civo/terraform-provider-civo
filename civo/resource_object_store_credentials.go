@@ -73,6 +73,7 @@ func resourceObjectStoreCredentialCreate(ctx context.Context, d *schema.Resource
 	log.Printf("[INFO] configuring the Object Store Credential %s", d.Get("name").(string))
 	config := &civogo.CreateObjectStoreCredentialRequest{
 		Name: d.Get("name").(string),
+		Region: apiClient.Region,
 	}
 
 	if v, ok := d.GetOk("access_key_id"); ok {
@@ -84,6 +85,10 @@ func resourceObjectStoreCredentialCreate(ctx context.Context, d *schema.Resource
 		SecretAccessKeyID := v.(string)
 		config.SecretAccessKeyID = &SecretAccessKeyID
 	}
+
+	// DEBUG
+	log.Printf("[DEBUG] Object Store Credential configuration: %+v", config)
+	log.Printf("[DEBUG] API: %+v", apiClient)
 
 	log.Printf("[INFO] creating the Object Store Credential %s", d.Get("name").(string))
 	storeCredential, err := apiClient.NewObjectStoreCredential(config)
@@ -157,7 +162,9 @@ func resourceObjectStoreCredentialUpdate(ctx context.Context, d *schema.Resource
 		return diag.Errorf("[ERR] failed to find Object Store Credential: %s", err)
 	}
 
-	config := &civogo.UpdateObjectStoreCredentialRequest{}
+	config := &civogo.UpdateObjectStoreCredentialRequest{
+		Region: apiClient.Region,
+	}
 
 	if d.HasChange("access_key_id") {
 		accessKeyID := d.Get("access_key_id").(string)
