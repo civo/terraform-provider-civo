@@ -23,7 +23,7 @@ func TestAccDataSourceCivoObjectStore_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(datasourceName, "max_size_gb"),
 					resource.TestCheckResourceAttrSet(datasourceName, "region"),
 					resource.TestCheckResourceAttrSet(datasourceName, "bucket_url"),
-					resource.TestCheckResourceAttrSet(datasourceName, "credential_id"),
+					resource.TestCheckResourceAttrSet(datasourceName, "access_key_id"),
 					resource.TestCheckResourceAttr(datasourceName, "status", "ready"),
 				),
 			},
