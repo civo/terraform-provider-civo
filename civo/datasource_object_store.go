@@ -44,10 +44,10 @@ func dataSourceObjectStore() *schema.Resource {
 				Computed:    true,
 				Description: "The maximum size of the Object Store",
 			},
-			"credential_id": {
+			"access_key_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "ID of Owner of the Object store. You can reference name of any civo object store credential created before",
+				Description: "The access key ID from the Object Store credential. If this is not set, a new credential will be created.",
 			},
 			"bucket_url": {
 				Type:        schema.TypeString,
