@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
-	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -38,28 +37,18 @@ func dataSourceObjectStore() *schema.Resource {
 				Optional:    true,
 				Description: "The region of an existing Object Store",
 			},
-			"generated_name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The generated name of the Object Store",
-			},
+			// Computed resource
 			"max_size_gb": {
 				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     500,
+				Computed:    true,
 				Description: "The maximum size of the Object Store",
 			},
 			"access_key_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The access key id of the Object Store",
+				Description: "The access key ID from the Object Store credential. If this is not set, a new credential will be created.",
 			},
-			"secret_access_key": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The secret access key of the Object Store",
-			},
-			"endpoint": {
+			"bucket_url": {
 				Type:        schema.TypeString,
 				Description: "The endpoint of the Object Store",
 				Computed:    true,
@@ -103,18 +92,12 @@ func dataSourceObjectStoreRead(ctx context.Context, d *schema.ResourceData, m in
 		foundStore = store
 	}
 
-	maxSize, err := utils.StringToInt(foundStore.MaxSize)
-	if err != nil {
-		return diag.Errorf("[ERR] failed to convert the max size to int: %s", err)
-	}
-
 	d.SetId(foundStore.ID)
 	d.Set("name", foundStore.Name)
-	d.Set("generated_name", foundStore.GeneratedName)
-	d.Set("max_size_gb", maxSize)
-	d.Set("access_key_id", foundStore.AccessKeyID)
-	d.Set("secret_access_key", foundStore.SecretAccessKey)
-	d.Set("endpoint", foundStore.ObjectStoreEndpoint)
+	d.Set("region", apiClient.Region)
+	d.Set("max_size_gb", foundStore.MaxSize)
+	d.Set("access_key_id", foundStore.OwnerInfo.AccessKeyID)
+	d.Set("bucket_url", foundStore.BucketURL)
 	d.Set("status", foundStore.Status)
 
 	return nil

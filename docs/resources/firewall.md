@@ -15,13 +15,50 @@ Provides a Civo firewall resource. This can be used to create, modify, and delet
 ```terraform
 # Create a network
 resource "civo_network" "custom_net" {
-    label = "my-custom-network"
+  label = "my-custom-network"
 }
 
 # Create a firewall
 resource "civo_firewall" "www" {
-  name = "www"
+  name       = "www"
   network_id = civo_network.custom_net.id
+}
+
+# Create a firewall with the default rules
+resource "civo_firewall" "www" {
+  name                 = "www"
+  network_id           = civo_network.custom_net.id
+  create_default_rules = true
+}
+
+# Create a firewall withouth the default rules but with a custom rule
+resource "civo_firewall" "www" {
+  name                 = "www"
+  network_id           = civo_network.custom_net.id
+  create_default_rules = false
+  ingress_rule {
+    label      = "k8s"
+    protocol   = "tcp"
+    port_range = "6443"
+    cidr       = ["192.168.1.1/32", "192.168.10.4/32", "192.168.10.10/32"]
+    action     = "allow"
+  }
+
+  ingress_rule {
+    label      = "ssh"
+    protocol   = "tcp"
+    port_range = "22"
+    cidr       = ["192.168.1.1/32", "192.168.10.4/32", "192.168.10.10/32"]
+    action     = "allow"
+  }
+
+  egress_rule {
+    label      = "all"
+    protocol   = "tcp"
+    port_range = "1-65535"
+    cidr       = ["0.0.0.0/0"]
+    action     = "allow"
+  }
 }
 ```
 
@@ -34,13 +71,52 @@ resource "civo_firewall" "www" {
 
 ### Optional
 
-- `create_default_rules` (Boolean) The create rules flag is used to create the default firewall rules, if is not defined will be set to true
+- `create_default_rules` (Boolean) The create rules flag is used to create the default firewall rules, if is not defined will be set to true, and if you set to false you need to define at least one ingress or egress rule
+- `egress_rule` (Block Set) The egress rules, this is a list of rules that will be applied to the firewall (see [below for nested schema](#nestedblock--egress_rule))
+- `ingress_rule` (Block Set) The ingress rules, this is a list of rules that will be applied to the firewall (see [below for nested schema](#nestedblock--ingress_rule))
 - `network_id` (String) The firewall network, if is not defined we use the default network
 - `region` (String) The firewall region, if is not defined we use the global defined in the provider
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+
+<a id="nestedblock--egress_rule"></a>
+### Nested Schema for `egress_rule`
+
+Required:
+
+- `action` (String) The action of the rule can be allow or deny. When we set the `action = 'allow'`, this is going to add a rule to allow traffic. Similarly, setting `action = 'deny'` will deny the traffic.
+- `cidr` (Set of String) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
+
+Optional:
+
+- `label` (String) A string that will be the displayed name/reference for this rule
+- `port_range` (String) The port or port range to open, can be a single port or a range separated by a dash (`-`), e.g. `80` or `80-443`
+- `protocol` (String) The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)
+
+Read-Only:
+
+- `id` (String) The ID of the firewall rule. This is only set when the rule is created by terraform.
+
+
+<a id="nestedblock--ingress_rule"></a>
+### Nested Schema for `ingress_rule`
+
+Required:
+
+- `action` (String) The action of the rule can be allow or deny. When we set the `action = 'allow'`, this is going to add a rule to allow traffic. Similarly, setting `action = 'deny'` will deny the traffic.
+- `cidr` (Set of String) The CIDR notation of the other end to affect, or a valid network CIDR (e.g. 0.0.0.0/0 to open for everyone or 1.2.3.4/32 to open just for a specific IP address)
+
+Optional:
+
+- `label` (String) A string that will be the displayed name/reference for this rule
+- `port_range` (String) The port or port range to open, can be a single port or a range separated by a dash (`-`), e.g. `80` or `80-443`
+- `protocol` (String) The protocol choice from `tcp`, `udp` or `icmp` (the default if unspecified is `tcp`)
+
+Read-Only:
+
+- `id` (String) The ID of the firewall rule. This is only set when the rule is created by terraform.
 
 ## Import
 
