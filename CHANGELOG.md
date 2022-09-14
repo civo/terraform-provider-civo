@@ -1,4 +1,13 @@
 
+## [v1.0.22](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.22) (14 September 2022)
+
+### Merged
+- [#144](https://github.com/civo/terraform-provider-civo/pull/144) - Added resource & data source for object store credentials
+- [#145](https://github.com/civo/terraform-provider-civo/pull/145) - Merge the firewall rule inside the firewall resource, fixed some other error in the provider
+
+### Commits
+- [4ec5d80](https://github.com/civo/terraform-provider-civo/commit/4ec5d809f58f42dbfe7e2088ec912a012c1d6311) - Fix acc test for kubernetes
+
 ## [v1.0.21](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.21) (28 July 2022)
 
 ### Merged
