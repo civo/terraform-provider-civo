@@ -36,9 +36,8 @@ func TestAccCivoObjectStore_basic(t *testing.T) {
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", storeName),
 					resource.TestCheckResourceAttrSet(resName, "max_size_gb"),
+					resource.TestCheckResourceAttrSet(resName, "bucket_url"),
 					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
-					resource.TestCheckResourceAttrSet(resName, "secret_access_key"),
-					resource.TestCheckResourceAttrSet(resName, "endpoint"),
 					resource.TestCheckResourceAttr(resName, "status", "ready"),
 				),
 			},
@@ -64,6 +63,7 @@ func TestAccCivoObjectStore_update(t *testing.T) {
 					testAccCheckCivoObjectStoreResourceExists(resName, &store),
 					testAccCheckCivoObjectStoreValues(&store, storeName),
 					resource.TestCheckResourceAttr(resName, "name", storeName),
+					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
 					resource.TestCheckResourceAttr(resName, "max_size_gb", strconv.Itoa(500)),
 				),
 			},
@@ -74,6 +74,7 @@ func TestAccCivoObjectStore_update(t *testing.T) {
 					testAccCheckCivoObjectStoreResourceExists(resName, &store),
 					testAccCheckCivoObjectStoreUpdated(&store, storeName),
 					resource.TestCheckResourceAttr(resName, "name", storeName),
+					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
 					resource.TestCheckResourceAttr(resName, "max_size_gb", strconv.Itoa(1000)),
 				),
 			},
@@ -144,7 +145,7 @@ func testAccCheckCivoObjectStoreConfigBasic(name string) string {
 resource "civo_object_store" "foobar" {
 	name = "%s"
 	max_size_gb = 500
-	region = "LON1"
+	region = "FAKE"
 }`, name)
 }
 
@@ -153,6 +154,6 @@ func testAccCheckCivoObjectStoreConfigUpdates(name string) string {
 resource "civo_object_store" "foobar" {
 	name = "%s"
 	max_size_gb = 1000
-	region = "LON1"
+	region = "FAKE"
 }`, name)
 }
