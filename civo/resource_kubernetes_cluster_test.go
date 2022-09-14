@@ -136,35 +136,38 @@ func testAccCheckCivoKubernetesClusterDestroy(s *terraform.State) error {
 
 func testAccCheckCivoKubernetesClusterConfigBasic(name string) string {
 	return fmt.Sprintf(`
-data "civo_firewall" "default" {
-	name = "default-default"
-	region = "LON1"
+resource "civo_firewall" "default" {
+	name = "%s"
+	create_default_rules = true
+	region = "FAKE"
 }
 
 resource "civo_kubernetes_cluster" "foobar" {
 	name = "%s"
-	firewall_id = data.civo_firewall.default.id
+	firewall_id = civo_firewall.default.id
 	pools {
 		node_count = 2
 		size = "g4s.kube.small"
 	}
-}`, name)
+}`, name, name)
 }
 
 func testAccCheckCivoKubernetesClusterConfigCNI(name string) string {
 	return fmt.Sprintf(`
-data "civo_firewall" "default" {
-	name = "default-default"
-	region = "LON1"
+resource "civo_firewall" "default" {
+	name = "%s"
+	create_default_rules = true
+	region = "FAKE"
 }
 
 resource "civo_kubernetes_cluster" "foobar" {
 	name = "%s"
-	firewall_id = data.civo_firewall.default.id
+	firewall_id = civo_firewall.default.id
+	region = "FAKE"
 	pools {
 		node_count = 2
 		size = "g4s.kube.small"
 	}
 	cni = "cilium"
-}`, name)
+}`, name, name)
 }

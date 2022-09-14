@@ -183,9 +183,13 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	log.Printf("[INFO] configuring the instance %s", d.Get("hostname").(string))
-	config, err := apiClient.NewInstanceConfig()
-	if err != nil {
-		return diag.Errorf("[ERR] failed to create a new config: %s", err)
+	config := &civogo.InstanceConfig{
+		Count:            1,
+		Hostname:         utils.RandomName(),
+		Size:             "g3.medium",
+		Region:           apiClient.Region,
+		PublicIPRequired: "true",
+		InitialUser:      "civo",
 	}
 
 	if hostname, ok := d.GetOk("hostname"); ok {
@@ -217,23 +221,19 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	if attr, ok := d.GetOk("template"); ok {
-		templateID := ""
 		findTemplate, err := apiClient.FindDiskImage(attr.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to get the template: %s", err)
 		}
-		templateID = findTemplate.ID
-		config.TemplateID = templateID
+		config.TemplateID = findTemplate.ID
 	}
 
 	if attr, ok := d.GetOk("disk_image"); ok {
-		diskImageID := ""
 		findDiskImage, err := apiClient.FindDiskImage(attr.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to get the disk image: %s", err)
 		}
-		diskImageID = findDiskImage.ID
-		config.TemplateID = diskImageID
+		config.TemplateID = findDiskImage.ID
 	}
 
 	if attr, ok := d.GetOk("initial_user"); ok {

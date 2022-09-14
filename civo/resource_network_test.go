@@ -137,7 +137,6 @@ func testAccCheckCivoNetworkConfigBasic(label string) string {
 	return fmt.Sprintf(`
 resource "civo_network" "foobar" {
 	label = "%s"
-	region = "LON1"
 }`, label)
 }
 
@@ -145,6 +144,5 @@ func testAccCheckCivoNetworkConfigUpdates(label string) string {
 	return fmt.Sprintf(`
 resource "civo_network" "foobar" {
 	label = "%s"
-	region = "LON1"
 }`, label)
 }

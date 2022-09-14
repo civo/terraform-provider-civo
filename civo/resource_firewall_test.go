@@ -34,6 +34,44 @@ func TestAccCivoFirewall_basic(t *testing.T) {
 					testAccCheckCivoFirewallValues(&firewall, firewallName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", firewallName),
+					resource.TestCheckResourceAttrSet(resName, "ingress_rule.#"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCivoFirewallWithIngressEgress_basic(t *testing.T) {
+	var firewall civogo.Firewall
+
+	// generate a random name for each test run
+	resName := "civo_firewall.foobar"
+	var firewallName = acctest.RandomWithPrefix("tf-fw")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCivoFirewallDestroy,
+		Steps: []resource.TestStep{
+			{
+				// use a dynamic configuration with the random name from above
+				Config: testAccCheckCivoFirewallConfigWithIngressEgress(firewallName),
+				// compose a basic test, checking both remote and local values
+				Check: resource.ComposeTestCheckFunc(
+					// query the API to retrieve the widget object
+					testAccCheckCivoFirewallResourceExists(resName, &firewall),
+					// verify remote values
+					testAccCheckCivoFirewallValues(&firewall, firewallName),
+					// verify local values
+					resource.TestCheckResourceAttr(resName, "name", firewallName),
+					resource.TestCheckResourceAttrSet(resName, "ingress_rule.#"),
+					resource.TestCheckResourceAttrSet(resName, "egress_rule.#"),
+					resource.TestCheckResourceAttrSet(resName, "ingress_rule.0.id"),
+					resource.TestCheckResourceAttr(resName, "ingress_rule.0.protocol", "tcp"),
+					resource.TestCheckResourceAttr(resName, "ingress_rule.0.port_range", "443"),
+					resource.TestCheckResourceAttrSet(resName, "egress_rule.0.id"),
+					resource.TestCheckResourceAttr(resName, "egress_rule.0.protocol", "tcp"),
+					resource.TestCheckResourceAttr(resName, "egress_rule.0.port_range", "22"),
 				),
 			},
 		},
@@ -137,6 +175,33 @@ func testAccCheckCivoFirewallConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "civo_firewall" "foobar" {
 	name = "%s"
+	create_default_rules = true
+	region = "FAKE"
+}`, name)
+}
+
+func testAccCheckCivoFirewallConfigWithIngressEgress(name string) string {
+	return fmt.Sprintf(`
+resource "civo_firewall" "foobar" {
+	name = "%s"
+	create_default_rules = false
+	region = "FAKE"
+
+	ingress_rule {
+		label = "www https"
+		protocol = "tcp"
+		port_range = "443"
+		cidr = ["192.168.1.1/32", "192.168.10.4/32"]
+		action = "allow"
+	  }
+	  
+	  egress_rule {
+		label = "ssh"
+		protocol = "tcp"
+		port_range = "22"
+		cidr = ["192.168.1.1/32", "192.168.10.4/32", "192.168.10.10/32"]
+		action = "allow"
+	  }
 }`, name)
 }
 
@@ -144,5 +209,7 @@ func testAccCheckCivoFirewallConfigUpdates(name string) string {
 	return fmt.Sprintf(`
 resource "civo_firewall" "foobar" {
 	name = "%s"
+	create_default_rules = true
+	region = "FAKE"
 }`, name)
 }
