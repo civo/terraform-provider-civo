@@ -86,10 +86,6 @@ func resourceObjectStoreCredentialCreate(ctx context.Context, d *schema.Resource
 		config.SecretAccessKeyID = &SecretAccessKeyID
 	}
 
-	// DEBUG
-	log.Printf("[DEBUG] Object Store Credential configuration: %+v", config)
-	log.Printf("[DEBUG] API: %+v", apiClient)
-
 	log.Printf("[INFO] creating the Object Store Credential %s", d.Get("name").(string))
 	storeCredential, err := apiClient.NewObjectStoreCredential(config)
 	if err != nil {
