@@ -53,11 +53,6 @@ func dataSourceObjectStoreCredential() *schema.Resource {
 				Computed:    true,
 				Description: "The status of the Object Store Credential",
 			},
-			"suspended": {
-				Type:        schema.TypeBool,
-				Computed:    true,
-				Description: "Tells us whether the credential is suspended or not",
-			},
 		},
 	}
 }
@@ -98,7 +93,6 @@ func dataSourceObjectStoreCredentialRead(ctx context.Context, d *schema.Resource
 	d.Set("access_key_id", foundStoreCredential.AccessKeyID)
 	d.Set("secret_access_key", foundStoreCredential.SecretAccessKeyID)
 	d.Set("status", foundStoreCredential.Status)
-	d.Set("suspended", foundStoreCredential.Suspended)
 
 	return nil
 }

@@ -15,5 +15,5 @@ resource "civo_object_store_bucket" "backup" {
 	name = "backup-server"
 	max_size_gb = 500
 	region = "LON1"
-	credential_id = civo_object_store_credential.backup.id
+	access_key_id = civo_object_store_credential.backup.access_key_id
 }

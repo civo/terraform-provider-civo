@@ -2,7 +2,6 @@ package civo
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -24,7 +23,6 @@ func TestAccDataSourceCivoObjectStoreCredential_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(datasourceName, "access_key_id"),
 					resource.TestCheckResourceAttrSet(datasourceName, "secret_access_key"),
 					resource.TestCheckResourceAttr(datasourceName, "status", "ready"),
-					resource.TestCheckResourceAttr(datasourceName, "suspended", strconv.FormatBool(false)),
 				),
 			},
 		},

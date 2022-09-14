@@ -35,11 +35,11 @@ func resourceObjectStore() *schema.Resource {
 				Default:     500,
 				Description: "The maximum size of the Object Store. Default is 500GB.",
 			},
-			"credential_id": {
+			"access_key_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "ID of Owner of the Object store. You can reference name of any civo object store credential created before, if you don't declare this value, we create one for you.",
+				Description: "The access key ID from the Object Store credential. If this is not set, a new credential will be created.",
 			},
 			"bucket_url": {
 				Type:        schema.TypeString,
@@ -81,8 +81,8 @@ func resourceObjectStoreCreate(ctx context.Context, d *schema.ResourceData, m in
 		Region:    apiClient.Region,
 	}
 
-	if credentialID, ok := d.GetOk("credential_id"); ok {
-		config.AccessKeyID = credentialID.(string)
+	if AccessKeyID, ok := d.GetOk("access_key_id"); ok {
+		config.AccessKeyID = AccessKeyID.(string)
 	}
 
 	log.Printf("[INFO] creating the Object Store %s", d.Get("name").(string))
@@ -140,7 +140,7 @@ func resourceObjectStoreRead(ctx context.Context, d *schema.ResourceData, m inte
 	d.Set("name", resp.Name)
 	d.Set("max_size_gb", resp.MaxSize)
 	d.Set("region", apiClient.Region)
-	d.Set("credential_id", resp.OwnerInfo.CredentialID)
+	d.Set("access_key_id", resp.OwnerInfo.AccessKeyID)
 	d.Set("bucket_url", resp.BucketURL)
 	d.Set("status", resp.Status)
 

@@ -2,7 +2,6 @@ package civo
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/civo/civogo"
@@ -37,7 +36,6 @@ func TestAccCivoObjectStoreCredential_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
 					resource.TestCheckResourceAttrSet(resName, "secret_access_key"),
 					resource.TestCheckResourceAttr(resName, "status", "ready"),
-					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(false)),
 				),
 			},
 		},
@@ -70,7 +68,6 @@ func TestAccCivoObjectStoreCredentialWhitCustomCredential_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resName, "access_key_id", "1234567890"),
 					resource.TestCheckResourceAttr(resName, "secret_access_key", "1234567890"),
 					resource.TestCheckResourceAttr(resName, "status", "ready"),
-					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(false)),
 				),
 			},
 		},
@@ -98,7 +95,6 @@ func TestAccCivoObjectStoreCredential_update(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
 					resource.TestCheckResourceAttrSet(resName, "secret_access_key"),
 					resource.TestCheckResourceAttr(resName, "status", "ready"),
-					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(false)),
 				),
 			},
 			{
@@ -111,7 +107,6 @@ func TestAccCivoObjectStoreCredential_update(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
 					resource.TestCheckResourceAttr(resName, "secret_access_key", "1234567890"),
 					resource.TestCheckResourceAttr(resName, "status", "ready"),
-					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(false)),
 				),
 			},
 		},
