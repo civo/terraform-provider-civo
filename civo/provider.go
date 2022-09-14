@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	// Version is the version of the provider
+	// ProviderVersion is the version of the provider to set in the User-Agent header
 	ProviderVersion = "dev"
 )
 
