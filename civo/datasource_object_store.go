@@ -97,7 +97,7 @@ func dataSourceObjectStoreRead(ctx context.Context, d *schema.ResourceData, m in
 	d.Set("name", foundStore.Name)
 	d.Set("region", apiClient.Region)
 	d.Set("max_size_gb", foundStore.MaxSize)
-	d.Set("credential_id", foundStore.OwnerInfo.CredentialID)
+	d.Set("access_key_id", foundStore.OwnerInfo.AccessKeyID)
 	d.Set("bucket_url", foundStore.BucketURL)
 	d.Set("status", foundStore.Status)
 
