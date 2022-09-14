@@ -1,4 +1,12 @@
 
+## [v1.0.23](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.23) (14 September 2022)
+
+### Merged
+- [#148](https://github.com/civo/terraform-provider-civo/pull/148) - Fix bug in the creation of object store credential
+
+### Commits
+- [9008885](https://github.com/civo/terraform-provider-civo/commit/90088858c992969b530af3cfe639a29911e8c58c) - Update the doc to fix the name of the resource and the datasource for object store
+
 ## [v1.0.22](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.22) (14 September 2022)
 
 ### Merged
