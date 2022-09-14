@@ -11,7 +11,7 @@ resource "civo_object_store_credential" "backup" {
 }
 
 # Use the credential to create a bucket
-resource "civo_object_store_bucket" "backup" {
+resource "civo_object_store" "backup" {
 	name = "backup-server"
 	max_size_gb = 500
 	region = "LON1"
