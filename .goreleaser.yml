@@ -20,6 +20,8 @@ builds:
       - goos: windows
         goarch: 'arm64'
     binary: '{{ .ProjectName }}_v{{ .Version }}'
+    ldflags:
+      - -s -w -X github.com/civo/terraform-provider-civo/civo.ProviderVersion={{.Version}}
 archives:
 - format: zip
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'

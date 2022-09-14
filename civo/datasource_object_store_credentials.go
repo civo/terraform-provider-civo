@@ -32,17 +32,12 @@ func dataSourceObjectStoreCredential() *schema.Resource {
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "The name of the Object Store Credential",
 			},
-			// "generated_name": {
-			// 	Type:        schema.TypeString,
-			// 	Computed:    true,
-			// 	Description: "The generated name of the Object Store Credential",
-			// },
-			"max_size_gb": {
-				Type:        schema.TypeInt,
+			"region": {
+				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     0,
-				Description: "The maximum size of the Object Store Credential",
+				Description: "The region of an existing Object Store",
 			},
+			// Computed values
 			"access_key_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -60,8 +55,7 @@ func dataSourceObjectStoreCredential() *schema.Resource {
 			},
 			"suspended": {
 				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "Tells us whether the credential is suspended or not",
 			},
 		},
@@ -70,6 +64,11 @@ func dataSourceObjectStoreCredential() *schema.Resource {
 
 func dataSourceObjectStoreCredentialRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
+
+	// overwrite the region if is define in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
 	var foundStoreCredential *civogo.ObjectStoreCredential
 
@@ -93,10 +92,9 @@ func dataSourceObjectStoreCredentialRead(ctx context.Context, d *schema.Resource
 		foundStoreCredential = storeCredential
 	}
 
-	maxSize := foundStoreCredential.MaxSizeGB
 	d.SetId(foundStoreCredential.ID)
 	d.Set("name", foundStoreCredential.Name)
-	d.Set("max_size_gb", maxSize)
+	d.Set("region", apiClient.Region)
 	d.Set("access_key_id", foundStoreCredential.AccessKeyID)
 	d.Set("secret_access_key", foundStoreCredential.SecretAccessKeyID)
 	d.Set("status", foundStoreCredential.Status)

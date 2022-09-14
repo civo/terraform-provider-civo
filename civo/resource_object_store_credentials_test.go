@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// example.Widget represents a concrete Go type that represents an API resource
 func TestAccCivoObjectStoreCredential_basic(t *testing.T) {
 	var storeCredential civogo.ObjectStoreCredential
 
@@ -35,11 +34,43 @@ func TestAccCivoObjectStoreCredential_basic(t *testing.T) {
 					testAccCheckCivoObjectStoreCredentialValues(&storeCredential, storeCredentialName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", storeCredentialName),
-					resource.TestCheckResourceAttrSet(resName, "max_size_gb"),
 					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
 					resource.TestCheckResourceAttrSet(resName, "secret_access_key"),
 					resource.TestCheckResourceAttr(resName, "status", "ready"),
-					resource.TestCheckResourceAttrSet(resName, "suspended"),
+					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(false)),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCivoObjectStoreCredentialWhitCustomCredential_basic(t *testing.T) {
+	var storeCredential civogo.ObjectStoreCredential
+
+	// generate a random name for each test run
+	resName := "civo_object_store_credential.foobar"
+	var storeCredentialName = acctest.RandomWithPrefix("tf-test")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCivoObjectStoreCredentialDestroy,
+		Steps: []resource.TestStep{
+			{
+				// use a dynamic configuration with the random name from above
+				Config: testAccCheckCivoObjectStoreCredentialWhitCustomCredentialBasic(storeCredentialName),
+				// compose a basic test, checking both remote and local values
+				Check: resource.ComposeTestCheckFunc(
+					// query the API to retrieve the widget object
+					testAccCheckCivoObjectStoreCredentialResourceExists(resName, &storeCredential),
+					// verify remote values
+					testAccCheckCivoObjectStoreCredentialValues(&storeCredential, storeCredentialName),
+					// verify local values
+					resource.TestCheckResourceAttr(resName, "name", storeCredentialName),
+					resource.TestCheckResourceAttr(resName, "access_key_id", "1234567890"),
+					resource.TestCheckResourceAttr(resName, "secret_access_key", "1234567890"),
+					resource.TestCheckResourceAttr(resName, "status", "ready"),
+					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(false)),
 				),
 			},
 		},
@@ -64,7 +95,9 @@ func TestAccCivoObjectStoreCredential_update(t *testing.T) {
 					testAccCheckCivoObjectStoreCredentialResourceExists(resName, &storeCredential),
 					testAccCheckCivoObjectStoreCredentialValues(&storeCredential, storeCredentialName),
 					resource.TestCheckResourceAttr(resName, "name", storeCredentialName),
-					resource.TestCheckResourceAttr(resName, "max_size_gb", strconv.Itoa(500)),
+					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
+					resource.TestCheckResourceAttrSet(resName, "secret_access_key"),
+					resource.TestCheckResourceAttr(resName, "status", "ready"),
 					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(false)),
 				),
 			},
@@ -75,8 +108,10 @@ func TestAccCivoObjectStoreCredential_update(t *testing.T) {
 					testAccCheckCivoObjectStoreCredentialResourceExists(resName, &storeCredential),
 					testAccCheckCivoObjectStoreCredentialUpdated(&storeCredential, storeCredentialName),
 					resource.TestCheckResourceAttr(resName, "name", storeCredentialName),
-					resource.TestCheckResourceAttr(resName, "max_size_gb", strconv.Itoa(1000)),
-					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(true)),
+					resource.TestCheckResourceAttrSet(resName, "access_key_id"),
+					resource.TestCheckResourceAttr(resName, "secret_access_key", "1234567890"),
+					resource.TestCheckResourceAttr(resName, "status", "ready"),
+					resource.TestCheckResourceAttr(resName, "suspended", strconv.FormatBool(false)),
 				),
 			},
 		},
@@ -145,8 +180,15 @@ func testAccCheckCivoObjectStoreCredentialConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "civo_object_store_credential" "foobar" {
 	name = "%s"
-	max_size_gb = 0
-	suspended = false
+}`, name)
+}
+
+func testAccCheckCivoObjectStoreCredentialWhitCustomCredentialBasic(name string) string {
+	return fmt.Sprintf(`
+resource "civo_object_store_credential" "foobar" {
+	name = "%s"
+	access_key_id = "1234567890"
+	secret_access_key = "1234567890"
 }`, name)
 }
 
@@ -154,7 +196,6 @@ func testAccCheckCivoObjectStoreCredentialConfigUpdates(name string) string {
 	return fmt.Sprintf(`
 resource "civo_object_store_credential" "foobar" {
 	name = "%s"
-	max_size_gb = 0
-	suspended = true
+	secret_access_key = "1234567890"
 }`, name)
 }

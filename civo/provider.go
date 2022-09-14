@@ -9,6 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+var (
+	// Version is the version of the provider
+	ProviderVersion = "dev"
+)
+
 // Provider Civo cloud provider
 func Provider() *schema.Provider {
 	return &schema.Provider{
@@ -28,23 +33,24 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// "civo_template":           dataSourceTemplate(),
-			"civo_disk_image":         dataSourceDiskImage(),
-			"civo_kubernetes_version": dataSourceKubernetesVersion(),
-			"civo_kubernetes_cluster": dataSourceKubernetesCluster(),
-			"civo_instances_size":     dataSourceInstancesSize(),
-			"civo_size":               dataSourceSize(),
-			"civo_instances":          dataSourceInstances(),
-			"civo_instance":           dataSourceInstance(),
-			"civo_dns_domain_name":    dataSourceDNSDomainName(),
-			"civo_dns_domain_record":  dataSourceDNSDomainRecord(),
-			"civo_network":            dataSourceNetwork(),
-			"civo_volume":             dataSourceVolume(),
-			"civo_firewall":           dataSourceFirewall(),
-			"civo_loadbalancer":       dataSourceLoadBalancer(),
-			"civo_ssh_key":            dataSourceSSHKey(),
-			"civo_object_store":       dataSourceObjectStore(),
-			"civo_region":             dataSourceRegion(),
-			"civo_reserved_ip":        dataSourceReservedIP(),
+			"civo_disk_image":              dataSourceDiskImage(),
+			"civo_kubernetes_version":      dataSourceKubernetesVersion(),
+			"civo_kubernetes_cluster":      dataSourceKubernetesCluster(),
+			"civo_instances_size":          dataSourceInstancesSize(),
+			"civo_size":                    dataSourceSize(),
+			"civo_instances":               dataSourceInstances(),
+			"civo_instance":                dataSourceInstance(),
+			"civo_dns_domain_name":         dataSourceDNSDomainName(),
+			"civo_dns_domain_record":       dataSourceDNSDomainRecord(),
+			"civo_network":                 dataSourceNetwork(),
+			"civo_volume":                  dataSourceVolume(),
+			"civo_firewall":                dataSourceFirewall(),
+			"civo_loadbalancer":            dataSourceLoadBalancer(),
+			"civo_ssh_key":                 dataSourceSSHKey(),
+			"civo_object_store":            dataSourceObjectStore(),
+			"civo_object_store_credential": dataSourceObjectStoreCredential(),
+			"civo_region":                  dataSourceRegion(),
+			"civo_reserved_ip":             dataSourceReservedIP(),
 			// "civo_snapshot":           dataSourceSnapshot(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -61,8 +67,9 @@ func Provider() *schema.Provider {
 			"civo_kubernetes_node_pool":            resourceKubernetesClusterNodePool(),
 			"civo_reserved_ip":                     resourceReservedIP(),
 			"civo_instance_reserved_ip_assignment": resourceInstanceReservedIPAssignment(),
+			"civo_object_store":                    resourceObjectStore(),
+			"civo_object_store_credential":         resourceObjectStoreCredential(),
 			// "civo_loadbalancer":         resourceLoadBalancer(),
-			"civo_object_store": resourceObjectStore(),
 			// "civo_template": resourceTemplate(),
 			// "civo_snapshot":             resourceSnapshot(),
 
@@ -98,11 +105,17 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return client, nil
 	}
 
+	userAgent := &civogo.Component{
+		Name:    "terraform-provider-civo",
+		Version: ProviderVersion,
+	}
+
 	client, err = civogo.NewClient(tokenValue, regionValue)
 	if err != nil {
 		return nil, err
 	}
+	client.SetUserAgent(userAgent)
+
 	log.Printf("[DEBUG] Civo API URL: %s\n", "https://api.civo.com")
 	return client, nil
-
 }

@@ -2,6 +2,7 @@ package civo
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -20,11 +21,10 @@ func TestAccDataSourceCivoObjectStoreCredential_basic(t *testing.T) {
 				Config: testAccDataSourceCivoObjectStoreCredentialConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
-					resource.TestCheckResourceAttrSet(datasourceName, "max_size_gb"),
 					resource.TestCheckResourceAttrSet(datasourceName, "access_key_id"),
 					resource.TestCheckResourceAttrSet(datasourceName, "secret_access_key"),
 					resource.TestCheckResourceAttr(datasourceName, "status", "ready"),
-					resource.TestCheckResourceAttrSet(datasourceName, "suspended"),
+					resource.TestCheckResourceAttr(datasourceName, "suspended", strconv.FormatBool(false)),
 				),
 			},
 		},
@@ -35,8 +35,6 @@ func testAccDataSourceCivoObjectStoreCredentialConfig(name string) string {
 	return fmt.Sprintf(`
 resource "civo_object_store_credential" "foobar" {
 	name = "%s"
-	max_size_gb = 0
-	suspended = false
 }
 
 data "civo_object_store_credential" "foobar" {

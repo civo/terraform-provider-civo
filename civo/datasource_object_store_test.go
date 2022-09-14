@@ -21,7 +21,9 @@ func TestAccDataSourceCivoObjectStore_basic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 					resource.TestCheckResourceAttrSet(datasourceName, "max_size_gb"),
-					resource.TestCheckResourceAttrSet(datasourceName, "endpoint"),
+					resource.TestCheckResourceAttrSet(datasourceName, "region"),
+					resource.TestCheckResourceAttrSet(datasourceName, "bucket_url"),
+					resource.TestCheckResourceAttrSet(datasourceName, "credential_id"),
 					resource.TestCheckResourceAttr(datasourceName, "status", "ready"),
 				),
 			},
@@ -34,6 +36,7 @@ func testAccDataSourceCivoObjectStoreConfig(name string) string {
 resource "civo_object_store" "foobar" {
 	name = "%s"
 	max_size_gb = 500
+	region = "FAKE"
 }
 
 data "civo_object_store" "foobar" {
