@@ -72,7 +72,7 @@ func resourceObjectStoreCredentialCreate(ctx context.Context, d *schema.Resource
 
 	log.Printf("[INFO] configuring the Object Store Credential %s", d.Get("name").(string))
 	config := &civogo.CreateObjectStoreCredentialRequest{
-		Name: d.Get("name").(string),
+		Name:   d.Get("name").(string),
 		Region: apiClient.Region,
 	}
 
