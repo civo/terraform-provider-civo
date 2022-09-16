@@ -7,11 +7,12 @@ import (
 	"log"
 )
 
-const ProdAPI = "https://api.civo.com"
-
 var (
 	// ProviderVersion is the version of the provider to set in the User-Agent header
 	ProviderVersion = "dev"
+
+	// ProdAPI is the Base URL for CIVO Production API
+	ProdAPI = "https://api.civo.com"
 )
 
 // Provider Civo cloud provider
@@ -33,7 +34,7 @@ func Provider() *schema.Provider {
 			"api_endpoint": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("CIVO_API_URL", "https://api.civo.com"),
+				DefaultFunc: schema.EnvDefaultFunc("CIVO_API_URL", ProdAPI),
 				Description: "The Base URL to use for CIVO API.",
 			},
 		},
@@ -109,18 +110,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
+
 	userAgent := &civogo.Component{
 		Name:    "terraform-provider-civo",
 		Version: ProviderVersion,
 	}
-
-	client, err = civogo.NewClient(tokenValue, regionValue)
-	if err != nil {
-		return nil, err
-	}
 	client.SetUserAgent(userAgent)
 
-	log.Printf("[DEBUG] Civo API URL: %s\n", "https://api.civo.com")
+	log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
 	return client, nil
 }
