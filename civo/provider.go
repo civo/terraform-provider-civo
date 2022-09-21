@@ -2,16 +2,17 @@ package civo
 
 import (
 	"fmt"
-	"log"
-	"os"
-
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"log"
 )
 
 var (
 	// ProviderVersion is the version of the provider to set in the User-Agent header
 	ProviderVersion = "dev"
+
+	// ProdAPI is the Base URL for CIVO Production API
+	ProdAPI = "https://api.civo.com"
 )
 
 // Provider Civo cloud provider
@@ -29,6 +30,12 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_REGION", ""),
 				Description: "If region is not set, then no region will be used and them you need expensify in every resource even if you expensify here you can overwrite in a resource.",
+			},
+			"api_endpoint": {
+				Type:        schema.TypeString,
+				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("CIVO_API_URL", ProdAPI),
+				Description: "The Base URL to use for CIVO API.",
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -80,7 +87,9 @@ func Provider() *schema.Provider {
 
 // Provider configuration
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	var regionValue, tokenValue string
+	var regionValue, tokenValue, apiURL string
+	var client *civogo.Client
+	var err error
 
 	if region, ok := d.GetOk("region"); ok {
 		regionValue = region.(string)
@@ -92,30 +101,22 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, fmt.Errorf("[ERR] token not found")
 	}
 
-	var client *civogo.Client
-	var err error
-
-	apiURL, envExists := os.LookupEnv("CIVO_API_URL")
-	if envExists && apiURL != "" {
-		client, err = civogo.NewClientWithURL(tokenValue, apiURL, regionValue)
-		if err != nil {
-			return nil, err
-		}
-		log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
-		return client, nil
+	if apiEndpoint, ok := d.GetOk("api_endpoint"); ok {
+		apiURL = apiEndpoint.(string)
+	} else {
+		apiURL = ProdAPI
+	}
+	client, err = civogo.NewClientWithURL(tokenValue, apiURL, regionValue)
+	if err != nil {
+		return nil, err
 	}
 
 	userAgent := &civogo.Component{
 		Name:    "terraform-provider-civo",
 		Version: ProviderVersion,
 	}
-
-	client, err = civogo.NewClient(tokenValue, regionValue)
-	if err != nil {
-		return nil, err
-	}
 	client.SetUserAgent(userAgent)
 
-	log.Printf("[DEBUG] Civo API URL: %s\n", "https://api.civo.com")
+	log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
 	return client, nil
 }
