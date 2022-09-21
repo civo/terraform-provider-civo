@@ -33,7 +33,7 @@ func Provider() *schema.Provider {
 			},
 			"api_endpoint": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_API_URL", ProdAPI),
 				Description: "The Base URL to use for CIVO API.",
 			},
