@@ -101,8 +101,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, fmt.Errorf("[ERR] token not found")
 	}
 
-	if api_url, ok := d.GetOk("api_url"); ok {
-		apiURL = api_url.(string)
+	if apiEndpoint, ok := d.GetOk("api_endpoint"); ok {
+		apiURL = apiEndpoint.(string)
 	} else {
 		apiURL = ProdAPI
 	}
