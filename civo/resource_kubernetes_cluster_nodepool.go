@@ -36,8 +36,8 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 			},
 			"region": {
 				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "The region of the node pool, has to match that of the cluster",
+				Required:     false,
+				Description:  "The region of the node pool, has to match that of the cluster. if not declare we use the region in declared in the provider",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"num_target_nodes": {
