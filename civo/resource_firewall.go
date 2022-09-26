@@ -127,8 +127,8 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while tring to build the firewall request, %s", err)
 	}
-	firewall, err := apiClient.NewFirewall(firewallConfig)
 
+	firewall, err := apiClient.NewFirewall(firewallConfig)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to create a new firewall: %s", err)
 	}
@@ -389,6 +389,7 @@ func firewallRequestBuild(d *schema.ResourceData, client *civogo.Client) (*civog
 
 	firewallCofig := &civogo.FirewallConfig{
 		Name:        d.Get("name").(string),
+		Region:      client.Region,
 		NetworkID:   networkID,
 		CreateRules: &createFirewallRules,
 	}
