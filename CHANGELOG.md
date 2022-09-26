@@ -1,4 +1,13 @@
 
+## [v1.0.24](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.24) (26 September 2022)
+
+### Merged
+- [#150](https://github.com/civo/terraform-provider-civo/pull/150) - Fix error when you try to create a firewall witout region
+- [#147](https://github.com/civo/terraform-provider-civo/pull/147) - [Fix: 146] Added `api_url` field
+
+### Commits
+- [075eaad](https://github.com/civo/terraform-provider-civo/commit/075eaadc871ff984aa2c66b6cb153e22a9e791e6) - Change the api_endpoint from required to optional in the provide file
+
 ## [v1.0.23](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.23) (14 September 2022)
 
 ### Merged

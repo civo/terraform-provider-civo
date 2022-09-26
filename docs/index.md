@@ -43,5 +43,6 @@ resource "civo_instance" "web" {
 
 ### Optional
 
+- `api_endpoint` (String) The Base URL to use for CIVO API.
 - `region` (String) If region is not set, then no region will be used and them you need expensify in every resource even if you expensify here you can overwrite in a resource.
 - `token` (String) This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.
