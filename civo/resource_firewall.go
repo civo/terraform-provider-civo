@@ -33,6 +33,7 @@ func resourceFirewall() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The firewall region, if is not defined we use the global defined in the provider",
 			},
 			"create_default_rules": {
