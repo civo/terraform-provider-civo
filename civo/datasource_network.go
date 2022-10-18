@@ -51,7 +51,7 @@ func dataSourceNetwork() *schema.Resource {
 			"default": {
 				Type:        schema.TypeBool,
 				Computed:    true,
-				Description: "If is the default network",
+				Description: "It is the default network",
 			},
 		},
 	}
