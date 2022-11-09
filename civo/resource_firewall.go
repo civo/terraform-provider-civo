@@ -421,14 +421,6 @@ func expandFirewallRules(rules []interface{}, direction string) []civogo.Firewal
 			Action:    rule["action"].(string),
 		}
 
-		// if rule["start_port"].(string) != "" {
-		// 	fwRule.StartPort = rule["start_port"].(string)
-		// }
-
-		// if rule["end_port"].(string) != "" {
-		// 	fwRule.StartPort = rule["start_port"].(string)
-		// }
-
 		if rule["port_range"].(string) != "" {
 			fwRule.Ports = rule["port_range"].(string)
 		}
