@@ -27,6 +27,7 @@ func resourceObjectStore() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The region for the Object Store, if not declared we use the region as declared in the provider (Defaults to LON1)",
 			},
 			"max_size_gb": {
