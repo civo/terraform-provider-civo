@@ -1,4 +1,12 @@
 
+## [v1.0.26](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.26) (10 November 2022)
+
+### Merged
+- [#156](https://github.com/civo/terraform-provider-civo/pull/156) - Fix error in the civo_object_store and add more example
+
+### Commits
+- [cd816da](https://github.com/civo/terraform-provider-civo/commit/cd816da5632f675d4e75e360a400e81dd801c4c2) - Remove comment code
+
 ## [v1.0.25](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.25) (14 October 2022)
 
 ## [v1.0.24](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.24) (26 September 2022)
