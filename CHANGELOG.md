@@ -1,4 +1,9 @@
 
+## [v1.0.27](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.27) (14 December 2022)
+
+### Merged
+- [#158](https://github.com/civo/terraform-provider-civo/pull/158) - Add the UPGRADING state to the cluster creation
+
 ## [v1.0.26](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.26) (10 November 2022)
 
 ### Merged
