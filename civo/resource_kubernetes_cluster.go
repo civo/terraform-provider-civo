@@ -297,7 +297,7 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 	d.SetId(resp.ID)
 
 	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"BUILDING", "AVAILABLE"},
+		Pending: []string{"BUILDING", "AVAILABLE", "UPGRADING"},
 		Target:  []string{"ACTIVE"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.GetKubernetesCluster(d.Id())
