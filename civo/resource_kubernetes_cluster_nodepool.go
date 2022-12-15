@@ -274,7 +274,7 @@ func resourceKubernetesClusterNodePoolDelete(ctx context.Context, d *schema.Reso
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
 	_, err = apiClient.UpdateKubernetesCluster(getKubernetesCluster.ID, config)
 	if err != nil {
-		return diag.Errorf("[INFO] an error occurred while tring to delete the kubernetes cluster pool %s", err)
+		return diag.Errorf("[INFO] an error occurred while trying to delete the kubernetes cluster pool %s", err)
 	}
 
 	err = waitForKubernetesNodePoolDelete(apiClient, d)

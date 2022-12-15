@@ -89,7 +89,7 @@ func resourceSSHKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 			log.Printf("[INFO] updating the ssh key %s", d.Get("name").(string))
 			_, err := apiClient.UpdateSSHKey(d.Get("name").(string), d.Id())
 			if err != nil {
-				return diag.Errorf("[ERR] an error occurred while tring to rename the ssh key %s", d.Id())
+				return diag.Errorf("[ERR] an error occurred while trying to rename the ssh key %s", d.Id())
 			}
 		}
 	}
@@ -104,7 +104,7 @@ func resourceSSHKeyDelete(_ context.Context, d *schema.ResourceData, m interface
 	log.Printf("[INFO] deleting the ssh key %s", d.Id())
 	_, err := apiClient.DeleteSSHKey(d.Id())
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete the ssh key %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while trying to delete the ssh key %s", d.Id())
 	}
 	return nil
 }

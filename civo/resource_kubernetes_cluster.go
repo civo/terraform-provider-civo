@@ -297,7 +297,7 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 	d.SetId(resp.ID)
 
 	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"BUILDING", "AVAILABLE", "UPGRADING"},
+		Pending: []string{"BUILDING", "AVAILABLE", "UPGRADING", "SCALING"},
 		Target:  []string{"ACTIVE"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.GetKubernetesCluster(d.Id())
@@ -466,7 +466,7 @@ func resourceKubernetesClusterDelete(_ context.Context, d *schema.ResourceData, 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
 	_, err := apiClient.DeleteKubernetesCluster(d.Id())
 	if err != nil {
-		return diag.Errorf("[INFO] an error occurred while tring to delete the kubernetes cluster %s", err)
+		return diag.Errorf("[INFO] an error occurred while trying to delete the kubernetes cluster %s", err)
 	}
 
 	return nil

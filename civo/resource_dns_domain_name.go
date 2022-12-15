@@ -115,7 +115,7 @@ func resourceDNSDomainNameDelete(_ context.Context, d *schema.ResourceData, m in
 	log.Printf("[INFO] Deleting the domain %s", d.Get("name").(string))
 	_, err = apiClient.DeleteDNSDomain(resp)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete the domain %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while trying to delete the domain %s", d.Id())
 	}
 	return nil
 }

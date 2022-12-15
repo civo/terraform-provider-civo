@@ -154,7 +154,7 @@ func resourceReservedIPDelete(_ context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] deleting the ip resource %s", d.Id())
 	_, err := apiClient.DeleteIP(d.Id())
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete the ip resource %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while trying to delete the ip resource %s", d.Id())
 	}
 	return nil
 }

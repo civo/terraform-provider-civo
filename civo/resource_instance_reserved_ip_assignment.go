@@ -57,13 +57,13 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 	// We check if the instance is valid and if it is not we return an error
 	instance, err := apiClient.GetInstance(d.Get("instance_id").(string))
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to get instance %s", d.Get("instance_id").(string))
+		return diag.Errorf("[ERR] an error occurred while trying to get instance %s", d.Get("instance_id").(string))
 	}
 
 	// We check if the reserved ip is valid and if it is not we return an error
 	reservedIP, err := apiClient.FindIP(d.Get("reserved_ip_id").(string))
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to get reserved ip %s", d.Get("reserved_ip_id").(string))
+		return diag.Errorf("[ERR] an error occurred while trying to get reserved ip %s", d.Get("reserved_ip_id").(string))
 	}
 
 	if reservedIP.AssignedTo.ID != "" {
@@ -75,7 +75,7 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 
 	_, err = apiClient.AssignIP(reservedIP.ID, instance.ID, "instance", apiClient.Region)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to assign reserved ip %s to instance %s", d.Get("reserved_ip_id").(string), d.Get("instance_id").(string))
+		return diag.Errorf("[ERR] an error occurred while trying to assign reserved ip %s to instance %s", d.Get("reserved_ip_id").(string), d.Get("instance_id").(string))
 	}
 
 	d.SetId(resource.UniqueId())
@@ -122,7 +122,7 @@ func resourceInstanceReservedIPRead(_ context.Context, d *schema.ResourceData, m
 	// We check if the reserved ip is valid and if it is not we return an error
 	reservedIP, err := apiClient.FindIP(reservedID)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to get reserved ip %s", reservedID)
+		return diag.Errorf("[ERR] an error occurred while trying to get reserved ip %s", reservedID)
 	}
 
 	if reservedIP.AssignedTo.ID != instanceID {
@@ -148,7 +148,7 @@ func resourceInstanceReservedIPDelete(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[INFO] unassign the ip (%s) from the instance", reservedIP)
 	_, err := apiClient.UnassignIP(reservedIP, apiClient.Region)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to unassign the ip %s: %s", reservedIP, err)
+		return diag.Errorf("[ERR] an error occurred while trying to unassign the ip %s: %s", reservedIP, err)
 	}
 
 	createStateConf := &resource.StateChangeConf{

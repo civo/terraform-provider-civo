@@ -193,7 +193,7 @@ func resourceObjectStoreCredentialDelete(ctx context.Context, d *schema.Resource
 	log.Printf("[INFO] deleting the Object Store Credential %s", d.Id())
 	_, err := apiClient.DeleteObjectStoreCredential(d.Id())
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete the Object Store Credential %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while trying to delete the Object Store Credential %s", d.Id())
 	}
 	return nil
 }
