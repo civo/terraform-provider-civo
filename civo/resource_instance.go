@@ -468,7 +468,7 @@ func resourceInstanceDelete(_ context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] deleting the instance %s", d.Id())
 	_, err := apiClient.DeleteInstance(d.Id())
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete instance %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while trying to delete instance %s", d.Id())
 	}
 	return nil
 }

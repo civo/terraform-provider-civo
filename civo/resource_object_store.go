@@ -191,7 +191,7 @@ func resourceObjectStoreDelete(ctx context.Context, d *schema.ResourceData, m in
 	log.Printf("[INFO] deleting the Object Store %s", d.Id())
 	_, err := apiClient.DeleteObjectStore(d.Id())
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete the Object Store %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while trying to delete the Object Store %s", d.Id())
 	}
 	return nil
 }

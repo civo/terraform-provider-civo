@@ -141,7 +141,7 @@ func resourceVolumeAttachmentDelete(_ context.Context, d *schema.ResourceData, m
 	log.Printf("[INFO] Detaching the volume %s", d.Id())
 	_, err := apiClient.DetachVolume(volumeID)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to detach the volume %s", err)
+		return diag.Errorf("[ERR] an error occurred while trying to detach the volume %s", err)
 	}
 	return nil
 }

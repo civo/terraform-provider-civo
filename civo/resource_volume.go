@@ -173,7 +173,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 				_, err = apiClient.AttachVolume(d.Id(), resp.InstanceID)
 				if err != nil {
-					return fmt.Errorf("[ERR] an error occurred while tring to attach the volume %s", d.Id())
+					return fmt.Errorf("[ERR] an error occurred while trying to attach the volume %s", d.Id())
 				}
 
 			} else {
@@ -209,7 +209,7 @@ func resourceVolumeDelete(_ context.Context, d *schema.ResourceData, m interface
 	log.Printf("[INFO] deleting the volume %s", d.Id())
 	_, err := apiClient.DeleteVolume(d.Id())
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete the volume %s", err)
+		return diag.Errorf("[ERR] an error occurred while trying to delete the volume %s", err)
 	}
 	return nil
 }

@@ -136,7 +136,7 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 	log.Printf("[INFO] deleting the network %s", d.Id())
 	_, err := apiClient.DeleteNetwork(d.Id())
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete the network %s", d.Id())
+		return diag.Errorf("[ERR] an error occurred while trying to delete the network %s", d.Id())
 	}
 	return nil
 }

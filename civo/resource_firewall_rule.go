@@ -202,7 +202,7 @@ func resourceFirewallRuleDelete(_ context.Context, d *schema.ResourceData, m int
 	log.Printf("[INFO] retriving the firewall rule %s", d.Id())
 	_, err := apiClient.DeleteFirewallRule(d.Get("firewall_id").(string), d.Id())
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete firewall rule %s - %v", d.Id(), err)
+		return diag.Errorf("[ERR] an error occurred while trying to delete firewall rule %s - %v", d.Id(), err)
 	}
 	return nil
 }

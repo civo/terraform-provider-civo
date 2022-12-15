@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -126,7 +128,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	firewallConfig, err := firewallRequestBuild(d, apiClient)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to build the firewall request, %s", err)
+		return diag.Errorf("[ERR] an error occurred while trying to build the firewall request, %s", err)
 	}
 
 	firewall, err := apiClient.NewFirewall(firewallConfig)
@@ -195,7 +197,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			log.Printf("[INFO] updating the firewall name, %s", d.Id())
 			_, err := apiClient.RenameFirewall(d.Id(), &firewall)
 			if err != nil {
-				return diag.Errorf("[WARN] an error occurred while tring to rename the firewall %s, %s", d.Id(), err)
+				return diag.Errorf("[WARN] an error occurred while trying to rename the firewall %s, %s", d.Id(), err)
 			}
 		}
 	}
@@ -215,7 +217,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		// call the api to get the current rules
 		allRules, err := apiClient.ListFirewallRules(d.Id())
 		if err != nil {
-			return diag.Errorf("[ERR] an error occurred while tring to list the firewall rules, %s", err)
+			return diag.Errorf("[ERR] an error occurred while trying to list the firewall rules, %s", err)
 		}
 
 		// remove the rules that are not in terraform
@@ -225,7 +227,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 					log.Printf("[INFO] removing the ingress rule %s", rule.ID)
 					_, err := apiClient.DeleteFirewallRule(d.Id(), rule.ID)
 					if err != nil {
-						return diag.Errorf("[WARN] an error occurred while tring to delete the ingress rule %s, %s", rule.ID, err)
+						return diag.Errorf("[WARN] an error occurred while trying to delete the ingress rule %s, %s", rule.ID, err)
 					}
 				}
 			} else {
@@ -233,7 +235,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 					log.Printf("[INFO] removing the egress rule %s", rule.ID)
 					_, err := apiClient.DeleteFirewallRule(d.Id(), rule.ID)
 					if err != nil {
-						return diag.Errorf("[WARN] an error occurred while tring to delete the egress rule %s, %s", rule.ID, err)
+						return diag.Errorf("[WARN] an error occurred while trying to delete the egress rule %s, %s", rule.ID, err)
 					}
 				}
 			}
@@ -246,7 +248,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 					fwRule := firewallUpdateBuild(ingressRule, apiClient.Region, "ingress", d)
 					resp, err := apiClient.NewFirewallRule(fwRule)
 					if err != nil {
-						return diag.Errorf("[WARN] an error occurred while tring to create the ingress rule %s, %s", fwRule, err)
+						return diag.Errorf("[WARN] an error occurred while trying to create the ingress rule %s, %s", fwRule, err)
 					}
 					log.Printf("[INFO] creating a new ingress rule %s", resp.ID)
 				}
@@ -260,7 +262,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 					fwRule := firewallUpdateBuild(egressRule, apiClient.Region, "egress", d)
 					resp, err := apiClient.NewFirewallRule(fwRule)
 					if err != nil {
-						return diag.Errorf("[WARN] an error occurred while tring to create the egress rule %s, %s", fwRule, err)
+						return diag.Errorf("[WARN] an error occurred while trying to create the egress rule %s, %s", fwRule, err)
 					}
 					log.Printf("[INFO] creating a new egress rule %s", resp.ID)
 				}
@@ -289,10 +291,27 @@ func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interfa
 	}
 
 	log.Printf("[INFO] deleting the firewall %s", firewallID)
-	_, err = apiClient.DeleteFirewall(firewallID)
-	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while tring to delete the firewall %s, %s", firewallID, err)
+
+	deleteStateConf := &resource.StateChangeConf{
+		Pending: []string{"failed"},
+		Target:  []string{"success"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.DeleteFirewall(firewallID)
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, string(resp.Result), nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
 	}
+	_, err = deleteStateConf.WaitForStateContext(context.Background())
+	if err != nil {
+		return diag.Errorf("error waiting for firewall (%s) to be deleted: %s", firewallID, err)
+	}
+
 	return nil
 }
 
