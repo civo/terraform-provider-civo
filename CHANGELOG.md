@@ -1,4 +1,9 @@
 
+## [v1.0.28](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.28) (15 December 2022)
+
+### Merged
+- [#159](https://github.com/civo/terraform-provider-civo/pull/159) - Fix the error in firewall, fixed spelling mistake in the errors and added new Pending state to the cluster
+
 ## [v1.0.27](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.27) (14 December 2022)
 
 ### Merged
