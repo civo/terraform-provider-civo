@@ -133,8 +133,8 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 	d.SetId(database.ID)
 
 	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"pending"},
-		Target:  []string{"ready"},
+		Pending: []string{"Pending"},
+		Target:  []string{"Ready"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.GetDatabase(d.Id())
 			if err != nil {
