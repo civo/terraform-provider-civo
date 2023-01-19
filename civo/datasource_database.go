@@ -47,7 +47,7 @@ func dataSourceDatabase() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The region of an existing Object Store",
+				Description: "The region of an existing Database",
 			},
 			"network_id": {
 				Type:        schema.TypeString,
@@ -57,7 +57,7 @@ func dataSourceDatabase() *schema.Resource {
 			"firewall_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The secret access key of the Database",
+				Description: "The firewall id of the Database",
 			},
 		},
 	}
@@ -84,7 +84,7 @@ func dataSourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if id, ok := d.GetOk("id"); ok {
-		log.Printf("[INFO] Getting the Database by name")
+		log.Printf("[INFO] Getting the Database by id")
 		database, err := apiClient.FindDatabase(id.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive Database: %s", err)
