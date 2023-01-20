@@ -33,10 +33,15 @@ func testAccDataSourceCivoDatabaseConfig(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {
 	name = "%s"
+	size = "g4s.kube.small"
+	nodes = 2
 }
 
 data "civo_database" "foobar" {
 	name = civo_database.foobar.name
+	size = "g4s.kube.small"
+	nodes = 2
+	region = "LON1"
 }
 `, name)
 }

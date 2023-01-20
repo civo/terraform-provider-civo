@@ -139,6 +139,8 @@ func testAccCheckCivoDatabaseConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {
 	name = "%s"
+	size = "g4s.kube.small"
+	nodes = 2
 }`, name)
 }
 
@@ -146,5 +148,7 @@ func testAccCheckCivoDatabaseConfigUpdates(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {
 	name = "%s"
+	size = "g4s.kube.small"
+	nodes = 2
 }`, name)
 }
