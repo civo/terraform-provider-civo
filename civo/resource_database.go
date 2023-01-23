@@ -16,14 +16,6 @@ import (
 // and with it you can handle the Database created with Terraform.
 func resourceDatabase() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDatabaseCreate,
-		ReadContext:   resourceDatabaseRead,
-		UpdateContext: resourceDatabaseUpdate,
-		DeleteContext: resourceDatabaseDelete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -32,42 +24,59 @@ func resourceDatabase() *schema.Resource {
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "Name of the database",
 			},
-
 			"nodes": {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "Count of nodes",
 			},
-
 			"size": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "Size of the database",
 			},
-
 			"network_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				Description: "The id of the associated network",
 			},
-
 			"firewall_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				Description: "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
-
 			"region": {
 				Type:        schema.TypeString,
+				Computed:    true,
 				Optional:    true,
 				Description: "The region where the database will be created.",
 			},
+			"username": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The username of the database",
+			},
+			"password": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The password of the database",
+			},
+			"status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The status of the database",
+			},
 		},
-
+		CreateContext: resourceDatabaseCreate,
+		ReadContext:   resourceDatabaseRead,
+		UpdateContext: resourceDatabaseUpdate,
+		DeleteContext: resourceDatabaseDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -221,6 +230,10 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interfa
 	d.Set("nodes", resp.Nodes)
 	d.Set("network_id", resp.NetworkID)
 	d.Set("firewall_id", resp.FirewallID)
+	d.Set("region", apiClient.Region)
+	d.Set("username", resp.Username)
+	d.Set("password", resp.Password)
+	d.Set("status", resp.Status)
 
 	return nil
 }

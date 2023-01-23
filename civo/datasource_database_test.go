@@ -22,7 +22,7 @@ func TestAccDataSourceCivoDatabase_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 					resource.TestCheckResourceAttrSet(datasourceName, "size"),
 					resource.TestCheckResourceAttrSet(datasourceName, "nodes"),
-					resource.TestCheckResourceAttr(datasourceName, "status", "ready"),
+					resource.TestCheckResourceAttr(datasourceName, "status", "Ready"),
 				),
 			},
 		},
@@ -33,15 +33,11 @@ func testAccDataSourceCivoDatabaseConfig(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {
 	name = "%s"
-	size = "g4s.kube.small"
+	size = "g3.db.xsmall"
 	nodes = 2
 }
 
 data "civo_database" "foobar" {
 	name = civo_database.foobar.name
-	size = "g4s.kube.small"
-	nodes = 2
-	region = "LON1"
-}
-`, name)
+}`, name)
 }

@@ -35,7 +35,7 @@ func TestAccCivoDatabase_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resName, "name", databaseName),
 					resource.TestCheckResourceAttrSet(resName, "size"),
 					resource.TestCheckResourceAttrSet(resName, "nodes"),
-					resource.TestCheckResourceAttr(resName, "status", "ready"),
+					resource.TestCheckResourceAttr(resName, "status", "Ready"),
 				),
 			},
 		},
@@ -60,7 +60,7 @@ func TestAccCivoDatabase_update(t *testing.T) {
 					testAccCheckCivoDatabaseResourceExists(resName, &database),
 					testAccCheckCivoDatabaseValues(&database, databaseName),
 					resource.TestCheckResourceAttr(resName, "name", databaseName),
-					resource.TestCheckResourceAttr(resName, "status", "ready"),
+					resource.TestCheckResourceAttr(resName, "status", "Ready"),
 				),
 			},
 			{
@@ -70,7 +70,7 @@ func TestAccCivoDatabase_update(t *testing.T) {
 					testAccCheckCivoDatabaseResourceExists(resName, &database),
 					testAccCheckCivoDatabaseUpdated(&database, databaseName),
 					resource.TestCheckResourceAttr(resName, "name", databaseName),
-					resource.TestCheckResourceAttr(resName, "status", "ready"),
+					resource.TestCheckResourceAttr(resName, "status", "Ready"),
 				),
 			},
 		},
@@ -139,7 +139,7 @@ func testAccCheckCivoDatabaseConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {
 	name = "%s"
-	size = "g4s.kube.small"
+	size = "g3.db.xsmall"
 	nodes = 2
 }`, name)
 }
@@ -148,7 +148,7 @@ func testAccCheckCivoDatabaseConfigUpdates(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {
 	name = "%s"
-	size = "g4s.kube.small"
+	size = "g3.db.xsmall"
 	nodes = 2
 }`, name)
 }

@@ -19,7 +19,6 @@ func dataSourceDatabase() *schema.Resource {
 			"Get information of an Database for use in other resources. This data source provides all of the Database's properties as configured on your Civo account.",
 			"Note: This data source returns a single Database. When specifying a name, an error will be raised if more than one Databases with the same name found.",
 		}, "\n\n"),
-		ReadContext: dataSourceDatabaseRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
@@ -34,19 +33,18 @@ func dataSourceDatabase() *schema.Resource {
 			},
 			"size": {
 				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.NoZeroValues,
+				Computed:     true,
 				Description:  "Size of the database",
 			},
 			"nodes": {
 				Type:         schema.TypeInt,
-				Required:     true,
-				ValidateFunc: validation.NoZeroValues,
+				Computed:     true,
 				Description:  "Count of nodes",
 			},
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The region of an existing Database",
 			},
 			"network_id": {
@@ -59,7 +57,23 @@ func dataSourceDatabase() *schema.Resource {
 				Computed:    true,
 				Description: "The firewall id of the Database",
 			},
+			"username": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The username of the database",
+			},
+			"password": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The password of the database",
+			},
+			"status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The status of the database",
+			},
 		},
+		ReadContext: dataSourceDatabaseRead,
 	}
 }
 
@@ -100,6 +114,9 @@ func dataSourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interfa
 	d.Set("nodes", foundDatabase.Nodes)
 	d.Set("network_id", foundDatabase.NetworkID)
 	d.Set("firewall_id", foundDatabase.FirewallID)
+	d.Set("username", foundDatabase.Username)
+	d.Set("password", foundDatabase.Password)
+	d.Set("status", foundDatabase.Status)
 
 	return nil
 }
