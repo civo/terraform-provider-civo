@@ -32,14 +32,14 @@ func dataSourceDatabase() *schema.Resource {
 				Description:  "The name of the Database",
 			},
 			"size": {
-				Type:         schema.TypeString,
-				Computed:     true,
-				Description:  "Size of the database",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Size of the database",
 			},
 			"nodes": {
-				Type:         schema.TypeInt,
-				Computed:     true,
-				Description:  "Count of nodes",
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Count of nodes",
 			},
 			"region": {
 				Type:        schema.TypeString,
