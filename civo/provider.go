@@ -2,9 +2,10 @@ package civo
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
 )
 
 var (
@@ -58,6 +59,7 @@ func Provider() *schema.Provider {
 			"civo_object_store_credential": dataSourceObjectStoreCredential(),
 			"civo_region":                  dataSourceRegion(),
 			"civo_reserved_ip":             dataSourceReservedIP(),
+			"civo_database":                dataSourceDatabase(),
 			// "civo_snapshot":           dataSourceSnapshot(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -76,6 +78,7 @@ func Provider() *schema.Provider {
 			"civo_instance_reserved_ip_assignment": resourceInstanceReservedIPAssignment(),
 			"civo_object_store":                    resourceObjectStore(),
 			"civo_object_store_credential":         resourceObjectStoreCredential(),
+			"civo_database":                        resourceDatabase(),
 			// "civo_loadbalancer":         resourceLoadBalancer(),
 			// "civo_template": resourceTemplate(),
 			// "civo_snapshot":             resourceSnapshot(),
