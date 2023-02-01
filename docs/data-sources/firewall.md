@@ -21,7 +21,7 @@ Firewalls may be looked up by id or name, and you can optionally pass region if 
 ```terraform
 data "civo_firewall" "test" {
     name = "test-firewall"
-    region = "NYC1"
+    region = "LON1"
 }
 ```
 
