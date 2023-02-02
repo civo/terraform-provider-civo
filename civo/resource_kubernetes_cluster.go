@@ -89,6 +89,12 @@ func resourceKubernetesCluster() *schema.Resource {
 				Required:    true,
 				Description: "The existing firewall ID to use for this cluster",
 			},
+			"cluster_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The type of cluster to create, valid options are `k3s` or `talos` the default is `k3s`",
+			},
 			// Computed resource
 			"installed_applications": applicationSchema(),
 			"pools":                  nodePoolSchema(),
@@ -270,6 +276,10 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 		config.Applications = ""
 	}
 
+	if attr, ok := d.GetOk("cluster_type"); ok {
+		config.ClusterType = attr.(string)
+	}
+
 	if attr, ok := d.GetOk("firewall_id"); ok {
 		firewallID := attr.(string)
 		firewall, err := apiClient.FindFirewall(firewallID)
@@ -344,6 +354,7 @@ func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m 
 	d.Set("num_target_nodes", resp.NumTargetNode)
 	d.Set("target_nodes_size", resp.TargetNodeSize)
 	d.Set("kubernetes_version", resp.KubernetesVersion)
+	d.Set("cluster_type", resp.ClusterType)
 	d.Set("cni", resp.CNIPlugin)
 	d.Set("tags", strings.Join(resp.Tags, " ")) // space separated tags
 	d.Set("status", resp.Status)

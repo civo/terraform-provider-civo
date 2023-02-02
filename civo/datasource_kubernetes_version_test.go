@@ -95,7 +95,7 @@ func testAccCheckDataSourceCivoKubernetesVersionFiltered(n string) resource.Test
 
 		for i := 0; i < total; i++ {
 			name := rs.Primary.Attributes[fmt.Sprintf("versions.%d.type", i)]
-			if !stringInSlice(name, []string{"stable"}) {
+			if !stringInSlice(name, []string{"talos"}) {
 				return fmt.Errorf("Type is not in expected test filter values")
 			}
 
@@ -117,7 +117,7 @@ func testAccDataSourceCivoKubernetesVersionConfigWhitFilter() string {
 data "civo_kubernetes_version" "foobar" {
 	filter {
         key = "type"
-        values = ["stable"]
+        values = ["talos"]
 	}
 }
 `
