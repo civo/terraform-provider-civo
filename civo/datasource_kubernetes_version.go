@@ -46,7 +46,7 @@ func flattenKubernetesVersion(version, _ interface{}, _ map[string]interface{}) 
 	flattenedVersion := map[string]interface{}{}
 	flattenedVersion["version"] = s.Version
 	flattenedVersion["label"] = fmt.Sprintf("v%s", s.Version)
-	flattenedVersion["type"] = s.Type
+	flattenedVersion["type"] = s.ClusterType
 	flattenedVersion["default"] = s.Default
 	return flattenedVersion, nil
 }
@@ -67,7 +67,7 @@ func kubernetesVersionSchema() map[string]*schema.Schema {
 		"type": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "The type of the version - can be `stable`, `legacy` & etc",
+			Description: "The type of the cluster, can be `talos` or `k3s`",
 		},
 		"default": {
 			Type:        schema.TypeBool,
