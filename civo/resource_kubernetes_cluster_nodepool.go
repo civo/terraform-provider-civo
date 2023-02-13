@@ -145,7 +145,7 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 
 	d.SetId(nodePoolLabel)
 
-	err = waitForKubernetesNodePoolCreate(apiClient, d)
+	err = waitForKubernetesNodePoolCreate(apiClient, d, clusterID)
 	if err != nil {
 		return diag.Errorf("Error creating Kubernetes node pool: %s", err)
 	}
@@ -237,7 +237,7 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 		return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
-	err = waitForKubernetesNodePoolCreate(apiClient, d)
+	err = waitForKubernetesNodePoolCreate(apiClient, d, clusterID)
 	if err != nil {
 		return diag.Errorf("Error updating Kubernetes node pool: %s", err)
 	}
@@ -355,7 +355,7 @@ func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int
 }
 
 // waitForKubernetesNodePoolCreate is a utility function to wait for a node pool to be created
-func waitForKubernetesNodePoolCreate(client *civogo.Client, d *schema.ResourceData) error {
+func waitForKubernetesNodePoolCreate(client *civogo.Client, d *schema.ResourceData, clusterID string) error {
 	var (
 		tickerInterval        = 10 * time.Second
 		timeoutSeconds        = d.Timeout(schema.TimeoutCreate).Seconds()
@@ -364,12 +364,10 @@ func waitForKubernetesNodePoolCreate(client *civogo.Client, d *schema.ResourceDa
 		totalRequiredInstance = 0
 		totalRunningInstance  = 0
 		ticker                = time.NewTicker(tickerInterval)
-		clusterID             = d.Get("cluster_id").(string)
 		nodePoolID            = d.Id()
 	)
 
 	for range ticker.C {
-
 		cluster, err := client.GetKubernetesCluster(clusterID)
 		if err != nil {
 			ticker.Stop()
