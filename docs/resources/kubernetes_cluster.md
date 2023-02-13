@@ -43,11 +43,38 @@ resource "civo_firewall_rule" "kubernetes" {
     action = "allow"
 }
 
-# Create a cluster
+# Create a cluster without expecific cluster type by default is k3s
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
+    pools {
+        label = "front-end" // Optional
+        size = element(data.civo_size.xsmall.sizes, 0).name
+        node_count = 3
+    }
+}
+
+# Create a cluster with k3s
+resource "civo_kubernetes_cluster" "my-cluster" {
+    name = "my-cluster"
+    applications = "Portainer,Linkerd:Linkerd & Jaeger"
+    firewall_id = civo_firewall.my-firewall.id
+    cluster_type = "k3s"
+    pools {
+        label = "front-end" // Optional
+        size = element(data.civo_size.xsmall.sizes, 0).name
+        node_count = 3
+    }
+}
+
+
+# Create a cluster with talos
+resource "civo_kubernetes_cluster" "my-cluster" {
+    name = "my-cluster"
+    applications = "Portainer,Linkerd:Linkerd & Jaeger"
+    firewall_id = civo_firewall.my-firewall.id
+    cluster_type = "talos"
     pools {
         label = "front-end" // Optional
         size = element(data.civo_size.xsmall.sizes, 0).name
@@ -67,6 +94,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 ### Optional
 
 - `applications` (String) Comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. Application names are case-sensitive; the available applications can be listed with the Civo CLI: 'civo kubernetes applications ls'. If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik. For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'.
+- `cluster_type` (String) The type of cluster to create, valid options are `k3s` or `talos` the default is `k3s`
 - `cni` (String) The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
 - `kubernetes_version` (String) The version of k3s to install (optional, the default is currently the latest available)
 - `name` (String) Name for your cluster, must be unique within your account

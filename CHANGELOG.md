@@ -1,4 +1,10 @@
 
+## [v1.0.30](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.30) (13 February 2023)
+
+### Merged
+- [#165](https://github.com/civo/terraform-provider-civo/pull/165) - Fixed error when you change the node pool count
+- [#164](https://github.com/civo/terraform-provider-civo/pull/164) - Update the kubernetes resource to include the option to add expecific cluster type
+
 ## [v1.0.29](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.29) (1 February 2023)
 
 ### Merged
