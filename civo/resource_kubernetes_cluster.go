@@ -457,7 +457,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
 	}
 
-	err = waitForKubernetesNodePoolCreate(apiClient, d)
+	err = waitForKubernetesNodePoolCreate(apiClient, d, d.Id())
 	if err != nil {
 		return diag.Errorf("Error updating Kubernetes node pool: %s", err)
 	}
@@ -527,6 +527,7 @@ func flattenInstalledApplication(apps []civogo.KubernetesInstalledApplication) [
 	return flattenedInstalledApplication
 }
 
+// exapandNodePools function to expand the node pools
 func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConfig {
 	expandedNodePools := make([]civogo.KubernetesClusterPoolConfig, 0, len(nodePools))
 	for _, rawPool := range nodePools {
