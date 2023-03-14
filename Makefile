@@ -9,6 +9,9 @@ default: build
 build: fmtcheck
 	go install
 
+localdev:
+	./scripts/local.sh
+
 test: fmtcheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \

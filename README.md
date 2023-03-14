@@ -23,6 +23,14 @@ Enter the provider directory and build the provider
 $ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-civo
 $ make build
 ```
+Local Development: Using a local version of the Provider
+---------------------
+If you're developing the provider locally, you can test your changes through:
+```bash
+$ make localdev
+```
+You'll be asked to provide the folder containing the declaration of the resources to be installed in civo and the civo region in which deploy those resources. 
+No provider declaration is necessary because automatically produced by the script. 
 
 Documentation
 ----------------------
