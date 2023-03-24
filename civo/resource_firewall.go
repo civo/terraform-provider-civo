@@ -131,9 +131,31 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("[ERR] an error occurred while trying to build the firewall request, %s", err)
 	}
 
-	firewall, err := apiClient.NewFirewall(firewallConfig)
+	// Create StateChangeConf to wait for the firewall to be created
+	createStateConf := &resource.StateChangeConf{
+		Pending: []string{"failed"},
+		Target:  []string{"success"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.NewFirewall(firewallConfig)
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, string(resp.Result), nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err = createStateConf.WaitForStateContext(context.Background())
 	if err != nil {
-		return diag.Errorf("[ERR] failed to create a new firewall: %s", err)
+		return diag.Errorf("[ERR] failed to create a new firewall: %s, err: %s", firewallConfig.Name, err)
+	}
+
+	// Get the firewall
+	firewall, err := apiClient.FindFirewall(firewallConfig.Name)
+	if err != nil {
+		return diag.Errorf("[ERR] error retrieving firewall: %s, err: %s", firewallConfig.Name, err)
 	}
 
 	d.SetId(firewall.ID)
