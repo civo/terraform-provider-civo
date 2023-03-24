@@ -176,7 +176,7 @@ func testAccCheckCivoFirewallConfigBasic(name string) string {
 resource "civo_firewall" "foobar" {
 	name = "%s"
 	create_default_rules = true
-	region = "FAKE"
+	region = "LOCAL"
 }`, name)
 }
 
@@ -185,7 +185,7 @@ func testAccCheckCivoFirewallConfigWithIngressEgress(name string) string {
 resource "civo_firewall" "foobar" {
 	name = "%s"
 	create_default_rules = false
-	region = "FAKE"
+	region = "LOCAL"
 
 	ingress_rule {
 		label = "www https"
@@ -210,6 +210,6 @@ func testAccCheckCivoFirewallConfigUpdates(name string) string {
 resource "civo_firewall" "foobar" {
 	name = "%s"
 	create_default_rules = true
-	region = "FAKE"
+	region = "LOCAL"
 }`, name)
 }
