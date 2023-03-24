@@ -1,4 +1,11 @@
 
+## [v1.0.31](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.31) (24 March 2023)
+
+### Merged
+- [#169](https://github.com/civo/terraform-provider-civo/pull/169) - Add a StateChange to the firewall to wait for network be ready.
+- [#168](https://github.com/civo/terraform-provider-civo/pull/168) - Adds an init script that uses the local version of the provider
+- [#166](https://github.com/civo/terraform-provider-civo/pull/166) - Bump golang.org/x/net from 0.0.0-20220921155015-db77216a4ee9 to 0.7.0
+
 ## [v1.0.30](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.30) (13 February 2023)
 
 ### Merged
