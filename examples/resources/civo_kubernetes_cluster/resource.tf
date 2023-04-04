@@ -28,7 +28,7 @@ resource "civo_firewall_rule" "kubernetes" {
     action = "allow"
 }
 
-# Create a cluster without expecific cluster type by default is k3s
+# Create a cluster without specific cluster type by default is k3s
 resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
