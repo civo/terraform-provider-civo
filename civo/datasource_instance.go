@@ -54,7 +54,7 @@ func dataSourceInstance() *schema.Resource {
 			"cpu_cores": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "Total cpu of the inatance",
+				Description: "Total cpu of the instance",
 			},
 			"ram_mb": {
 				Type:        schema.TypeInt,

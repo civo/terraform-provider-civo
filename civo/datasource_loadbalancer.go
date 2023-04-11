@@ -33,7 +33,7 @@ func dataSourceLoadBalancer() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The region of the load balancer, if you delcare this field, the datasource will use this value instead of the one defined in the provider",
+				Description: "The region of the load balancer, if you declare this field, the datasource will use this value instead of the one defined in the provider",
 			},
 			"public_ip": {
 				Type:        schema.TypeString,

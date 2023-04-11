@@ -35,7 +35,7 @@ output "civo_loadbalancer_output" {
 
 - `id` (String) The id of the load balancer to retrieve (You can find this id from service annotations 'kubernetes.civo.com/loadbalancer-id')
 - `name` (String) The name of the load balancer (You can find this name from service annotations 'kubernetes.civo.com/loadbalancer-name')
-- `region` (String) The region of the load balancer, if you delcare this field, the datasource will use this value instead of the one defined in the provider
+- `region` (String) The region of the load balancer, if you declare this field, the datasource will use this value instead of the one defined in the provider
 
 ### Read-Only
 
