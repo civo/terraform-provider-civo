@@ -155,7 +155,7 @@ func dataSourceInstanceRead(_ context.Context, d *schema.ResourceData, m interfa
 		log.Printf("[INFO] Getting the instance by id")
 		image, err := apiClient.FindInstance(id.(string))
 		if err != nil {
-			return diag.Errorf("[ERR] failed to retrive instance: %s", err)
+			return diag.Errorf("[ERR] failed to retrieve instance: %s", err)
 		}
 
 		foundImage = image
@@ -163,12 +163,15 @@ func dataSourceInstanceRead(_ context.Context, d *schema.ResourceData, m interfa
 		log.Printf("[INFO] Getting the instance by hostname")
 		image, err := apiClient.FindInstance(hostname.(string))
 		if err != nil {
-			return diag.Errorf("[ERR] failed to retrive instance: %s", err)
+			return diag.Errorf("[ERR] failed to retrieve instance: %s", err)
 		}
 
 		foundImage = image
 	}
-
+	//Check for nil pointer
+	if foundImage == nil {
+		return diag.Errorf("[ERR] failed to retrieve instance, image not found")
+	}
 	d.SetId(foundImage.ID)
 	d.Set("hostname", foundImage.Hostname)
 	d.Set("reverse_dns", foundImage.ReverseDNS)
