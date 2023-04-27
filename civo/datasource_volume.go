@@ -74,7 +74,7 @@ func dataSourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface
 		log.Printf("[INFO] Getting the volume by id")
 		volume, err := apiClient.FindVolume(id.(string))
 		if err != nil {
-			return diag.Errorf("[ERR] failed to retrive volume: %s", err)
+			return diag.Errorf("[ERR] failed to retrieve volume: %s", err)
 		}
 
 		foundVolume = volume
@@ -82,12 +82,16 @@ func dataSourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface
 		log.Printf("[INFO] Getting the volume by name")
 		volume, err := apiClient.FindVolume(name.(string))
 		if err != nil {
-			return diag.Errorf("[ERR] failed to retrive volume: %s", err)
+			return diag.Errorf("[ERR] failed to retrieve volume: %s", err)
 		}
 
 		foundVolume = volume
 	}
 
+	//Check for nil pointer
+	if foundVolume == nil {
+		return diag.Errorf("[ERR] failed to retrieve volume")
+	}
 	d.SetId(foundVolume.ID)
 	d.Set("name", foundVolume.Name)
 	d.Set("size_gb", foundVolume.SizeGigabytes)
