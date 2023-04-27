@@ -3,9 +3,9 @@ description: Use this for any other issues. Please do NOT create blank issues
 title: "[OTHER]"
 labels:
   [
-    "✨ goal: improvement",
+    " goal: improvement",
     "🛠 status : under development",
-    "🟨 priority: medium",
+    " priority: medium",
   ]
 body:
   - type: markdown
@@ -21,7 +21,7 @@ body:
   - type: dropdown
     id: browser
     attributes:
-      label: "🥦 Browser"
+      label: " Browser"
       description: "What browser are you using ?"
       options:
         - Google Chrome
@@ -37,7 +37,7 @@ body:
   - type: checkboxes
     id: no-duplicate-issues
     attributes:
-      label: "Checklist ✅"
+      label: "Checklist "
       options:
         - label: "I checked and didn't find similar issue"
           required: true
