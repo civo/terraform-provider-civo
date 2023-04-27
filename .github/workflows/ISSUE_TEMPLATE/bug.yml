@@ -5,7 +5,7 @@ labels:
   [
     "🛠 goal: fix",
     "🛠 status : under development",
-    "🟧 priority: high",
+    " priority: high",
   ]
 body:
   - type: textarea
@@ -26,7 +26,7 @@ body:
   - type: dropdown
     id: browser
     attributes:
-      label: "Browser 🥦"
+      label: "Browser "
       description: "What browser are you using ?"
       options:
         - Google Chrome
@@ -42,7 +42,7 @@ body:
   - type: checkboxes
     id: no-duplicate-issues
     attributes:
-      label: "Checklist ✅"
+      label: "Checklist "
       options:
         - label: "I checked and didn't find similar issue"
           required: true
