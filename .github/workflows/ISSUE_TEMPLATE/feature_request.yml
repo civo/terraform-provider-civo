@@ -1,11 +1,11 @@
-name: 💡 Feature Request
+name: Feature Request
 description: Have a new idea/feature for Terraform Provider? Please suggest!
 title: "[FEATURE] write a small description here"
 labels:
   [
-    "⭐ goal: addition",
+    " goal: addition",
     "🛠 status : under development",
-    "🟨 priority: medium",
+    " priority: medium",
   ]
 body:
   - type: textarea
@@ -26,7 +26,7 @@ body:
   - type: dropdown
     id: browser
     attributes:
-      label: "🥦 Browser"
+      label: "Browser"
       description: "What browser are you using ?"
       options:
         - Google Chrome
