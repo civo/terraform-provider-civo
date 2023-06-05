@@ -7,7 +7,7 @@ data civo_database_version "mysql" {
 }
 
 # Example for postgresql
-data civo_database_version "mysql" {
+data civo_database_version "postgresql" {
   filter {
         key = "engine"
         values = ["postgresql"]
