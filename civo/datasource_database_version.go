@@ -62,7 +62,7 @@ func flattenVersion(versions, _ interface{}, _ map[string]interface{}) (map[stri
 	flattenedSize["engine"] = s.Engine
 	flattenedSize["version"] = s.Version
 	flattenedSize["default"] = s.Default
-	
+
 	return flattenedSize, nil
 }
 

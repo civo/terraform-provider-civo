@@ -31,15 +31,15 @@ func resourceDatabase() *schema.Resource {
 				Description:  "Size of the database",
 			},
 			"engine": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The engine of the database",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The engine of the database",
 				ValidateFunc: validation.NoZeroValues,
 			},
 			"version": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The version of the database",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The version of the database",
 				ValidateFunc: validation.NoZeroValues,
 			},
 			"network_id": {
@@ -109,10 +109,10 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] configuring the database %s", d.Get("name").(string))
 
 	config := &civogo.CreateDatabaseRequest{
-		Name:   d.Get("name").(string),
-		Software: d.Get("engine").(string),
+		Name:            d.Get("name").(string),
+		Software:        d.Get("engine").(string),
 		SoftwareVersion: d.Get("version").(string),
-		Region: apiClient.Region,
+		Region:          apiClient.Region,
 	}
 
 	if attr, ok := d.GetOk("nodes"); ok {
