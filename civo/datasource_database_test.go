@@ -22,6 +22,8 @@ func TestAccDataSourceCivoDatabase_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 					resource.TestCheckResourceAttrSet(datasourceName, "size"),
 					resource.TestCheckResourceAttrSet(datasourceName, "nodes"),
+					resource.TestCheckResourceAttrSet(datasourceName, "engine"),
+					resource.TestCheckResourceAttrSet(datasourceName, "version"),
 					resource.TestCheckResourceAttr(datasourceName, "status", "Ready"),
 				),
 			},
@@ -34,6 +36,8 @@ func testAccDataSourceCivoDatabaseConfig(name string) string {
 resource "civo_database" "foobar" {
 	name = "%s"
 	size = "g3.db.xsmall"
+	engine = "Postgres"
+	version = "13"
 	nodes = 2
 }
 
