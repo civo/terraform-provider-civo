@@ -44,7 +44,6 @@ func Provider() *schema.Provider {
 			"civo_disk_image":              dataSourceDiskImage(),
 			"civo_kubernetes_version":      dataSourceKubernetesVersion(),
 			"civo_kubernetes_cluster":      dataSourceKubernetesCluster(),
-			"civo_instances_size":          dataSourceInstancesSize(),
 			"civo_size":                    dataSourceSize(),
 			"civo_instances":               dataSourceInstances(),
 			"civo_instance":                dataSourceInstance(),
@@ -60,6 +59,7 @@ func Provider() *schema.Provider {
 			"civo_region":                  dataSourceRegion(),
 			"civo_reserved_ip":             dataSourceReservedIP(),
 			"civo_database":                dataSourceDatabase(),
+			"civo_database_version":        dataDatabaseVersion(),
 			// "civo_snapshot":           dataSourceSnapshot(),
 		},
 		ResourcesMap: map[string]*schema.Resource{

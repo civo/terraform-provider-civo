@@ -35,6 +35,8 @@ func TestAccCivoDatabase_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resName, "name", databaseName),
 					resource.TestCheckResourceAttrSet(resName, "size"),
 					resource.TestCheckResourceAttrSet(resName, "nodes"),
+					resource.TestCheckResourceAttrSet(resName, "engine"),
+					resource.TestCheckResourceAttrSet(resName, "version"),
 					resource.TestCheckResourceAttr(resName, "status", "Ready"),
 				),
 			},
@@ -140,6 +142,8 @@ func testAccCheckCivoDatabaseConfigBasic(name string) string {
 resource "civo_database" "foobar" {
 	name = "%s"
 	size = "g3.db.xsmall"
+	engine = "Postgres"
+	version = "13"
 	nodes = 2
 }`, name)
 }
@@ -149,6 +153,8 @@ func testAccCheckCivoDatabaseConfigUpdates(name string) string {
 resource "civo_database" "foobar" {
 	name = "%s"
 	size = "g3.db.xsmall"
+	engine = "Postgres"
+	version = "13"
 	nodes = 2
 }`, name)
 }
