@@ -1,4 +1,6 @@
 
+## [v1.0.32](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.32) (12 June 2023)
+
 ## [v1.0.33](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.33) (12 June 2023)
 
 ### Merged
