@@ -1,6 +1,9 @@
 
 ## [v1.0.34](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.34) (12 June 2023)
 
+### Merged
+- [#180](https://github.com/civo/terraform-provider-civo/pull/180) - Update the terraform lib also the civogo
+
 ## [v1.0.33](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.33) (12 June 2023)
 
 ### Merged
