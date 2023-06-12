@@ -33,6 +33,7 @@ data "civo_database" "test" {
 
 ### Read-Only
 
+- `engine` (String) The engine of the database
 - `firewall_id` (String) The firewall id of the Database
 - `network_id` (String) The network id of the Database
 - `nodes` (Number) Count of nodes
@@ -40,5 +41,6 @@ data "civo_database" "test" {
 - `size` (String) Size of the database
 - `status` (String) The status of the database
 - `username` (String) The username of the database
+- `version` (String) The version of the database
 
 

@@ -1,4 +1,19 @@
 
+## [v1.0.33](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.33) (12 June 2023)
+
+### Merged
+- [#179](https://github.com/civo/terraform-provider-civo/pull/179) - Add WaitForStateto the network delete
+- [#178](https://github.com/civo/terraform-provider-civo/pull/178) - Update the database
+- [#171](https://github.com/civo/terraform-provider-civo/pull/171) - fix typo errors for code and documentation
+- [#177](https://github.com/civo/terraform-provider-civo/pull/177) - Get Volume data-source improvement
+- [#174](https://github.com/civo/terraform-provider-civo/pull/174) - feat: add ISSUE_TEMPLATES to report issues
+- [#173](https://github.com/civo/terraform-provider-civo/pull/173) - feat: add bug.yml
+- [#172](https://github.com/civo/terraform-provider-civo/pull/172) - nil pointer check for instance
+- [#170](https://github.com/civo/terraform-provider-civo/pull/170) - Update kubernetes_cluster.md
+
+### Commits
+- [2b9a899](https://github.com/civo/terraform-provider-civo/commit/2b9a899467993492641319099c5bc08e7624d55d) - Update resource.tf
+
 ## [v1.0.31](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.31) (24 March 2023)
 
 ### Merged

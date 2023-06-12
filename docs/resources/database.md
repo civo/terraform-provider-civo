@@ -29,6 +29,8 @@ resource "civo_database" "custom_database" {
     name = "custom_database"
     size = element(data.civo_size.small.sizes, 0).name
     nodes = 2
+    engine = element(data.civo_database_version.mysql.versions, 0).engine
+    version = element(data.civo_database_version.mysql.versions, 0).version
 }
 ```
 
@@ -37,9 +39,11 @@ resource "civo_database" "custom_database" {
 
 ### Required
 
+- `engine` (String) The engine of the database
 - `name` (String) Name of the database
 - `nodes` (Number) Count of nodes
 - `size` (String) Size of the database
+- `version` (String) The version of the database
 
 ### Optional
 
