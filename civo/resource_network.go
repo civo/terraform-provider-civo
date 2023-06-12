@@ -164,6 +164,6 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.Errorf("error waiting for network (%s) to be deleted: %s", netowrkID, err)
 	}
-	
+
 	return nil
 }
