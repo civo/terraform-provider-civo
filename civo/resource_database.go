@@ -2,6 +2,7 @@ package civo
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -47,6 +48,7 @@ func resourceDatabase() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "The id of the associated network",
+				ForceNew:    true,
 			},
 			"nodes": {
 				Type:         schema.TypeInt,
@@ -75,6 +77,21 @@ func resourceDatabase() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The password of the database",
+			},
+			"endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The endpoint of the database",
+			},
+			"dns_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The DNS endpoint of the database",
+			},
+			"port": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The port of the database",
 			},
 			"status": {
 				Type:        schema.TypeString,
@@ -249,6 +266,9 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interfa
 	d.Set("region", apiClient.Region)
 	d.Set("username", resp.Username)
 	d.Set("password", resp.Password)
+	d.Set("endpoint", resp.PublicIPv4)
+	d.Set("dns_endpoint", fmt.Sprintf("%s.db.civo.com", resp.ID))
+	d.Set("port", resp.Port)
 	d.Set("status", resp.Status)
 
 	return nil

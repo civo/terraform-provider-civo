@@ -2,6 +2,7 @@ package civo
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 
@@ -77,6 +78,21 @@ func dataSourceDatabase() *schema.Resource {
 				Computed:    true,
 				Description: "The password of the database",
 			},
+			"endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The endpoint of the database",
+			},
+			"dns_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The DNS endpoint of the database",
+			},
+			"port": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The port of the database",
+			},
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -128,6 +144,9 @@ func dataSourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interfa
 	d.Set("firewall_id", foundDatabase.FirewallID)
 	d.Set("username", foundDatabase.Username)
 	d.Set("password", foundDatabase.Password)
+	d.Set("endpoint", foundDatabase.PublicIPv4)
+	d.Set("dns_endpoint", fmt.Sprintf("%s.db.civo.com", foundDatabase.ID))
+	d.Set("port", foundDatabase.Port)
 	d.Set("status", foundDatabase.Status)
 
 	return nil
