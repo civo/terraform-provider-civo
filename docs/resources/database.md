@@ -25,6 +25,13 @@ data "civo_size" "small" {
     }
 }
 
+data civo_database_version "mysql" {
+  filter {
+        key = "engine"
+        values = ["mysql"]
+    }
+}
+
 resource "civo_database" "custom_database" {
     name = "custom_database"
     size = element(data.civo_size.small.sizes, 0).name
@@ -54,8 +61,11 @@ resource "civo_database" "custom_database" {
 
 ### Read-Only
 
+- `dns_endpoint` (String) The DNS endpoint of the database
+- `endpoint` (String) The endpoint of the database
 - `id` (String) The ID of this resource.
 - `password` (String) The password of the database
+- `port` (Number) The port of the database
 - `status` (String) The status of the database
 - `username` (String) The username of the database
 

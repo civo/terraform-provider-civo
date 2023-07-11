@@ -1,4 +1,9 @@
 
+## [v1.0.35](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.35) (11 July 2023)
+
+### Merged
+- [#182](https://github.com/civo/terraform-provider-civo/pull/182) - Fix the doc for database and add extra field
+
 ## [v1.0.34](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.34) (12 June 2023)
 
 ### Merged
