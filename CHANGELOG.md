@@ -6,6 +6,7 @@
 
 ### Commits
 - [68fc307](https://github.com/civo/terraform-provider-civo/commit/68fc307e1817e1e3ee45e5782d3d7872e9e042dd) - move to crazy-max/ghaction-import-gpg the other one is deprecated
+- [48fdc8b](https://github.com/civo/terraform-provider-civo/commit/48fdc8b3039f464a4d39cc34034759c5aa6fa733) - Try with GITHUB_TOKEN
 - [8ebe0f2](https://github.com/civo/terraform-provider-civo/commit/8ebe0f2a2da0995fcd82b6be70f52d807b24f5e2) - Use the version 1.18.2 for goreleaser
 - [ee40365](https://github.com/civo/terraform-provider-civo/commit/ee40365b43ea6f8933c85ff9563287bbc375a2c7) - Add version to the goreleaser
 
