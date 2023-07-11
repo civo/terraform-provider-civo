@@ -14,6 +14,18 @@ data civo_database_version "postgresql" {
     }
 }
 
+data "civo_size" "small" {
+    filter {
+        key = "name"
+        values = ["db.small"]
+        match_by = "re"
+    }
+    filter {
+        key = "type"
+        values = ["database"]
+    }
+}
+
 # To use this data source, make sure you have a database cluster created.
 resource "civo_database" "custom_database" {
     name = "custom_database"

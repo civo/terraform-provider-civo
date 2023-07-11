@@ -10,6 +10,13 @@ data "civo_size" "small" {
     }
 }
 
+data civo_database_version "mysql" {
+  filter {
+        key = "engine"
+        values = ["mysql"]
+    }
+}
+
 resource "civo_database" "custom_database" {
     name = "custom_database"
     size = element(data.civo_size.small.sizes, 0).name
