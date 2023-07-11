@@ -5,6 +5,7 @@
 - [#182](https://github.com/civo/terraform-provider-civo/pull/182) - Fix the doc for database and add extra field
 
 ### Commits
+- [68fc307](https://github.com/civo/terraform-provider-civo/commit/68fc307e1817e1e3ee45e5782d3d7872e9e042dd) - move to crazy-max/ghaction-import-gpg the other one is deprecated
 - [ee40365](https://github.com/civo/terraform-provider-civo/commit/ee40365b43ea6f8933c85ff9563287bbc375a2c7) - Add version to the goreleaser
 
 ## [v1.0.34](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.34) (12 June 2023)
