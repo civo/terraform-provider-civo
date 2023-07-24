@@ -1,4 +1,9 @@
 
+## [v1.0.36](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.36) (24 July 2023)
+
+### Merged
+- [#184](https://github.com/civo/terraform-provider-civo/pull/184) - Add support for public ip node pool
+
 ## [v1.0.35](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.35) (11 July 2023)
 
 ### Merged

@@ -60,6 +60,7 @@ resource "civo_kubernetes_node_pool" "back-end" {
 - `label` (String) Node pool label, if you don't provide one, we will generate one for you
 - `node_count` (Number) the number of instances to create (optional, the default at the time of writing is 3)
 - `num_target_nodes` (Number, Deprecated) the number of instances to create (optional, the default at the time of writing is 3)
+- `public_ip_node_pool` (Boolean) Node pool belongs to the public ip node pool
 - `size` (String) the size of each node (optional, the default is currently g4s.kube.medium)
 - `target_nodes_size` (String, Deprecated) the size of each node (optional, the default is currently g4s.kube.medium)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))

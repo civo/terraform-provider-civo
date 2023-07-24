@@ -14,40 +14,40 @@ Retrieves information about the database versions that Civo supports, with the a
 
 ```terraform
 # Example for mysql
-data civo_database_version "mysql" {
+data "civo_database_version" "mysql" {
   filter {
-        key = "engine"
-        values = ["mysql"]
-    }
+    key    = "engine"
+    values = ["mysql"]
+  }
 }
 
 # Example for postgresql
-data civo_database_version "postgresql" {
+data "civo_database_version" "postgresql" {
   filter {
-        key = "engine"
-        values = ["postgresql"]
-    }
+    key    = "engine"
+    values = ["postgresql"]
+  }
 }
 
 data "civo_size" "small" {
-    filter {
-        key = "name"
-        values = ["db.small"]
-        match_by = "re"
-    }
-    filter {
-        key = "type"
-        values = ["database"]
-    }
+  filter {
+    key      = "name"
+    values   = ["db.small"]
+    match_by = "re"
+  }
+  filter {
+    key    = "type"
+    values = ["database"]
+  }
 }
 
 # To use this data source, make sure you have a database cluster created.
 resource "civo_database" "custom_database" {
-    name = "custom_database"
-    size = element(data.civo_size.small.sizes, 0).name
-    nodes = 2
-    engine = element(data.civo_database_version.mysql.versions, 0).engine
-    version = element(data.civo_database_version.mysql.versions, 0).version
+  name    = "custom_database"
+  size    = element(data.civo_size.small.sizes, 0).name
+  nodes   = 2
+  engine  = element(data.civo_database_version.mysql.versions, 0).engine
+  version = element(data.civo_database_version.mysql.versions, 0).version
 }
 ```
 
