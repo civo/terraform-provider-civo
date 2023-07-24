@@ -72,6 +72,12 @@ func resourceKubernetesClusterNodePool() *schema.Resource {
 				},
 				Description: "Instance names in the nodepool",
 			},
+			"public_ip_node_pool": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Node pool belongs to the public ip node pool",
+			},
 		},
 		CreateContext: resourceKubernetesClusterNodePoolCreate,
 		ReadContext:   resourceKubernetesClusterNodePoolRead,
@@ -129,7 +135,13 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 		newPool = append(newPool, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size})
 	}
 
-	newPool = append(newPool, civogo.KubernetesClusterPoolConfig{ID: nodePoolLabel, Count: count, Size: size})
+	pool := civogo.KubernetesClusterPoolConfig{ID: nodePoolLabel, Count: count, Size: size}
+
+	if value, ok := d.GetOk("public_ip_node_pool"); ok {
+		pool.PublicIPNodePool = value.(bool)
+	}
+
+	newPool = append(newPool, pool)
 
 	log.Printf("[INFO] configuring kubernetes cluster %s to add pool %s", getKubernetesCluster.ID, nodePoolLabel)
 	config := &civogo.KubernetesClusterConfig{
@@ -183,6 +195,10 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 	d.Set("cluster_id", resp.ID)
 	d.Set("node_count", resp.Pools[poolIndex].Count)
 	d.Set("size", resp.Pools[poolIndex].Size)
+
+	if resp.Pools[poolIndex].PublicIPNodePool {
+		d.Set("public_ip_node_pool", resp.Pools[poolIndex].PublicIPNodePool)
+	}
 
 	poolInstanceNames := make([]string, 0)
 	poolInstanceNames = append(poolInstanceNames, resp.Pools[poolIndex].InstanceNames...)
@@ -321,6 +337,9 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 				d.Set("node_count", v.Count)
 				d.Set("size", v.Size)
 				d.Set("region", currentRegionCode)
+				if v.PublicIPNodePool {
+					d.Set("public_ip_node_pool", v.PublicIPNodePool)
+				}
 			}
 		}
 	}

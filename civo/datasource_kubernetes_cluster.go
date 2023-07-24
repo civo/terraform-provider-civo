@@ -143,6 +143,11 @@ func dataSourcenodePoolSchema() *schema.Schema {
 					Description: "A list of the instance in the pool",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 				},
+				"public_ip_node_pool": {
+					Type:        schema.TypeBool,
+					Computed:    true,
+					Description: "Node pool belongs to the public ip node pool",
+				},
 			},
 		},
 	}
@@ -246,10 +251,11 @@ func flattenDataSourceNodePool(cluster *civogo.KubernetesCluster) []interface{} 
 		poolInstanceNames = append(poolInstanceNames, pool.InstanceNames...)
 
 		rawPool := map[string]interface{}{
-			"label":          pool.ID,
-			"node_count":     pool.Count,
-			"size":           pool.Size,
-			"instance_names": poolInstanceNames,
+			"label":               pool.ID,
+			"node_count":          pool.Count,
+			"size":                pool.Size,
+			"instance_names":      poolInstanceNames,
+			"public_ip_node_pool": pool.PublicIPNodePool,
 		}
 		flattenedPool = append(flattenedPool, rawPool)
 	}

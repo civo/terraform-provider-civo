@@ -2,7 +2,7 @@ module github.com/civo/terraform-provider-civo
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/civo/civogo v0.3.36
+	github.com/civo/civogo v0.3.42
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0

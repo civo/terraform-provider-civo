@@ -183,6 +183,12 @@ func nodePoolSchema() *schema.Schema {
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					Description: "Instance names in the nodepool",
 				},
+				"public_ip_node_pool": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Computed:    true,
+					Description: "Node pool belongs to the public ip node pool",
+				},
 			},
 		},
 	}
@@ -495,10 +501,11 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 	poolInstanceNames = append(poolInstanceNames, cluster.Pools[0].InstanceNames...)
 
 	rawPool := map[string]interface{}{
-		"label":          cluster.Pools[0].ID,
-		"node_count":     cluster.Pools[0].Count,
-		"size":           cluster.Pools[0].Size,
-		"instance_names": poolInstanceNames,
+		"label":               cluster.Pools[0].ID,
+		"node_count":          cluster.Pools[0].Count,
+		"size":                cluster.Pools[0].Size,
+		"instance_names":      poolInstanceNames,
+		"public_ip_node_pool": cluster.Pools[0].PublicIPNodePool,
 	}
 
 	flattenedPool = append(flattenedPool, rawPool)
@@ -543,6 +550,11 @@ func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConf
 			Size:  pool["size"].(string),
 			Count: pool["node_count"].(int),
 		}
+
+		if pool["public_ip_node_pool"].(bool) {
+			cr.PublicIPNodePool = pool["public_ip_node_pool"].(bool)
+		}
+
 		expandedNodePools = append(expandedNodePools, cr)
 	}
 
