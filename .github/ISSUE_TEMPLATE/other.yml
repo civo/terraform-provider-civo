@@ -1,4 +1,4 @@
-name: ❗ Other
+name: Other
 description: Use this for any other issues. Please do NOT create blank issues
 title: "[OTHER] <description>"
 labels: ["other"]
