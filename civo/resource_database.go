@@ -2,6 +2,7 @@ package civo
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -24,23 +25,36 @@ func resourceDatabase() *schema.Resource {
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "Name of the database",
 			},
-			"nodes": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ValidateFunc: validation.NoZeroValues,
-				Description:  "Count of nodes",
-			},
 			"size": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "Size of the database",
 			},
+			"engine": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The engine of the database",
+				ValidateFunc: validation.NoZeroValues,
+			},
+			"version": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The version of the database",
+				ValidateFunc: validation.NoZeroValues,
+			},
 			"network_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				Description: "The id of the associated network",
+				ForceNew:    true,
+			},
+			"nodes": {
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.NoZeroValues,
+				Description:  "Count of nodes",
 			},
 			"firewall_id": {
 				Type:        schema.TypeString,
@@ -63,6 +77,21 @@ func resourceDatabase() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The password of the database",
+			},
+			"endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The endpoint of the database",
+			},
+			"dns_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The DNS endpoint of the database",
+			},
+			"port": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The port of the database",
 			},
 			"status": {
 				Type:        schema.TypeString,
@@ -97,8 +126,10 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] configuring the database %s", d.Get("name").(string))
 
 	config := &civogo.CreateDatabaseRequest{
-		Name:   d.Get("name").(string),
-		Region: apiClient.Region,
+		Name:            d.Get("name").(string),
+		Software:        d.Get("engine").(string),
+		SoftwareVersion: d.Get("version").(string),
+		Region:          apiClient.Region,
 	}
 
 	if attr, ok := d.GetOk("nodes"); ok {
@@ -228,11 +259,16 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interfa
 	d.Set("name", resp.Name)
 	d.Set("size", resp.Size)
 	d.Set("nodes", resp.Nodes)
+	d.Set("engine", resp.Software)
+	d.Set("version", resp.SoftwareVersion)
 	d.Set("network_id", resp.NetworkID)
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("region", apiClient.Region)
 	d.Set("username", resp.Username)
 	d.Set("password", resp.Password)
+	d.Set("endpoint", resp.PublicIPv4)
+	d.Set("dns_endpoint", fmt.Sprintf("%s.db.civo.com", resp.ID))
+	d.Set("port", resp.Port)
 	d.Set("status", resp.Status)
 
 	return nil

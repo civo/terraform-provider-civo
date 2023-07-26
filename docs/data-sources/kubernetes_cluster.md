@@ -71,6 +71,7 @@ Read-Only:
 - `instance_names` (Set of String)
 - `label` (String)
 - `node_count` (Number)
+- `public_ip_node_pool` (Boolean)
 - `size` (String)
 
 

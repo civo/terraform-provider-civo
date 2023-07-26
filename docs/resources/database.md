@@ -14,21 +14,30 @@ description: |-
 
 ```terraform
 data "civo_size" "small" {
-    filter {
-        key = "name"
-        values = ["db.small"]
-        match_by = "re"
-    }
-    filter {
-        key = "type"
-        values = ["database"]
-    }
+  filter {
+    key      = "name"
+    values   = ["db.small"]
+    match_by = "re"
+  }
+  filter {
+    key    = "type"
+    values = ["database"]
+  }
+}
+
+data "civo_database_version" "mysql" {
+  filter {
+    key    = "engine"
+    values = ["mysql"]
+  }
 }
 
 resource "civo_database" "custom_database" {
-    name = "custom_database"
-    size = element(data.civo_size.small.sizes, 0).name
-    nodes = 2
+  name    = "custom_database"
+  size    = element(data.civo_size.small.sizes, 0).name
+  nodes   = 2
+  engine  = element(data.civo_database_version.mysql.versions, 0).engine
+  version = element(data.civo_database_version.mysql.versions, 0).version
 }
 ```
 
@@ -37,9 +46,11 @@ resource "civo_database" "custom_database" {
 
 ### Required
 
+- `engine` (String) The engine of the database
 - `name` (String) Name of the database
 - `nodes` (Number) Count of nodes
 - `size` (String) Size of the database
+- `version` (String) The version of the database
 
 ### Optional
 
@@ -50,8 +61,11 @@ resource "civo_database" "custom_database" {
 
 ### Read-Only
 
+- `dns_endpoint` (String) The DNS endpoint of the database
+- `endpoint` (String) The endpoint of the database
 - `id` (String) The ID of this resource.
 - `password` (String) The password of the database
+- `port` (Number) The port of the database
 - `status` (String) The status of the database
 - `username` (String) The username of the database
 

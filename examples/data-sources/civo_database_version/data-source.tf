@@ -1,3 +1,19 @@
+# Example for mysql
+data "civo_database_version" "mysql" {
+  filter {
+    key    = "engine"
+    values = ["mysql"]
+  }
+}
+
+# Example for postgresql
+data "civo_database_version" "postgresql" {
+  filter {
+    key    = "engine"
+    values = ["postgresql"]
+  }
+}
+
 data "civo_size" "small" {
   filter {
     key      = "name"
@@ -10,13 +26,7 @@ data "civo_size" "small" {
   }
 }
 
-data "civo_database_version" "mysql" {
-  filter {
-    key    = "engine"
-    values = ["mysql"]
-  }
-}
-
+# To use this data source, make sure you have a database cluster created.
 resource "civo_database" "custom_database" {
   name    = "custom_database"
   size    = element(data.civo_size.small.sizes, 0).name

@@ -33,12 +33,17 @@ data "civo_database" "test" {
 
 ### Read-Only
 
+- `dns_endpoint` (String) The DNS endpoint of the database
+- `endpoint` (String) The endpoint of the database
+- `engine` (String) The engine of the database
 - `firewall_id` (String) The firewall id of the Database
 - `network_id` (String) The network id of the Database
 - `nodes` (Number) Count of nodes
 - `password` (String) The password of the database
+- `port` (Number) The port of the database
 - `size` (String) Size of the database
 - `status` (String) The status of the database
 - `username` (String) The username of the database
+- `version` (String) The version of the database
 
 

@@ -35,7 +35,7 @@ output "instance_output" {
 
 ### Read-Only
 
-- `cpu_cores` (Number) Total cpu of the inatance
+- `cpu_cores` (Number) Total cpu of the instance
 - `created_at` (String) The date of creation of the instance
 - `disk_gb` (Number) The size of the disk
 - `firewall_id` (String) The ID of the firewall used

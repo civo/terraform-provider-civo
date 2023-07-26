@@ -1,4 +1,40 @@
 
+## [v1.0.36](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.36) (24 July 2023)
+
+### Merged
+- [#184](https://github.com/civo/terraform-provider-civo/pull/184) - Add support for public ip node pool
+
+## [v1.0.35](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.35) (11 July 2023)
+
+### Merged
+- [#182](https://github.com/civo/terraform-provider-civo/pull/182) - Fix the doc for database and add extra field
+
+### Commits
+- [68fc307](https://github.com/civo/terraform-provider-civo/commit/68fc307e1817e1e3ee45e5782d3d7872e9e042dd) - move to crazy-max/ghaction-import-gpg the other one is deprecated
+- [48fdc8b](https://github.com/civo/terraform-provider-civo/commit/48fdc8b3039f464a4d39cc34034759c5aa6fa733) - Try with GITHUB_TOKEN
+- [8ebe0f2](https://github.com/civo/terraform-provider-civo/commit/8ebe0f2a2da0995fcd82b6be70f52d807b24f5e2) - Use the version 1.18.2 for goreleaser
+- [ee40365](https://github.com/civo/terraform-provider-civo/commit/ee40365b43ea6f8933c85ff9563287bbc375a2c7) - Add version to the goreleaser
+
+## [v1.0.34](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.34) (12 June 2023)
+
+### Merged
+- [#180](https://github.com/civo/terraform-provider-civo/pull/180) - Update the terraform lib also the civogo
+
+## [v1.0.33](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.33) (12 June 2023)
+
+### Merged
+- [#179](https://github.com/civo/terraform-provider-civo/pull/179) - Add WaitForStateto the network delete
+- [#178](https://github.com/civo/terraform-provider-civo/pull/178) - Update the database
+- [#171](https://github.com/civo/terraform-provider-civo/pull/171) - fix typo errors for code and documentation
+- [#177](https://github.com/civo/terraform-provider-civo/pull/177) - Get Volume data-source improvement
+- [#174](https://github.com/civo/terraform-provider-civo/pull/174) - feat: add ISSUE_TEMPLATES to report issues
+- [#173](https://github.com/civo/terraform-provider-civo/pull/173) - feat: add bug.yml
+- [#172](https://github.com/civo/terraform-provider-civo/pull/172) - nil pointer check for instance
+- [#170](https://github.com/civo/terraform-provider-civo/pull/170) - Update kubernetes_cluster.md
+
+### Commits
+- [2b9a899](https://github.com/civo/terraform-provider-civo/commit/2b9a899467993492641319099c5bc08e7624d55d) - Update resource.tf
+
 ## [v1.0.31](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.31) (24 March 2023)
 
 ### Merged

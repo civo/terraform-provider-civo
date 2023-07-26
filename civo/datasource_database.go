@@ -2,6 +2,7 @@ package civo
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 
@@ -36,6 +37,16 @@ func dataSourceDatabase() *schema.Resource {
 				Computed:    true,
 				Description: "Size of the database",
 			},
+			"engine": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The engine of the database",
+			},
+			"version": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The version of the database",
+			},
 			"nodes": {
 				Type:        schema.TypeInt,
 				Computed:    true,
@@ -66,6 +77,21 @@ func dataSourceDatabase() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The password of the database",
+			},
+			"endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The endpoint of the database",
+			},
+			"dns_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The DNS endpoint of the database",
+			},
+			"port": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The port of the database",
 			},
 			"status": {
 				Type:        schema.TypeString,
@@ -111,11 +137,16 @@ func dataSourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interfa
 	d.Set("name", foundDatabase.Name)
 	d.Set("region", apiClient.Region)
 	d.Set("size", foundDatabase.Size)
+	d.Set("engine", foundDatabase.Software)
+	d.Set("version", foundDatabase.SoftwareVersion)
 	d.Set("nodes", foundDatabase.Nodes)
 	d.Set("network_id", foundDatabase.NetworkID)
 	d.Set("firewall_id", foundDatabase.FirewallID)
 	d.Set("username", foundDatabase.Username)
 	d.Set("password", foundDatabase.Password)
+	d.Set("endpoint", foundDatabase.PublicIPv4)
+	d.Set("dns_endpoint", fmt.Sprintf("%s.db.civo.com", foundDatabase.ID))
+	d.Set("port", foundDatabase.Port)
 	d.Set("status", foundDatabase.Status)
 
 	return nil

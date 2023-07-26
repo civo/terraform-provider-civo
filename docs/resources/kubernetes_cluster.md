@@ -128,6 +128,7 @@ Required:
 Optional:
 
 - `label` (String) Node pool label, if you don't provide one, we will generate one for you
+- `public_ip_node_pool` (Boolean) Node pool belongs to the public ip node pool
 
 Read-Only:
 

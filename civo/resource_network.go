@@ -3,10 +3,12 @@ package civo
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -133,10 +135,35 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 		apiClient.Region = region.(string)
 	}
 
-	log.Printf("[INFO] deleting the network %s", d.Id())
-	_, err := apiClient.DeleteNetwork(d.Id())
+	netowrkID := d.Id()
+	log.Printf("[INFO] Checking if firewall %s exists", netowrkID)
+	_, err := apiClient.FindNetwork(netowrkID)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while trying to delete the network %s", d.Id())
+		log.Printf("[INFO] Unable to find network %s - probably it's been deleted", netowrkID)
+		return nil
 	}
+
+	log.Printf("[INFO] deleting the network %s", netowrkID)
+
+	deleteStateConf := &resource.StateChangeConf{
+		Pending: []string{"failed"},
+		Target:  []string{"success"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.DeleteNetwork(netowrkID)
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, string(resp.Result), nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err = deleteStateConf.WaitForStateContext(context.Background())
+	if err != nil {
+		return diag.Errorf("error waiting for network (%s) to be deleted: %s", netowrkID, err)
+	}
+
 	return nil
 }

@@ -16,8 +16,12 @@ An error will be raised if the provided volume name does not exist in your Civo 
 ## Example Usage
 
 ```terraform
-data "civo_volume" "mysql" {
-    name = "database-mysql"
+data "civo_volume" "myvolume" {
+  name = "test-volume-name"
+}
+
+output "volume_output" {
+  value = data.civo_volume.myvolume
 }
 ```
 
