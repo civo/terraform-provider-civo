@@ -3,7 +3,7 @@
 page_title: "civo_reserved_ip Resource - terraform-provider-civo"
 subcategory: ""
 description: |-
-  Provides a Civo reserved IP to represent a publicly-accessible static IP addresses that can be mapped to one of your Instancesor Load Balancer.
+  Provides a Civo reserved IP to represent a publicly-accessible static IP addresses that can be mapped to one of your Instances or a Load Balancer.
 ---
 
 # civo_reserved_ip (Resource)
