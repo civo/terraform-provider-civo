@@ -9,7 +9,6 @@ data "civo_size" "small" {
         key = "type"
         values = ["instance"]
     }
-
 }
 
 resource "civo_instance" "my-test-instance" {
