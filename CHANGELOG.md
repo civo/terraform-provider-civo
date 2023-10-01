@@ -1,4 +1,10 @@
 
+## [v1.0.37](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.37) (1 October 2023)
+
+### Merged
+- [#188](https://github.com/civo/terraform-provider-civo/pull/188) - Update the civo_size with the new format and add more examples
+- [#175](https://github.com/civo/terraform-provider-civo/pull/175) - fix(.github): adds github workflows for ISSUE TEMPLATES for bug addition, documentation add, feature request and security
+
 ## [v1.0.36](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.36) (24 July 2023)
 
 ### Merged

@@ -24,7 +24,6 @@ data "civo_size" "small" {
         key = "type"
         values = ["instance"]
     }
-
 }
 
 resource "civo_instance" "my-test-instance" {
@@ -54,7 +53,7 @@ resource "civo_instance" "my-test-instance" {
 
 Required:
 
-- `key` (String) Filter sizes by this key. This may be one of `cpu`, `description`, `disk`, `name`, `ram`, `selectable`, `type`.
+- `key` (String) Filter sizes by this key. This may be one of `cpu`, `description`, `disk`, `gpu_type`, `gpu`, `name`, `ram`, `selectable`, `type`.
 - `values` (List of String) Only retrieves `sizes` which keys has value that matches one of the values provided here
 
 Optional:
@@ -68,7 +67,7 @@ Optional:
 
 Required:
 
-- `key` (String) Sort sizes by this key. This may be one of `cpu`, `description`, `disk`, `name`, `ram`, `selectable`, `type`.
+- `key` (String) Sort sizes by this key. This may be one of `cpu`, `description`, `disk`, `gpu_type`, `gpu`, `name`, `ram`, `selectable`, `type`.
 
 Optional:
 
@@ -83,6 +82,8 @@ Read-Only:
 - `cpu` (Number)
 - `description` (String)
 - `disk` (Number)
+- `gpu` (Number)
+- `gpu_type` (String)
 - `name` (String)
 - `ram` (Number)
 - `selectable` (Boolean)
