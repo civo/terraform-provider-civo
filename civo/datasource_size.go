@@ -16,6 +16,8 @@ type Size struct {
 	Type        string
 	CPU         int
 	RAM         int
+	GPU         int
+	GPUType     string
 	DisK        int
 	Selectable  bool
 }
@@ -51,24 +53,15 @@ func getSizes(m interface{}, _ map[string]interface{}) ([]interface{}, error) {
 			continue
 		}
 
-		typeName := ""
-
-		switch {
-		case strings.Contains(v.Name, "db"):
-			typeName = "database"
-		case strings.Contains(v.Name, "kube") || strings.Contains(v.Name, "k3s"):
-			typeName = "kubernetes"
-		default:
-			typeName = "instance"
-		}
-
 		sizeList = append(sizeList, Size{
 			Name:        v.Name,
 			Description: v.Description,
-			Type:        typeName,
+			Type:        strings.ToLower(v.Type),
 			CPU:         v.CPUCores,
 			RAM:         v.RAMMegabytes,
 			DisK:        v.DiskGigabytes,
+			GPU:         v.GPUCount,
+			GPUType:     v.GPUType,
 			Selectable:  v.Selectable,
 		})
 	}
@@ -90,6 +83,8 @@ func flattenSize(size, _ interface{}, _ map[string]interface{}) (map[string]inte
 	flattenedSize["cpu"] = s.CPU
 	flattenedSize["ram"] = s.RAM
 	flattenedSize["disk"] = s.DisK
+	flattenedSize["gpu"] = s.GPU
+	flattenedSize["gpu_type"] = s.GPUType
 	flattenedSize["description"] = s.Description
 	flattenedSize["selectable"] = s.Selectable
 
@@ -101,27 +96,37 @@ func sizeSchema() map[string]*schema.Schema {
 		"name": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "The name of the instance size",
+			Description: "The name of the size",
 		},
 		"type": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "A human name of the instance size",
+			Description: "A human name of the size",
 		},
 		"cpu": {
 			Type:        schema.TypeInt,
 			Computed:    true,
-			Description: "Total of CPU in the instance",
+			Description: "Total of CPU",
 		},
 		"ram": {
 			Type:        schema.TypeInt,
 			Computed:    true,
-			Description: "Total of RAM of the instance",
+			Description: "Total of RAM",
 		},
 		"disk": {
 			Type:        schema.TypeInt,
 			Computed:    true,
-			Description: "The instance size of SSD",
+			Description: "The size of SSD",
+		},
+		"gpu": {
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "Total of GPU",
+		},
+		"gpu_type": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "GPU type",
 		},
 		"description": {
 			Type:        schema.TypeString,
