@@ -1,4 +1,12 @@
 
+## [v1.0.38](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.38) (4 October 2023)
+
+### Merged
+- [#189](https://github.com/civo/terraform-provider-civo/pull/189) - Feature/cluster pool update
+
+### Commits
+- [6b380ba](https://github.com/civo/terraform-provider-civo/commit/6b380ba79c3e0f75914ef775a05e4401b8b1181c) - Remove comments from the node pool file that were not used
+
 ## [v1.0.37](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.37) (1 October 2023)
 
 ### Merged
