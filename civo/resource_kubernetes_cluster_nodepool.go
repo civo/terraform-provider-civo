@@ -288,9 +288,6 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 		return diag.Errorf("[INFO] error getting kubernetes cluster: %s", clusterID)
 	}
 
-	// Add log to check the cluster
-	log.Printf("[INFO] kubernetes cluster pool %+v", getKubernetesCluster)
-
 	if d.HasChange("node_count") {
 		poolUpdate.Count = d.Get("node_count").(int)
 	}
@@ -323,9 +320,7 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 			}
 			poolUpdate.Taints = nodePoolTains
 		} else {
-			log.Printf("[INFO] fuera de tains else")
 			poolUpdate.Taints = []corev1.Taint{}
-			log.Printf("[INFO] fuera de tains else data: %+v", poolUpdate)
 		}
 	}
 
