@@ -288,5 +288,6 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the Database %s", d.Id())
 	}
+	
 	return nil
 }
