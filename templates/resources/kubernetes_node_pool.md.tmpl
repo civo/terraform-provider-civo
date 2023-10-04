@@ -1,0 +1,39 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+{{ tffile (printf "examples/resources/%s/resource.tf" .Name)}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import civo_kubernetes_node_pool.my-pool 1b8b2100-0e9f-4e8f-ad78-9eb578c2a0af:502c1130-cb9b-4a88-b6d2-307bd96d946a
+```
+## Taint and Labels
+
+The Kubernetes node pool resource supports taints and labels. These can be specified as a map of key/value pairs. For example:
+
+{{ tffile (printf "examples/resources/%s/resource-taint-labels.tf" .Name)}}
+
+### Taints
+
+Taints are used to repel pods from nodes. They can be used to repel pods from nodes with certain hardware, or to repel pods from nodes that are running certain services. For example, you may want to repel pods from nodes that are running a database, or from nodes that are running a monitoring agent.
+Taints have to currently be removed from nodes using the kubectl command in addition to being removed from a Terraform configuration. For example:
+
+```shell
+kubectl taint nodes node-1 key=value:NoSchedule-
+```
+This will be automated in a future release of the provider. Removing a taint from Terraform will prevent the node from being tainted again if node pools with the taints are altered or scaled.
