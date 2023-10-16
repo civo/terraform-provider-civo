@@ -1,4 +1,9 @@
 
+## [v1.0.39](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.39) (16 October 2023)
+
+### Merged
+- [#191](https://github.com/civo/terraform-provider-civo/pull/191) - Remove the waitForKubernetesNodeDelete and add retry to the delete
+
 ## [v1.0.38](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.38) (4 October 2023)
 
 ### Merged
