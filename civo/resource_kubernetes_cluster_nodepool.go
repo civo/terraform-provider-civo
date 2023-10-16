@@ -14,6 +14,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -200,7 +201,6 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 	}
 
 	return resourceKubernetesClusterNodePoolRead(ctx, d, m)
-
 }
 
 // function to read the kubernetes cluster
@@ -359,7 +359,20 @@ func resourceKubernetesClusterNodePoolDelete(ctx context.Context, d *schema.Reso
 		return diag.Errorf("[INFO] an error occurred while trying to delete the kubernetes cluster pool %s", err)
 	}
 
-	err = waitForKubernetesNodePoolDelete(apiClient, d)
+	// Add retry logic here to delete the node pool
+	err = retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete)-time.Minute, func() *retry.RetryError {
+		_, err := apiClient.GetKubernetesClusterPool(getKubernetesCluster.ID, d.Id())
+		if err != nil {
+			if errors.Is(err, civogo.DatabaseClusterPoolNotFoundError) {
+				log.Printf("[INFO] kubernetes node pool %s deleted", d.Id())
+				return nil
+			}
+			log.Printf("[INFO] error trying to read kubernetes cluster pool: %s", err)
+			return retry.NonRetryableError(fmt.Errorf("error waiting for Kubernetes node pool to be deleted: %s", err))
+		}
+		log.Printf("[INFO] kubernetes node pool %s still exists", d.Id())
+		return retry.RetryableError(fmt.Errorf("kubernetes node pool still exists"))
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -486,40 +499,4 @@ func waitForKubernetesNodePoolCreate(client *civogo.Client, d *schema.ResourceDa
 	}
 
 	return fmt.Errorf("timeout waiting to create nodepool %s", nodePoolID)
-}
-
-// waitForKubernetesNodePoolDelete is a utility function to wait for a node pool to be deleted
-func waitForKubernetesNodePoolDelete(client *civogo.Client, d *schema.ResourceData) error {
-	var (
-		tickerInterval = 10 * time.Second
-		timeoutSeconds = d.Timeout(schema.TimeoutDelete).Seconds()
-		timeout        = int(timeoutSeconds / tickerInterval.Seconds())
-		n              = 0
-		ticker         = time.NewTicker(tickerInterval)
-		clusterID      = d.Get("cluster_id").(string)
-		nodePoolID     = d.Id()
-	)
-
-	for range ticker.C {
-
-		_, err := client.GetKubernetesClusterPool(clusterID, nodePoolID)
-		if err != nil {
-			ticker.Stop()
-			// check if the error is not found
-			if errors.Is(err, civogo.DatabaseClusterPoolNotFoundError) {
-				return nil
-			}
-
-			return fmt.Errorf("error trying to read kuberntes cluster pool: %s", err)
-		}
-
-		if n > timeout {
-			ticker.Stop()
-			break
-		}
-
-		n++
-	}
-
-	return fmt.Errorf("timeout waiting to delete pool %s", nodePoolID)
 }
