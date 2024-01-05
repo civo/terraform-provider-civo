@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDataSourceCivoDatabaseVersion_basic(t *testing.T) {
+func TestAccDataSourceCivoDatabaseVersionBasic(t *testing.T) {
 	datasourceName := "data.civo_database_version.foobar"
 
 	resource.Test(t, resource.TestCase{
@@ -26,7 +26,7 @@ func TestAccDataSourceCivoDatabaseVersion_basic(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceCivoDatabaseVersion_WithFilterAndSort(t *testing.T) {
+func TestAccDataSourceCivoDatabaseVersionWithFilterAndSort(t *testing.T) {
 	datasourceName := "data.civo_database_version.foobar"
 
 	resource.Test(t, resource.TestCase{
@@ -122,7 +122,7 @@ data "civo_database_version" "foobar" {
 	sort {
         key = "engine"
         direction = "desc"
-    }
+    	}
 }
 `
 }
