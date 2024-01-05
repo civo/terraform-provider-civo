@@ -274,7 +274,7 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 
 	if attr, ok := d.GetOk("applications"); ok {
 		if utils.CheckAPPName(attr.(string), apiClient) {
-			config.Applications = attr.(string)
+			config.Applications = strings.ReplaceAll(attr.(string), " ", "")
 		} else {
 			return diag.Errorf("[ERR] the app that tries to install is not valid: %s", attr.(string))
 		}
