@@ -2,16 +2,18 @@ package civo
 
 import (
 	"context"
+	"strings"
 
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestProvider(t *testing.T) {
 	if err := Provider().InternalValidate(); err != nil {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("err: %s", err.Error())
 	}
 }
 
@@ -27,6 +29,15 @@ func TestToken(t *testing.T) {
 
 	diags := rawProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(raw))
 	if diags.HasError() {
-		t.Fatalf("provider configure failed: %s", diags)
+		t.Fatalf("provider configure failed: %s", diagnosticsToString(diags))
 	}
+}
+
+func diagnosticsToString(diags diag.Diagnostics) string {
+	diagsAsStrings := make([]string, len(diags))
+	for i, diag := range diags {
+		diagsAsStrings[i] = diag.Summary
+	}
+
+	return strings.Join(diagsAsStrings, "; ")
 }
