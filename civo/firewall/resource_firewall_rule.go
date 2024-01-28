@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Firewall Rule resource represent you can create and manage all firewall rules
+// ResourceFirewallRule Firewall Rule resource represent you can create and manage all firewall rules
 // this resource don't have an update option because the backend don't have the
 // support for that, so in this case we use ForceNew for all object in the resource
 func ResourceFirewallRule() *schema.Resource {

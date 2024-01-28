@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+// DataSourceReservedIP function returns a schema.Resource that represents a reserved IP.
+// This can be used to query and retrieve details about a specific reserved IP in the infrastructure.
 func DataSourceReservedIP() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{

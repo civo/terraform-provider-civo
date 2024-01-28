@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Data source to get from the api a specific network
-// using the id or the label
+// DataSourceNetwork function returns a schema.Resource that represents a Network.
+// This can be used to query and retrieve details about a specific Network in the infrastructure using its id or label.
 func DataSourceNetwork() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{

@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Data source to get from the api a specific ObjectStore
-// using the id or the name
+// DataSourceObjectStore function returns a schema.Resource that represents an Object Store.
+// This can be used to query and retrieve details about a specific Object Store in the infrastructure using its id or name.
 func DataSourceObjectStore() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{

@@ -7,14 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// DatabaseVersion is a temporal struct to save all versions
-type DatabaseVersion struct {
+// Version is a temporal struct to save all versions
+type Version struct {
 	Engine  string
 	Version string
 	Default bool
 }
 
-// Data source to get and filter all database version
+// DataDatabaseVersion Data source to get and filter all database version
 // use to define the engine and version in resourceDatabase
 func DataDatabaseVersion() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
@@ -37,10 +37,10 @@ func getVersion(m interface{}, _ map[string]interface{}) ([]interface{}, error) 
 		return nil, fmt.Errorf("[ERR] error retrieving version: %s", err)
 	}
 
-	versionList := []DatabaseVersion{}
+	versionList := []Version{}
 	for k, v := range partialVersions {
 		for _, version := range v {
-			versionList = append(versionList, DatabaseVersion{
+			versionList = append(versionList, Version{
 				Engine:  k,
 				Version: version.SoftwareVersion,
 				Default: version.Default,
@@ -56,7 +56,7 @@ func getVersion(m interface{}, _ map[string]interface{}) ([]interface{}, error) 
 }
 
 func flattenVersion(versions, _ interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
-	s := versions.(DatabaseVersion)
+	s := versions.(Version)
 
 	flattenedSize := map[string]interface{}{}
 	flattenedSize["engine"] = s.Engine

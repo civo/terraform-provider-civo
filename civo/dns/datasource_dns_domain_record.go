@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Data source to get from the api a specific domain record
+// DataSourceDNSDomainRecord Data source to get from the api a specific domain record
 // using the id or the name of the domain
 func DataSourceDNSDomainRecord() *schema.Resource {
 	return &schema.Resource{

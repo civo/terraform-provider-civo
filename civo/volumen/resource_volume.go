@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Volume resource, with this we can create and manage all volume
+// ResourceVolume function returns a schema.Resource that represents a Volume.
+// This can be used to create, read, update, and delete operations for a Volume in the infrastructure.
 func ResourceVolume() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo volume which can be attached to an instance in order to provide expanded storage.",

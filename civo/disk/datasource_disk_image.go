@@ -16,7 +16,7 @@ type TemplateDisk struct {
 	Label   string
 }
 
-// Data source to get from the api a specific template
+// DataSourceDiskImage Data source to get from the api a specific template
 // using the code of the image
 func DataSourceDiskImage() *schema.Resource {
 

@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// CivoKubernetesClusterDestroy is used to destroy the kubernetes cluster created during the test
 func CivoKubernetesClusterDestroy(s *terraform.State) error {
 	client := TestAccProvider.Meta().(*civogo.Client)
 

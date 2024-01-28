@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Data source to get from the api a specific domain
-// using the id or the name of the domain
+// DataSourceVolume function returns a schema.Resource that represents a Volume.
+// This can be used to query and retrieve details about a specific Volume in the infrastructure using its id or name.
 func DataSourceVolume() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{

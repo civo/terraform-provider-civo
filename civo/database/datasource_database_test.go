@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+// DataSourceCivoDatabase_basic is used to test the data source
 func DataSourceCivoDatabase_basic(t *testing.T) {
 	datasourceName := "data.civo_database.foobar"
 	name := acctest.RandomWithPrefix("database")
@@ -32,6 +33,7 @@ func DataSourceCivoDatabase_basic(t *testing.T) {
 	})
 }
 
+// DataSourceCivoDatabaseConfig is used to configure the data source
 func DataSourceCivoDatabaseConfig(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {

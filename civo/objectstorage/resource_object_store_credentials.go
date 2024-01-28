@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// The Object Store Credential resource represents an ObjectStoreCredential object
-// and with it you can handle the Object Stores Credential created with Terraform.
+// ResourceObjectStoreCredential function returns a schema.Resource that represents an Object Store Credential.
+// This can be used to create, read, update, and delete operations for an Object Store Credential in the infrastructure.
 func ResourceObjectStoreCredential() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides an Object Store Credential resource. This can be used to create, modify, and delete object stores credential.",

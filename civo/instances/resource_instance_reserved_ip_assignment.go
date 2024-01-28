@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// The instance reserved ip assignment resource schema definition
+// ResourceInstanceReservedIPAssignment The instance reserved ip assignment resource schema definition
 // represent the instance reserved ip assignment resource
 func ResourceInstanceReservedIPAssignment() *schema.Resource {
 	return &schema.Resource{

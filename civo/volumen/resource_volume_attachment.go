@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Volume resource, with this we can create and manage all volume
+// ResourceVolumeAttachment function returns a schema.Resource that represents a Volume Attachment.
+// This can be used to create, read, update, and delete operations for a Volume Attachment in the infrastructure.
 func ResourceVolumeAttachment() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manages volume attachment/detachment to an instance.",

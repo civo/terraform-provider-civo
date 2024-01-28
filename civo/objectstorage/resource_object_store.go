@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// The Object Store resource represents an ObjectStore object
-// and with it you can handle the Object Stores created with Terraform.
+// ResourceObjectStore function returns a schema.Resource that represents an Object Store.
+// This can be used to create, read, update, and delete operations for an Object Store in the infrastructure.
 func ResourceObjectStore() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides an Object Store resource. This can be used to create, modify, and delete object stores.",

@@ -22,8 +22,9 @@ type Size struct {
 	Selectable  bool
 }
 
-// Data source to get and filter all instances size
-// use to define the size in resourceInstance
+// DataSourceSize function returns a schema.Resource that represents an Instance Size.
+// This can be used to query and retrieve details about a specific Instance Size in the infrastructure.
+// The retrieved Instance Size can then be used to define the size for other resources or data sources.
 func DataSourceSize() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
 		Description:         "Retrieves information about the sizes that Civo supports, with the ability to filter the results.",

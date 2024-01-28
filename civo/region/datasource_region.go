@@ -8,8 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Data source to get and filter all regions
-// use to define the region in the rest of the resource or datasource
+// DataSourceRegion function returns a schema.Resource that represents a Region.
+// This can be used to query and retrieve details about a specific Region in the infrastructure.
+// The retrieved Region can then be used to define the region for other resources or data sources.
 func DataSourceRegion() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
 		Description: "Retrieves information about the region that Civo supports, with the ability to filter the results.",

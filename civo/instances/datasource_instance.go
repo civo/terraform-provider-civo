@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Data source to get from the api a specific instance
+// DataSourceInstance Data source to get from the api a specific instance
 // using the id or the hostname
 func DataSourceInstance() *schema.Resource {
 	return &schema.Resource{

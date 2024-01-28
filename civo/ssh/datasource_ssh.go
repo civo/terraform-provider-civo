@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Data source to get from the api a specific ssh key
-// using the id or the name
+// DataSourceSSHKey function returns a schema.Resource that represents an SSH Key.
+// This can be used to query and retrieve details about a specific SSH Key in the infrastructure using its id or name.
 func DataSourceSSHKey() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{

@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// The instance resource represents an object of type instances
+// ResourceInstance The instance resource represents an object of type instances
 // and with it you can handle the instances created with Terraform
 func ResourceInstance() *schema.Resource {
 	return &schema.Resource{

@@ -8,9 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Data source to get and filter all kubernetes version
-// available in the server, use to define the version at the
-// moment of the cluster creation in resourceKubernetesCluster
+// DataSourceKubernetesVersion function returns a schema.Resource that represents a Kubernetes version.
+// This can be used to query and retrieve details about a specific Kubernetes version in the infrastructure.
 func DataSourceKubernetesVersion() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
 		Description:         "Provides access to the available Civo Kubernetes versions, with the ability to filter the results.",

@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Data source to get from the api a specific firewall
+// DataSourceFirewall Data source to get from the api a specific firewall
 // using the id or the label
 func DataSourceFirewall() *schema.Resource {
 	return &schema.Resource{

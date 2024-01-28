@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Data source to get from the api a specific Load Balancer
-// using the id or the hostname of the Load Balancer
+// DataSourceLoadBalancer function returns a schema.Resource that represents a Load Balancer.
+// This can be used to query and retrieve details about a specific Load Balancer in the infrastructure using its id or hostname.
 func DataSourceLoadBalancer() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{

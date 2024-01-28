@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// DNS domain record resource with this we can create and manage DNS Domain
+// ResourceDNSDomainRecord DNS domain record resource with this we can create and manage DNS Domain
 func ResourceDNSDomainRecord() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo DNS domain record resource.",

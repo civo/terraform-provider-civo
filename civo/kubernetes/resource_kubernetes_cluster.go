@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Kubernetes Cluster resource, with this you can manage all cluster from terraform
+// ResourceKubernetesCluster function returns a schema.Resource that represents a Kubernetes cluster.
+// This can be used to create, read, update, and delete operations for a Kubernetes cluster in the infrastructure.
 func ResourceKubernetesCluster() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo Kubernetes cluster resource. This can be used to create, delete, and modify clusters.",

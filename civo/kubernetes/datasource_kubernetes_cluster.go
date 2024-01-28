@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// Data source to get from the api a specific instance
-// using the id or the hostname
+// DataSourceKubernetesCluster function returns a schema.Resource that represents a Kubernetes cluster.
+// This can be used to query and retrieve details about a specific Kubernetes cluster in the infrastructure.
 func DataSourceKubernetesCluster() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{

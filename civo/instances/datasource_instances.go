@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Data source to get and filter all instances with filter
+// DataSourceInstances Data source to get and filter all instances with filter
 func DataSourceInstances() *schema.Resource {
 	dataListConfig := &datalist.ResourceConfig{
 		Description: strings.Join([]string{

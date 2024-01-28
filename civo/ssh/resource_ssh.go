@@ -10,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Ssh resource, with this we can create and manage all Snapshot
+// ResourceSSHKey function returns a schema.Resource that represents an SSH Key.
+// This can be used to create, read, update, and delete operations for an SSH Key in the infrastructure.
 func ResourceSSHKey() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo SSH key resource to allow you to manage SSH keys for instance access. Keys created with this resource can be referenced in your instance configuration via their ID.",

@@ -18,7 +18,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Kubernetes Cluster resource, with this you can manage all cluster from terraform
+// ResourceKubernetesClusterNodePool function returns a schema.Resource that represents a node pool in a Kubernetes cluster.
+// This can be used to create, read, update, and delete operations for a node pool in a Kubernetes cluster from terraform.
 func ResourceKubernetesClusterNodePool() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Provides a Civo Kubernetes node pool resource. While the default node pool must be defined in the `civo_kubernetes_cluster` resource, this resource can be used to add additional ones to a cluster.",

@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// The resource network represent a network inside the cloud
+// ResourceNetwork function returns a schema.Resource that represents a Network.
+// This can be used to create, read, update, and delete operations for a Network in the infrastructure.
 func ResourceNetwork() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo network resource. This can be used to create, modify, and delete networks.",

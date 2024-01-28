@@ -13,8 +13,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// TestAccProvider is a global instance of the provider under test. 
+// It is used in acceptance tests to configure resources.
 var TestAccProvider *schema.Provider
+
+// TestAccProviders is a map of provider instances keyed by their name. 
+// It is used in acceptance tests where multiple providers are in play.
 var TestAccProviders map[string]*schema.Provider
+
+// TestAccProviderFactories is a map of functions that return a provider instance and an error. 
+// It is used in acceptance tests where the provider needs to be configured in a certain way.
 var TestAccProviderFactories map[string]func() (*schema.Provider, error)
 
 func init() {
@@ -29,16 +37,21 @@ func init() {
 	}
 }
 
+// TestProvider - Test the provider itself
 func TestProvider(t *testing.T) {
 	if err := civo.Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
-func TestProvider_impl(t *testing.T) {
+
+// TestProviderImpl is a test function to ensure that the Provider function of the civo package 
+// returns an instance of the *schema.Provider type. It doesn't test any behavior of the provider itself.
+func TestProviderImpl(t *testing.T) {
 	var _ *schema.Provider = civo.Provider()
 }
 
+// TestToken - Test the provider token
 func TestToken(t *testing.T) {
 	rawProvider := civo.Provider()
 	raw := map[string]interface{}{
@@ -51,6 +64,7 @@ func TestToken(t *testing.T) {
 	}
 }
 
+// DiagnosticsToString - Convert diag.Diagnostics to string
 func DiagnosticsToString(diags diag.Diagnostics) string {
 	diagsAsStrings := make([]string, len(diags))
 	for i, diag := range diags {
@@ -60,6 +74,7 @@ func DiagnosticsToString(diags diag.Diagnostics) string {
 	return strings.Join(diagsAsStrings, "; ")
 }
 
+// TestAccPreCheck - Check if the environment variables are set
 func TestAccPreCheck(t *testing.T) {
 	if v := os.Getenv("CIVO_TOKEN"); v == "" {
 		t.Fatal("CIVO_TOKEN must be set for acceptance tests")

@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// The Database resource represents an Database object
+// ResourceDatabase The Database resource represents an Database object
 // and with it you can handle the Database created with Terraform.
 func ResourceDatabase() *schema.Resource {
 	return &schema.Resource{

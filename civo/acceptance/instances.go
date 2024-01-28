@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// CivoInstanceDestroy is used to destroy the instance created during the test
 func CivoInstanceDestroy(s *terraform.State) error {
 	client := TestAccProvider.Meta().(*civogo.Client)
 
@@ -25,7 +26,7 @@ func CivoInstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
-// CheckExampleResourceExists queries the API and retrieves the matching Widget.
+// CivoInstanceResourceExists queries the API and retrieves the matching Widget.
 func CivoInstanceResourceExists(n string, instance *civogo.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// find the corresponding state object

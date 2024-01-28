@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// CivoDatabase_basic is used to test the database resource
 func CivoDatabase_basic(t *testing.T) {
 	var database civogo.Database
 
@@ -45,6 +46,7 @@ func CivoDatabase_basic(t *testing.T) {
 	})
 }
 
+// CivoDatabase_update is used to test the database resource
 func CivoDatabase_update(t *testing.T) {
 	var database civogo.Database
 
@@ -80,6 +82,7 @@ func CivoDatabase_update(t *testing.T) {
 	})
 }
 
+// CivoDatabaseConfig is used to configure the database resource
 func CivoDatabaseValues(database *civogo.Database, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if database.Name != name {
@@ -89,7 +92,7 @@ func CivoDatabaseValues(database *civogo.Database, name string) resource.TestChe
 	}
 }
 
-// CheckExampleResourceExists queries the API and retrieves the matching Widget.
+// CivoDatabaseResourceExists - Check if the database resource exist
 func CivoDatabaseResourceExists(n string, database *civogo.Database) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// find the corresponding state object
@@ -112,6 +115,7 @@ func CivoDatabaseResourceExists(n string, database *civogo.Database) resource.Te
 	}
 }
 
+// CivoDatabaseUpdated - Check if the database resource is updated
 func CivoDatabaseUpdated(database *civogo.Database, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if database.Name != name {
@@ -121,6 +125,7 @@ func CivoDatabaseUpdated(database *civogo.Database, name string) resource.TestCh
 	}
 }
 
+// CivoDatabaseDestroy is used to destroy the database created during the test
 func CivoDatabaseDestroy(s *terraform.State) error {
 	client := acceptance.TestAccProvider.Meta().(*civogo.Client)
 
@@ -138,6 +143,7 @@ func CivoDatabaseDestroy(s *terraform.State) error {
 	return nil
 }
 
+// CivoDatabaseConfigBasic is used to configure the database resource
 func CivoDatabaseConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {
@@ -149,6 +155,7 @@ resource "civo_database" "foobar" {
 }`, name)
 }
 
+// CivoDatabaseConfigUpdates is used to configure the database resource
 func CivoDatabaseConfigUpdates(name string) string {
 	return fmt.Sprintf(`
 resource "civo_database" "foobar" {
