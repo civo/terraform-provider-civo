@@ -117,7 +117,7 @@ data "civo_database_version" "foobar" {
 `
 }
 
-// DataSourceCivoDatabaseVersionWhitFilterAndSort - Config for the data source with filter and sort	
+// DataSourceCivoDatabaseVersionWhitFilterAndSort - Config for the data source with filter and sort
 func DataSourceCivoDatabaseVersionWhitFilterAndSort() string {
 	return `
 data "civo_database_version" "foobar" {
