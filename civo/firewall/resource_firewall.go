@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
@@ -314,7 +315,7 @@ func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interfa
 
 	log.Printf("[INFO] deleting the firewall %s", firewallID)
 
-	deleteStateConf := &resource.StateChangeConf{
+	deleteStateConf := &retry.StateChangeConf{
 		Pending: []string{"failed"},
 		Target:  []string{"success"},
 		Refresh: func() (interface{}, string, error) {

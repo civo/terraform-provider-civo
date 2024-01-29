@@ -84,7 +84,6 @@ func Provider() *schema.Provider {
 			"civo_dns_domain_name":                 dns.ResourceDNSDomainName(),
 			"civo_dns_domain_record":               dns.ResourceDNSDomainRecord(),
 			"civo_firewall":                        firewall.ResourceFirewall(),
-			"civo_firewall_rule":                   firewall.ResourceFirewallRule(),
 			"civo_ssh_key":                         ssh.ResourceSSHKey(),
 			"civo_kubernetes_cluster":              kubernetes.ResourceKubernetesCluster(),
 			"civo_kubernetes_node_pool":            kubernetes.ResourceKubernetesClusterNodePool(),
