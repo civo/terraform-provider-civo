@@ -18,7 +18,7 @@ import (
 	"github.com/civo/terraform-provider-civo/civo/region"
 	"github.com/civo/terraform-provider-civo/civo/size"
 	"github.com/civo/terraform-provider-civo/civo/ssh"
-	"github.com/civo/terraform-provider-civo/civo/volumen"
+	"github.com/civo/terraform-provider-civo/civo/volume"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
