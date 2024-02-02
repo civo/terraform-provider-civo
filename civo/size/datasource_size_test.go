@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func DataSourceCivoSize_basic(t *testing.T) {
+func TestAccDataSourceCivoSize_basic(t *testing.T) {
 	datasourceName := "data.civo_size.foobar"
 
 	resource.Test(t, resource.TestCase{
@@ -27,7 +27,7 @@ func DataSourceCivoSize_basic(t *testing.T) {
 	})
 }
 
-func DataSourceCivoSize_WithFilterAndSort(t *testing.T) {
+func TestAccDataSourceCivoSize_WithFilterAndSort(t *testing.T) {
 	datasourceName := "data.civo_size.foobar"
 
 	resource.Test(t, resource.TestCase{

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceCivoObjectStoreCredential_basic(t *testing.T) {
+func TestAccDataSourceCivoObjectStoreCredential_basic(t *testing.T) {
 	datasourceName := "data.civo_object_store_credential.foobar"
 	name := acctest.RandomWithPrefix("objectstorecredential")
 

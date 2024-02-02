@@ -12,7 +12,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoSSHKey_basic(t *testing.T) {
+func TestAccCivoSSHKey_basic(t *testing.T) {
 	var SSHKey civogo.SSHKey
 
 	// generate a random name for each test run
@@ -46,7 +46,7 @@ func CivoSSHKey_basic(t *testing.T) {
 	})
 }
 
-func CivoSSHKey_update(t *testing.T) {
+func TestAccCivoSSHKey_update(t *testing.T) {
 	var SSHKey civogo.SSHKey
 
 	// generate a random name for each test run

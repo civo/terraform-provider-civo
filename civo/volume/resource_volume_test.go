@@ -12,7 +12,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoVolume_basic(t *testing.T) {
+func TestAccCivoVolume_basic(t *testing.T) {
 	var volume civogo.Volume
 
 	// generate a random name for each test run

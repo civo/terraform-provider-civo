@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// DataSourceCivoDatabaseVersion_basic - Test the data source for database version
-func DataSourceCivoDatabaseVersion_basic(t *testing.T) {
+// TestAccDataSourceCivoDatabaseVersion_basic - Test the data source for database version
+func TestAccDataSourceCivoDatabaseVersion_basic(t *testing.T) {
 	datasourceName := "data.civo_database_version.foobar"
 
 	resource.Test(t, resource.TestCase{
@@ -28,8 +28,8 @@ func DataSourceCivoDatabaseVersion_basic(t *testing.T) {
 	})
 }
 
-// DataSourceCivoDatabaseVersion_WithFilterAndSort - Test the data source for database version with filter and sort
-func DataSourceCivoDatabaseVersion_WithFilterAndSort(t *testing.T) {
+// TestAccDataSourceCivoDatabaseVersion_WithFilterAndSort - Test the data source for database version with filter and sort
+func TestAccDataSourceCivoDatabaseVersion_WithFilterAndSort(t *testing.T) {
 	datasourceName := "data.civo_database_version.foobar"
 
 	resource.Test(t, resource.TestCase{

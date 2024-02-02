@@ -12,7 +12,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoDNSDomainName_basic(t *testing.T) {
+func TestAccCivoDNSDomainName_basic(t *testing.T) {
 	var domain civogo.DNSDomain
 
 	// generate a random name for each test run
@@ -41,7 +41,7 @@ func CivoDNSDomainName_basic(t *testing.T) {
 	})
 }
 
-func CivoDNSDomainName_update(t *testing.T) {
+func TestAccCivoDNSDomainName_update(t *testing.T) {
 	var domain civogo.DNSDomain
 
 	// generate a random name for each test run

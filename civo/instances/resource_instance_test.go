@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// example.Widget represents a concrete Go type that represents an API resource
-func CivoInstance_basic(t *testing.T) {
+// TestAccCivoInstance_basic is a test function that verifies the basic functionality of creating a Civo instance.
+func TestAccCivoInstance_basic(t *testing.T) {
 	var instance civogo.Instance
 
 	// generate a random name for each test run
@@ -50,7 +50,8 @@ func CivoInstance_basic(t *testing.T) {
 	})
 }
 
-func CivoInstanceSize_update(t *testing.T) {
+// TestAccCivoInstanceSize_update is a test function that verifies the update functionality of the CivoInstanceSize resource.
+func TestAccCivoInstanceSize_update(t *testing.T) {
 	var instance civogo.Instance
 
 	// generate a random name for each test run
@@ -101,7 +102,7 @@ func CivoInstanceSize_update(t *testing.T) {
 	})
 }
 
-func CivoInstanceNotes_update(t *testing.T) {
+func TestAccCivoInstanceNotes_update(t *testing.T) {
 	var instance civogo.Instance
 
 	// generate a random name for each test run
@@ -154,7 +155,7 @@ func CivoInstanceNotes_update(t *testing.T) {
 	})
 }
 
-func CivoInstanceFirewall_update(t *testing.T) {
+func TestAccCivoInstanceFirewall_update(t *testing.T) {
 	var instance civogo.Instance
 
 	// generate a random name for each test run

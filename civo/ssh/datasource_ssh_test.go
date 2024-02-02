@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func DataSourceCivoSSHKey_basic(t *testing.T) {
+func TestAccDataSourceCivoSSHKey_basic(t *testing.T) {
 	datasourceName := "data.civo_ssh_key.foobar"
 	name := acctest.RandomWithPrefix("sshkey-test")
 	pubKey, err := GenerateDataSourceCivoSSHKeyPublic()

@@ -12,7 +12,7 @@ import (
 )
 
 // CivoDatabase_basic is used to test the database resource
-func CivoDatabase_basic(t *testing.T) {
+func TestAccCivoDatabase_basic(t *testing.T) {
 	var database civogo.Database
 
 	// generate a random name for each test run
@@ -47,7 +47,7 @@ func CivoDatabase_basic(t *testing.T) {
 }
 
 // CivoDatabase_update is used to test the database resource
-func CivoDatabase_update(t *testing.T) {
+func TestAccCivoDatabase_update(t *testing.T) {
 	var database civogo.Database
 
 	// generate a random name for each test run

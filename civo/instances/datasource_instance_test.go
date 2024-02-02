@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceCivoInstance_basic(t *testing.T) {
+func TestAccDataSourceCivoInstance_basic(t *testing.T) {
 	datasourceName := "data.civo_instance.foobar"
 	name := acctest.RandomWithPrefix("instance") + ".com"
 
@@ -29,7 +29,7 @@ func DataSourceCivoInstance_basic(t *testing.T) {
 	})
 }
 
-func DataSourceCivoInstanceByID_basic(t *testing.T) {
+func TestAccDataSourceCivoInstanceByID_basic(t *testing.T) {
 	datasourceName := "data.civo_instance.foobar"
 	name := acctest.RandomWithPrefix("instance") + ".com"
 

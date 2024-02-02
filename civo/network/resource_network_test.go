@@ -12,7 +12,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoNetwork_basic(t *testing.T) {
+func TestAccCivoNetwork_basic(t *testing.T) {
 	var network civogo.Network
 
 	// generate a random name for each test run
@@ -42,7 +42,7 @@ func CivoNetwork_basic(t *testing.T) {
 	})
 }
 
-func CivoNetwork_update(t *testing.T) {
+func TestAccCivoNetwork_update(t *testing.T) {
 	var network civogo.Network
 
 	// generate a random name for each test run

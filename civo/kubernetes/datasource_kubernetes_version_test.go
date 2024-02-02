@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func DataSourceCivoKubernetesVersion_basic(t *testing.T) {
+func TestAccDataSourceCivoKubernetesVersion_basic(t *testing.T) {
 	datasourceName := "data.civo_kubernetes_version.foobar"
 
 	resource.Test(t, resource.TestCase{
@@ -27,7 +27,7 @@ func DataSourceCivoKubernetesVersion_basic(t *testing.T) {
 	})
 }
 
-func DataSourceCivoKubernetesVersion_WithFilter(t *testing.T) {
+func TestAccDataSourceCivoKubernetesVersion_WithFilter(t *testing.T) {
 	datasourceName := "data.civo_kubernetes_version.foobar"
 
 	resource.Test(t, resource.TestCase{

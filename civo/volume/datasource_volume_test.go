@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceCivoVolume_basic(t *testing.T) {
+func TestAccDataSourceCivoVolume_basic(t *testing.T) {
 	datasourceName := "data.civo_volume.foobar"
 	name := acctest.RandomWithPrefix("ds-test")
 

@@ -11,8 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// example.Widget represents a concrete Go type that represents an API resource
-func CivoKubernetesCluster_basic(t *testing.T) {
+func TestAccCivoKubernetesCluster_basic(t *testing.T) {
 	var kubernetes civogo.KubernetesCluster
 
 	// generate a random name for each test run
@@ -51,7 +50,7 @@ func CivoKubernetesCluster_basic(t *testing.T) {
 	})
 }
 
-func CivoKubernetesClusterCNI(t *testing.T) {
+func TestAccCivoKubernetesClusterCNI(t *testing.T) {
 	var kubernetes civogo.KubernetesCluster
 
 	// generate a random name for each test run

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func CivoDNSDomainRecord_importBasic(t *testing.T) {
+func TestAccCivoDNSDomainRecord_importBasic(t *testing.T) {
 	resourceName := "civo_dns_domain_record.www"
 	var domainName = acctest.RandomWithPrefix("tf-test-record") + ".example"
 	var recordName = acctest.RandomWithPrefix("record")

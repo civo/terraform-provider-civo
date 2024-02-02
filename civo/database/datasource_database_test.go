@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// DataSourceCivoDatabase_basic is used to test the data source
-func DataSourceCivoDatabase_basic(t *testing.T) {
+// TestAccDataSourceCivoDatabase_basic is used to test the data source
+func TestAccDataSourceCivoDatabase_basic(t *testing.T) {
 	datasourceName := "data.civo_database.foobar"
 	name := acctest.RandomWithPrefix("database")
 

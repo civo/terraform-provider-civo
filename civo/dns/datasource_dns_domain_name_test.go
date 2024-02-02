@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceCivoDnsDomainName(t *testing.T) {
+// TestAccCivoDNSDomainNameDataSource_basic is a basic test case for a DNS Domain Name data source.
+func TestAccDataSourceCivoDnsDomainName(t *testing.T) {
 	datasourceName := "data.civo_dns_domain_name.domain"
 	domain := acctest.RandomWithPrefix("domian") + ".com"
 

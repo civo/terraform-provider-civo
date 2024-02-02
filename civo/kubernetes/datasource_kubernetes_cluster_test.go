@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceCivoKubernetesCluster_basic(t *testing.T) {
+func TestAccDataSourceCivoKubernetesCluster_basic(t *testing.T) {
 	datasourceName := "data.civo_kubernetes_cluster.foobar"
 	name := acctest.RandomWithPrefix("k8s")
 
@@ -33,7 +33,7 @@ func DataSourceCivoKubernetesCluster_basic(t *testing.T) {
 	})
 }
 
-func DataSourceCivoKubernetesClusterByID_basic(t *testing.T) {
+func TestAccDataSourceCivoKubernetesClusterByID_basic(t *testing.T) {
 	datasourceName := "data.civo_kubernetes_cluster.foobar"
 	name := acctest.RandomWithPrefix("k8s")
 

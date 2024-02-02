@@ -13,7 +13,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoObjectStore_basic(t *testing.T) {
+func TestAccCivoObjectStore_basic(t *testing.T) {
 	var store civogo.ObjectStore
 
 	// generate a random name for each test run
@@ -46,7 +46,7 @@ func CivoObjectStore_basic(t *testing.T) {
 	})
 }
 
-func CivoObjectStore_update(t *testing.T) {
+func TestAccCivoObjectStore_update(t *testing.T) {
 	var store civogo.ObjectStore
 
 	// generate a random name for each test run

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceReservedIP_basic(t *testing.T) {
+func TestAccDataSourceReservedIP_basic(t *testing.T) {
 	datasourceName := "data.civo_reserved_ip.foobar"
 	name := acctest.RandomWithPrefix("ip-test")
 

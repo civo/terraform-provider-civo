@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceCivoFirewall_basic(t *testing.T) {
+func TestAccDataSourceCivoFirewall_basic(t *testing.T) {
 	datasourceName := "data.civo_firewall.foobar"
 	name := acctest.RandomWithPrefix("net-test")
 

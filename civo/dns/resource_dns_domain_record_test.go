@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// example.Widget represents a concrete Go type that represents an API resource
-func CivoDNSDomainNameRecord_basic(t *testing.T) {
+// TestAccCivoDNSDomainNameRecord_basic tests the basic functionality of the domain record resource
+func TestAccCivoDNSDomainNameRecord_basic(t *testing.T) {
 	var domainRecord civogo.DNSRecord
 
 	// generate a random name for each test run
@@ -42,7 +42,7 @@ func CivoDNSDomainNameRecord_basic(t *testing.T) {
 	})
 }
 
-func CivoDNSDomainNameRecord_update(t *testing.T) {
+func TestAccCivoDNSDomainNameRecord_update(t *testing.T) {
 	var domainRecord civogo.DNSRecord
 
 	// generate a random name for each test run

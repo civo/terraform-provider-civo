@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func CivoReservedIP_basic(t *testing.T) {
+func TestAccCivoReservedIP_basic(t *testing.T) {
 	var ip civogo.IP
 
 	// generate a random name for each test run
@@ -40,7 +40,7 @@ func CivoReservedIP_basic(t *testing.T) {
 	})
 }
 
-func CivoReservedIP_update(t *testing.T) {
+func TestAccCivoReservedIP_update(t *testing.T) {
 	var ip civogo.IP
 
 	// generate a random name for each test run

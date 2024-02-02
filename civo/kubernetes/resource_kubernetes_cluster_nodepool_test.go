@@ -12,7 +12,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoKubernetesClusterNodePool_basic(t *testing.T) {
+func TestAccCivoKubernetesClusterNodePool_basic(t *testing.T) {
 	var kubernetes civogo.KubernetesCluster
 	var kubernetesNodePool civogo.KubernetesPool
 

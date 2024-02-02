@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func CivoDNSDomainName_importBasic(t *testing.T) {
+func TestAccCivoDNSDomainName_importBasic(t *testing.T) {
 	resourceName := "civo_dns_domain_name.foobar"
 	domainName := fmt.Sprintf("foobar-test-terraform-%s.com", acctest.RandString(10))
 

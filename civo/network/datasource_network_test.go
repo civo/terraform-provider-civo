@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceCivoNetwork_basic(t *testing.T) {
+func TestAccDataSourceCivoNetwork_basic(t *testing.T) {
 	datasourceName := "data.civo_network.foobar"
 	name := acctest.RandomWithPrefix("net-test")
 

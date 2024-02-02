@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func DataSourceCivoInstances_basic(t *testing.T) {
+func TestAccDataSourceCivoInstances_basic(t *testing.T) {
 	var instanceHostname = acctest.RandomWithPrefix("tf-test")
 	var instanceHostname2 = acctest.RandomWithPrefix("tf-test")
 

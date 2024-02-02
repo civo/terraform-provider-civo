@@ -12,7 +12,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoFirewall_basic(t *testing.T) {
+func TestAccCivoFirewall_basic(t *testing.T) {
 	var firewall civogo.Firewall
 
 	// generate a random name for each test run
@@ -42,7 +42,7 @@ func CivoFirewall_basic(t *testing.T) {
 	})
 }
 
-func CivoFirewallWithIngressEgress_basic(t *testing.T) {
+func TestAccCivoFirewallWithIngressEgress_basic(t *testing.T) {
 	var firewall civogo.Firewall
 
 	// generate a random name for each test run
@@ -79,7 +79,7 @@ func CivoFirewallWithIngressEgress_basic(t *testing.T) {
 	})
 }
 
-func CivoFirewall_update(t *testing.T) {
+func TestAccCivoFirewall_update(t *testing.T) {
 	var firewall civogo.Firewall
 
 	// generate a random name for each test run

@@ -12,7 +12,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoInstanceReservedIPAssignment_basic(t *testing.T) {
+func TestAccCivoInstanceReservedIPAssignment_basic(t *testing.T) {
 	var ip civogo.IP
 	var instance civogo.Instance
 

@@ -12,7 +12,7 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func CivoVolumeAttachment_basic(t *testing.T) {
+func TestAccCivoVolumeAttachment_basic(t *testing.T) {
 	var volume civogo.Volume
 	var instance civogo.Instance
 

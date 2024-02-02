@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func CivoObjectStoreCredential_basic(t *testing.T) {
+func TestAccCivoObjectStoreCredential_basic(t *testing.T) {
 	var storeCredential civogo.ObjectStoreCredential
 
 	// generate a random name for each test run
@@ -43,7 +43,7 @@ func CivoObjectStoreCredential_basic(t *testing.T) {
 	})
 }
 
-func CivoObjectStoreCredentialWhitCustomCredential_basic(t *testing.T) {
+func TestAccCivoObjectStoreCredentialWhitCustomCredential_basic(t *testing.T) {
 	var storeCredential civogo.ObjectStoreCredential
 
 	// generate a random name for each test run
@@ -75,7 +75,7 @@ func CivoObjectStoreCredentialWhitCustomCredential_basic(t *testing.T) {
 	})
 }
 
-func CivoObjectStoreCredential_update(t *testing.T) {
+func TestAccCivoObjectStoreCredential_update(t *testing.T) {
 	var storeCredential civogo.ObjectStoreCredential
 
 	// generate a random name for each test run
