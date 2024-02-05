@@ -2,7 +2,6 @@ package civo
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"testing"
@@ -12,32 +11,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var testAccProvider *schema.Provider
-var testAccProviders map[string]*schema.Provider
-var testAccProviderFactories map[string]func() (*schema.Provider, error)
-
-func init() {
-	testAccProvider = Provider()
-	testAccProviders = map[string]*schema.Provider{
-		"civo": testAccProvider,
-	}
-	testAccProviderFactories = map[string]func() (*schema.Provider, error){
-		"civo": func() (*schema.Provider, error) {
-			return testAccProvider, nil
-		},
-	}
-}
-
+// TestProvider tests the provider configuration
 func TestProvider(t *testing.T) {
 	if err := Provider().InternalValidate(); err != nil {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("err: %s", err.Error())
 	}
 }
 
+// TestProvider_impl tests the provider implementation
 func TestProvider_impl(t *testing.T) {
 	var _ *schema.Provider = Provider()
 }
 
+// TestToken tests the token configuration
 func TestToken(t *testing.T) {
 	rawProvider := Provider()
 	raw := map[string]interface{}{
@@ -57,13 +43,4 @@ func diagnosticsToString(diags diag.Diagnostics) string {
 	}
 
 	return strings.Join(diagsAsStrings, "; ")
-}
-
-func testAccPreCheck(t *testing.T) {
-	if v := os.Getenv("CIVO_TOKEN"); v == "" {
-		t.Fatal("CIVO_TOKEN must be set for acceptance tests")
-	}
-	if v := os.Getenv("CIVO_REGION"); v == "" {
-		t.Fatal("CIVO_REGION must be set for acceptance tests")
-	}
 }

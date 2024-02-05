@@ -5,6 +5,20 @@ import (
 	"log"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/civo/database"
+	"github.com/civo/terraform-provider-civo/civo/disk"
+	"github.com/civo/terraform-provider-civo/civo/dns"
+	"github.com/civo/terraform-provider-civo/civo/firewall"
+	"github.com/civo/terraform-provider-civo/civo/instances"
+	"github.com/civo/terraform-provider-civo/civo/ip"
+	"github.com/civo/terraform-provider-civo/civo/kubernetes"
+	"github.com/civo/terraform-provider-civo/civo/loadbalancer"
+	"github.com/civo/terraform-provider-civo/civo/network"
+	"github.com/civo/terraform-provider-civo/civo/objectstorage"
+	"github.com/civo/terraform-provider-civo/civo/region"
+	"github.com/civo/terraform-provider-civo/civo/size"
+	"github.com/civo/terraform-provider-civo/civo/ssh"
+	"github.com/civo/terraform-provider-civo/civo/volume"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -41,48 +55,42 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// "civo_template":           dataSourceTemplate(),
-			"civo_disk_image":              dataSourceDiskImage(),
-			"civo_kubernetes_version":      dataSourceKubernetesVersion(),
-			"civo_kubernetes_cluster":      dataSourceKubernetesCluster(),
-			"civo_size":                    dataSourceSize(),
-			"civo_instances":               dataSourceInstances(),
-			"civo_instance":                dataSourceInstance(),
-			"civo_dns_domain_name":         dataSourceDNSDomainName(),
-			"civo_dns_domain_record":       dataSourceDNSDomainRecord(),
-			"civo_network":                 dataSourceNetwork(),
-			"civo_volume":                  dataSourceVolume(),
-			"civo_firewall":                dataSourceFirewall(),
-			"civo_loadbalancer":            dataSourceLoadBalancer(),
-			"civo_ssh_key":                 dataSourceSSHKey(),
-			"civo_object_store":            dataSourceObjectStore(),
-			"civo_object_store_credential": dataSourceObjectStoreCredential(),
-			"civo_region":                  dataSourceRegion(),
-			"civo_reserved_ip":             dataSourceReservedIP(),
-			"civo_database":                dataSourceDatabase(),
-			"civo_database_version":        dataDatabaseVersion(),
-			// "civo_snapshot":           dataSourceSnapshot(),
+			"civo_disk_image":              disk.DataSourceDiskImage(),
+			"civo_kubernetes_version":      kubernetes.DataSourceKubernetesVersion(),
+			"civo_kubernetes_cluster":      kubernetes.DataSourceKubernetesCluster(),
+			"civo_size":                    size.DataSourceSize(),
+			"civo_instances":               instances.DataSourceInstances(),
+			"civo_instance":                instances.DataSourceInstance(),
+			"civo_dns_domain_name":         dns.DataSourceDNSDomainName(),
+			"civo_dns_domain_record":       dns.DataSourceDNSDomainRecord(),
+			"civo_network":                 network.DataSourceNetwork(),
+			"civo_volume":                  volume.DataSourceVolume(),
+			"civo_firewall":                firewall.DataSourceFirewall(),
+			"civo_loadbalancer":            loadbalancer.DataSourceLoadBalancer(),
+			"civo_ssh_key":                 ssh.DataSourceSSHKey(),
+			"civo_object_store":            objectstorage.DataSourceObjectStore(),
+			"civo_object_store_credential": objectstorage.DataSourceObjectStoreCredential(),
+			"civo_region":                  region.DataSourceRegion(),
+			"civo_reserved_ip":             ip.DataSourceReservedIP(),
+			"civo_database":                database.DataSourceDatabase(),
+			"civo_database_version":        database.DataDatabaseVersion(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"civo_instance":                        resourceInstance(),
-			"civo_network":                         resourceNetwork(),
-			"civo_volume":                          resourceVolume(),
-			"civo_volume_attachment":               resourceVolumeAttachment(),
-			"civo_dns_domain_name":                 resourceDNSDomainName(),
-			"civo_dns_domain_record":               resourceDNSDomainRecord(),
-			"civo_firewall":                        resourceFirewall(),
-			"civo_firewall_rule":                   resourceFirewallRule(),
-			"civo_ssh_key":                         resourceSSHKey(),
-			"civo_kubernetes_cluster":              resourceKubernetesCluster(),
-			"civo_kubernetes_node_pool":            resourceKubernetesClusterNodePool(),
-			"civo_reserved_ip":                     resourceReservedIP(),
-			"civo_instance_reserved_ip_assignment": resourceInstanceReservedIPAssignment(),
-			"civo_object_store":                    resourceObjectStore(),
-			"civo_object_store_credential":         resourceObjectStoreCredential(),
-			"civo_database":                        resourceDatabase(),
-			// "civo_loadbalancer":         resourceLoadBalancer(),
-			// "civo_template": resourceTemplate(),
-			// "civo_snapshot":             resourceSnapshot(),
-
+			"civo_instance":                        instances.ResourceInstance(),
+			"civo_instance_reserved_ip_assignment": instances.ResourceInstanceReservedIPAssignment(),
+			"civo_network":                         network.ResourceNetwork(),
+			"civo_volume":                          volume.ResourceVolume(),
+			"civo_volume_attachment":               volume.ResourceVolumeAttachment(),
+			"civo_dns_domain_name":                 dns.ResourceDNSDomainName(),
+			"civo_dns_domain_record":               dns.ResourceDNSDomainRecord(),
+			"civo_firewall":                        firewall.ResourceFirewall(),
+			"civo_ssh_key":                         ssh.ResourceSSHKey(),
+			"civo_kubernetes_cluster":              kubernetes.ResourceKubernetesCluster(),
+			"civo_kubernetes_node_pool":            kubernetes.ResourceKubernetesClusterNodePool(),
+			"civo_reserved_ip":                     ip.ResourceReservedIP(),
+			"civo_object_store":                    objectstorage.ResourceObjectStore(),
+			"civo_object_store_credential":         objectstorage.ResourceObjectStoreCredential(),
+			"civo_database":                        database.ResourceDatabase(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
