@@ -13,17 +13,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// TestAccProvider is a global instance of the provider under test.
-// It is used in acceptance tests to configure resources.
-var TestAccProvider *schema.Provider
+var (
+	// TestAccProvider is a global instance of the provider under test.
+	// It is used in acceptance tests to configure resources.
+	TestAccProvider *schema.Provider
 
-// TestAccProviders is a map of provider instances keyed by their name.
-// It is used in acceptance tests where multiple providers are in play.
-var TestAccProviders map[string]*schema.Provider
+	// TestAccProviders is a map of provider instances keyed by their name.
+	// It is used in acceptance tests where multiple providers are in play.
+	TestAccProviders map[string]*schema.Provider
 
-// TestAccProviderFactories is a map of functions that return a provider instance and an error.
-// It is used in acceptance tests where the provider needs to be configured in a certain way.
-var TestAccProviderFactories map[string]func() (*schema.Provider, error)
+	// TestAccProviderFactories is a map of functions that return a provider instance and an error.
+	// It is used in acceptance tests where the provider needs to be configured in a certain way.
+	TestAccProviderFactories map[string]func() (*schema.Provider, error)
+)
 
 func init() {
 	TestAccProvider = civo.Provider()
