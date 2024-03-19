@@ -4,9 +4,9 @@ import (
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/google/uuid"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // nodePoolSchema function to define the node pool schema
@@ -134,7 +134,7 @@ func flattenInstalledApplication(apps []civogo.KubernetesInstalledApplication) [
 	return flattenedInstalledApplication
 }
 
-// exapandNodePools function to expand the node pools
+// expandNodePools function to expand the node pools
 func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConfig {
 	expandedNodePools := make([]civogo.KubernetesClusterPoolConfig, 0, len(nodePools))
 	for _, rawPool := range nodePools {
@@ -145,10 +145,46 @@ func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConf
 			poolID = pool["label"].(string)
 		}
 
+		// Initialize labels map only if they are provided and valid
+		var labels map[string]string
+		if rawLabels, ok := pool["labels"].(map[string]interface{}); ok {
+			labels = make(map[string]string, len(rawLabels))
+			for k, v := range rawLabels {
+				if strVal, ok := v.(string); ok {
+					labels[k] = strVal
+				}
+			}
+		}
+
+		// Initialize taints slice only if they are provided and valid
+		var taints []corev1.Taint
+		if rawTaints, ok := pool["taints"].([]interface{}); ok {
+			for _, rawTaint := range rawTaints {
+				taintMap, ok := rawTaint.(map[string]interface{})
+				if !ok {
+					continue
+				}
+
+				key, okKey := taintMap["key"].(string)
+				value, okValue := taintMap["value"].(string)
+				effect, okEffect := taintMap["effect"].(string)
+
+				if okKey && okValue && okEffect {
+					taints = append(taints, corev1.Taint{
+						Key:    key,
+						Value:  value,
+						Effect: corev1.TaintEffect(effect),
+					})
+				}
+			}
+		}
+
 		cr := civogo.KubernetesClusterPoolConfig{
-			ID:    poolID,
-			Size:  pool["size"].(string),
-			Count: pool["node_count"].(int),
+			ID:     poolID,
+			Size:   pool["size"].(string),
+			Count:  pool["node_count"].(int),
+			Labels: labels,
+			Taints: taints,
 		}
 
 		if pool["public_ip_node_pool"].(bool) {

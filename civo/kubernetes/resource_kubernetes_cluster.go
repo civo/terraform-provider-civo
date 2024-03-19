@@ -194,7 +194,7 @@ func applicationSchema() *schema.Schema {
 func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -303,7 +303,7 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -352,7 +352,7 @@ func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m 
 func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -391,7 +391,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 		targetNodePool := ""
 		nodePools := []civogo.KubernetesClusterPoolConfig{}
 		for _, v := range kubernetesCluster.Pools {
-			nodePools = append(nodePools, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size})
+			nodePools = append(nodePools, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size, Labels: v.Labels, Taints: v.Taints})
 			if targetNodePool == "" && v.ID == newPool["label"].(string) {
 				targetNodePool = v.ID
 			}
@@ -439,7 +439,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 func resourceKubernetesClusterDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
