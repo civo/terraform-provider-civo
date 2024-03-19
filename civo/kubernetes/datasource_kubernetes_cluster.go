@@ -75,7 +75,13 @@ func DataSourceKubernetesCluster() *schema.Resource {
 				Description: "A list of application installed",
 			},
 			"installed_applications": dataSourceApplicationSchema(),
-			"pools":                  dataSourcenodePoolSchema(),
+			"pools": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: nodePoolSchema(false),
+				},
+			},
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -110,44 +116,6 @@ func DataSourceKubernetesCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The date where the Kubernetes cluster was create",
-			},
-		},
-	}
-}
-
-// schema for the node pool in the cluster
-func dataSourcenodePoolSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Computed: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"label": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "Node pool label, if you don't provide one, we will generate one for you",
-				},
-				"node_count": {
-					Type:        schema.TypeInt,
-					Computed:    true,
-					Description: "The size of the pool",
-				},
-				"size": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "The size of each node inside the pool",
-				},
-				"instance_names": {
-					Type:        schema.TypeSet,
-					Computed:    true,
-					Description: "A list of the instance in the pool",
-					Elem:        &schema.Schema{Type: schema.TypeString},
-				},
-				"public_ip_node_pool": {
-					Type:        schema.TypeBool,
-					Computed:    true,
-					Description: "Node pool belongs to the public ip node pool",
-				},
 			},
 		},
 	}
@@ -188,7 +156,7 @@ func dataSourceApplicationSchema() *schema.Schema {
 func dataSourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
