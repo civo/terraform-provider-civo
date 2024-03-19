@@ -158,24 +158,14 @@ func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConf
 
 		// Initialize taints slice only if they are provided and valid
 		var taints []corev1.Taint
-		if rawTaints, ok := pool["taints"].([]interface{}); ok {
-			for _, rawTaint := range rawTaints {
-				taintMap, ok := rawTaint.(map[string]interface{})
-				if !ok {
-					continue
-				}
-
-				key, okKey := taintMap["key"].(string)
-				value, okValue := taintMap["value"].(string)
-				effect, okEffect := taintMap["effect"].(string)
-
-				if okKey && okValue && okEffect {
-					taints = append(taints, corev1.Taint{
-						Key:    key,
-						Value:  value,
-						Effect: corev1.TaintEffect(effect),
-					})
-				}
+		if taintSet, ok := pool["taint"].(*schema.Set); ok {
+			for _, taintInterface := range taintSet.List() {
+				taintMap := taintInterface.(map[string]interface{})
+				taints = append(taints, corev1.Taint{
+					Key:    taintMap["key"].(string),
+					Value:  taintMap["value"].(string),
+					Effect: corev1.TaintEffect(taintMap["effect"].(string)),
+				})
 			}
 		}
 
