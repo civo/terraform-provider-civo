@@ -30,6 +30,19 @@ func ResourceNetwork() *schema.Resource {
 				Computed:    true,
 				Description: "The region of the network",
 			},
+			"cidr": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The CIDR block for the network",
+			},
+			"nameservers": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "List of nameservers for the network",
+			},
 			// Computed resource
 			"name": {
 				Type:        schema.TypeString,
@@ -56,13 +69,19 @@ func ResourceNetwork() *schema.Resource {
 func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
 
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
-	network, err := apiClient.NewNetwork(d.Get("label").(string))
+	configs := civogo.NetworkConfig{
+		Label:         d.Get("label").(string),
+		CIDRv4:        d.Get("cidr").(string),
+		Region:        apiClient.Region,
+		NameserversV4: expandStringList(d.Get("nameservers")),
+	}
+	network, err := apiClient.CreateNetwork(configs)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to create a new network: %s", err)
 	}
@@ -76,7 +95,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -111,7 +130,7 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -131,7 +150,7 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -167,4 +186,17 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 	}
 
 	return nil
+}
+
+func expandStringList(input interface{}) []string {
+	var result []string
+
+	if inputList, ok := input.([]interface{}); ok {
+		for _, item := range inputList {
+			if str, ok := item.(string); ok {
+				result = append(result, str)
+			}
+		}
+	}
+	return result
 }
