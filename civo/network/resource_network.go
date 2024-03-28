@@ -30,12 +30,12 @@ func ResourceNetwork() *schema.Resource {
 				Computed:    true,
 				Description: "The region of the network",
 			},
-			"cidr": {
+			"cidr_v4": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The CIDR block for the network",
 			},
-			"nameservers": {
+			"nameservers_v4": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -77,9 +77,9 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
 	configs := civogo.NetworkConfig{
 		Label:         d.Get("label").(string),
-		CIDRv4:        d.Get("cidr").(string),
+		CIDRv4:        d.Get("cidr_v4").(string),
 		Region:        apiClient.Region,
-		NameserversV4: expandStringList(d.Get("nameservers")),
+		NameserversV4: expandStringList(d.Get("nameservers_v4")),
 	}
 	network, err := apiClient.CreateNetwork(configs)
 	if err != nil {
