@@ -77,7 +77,3 @@ require (
 )
 
 go 1.21
-
-replace (
-	github.com/civo/civogo => /Users/uzair/Work/civogo
-)
