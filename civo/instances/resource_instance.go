@@ -160,6 +160,11 @@ func ResourceInstance() *schema.Resource {
 				Computed:    true,
 				Description: "Timestamp when the instance was created",
 			},
+			"reserved_ipv4": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Can be either the UUID, name, or the IP address of the reserved IP",
+			},
 		},
 		CreateContext: resourceInstanceCreate,
 		ReadContext:   resourceInstanceRead,
@@ -174,11 +179,11 @@ func ResourceInstance() *schema.Resource {
 	}
 }
 
-// function to create a instance
+// function to create an instance
 func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -209,6 +214,10 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	if attr, ok := d.GetOk("public_ip_required"); ok {
 		config.PublicIPRequired = attr.(string)
+	}
+
+	if v, ok := d.GetOk("reserved_ipv4"); ok {
+		config.ReservedIPv4 = v.(string)
 	}
 
 	if networtID, ok := d.GetOk("network_id"); ok {
@@ -312,7 +321,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -346,6 +355,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("status", resp.Status)
 	d.Set("script", resp.Script)
+	d.Set("reserved_ipv4", resp.ReservedIP)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 
@@ -360,11 +370,11 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	return nil
 }
 
-// function to update a instance
+// function to update an instance
 func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
