@@ -128,11 +128,23 @@ Required:
 Optional:
 
 - `label` (String) Node pool label, if you don't provide one, we will generate one for you
+- `labels` (Map of String)
 - `public_ip_node_pool` (Boolean) Node pool belongs to the public ip node pool
+- `taint` (Block Set) (see [below for nested schema](#nestedblock--pools--taint))
 
 Read-Only:
 
 - `instance_names` (List of String) Instance names in the nodepool
+
+<a id="nestedblock--pools--taint"></a>
+### Nested Schema for `pools.taint`
+
+Required:
+
+- `effect` (String)
+- `key` (String)
+- `value` (String)
+
 
 
 <a id="nestedblock--timeouts"></a>

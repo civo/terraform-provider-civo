@@ -59,6 +59,7 @@ resource "civo_instance" "foo" {
 - `notes` (String) Add some notes to the instance
 - `public_ip_required` (String) This should be either 'none' or 'create' (default: 'create')
 - `region` (String) The region for the instance, if not declare we use the region in declared in the provider
+- `reserved_ipv4` (String) Can be either the UUID, name, or the IP address of the reserved IP
 - `reverse_dns` (String) A fully qualified domain name that should be used as the instance's IP's reverse DNS (optional, uses the hostname if unspecified)
 - `script` (String) The contents of a script that will be uploaded to /usr/local/bin/civo-user-init-script on your instance, read/write/executable only by root and then will be executed at the end of the cloud initialization
 - `size` (String) The name of the size, from the current list, e.g. g3.xsmall

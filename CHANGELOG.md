@@ -1,4 +1,17 @@
 
+## [v1.0.40](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.40) (29 April 2024)
+
+### Merged
+- [#201](https://github.com/civo/terraform-provider-civo/pull/201) - VLAN Support
+- [#207](https://github.com/civo/terraform-provider-civo/pull/207) - Update private key variable in release.yml
+- [#206](https://github.com/civo/terraform-provider-civo/pull/206) - Add environment variable for release job in release.yml
+- [#205](https://github.com/civo/terraform-provider-civo/pull/205) - Fix GitHub Actions configuration in release.yml
+- [#204](https://github.com/civo/terraform-provider-civo/pull/204) - Support Reserved IP for Instance create operation
+- [#200](https://github.com/civo/terraform-provider-civo/pull/200) - Add CIDR and Nameservers support in network
+- [#198](https://github.com/civo/terraform-provider-civo/pull/198) - Add Labels and Taints to Node Pool configurations
+- [#196](https://github.com/civo/terraform-provider-civo/pull/196) - Refactor Civo Kubernetes node pool configuration and organize code in their own folders per service
+- [#195](https://github.com/civo/terraform-provider-civo/pull/195) - Remove spaces in the applications string
+
 ## [v1.0.39](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.39) (16 October 2023)
 
 ### Merged

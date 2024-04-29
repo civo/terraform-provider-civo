@@ -68,10 +68,21 @@ Read-Only:
 
 Read-Only:
 
-- `instance_names` (Set of String)
+- `instance_names` (List of String)
 - `label` (String)
+- `labels` (Map of String)
 - `node_count` (Number)
 - `public_ip_node_pool` (Boolean)
 - `size` (String)
+- `taint` (Set of Object) (see [below for nested schema](#nestedobjatt--pools--taint))
+
+<a id="nestedobjatt--pools--taint"></a>
+### Nested Schema for `pools.taint`
+
+Read-Only:
+
+- `effect` (String)
+- `key` (String)
+- `value` (String)
 
 

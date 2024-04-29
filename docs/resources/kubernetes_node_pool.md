@@ -30,7 +30,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     name = "my-cluster"
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
-    node_pool {
+    pools {
         size = element(data.civo_size.xsmall.sizes, 0).name
         node_count = 3
     }
@@ -52,15 +52,14 @@ resource "civo_kubernetes_node_pool" "back-end" {
 ### Required
 
 - `cluster_id` (String) The ID of your cluster
-- `region` (String) The region of the node pool, has to match that of the cluster
+- `node_count` (Number) Number of nodes in the nodepool
+- `size` (String) Size of the nodes in the nodepool
 
 ### Optional
 
 - `label` (String) Node pool label, if you don't provide one, we will generate one for you
 - `labels` (Map of String)
-- `node_count` (Number) the number of instances to create (optional, the default at the time of writing is 3)
 - `public_ip_node_pool` (Boolean) Node pool belongs to the public ip node pool
-- `size` (String) the size of each node (optional, the default is currently g4s.kube.medium)
 - `taint` (Block Set) (see [below for nested schema](#nestedblock--taint))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -119,7 +118,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
     applications = "Portainer,Linkerd:Linkerd & Jaeger"
     firewall_id = civo_firewall.my-firewall.id
     
-    node_pool {
+    pools {
         size = element(data.civo_size.xsmall.sizes, 0).name
         node_count = 3
     }
