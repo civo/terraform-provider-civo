@@ -10,9 +10,18 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: release
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Unshallow
         run: git fetch --prune --unshallow
@@ -41,7 +50,7 @@ jobs:
       - name: Setup Git config
         run: |
           git config user.name "GitHub Actions"
-          git config user.email "<>"
+          git config user.email github-actions@github.com
 
       - name: Add and commit generated files
         run: |
@@ -68,4 +77,4 @@ jobs:
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
