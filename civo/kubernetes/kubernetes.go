@@ -23,7 +23,6 @@ func nodePoolSchema(isResource bool) map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Required:     true,
 			Description:  "Number of nodes in the nodepool",
-			ValidateFunc: validation.IntAtLeast(1),
 		},
 		"size": {
 			Type:        schema.TypeString,
