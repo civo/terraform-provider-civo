@@ -2,6 +2,7 @@
 ## [v1.0.40](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.40) (29 April 2024)
 
 ### Merged
+- [#208](https://github.com/civo/terraform-provider-civo/pull/208) - Update GoReleaser version to 1.25.1 in release.yml
 - [#201](https://github.com/civo/terraform-provider-civo/pull/201) - VLAN Support
 - [#207](https://github.com/civo/terraform-provider-civo/pull/207) - Update private key variable in release.yml
 - [#206](https://github.com/civo/terraform-provider-civo/pull/206) - Add environment variable for release job in release.yml
