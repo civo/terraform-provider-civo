@@ -54,6 +54,37 @@ func ResourceNetwork() *schema.Resource {
 				Computed:    true,
 				Description: "If the network is default, this will be `true`",
 			},
+			// VLAN Network
+			"vlan_id": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "VLAN ID for the network",
+			},
+			"vlan_cidr_v4": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "CIDR for VLAN IPv4",
+			},
+			"vlan_gateway_ip_v4": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Gateway IP for VLAN IPv4",
+			},
+			"vlan_hardware_addr": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Hardware address for VLAN",
+			},
+			"vlan_allocation_pool_v4_start": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Start of the IPv4 allocation pool for VLAN",
+			},
+			"vlan_allocation_pool_v4_end": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "End of the IPv4 allocation pool for VLAN",
+			},
 		},
 		CreateContext: resourceNetworkCreate,
 		ReadContext:   resourceNetworkRead,
@@ -75,11 +106,24 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
+	vlanConfig := civogo.VLANConnectConfig{
+		VlanID:                d.Get("vlan_id").(int),
+		HardwareAddr:          d.Get("vlan_hardware_addr").(string),
+		CIDRv4:                d.Get("vlan_cidr_v4").(string),
+		GatewayIPv4:           d.Get("vlan_gateway_ip_v4").(string),
+		AllocationPoolV4Start: d.Get("vlan_allocation_pool_v4_start").(string),
+		AllocationPoolV4End:   d.Get("vlan_allocation_pool_v4_end").(string),
+	}
+
 	configs := civogo.NetworkConfig{
 		Label:         d.Get("label").(string),
 		CIDRv4:        d.Get("cidr_v4").(string),
 		Region:        apiClient.Region,
 		NameserversV4: expandStringList(d.Get("nameservers_v4")),
+	}
+	// Only add VLAN configuration if VLAN ID is set
+	if vlanConfig.VlanID > 0 {
+		configs.VLanConfig = &vlanConfig
 	}
 	network, err := apiClient.CreateNetwork(configs)
 	if err != nil {
