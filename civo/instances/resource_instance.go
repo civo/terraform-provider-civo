@@ -2,16 +2,15 @@ package instances
 
 import (
 	"context"
-	"log"
-	"strings"
-	"time"
-
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"strings"
+	"time"
 )
 
 // ResourceInstance The instance resource represents an object of type instances
@@ -160,6 +159,11 @@ func ResourceInstance() *schema.Resource {
 				Computed:    true,
 				Description: "Timestamp when the instance was created",
 			},
+			"private_ipv4": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The private IPv4 address for the instance (optional)",
+			},
 			"reserved_ipv4": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -214,6 +218,10 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	if attr, ok := d.GetOk("public_ip_required"); ok {
 		config.PublicIPRequired = attr.(string)
+	}
+
+	if privateIPv4, ok := d.GetOk("private_ipv4"); ok {
+		config.PrivateIPv4 = privateIPv4.(string)
 	}
 
 	if v, ok := d.GetOk("reserved_ipv4"); ok {
@@ -471,7 +479,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceInstanceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
