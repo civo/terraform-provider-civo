@@ -1,4 +1,9 @@
 
+## [v1.0.41](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.41) (7 May 2024)
+
+### Merged
+- [#210](https://github.com/civo/terraform-provider-civo/pull/210) - Support Private IP for Instance create
+
 ## [v1.0.40](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.40) (29 April 2024)
 
 ### Merged

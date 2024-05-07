@@ -57,6 +57,7 @@ resource "civo_instance" "foo" {
 - `initial_user` (String) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)
 - `network_id` (String) This must be the ID of the network from the network listing (optional; default network used when not specified)
 - `notes` (String) Add some notes to the instance
+- `private_ipv4` (String) The private IPv4 address for the instance (optional)
 - `public_ip_required` (String) This should be either 'none' or 'create' (default: 'create')
 - `region` (String) The region for the instance, if not declare we use the region in declared in the provider
 - `reserved_ipv4` (String) Can be either the UUID, name, or the IP address of the reserved IP
