@@ -1,4 +1,9 @@
 
+## [v1.0.42](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.42) (6 June 2024)
+
+### Merged
+- [#214](https://github.com/civo/terraform-provider-civo/pull/214) - Rename field HarwareAddr to PhysicalInterface
+
 ## [v1.0.41](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.41) (7 May 2024)
 
 ### Merged
