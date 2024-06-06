@@ -70,10 +70,10 @@ func ResourceNetwork() *schema.Resource {
 				Optional:    true,
 				Description: "Gateway IP for VLAN IPv4",
 			},
-			"vlan_hardware_addr": {
+			"vlan_physical_interface": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Hardware address for VLAN",
+				Description: "Physical interface for VLAN",
 			},
 			"vlan_allocation_pool_v4_start": {
 				Type:        schema.TypeString,
@@ -108,7 +108,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
 	vlanConfig := civogo.VLANConnectConfig{
 		VlanID:                d.Get("vlan_id").(int),
-		HardwareAddr:          d.Get("vlan_hardware_addr").(string),
+		PhysicalInterface:     d.Get("vlan_physical_interface").(string),
 		CIDRv4:                d.Get("vlan_cidr_v4").(string),
 		GatewayIPv4:           d.Get("vlan_gateway_ip_v4").(string),
 		AllocationPoolV4Start: d.Get("vlan_allocation_pool_v4_start").(string),
