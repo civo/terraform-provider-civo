@@ -34,7 +34,7 @@ resource "civo_network" "custom_net" {
 - `vlan_allocation_pool_v4_start` (String) Start of the IPv4 allocation pool for VLAN
 - `vlan_cidr_v4` (String) CIDR for VLAN IPv4
 - `vlan_gateway_ip_v4` (String) Gateway IP for VLAN IPv4
-- `vlan_hardware_addr` (String) Hardware address for VLAN
+- `vlan_physical_interface` (String) Physical interface for VLAN
 - `vlan_id` (Number) VLAN ID for the network
 
 ### Read-Only
