@@ -4,11 +4,14 @@ package utils
 // func ValidateNameSize
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/go-cty/cty"
@@ -170,4 +173,24 @@ func InPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
 		}
 	}
 	return false
+}
+
+// FunctionWithError is a type that defines a function returning an error.
+type FunctionWithError func() error
+
+// RetryUntilSuccessOrTimeout calls the provided function repeatedly until it returns no error or the timeout has passed.
+func RetryUntilSuccessOrTimeout(fn FunctionWithError, interval time.Duration, timeout time.Duration) error {
+	start := time.Now()
+	for {
+		err := fn()
+		if err != nil {
+			if time.Since(start) > timeout {
+				return errors.New("timeout reached")
+			}
+			log.Printf("[INFO] Retrying after error: %s", err)
+			time.Sleep(interval)
+			continue
+		}
+		return nil
+	}
 }
