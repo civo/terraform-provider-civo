@@ -276,12 +276,18 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 	config.Tags = tags
 
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
-	instance, err := apiClient.CreateInstance(config)
-	if err != nil {
-		return diag.Errorf("[ERR] failed to create instance: %s", err)
-	}
+	err := utils.RetryUntilSuccessOrTimeout(func() error {
+		instance, err := apiClient.CreateInstance(config)
+		if err != nil {
+			return err
+		}
+		d.SetId(instance.ID)
+		return nil
+	}, 10*time.Second, 2*time.Minute)
 
-	d.SetId(instance.ID)
+	if err != nil {
+		return diag.Errorf("[ERR] failed to create instance after multiple attempts: %s", err)
+	}
 
 	createStateConf := &resource.StateChangeConf{
 		Pending: []string{"BUILDING"},

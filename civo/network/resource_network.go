@@ -125,12 +125,22 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	if vlanConfig.VlanID > 0 {
 		configs.VLanConfig = &vlanConfig
 	}
-	network, err := apiClient.CreateNetwork(configs)
-	if err != nil {
-		return diag.Errorf("[ERR] failed to create a new network: %s", err)
-	}
 
-	d.SetId(network.ID)
+	// Timeout: 2mins, Interval: 10secs
+	// Retry the network creation using the utility function
+	err := utils.RetryUntilSuccessOrTimeout(func() error {
+		log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
+		network, err := apiClient.CreateNetwork(configs)
+		if err != nil {
+			return err
+		}
+		d.SetId(network.ID)
+		return nil
+	}, 10*time.Second, 2*time.Minute)
+
+	if err != nil {
+		return diag.Errorf("[ERR] failed to create a new network after multiple attempts: %s", err)
+	}
 
 	return resourceNetworkRead(ctx, d, m)
 }
