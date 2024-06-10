@@ -126,7 +126,6 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 		configs.VLanConfig = &vlanConfig
 	}
 
-	// Timeout: 2mins, Interval: 10secs
 	// Retry the network creation using the utility function
 	err := utils.RetryUntilSuccessOrTimeout(func() error {
 		log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
