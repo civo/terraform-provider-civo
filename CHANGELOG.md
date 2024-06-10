@@ -1,4 +1,9 @@
 
+## [v1.0.43](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.43) (10 June 2024)
+
+### Merged
+- [#215](https://github.com/civo/terraform-provider-civo/pull/215) - Add Retry Logic for network and instance create
+
 ## [v1.0.42](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.42) (6 June 2024)
 
 ### Merged
