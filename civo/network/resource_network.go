@@ -176,6 +176,9 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 	d.Set("region", apiClient.Region)
 	d.Set("label", CurrentNetwork.Label)
 	d.Set("default", CurrentNetwork.Default)
+	d.Set("cidr_v4", CurrentNetwork.CIDR)
+	d.Set("nameservers_v4", CurrentNetwork.NameserversV4)
+
 	return nil
 }
 
