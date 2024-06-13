@@ -1,4 +1,10 @@
 
+## [v1.0.44](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.44) (13 June 2024)
+
+### Merged
+- [#218](https://github.com/civo/terraform-provider-civo/pull/218) - Fix disk_image and public_ip_required in instance read
+- [#216](https://github.com/civo/terraform-provider-civo/pull/216) - manage network state properly
+
 ## [v1.0.43](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.43) (10 June 2024)
 
 ### Merged
