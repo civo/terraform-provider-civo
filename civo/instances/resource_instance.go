@@ -373,13 +373,16 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("reserved_ipv4", resp.ReservedIP)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
+	d.Set("disk_image", resp.SourceID)
+
+	if resp.PublicIP != "" {
+		d.Set("public_ip_required", "create")
+	} else {
+		d.Set("public_ip_required", "none")
+	}
 
 	if _, ok := d.GetOk("template"); ok {
 		d.Set("template", d.Get("template").(string))
-	}
-
-	if _, ok := d.GetOk("disk_image"); ok {
-		d.Set("disk_image", d.Get("disk_image").(string))
 	}
 
 	return nil
