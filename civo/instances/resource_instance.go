@@ -71,6 +71,7 @@ func ResourceInstance() *schema.Resource {
 				Computed:     true,
 				ExactlyOneOf: []string{"template", "disk_image"},
 				Description:  "The ID for the disk image to use to build the instance",
+				ForceNew:     true,
 			},
 			"initial_user": {
 				Type:        schema.TypeString,
