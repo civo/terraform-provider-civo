@@ -71,10 +71,7 @@ func ResourceInstance() *schema.Resource {
 				Computed:     true,
 				ExactlyOneOf: []string{"template", "disk_image"},
 				Description:  "The ID for the disk image to use to build the instance",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// Suppress changes if the old value is non-empty and different from the new value
-					return old != "" && old != new
-				},
+				ForceNew:     true,
 			},
 			"initial_user": {
 				Type:        schema.TypeString,
