@@ -18,7 +18,7 @@ func ResourceNetwork() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo network resource. This can be used to create, modify, and delete networks.",
 		Schema: map[string]*schema.Schema{
-			"label": {
+			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "Name for the network",
@@ -42,12 +42,6 @@ func ResourceNetwork() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "List of nameservers for the network",
-			},
-			// Computed resource
-			"name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The name of the network",
 			},
 			"default": {
 				Type:        schema.TypeBool,
@@ -105,7 +99,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 		apiClient.Region = region.(string)
 	}
 
-	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
+	log.Printf("[INFO] creating the new network %s", d.Get("name").(string))
 	vlanConfig := civogo.VLANConnectConfig{
 		VlanID:                d.Get("vlan_id").(int),
 		PhysicalInterface:     d.Get("vlan_physical_interface").(string),
@@ -116,7 +110,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	configs := civogo.NetworkConfig{
-		Label:         d.Get("label").(string),
+		Label:         d.Get("name").(string),
 		CIDRv4:        d.Get("cidr_v4").(string),
 		Region:        apiClient.Region,
 		NameserversV4: expandStringList(d.Get("nameservers_v4")),
@@ -128,7 +122,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// Retry the network creation using the utility function
 	err := utils.RetryUntilSuccessOrTimeout(func() error {
-		log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
+		log.Printf("[INFO] Attempting to create the network %s", d.Get("name").(string))
 		network, err := apiClient.CreateNetwork(configs)
 		if err != nil {
 			return err
@@ -172,9 +166,8 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 		}
 	}
 
-	d.Set("name", CurrentNetwork.Name)
 	d.Set("region", apiClient.Region)
-	d.Set("label", CurrentNetwork.Label)
+	d.Set("name", CurrentNetwork.Label)
 	d.Set("default", CurrentNetwork.Default)
 	d.Set("cidr_v4", CurrentNetwork.CIDR)
 	d.Set("nameservers_v4", CurrentNetwork.NameserversV4)
@@ -191,9 +184,9 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		apiClient.Region = region.(string)
 	}
 
-	if d.HasChange("label") {
+	if d.HasChange("name") {
 		log.Printf("[INFO] updating the network %s", d.Id())
-		_, err := apiClient.RenameNetwork(d.Get("label").(string), d.Id())
+		_, err := apiClient.RenameNetwork(d.Get("name").(string), d.Id())
 		if err != nil {
 			return diag.Errorf("[ERR] An error occurred while rename the network %s", d.Id())
 		}
