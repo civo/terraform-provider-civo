@@ -23,6 +23,7 @@ func ResourceInstance() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The region for the instance, if not declare we use the region in declared in the provider",
 			},
 			"hostname": {
@@ -30,7 +31,6 @@ func ResourceInstance() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				Description:  "A fully qualified domain name that should be set as the instance's hostname",
-				ForceNew:     true,
 				ValidateFunc: utils.ValidateNameSize,
 			},
 			"reverse_dns": {
@@ -55,6 +55,7 @@ func ResourceInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "This must be the ID of the network from the network listing (optional; default network used when not specified)",
 			},
 			"template": {
@@ -363,7 +364,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("initial_password", resp.InitialPassword)
 	d.Set("source_type", resp.SourceType)
 	d.Set("source_id", resp.SourceID)
-	d.Set("sshkey_id", resp.SSHKey)
+	d.Set("sshkey_id", resp.SSHKeyID)
 	d.Set("tags", resp.Tags)
 	d.Set("private_ip", resp.PrivateIP)
 	d.Set("public_ip", resp.PublicIP)
@@ -429,25 +430,32 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 	}
 
-	// if has note we add to the instance
-	if d.HasChange("notes") {
+	// if notes or hostname have changed, add them to the instance
+	if d.HasChange("notes") || d.HasChange("hostname") {
 		notes := d.Get("notes").(string)
+		hostname := d.Get("hostname").(string)
+
 		instance, err := apiClient.GetInstance(d.Id())
 		if err != nil {
 			// check if the instance no longer exists.
 			return diag.Errorf("[ERR] instance %s not found", d.Id())
 		}
 
-		instance.Notes = notes
+		if d.HasChange("notes") {
+			instance.Notes = notes
+		}
+		if d.HasChange("hostname") {
+			instance.Hostname = hostname
+		}
 
-		log.Printf("[INFO] adding notes to the instance %s", d.Id())
+		log.Printf("[INFO] updating instance %s", d.Id())
 		_, err = apiClient.UpdateInstance(instance)
 		if err != nil {
-			return diag.Errorf("[ERR] an error occurred while adding a note to the instance %s", d.Id())
+			return diag.Errorf("[ERR] an error occurred while updating notes or hostname of the instance %s", d.Id())
 		}
 	}
 
-	// if a firewall is declare we update the instance
+	// if a firewall is declared we update the instance
 	if d.HasChange("firewall_id") {
 		firewallID := d.Get("firewall_id").(string)
 
@@ -457,6 +465,14 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			// check if the instance no longer exists.
 			return diag.Errorf("[ERR] an error occurred while set firewall to the instance %s", d.Id())
 		}
+	}
+
+	if d.HasChange("initial_user") {
+		return diag.Errorf("[ERR] updating initial_user is not supported")
+	}
+
+	if d.HasChange("sshkey_id") {
+		return diag.Errorf("[ERR] updating sshkey_id is not supported")
 	}
 
 	// if tags is declare we update the instance with the tags
