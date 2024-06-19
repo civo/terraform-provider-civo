@@ -465,6 +465,10 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("[ERR] updating initial_user is not supported")
 	}
 
+	if d.HasChange("sshkey_id") {
+		return diag.Errorf("[ERR] updating sshkey_id is not supported")
+	}
+
 	// if tags is declare we update the instance with the tags
 	if d.HasChange("tags") {
 		tfTags := d.Get("tags").(*schema.Set).List()
