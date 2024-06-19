@@ -23,6 +23,7 @@ func ResourceInstance() *schema.Resource {
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The region for the instance, if not declare we use the region in declared in the provider",
 			},
 			"hostname": {
@@ -55,6 +56,7 @@ func ResourceInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "This must be the ID of the network from the network listing (optional; default network used when not specified)",
 			},
 			"template": {
@@ -457,6 +459,10 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			// check if the instance no longer exists.
 			return diag.Errorf("[ERR] an error occurred while set firewall to the instance %s", d.Id())
 		}
+	}
+
+	if d.HasChange("initial_user") {
+		return diag.Errorf("[ERR] updating initial_user is not supported")
 	}
 
 	// if tags is declare we update the instance with the tags
