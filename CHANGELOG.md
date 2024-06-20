@@ -1,4 +1,10 @@
 
+## [v1.0.45](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.45) (20 June 2024)
+
+### Merged
+- [#226](https://github.com/civo/terraform-provider-civo/pull/226) - Various improvements in `civo_instance` rersource
+- [#219](https://github.com/civo/terraform-provider-civo/pull/219) - Destory and Re-create Instance in case of disk-image update
+
 ## [v1.0.44](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.44) (13 June 2024)
 
 ### Merged
