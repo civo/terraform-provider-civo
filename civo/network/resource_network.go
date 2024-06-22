@@ -34,6 +34,7 @@ func ResourceNetwork() *schema.Resource {
 			"cidr_v4": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The CIDR block for the network",
 			},
 			"nameservers_v4": {
@@ -42,6 +43,7 @@ func ResourceNetwork() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Computed:    true,
 				Description: "List of nameservers for the network",
 			},
 			// Computed resource
