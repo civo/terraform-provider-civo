@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -96,6 +97,7 @@ func ResourceNetwork() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: customizeDiffNetwork,
 	}
 }
 
@@ -258,4 +260,11 @@ func expandStringList(input interface{}) []string {
 		}
 	}
 	return result
+}
+
+func customizeDiffNetwork(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Id() != "" && d.HasChange("cidr_v4") {
+		return fmt.Errorf("the 'cidr_v4' field is immutable")
+	}
+	return nil
 }
