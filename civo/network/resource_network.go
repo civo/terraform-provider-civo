@@ -103,6 +103,19 @@ func ResourceNetwork() *schema.Resource {
 func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
+	label := d.Get("label").(string)
+
+    // List all networks and check for an exact match
+    networks, err := apiClient.ListNetworks()
+    if err != nil {
+        return diag.FromErr(err)
+    }
+    for _, network := range networks {
+        if network.Label == label {
+			return diag.Errorf("Network with label '%s' already exists, please go to dashboard https://dashboard.civo.com/ and check or pick a different label for the network.", label)
+        }
+    }
+
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
@@ -130,7 +143,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	// Retry the network creation using the utility function
-	err := utils.RetryUntilSuccessOrTimeout(func() error {
+	err = utils.RetryUntilSuccessOrTimeout(func() error {
 		log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
 		network, err := apiClient.CreateNetwork(configs)
 		if err != nil {

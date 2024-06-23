@@ -190,6 +190,19 @@ func ResourceInstance() *schema.Resource {
 func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
+	hostname := d.Get("hostname").(string)
+
+	// Check if an instance already exists by this hostname
+	existingInstances, err := apiClient.ListAllInstances()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	for _, instance := range existingInstances {
+		if instance.Hostname == hostname {
+			return diag.Errorf("Instance with hostname '%s' already exists, please go to dashboard https://dashboard.civo.com/ and check or pick a different hostname for the instance.", hostname)
+		}
+	}
+
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
@@ -278,7 +291,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 	config.Tags = tags
 
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
-	err := utils.RetryUntilSuccessOrTimeout(func() error {
+	err = utils.RetryUntilSuccessOrTimeout(func() error {
 		instance, err := apiClient.CreateInstance(config)
 		if err != nil {
 			return err
