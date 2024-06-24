@@ -3,6 +3,7 @@ package network
 import (
 	"context"
 	"fmt"
+	"errors"
 	"log"
 	"time"
 
@@ -130,29 +131,38 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 		configs.VLanConfig = &vlanConfig
 	}
 
-	// Retry the network creation using the utility function
-	err := utils.RetryUntilSuccessOrTimeout(func() error {
-		log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
-		network, err := apiClient.CreateNetwork(configs)
-		if err != nil {
-			return err
-		}
-		d.SetId(network.ID)
-
-		// Create a default firewall for the network
-		log.Printf("[INFO] Creating default firewall for the network %s", d.Get("label").(string))
-		err = createDefaultFirewall(apiClient, network.ID, network.Label)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}, 10*time.Second, 2*time.Minute)
-
+	log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
+	network, err := apiClient.CreateNetwork(configs)
 	if err != nil {
-		return diag.Errorf("[ERR] failed to create a new network after multiple attempts: %s", err)
+
+		// Check for the resource already exists error
+		if errors.Is(err, civogo.DatabaseNetworkExistsError) {
+			return diag.Errorf("[ERR] %s", err)
+		}
+
+		// Retry the network creation using the utility function for other errors
+		err := utils.RetryUntilSuccessOrTimeout(func() error {
+			log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
+			network, err := apiClient.CreateNetwork(configs)
+			if err != nil {
+				return err
+			}
+			d.SetId(network.ID)
+			return nil
+		}, 10*time.Second, 2*time.Minute)
+
+		if err != nil {
+			return diag.Errorf("[ERR] failed to create a new network after multiple attempts: %s", err)
+		}
 	}
 
+	d.SetId(network.ID)
+	// Create a default firewall for the network
+	log.Printf("[INFO] Creating default firewall for the network %s", d.Get("label").(string))
+	err = createDefaultFirewall(apiClient, network.ID, network.Label)
+	if err != nil {
+		return diag.Errorf("failed firewall")
+	}
 	return resourceNetworkRead(ctx, d, m)
 }
 
