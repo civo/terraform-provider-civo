@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -137,6 +138,14 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 			return err
 		}
 		d.SetId(network.ID)
+
+		// Create a default firewall for the network
+		log.Printf("[INFO] Creating default firewall for the network %s", d.Get("label").(string))
+		err = createDefaultFirewall(apiClient, network.ID, network.Label)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}, 10*time.Second, 2*time.Minute)
 
@@ -258,4 +267,22 @@ func expandStringList(input interface{}) []string {
 		}
 	}
 	return result
+}
+
+// createDefaultFirewall function to create a default firewall
+func createDefaultFirewall(apiClient *civogo.Client, networkID string, networkName string) error {
+
+	firewallConfig := civogo.FirewallConfig{
+		Name:      fmt.Sprintf("%s-default", networkName),
+		NetworkID: networkID,
+		Region:    apiClient.Region,
+	}
+
+	// Create the default firewall
+	_, err := apiClient.NewFirewall(&firewallConfig)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
