@@ -161,7 +161,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	log.Printf("[INFO] Creating default firewall for the network %s", d.Get("label").(string))
 	err = createDefaultFirewall(apiClient, network.ID, network.Label)
 	if err != nil {
-		return diag.Errorf("failed firewall")
+		return diag.Errorf("[ERR] failed to create a new firewall for the network %s: %s", d.Get("label").(string), err)
 	}
 	return resourceNetworkRead(ctx, d, m)
 }
