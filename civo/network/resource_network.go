@@ -2,8 +2,8 @@ package network
 
 import (
 	"context"
-	"fmt"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
