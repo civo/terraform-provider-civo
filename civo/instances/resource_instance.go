@@ -92,10 +92,10 @@ func ResourceInstance() *schema.Resource {
 				Description: "The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)",
 			},
 			"firewall_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
+				Description:  "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
