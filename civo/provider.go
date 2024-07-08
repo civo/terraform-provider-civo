@@ -1,8 +1,11 @@
 package civo
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/civo/database"
@@ -34,11 +37,11 @@ var (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"token": {
+			"credential_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("CIVO_TOKEN", ""),
-				Description: "This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.",
+				DefaultFunc: schema.EnvDefaultFunc("CIVO_CREDENTIAL_FILE", ""),
+				Description: "Path to the Civo credentials file. Can be specified using CIVO_CREDENTIAL_FILE environment variable.",
 			},
 			"region": {
 				Type:        schema.TypeString,
@@ -106,7 +109,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		regionValue = region.(string)
 	}
 
-	if token, ok := d.GetOk("token"); ok {
+	if token, ok := getToken(d); ok {
 		tokenValue = token.(string)
 	} else {
 		return nil, fmt.Errorf("[ERR] token not found")
@@ -130,4 +133,61 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
 	return client, nil
+}
+
+func getToken(d *schema.ResourceData) (interface{}, bool) {
+	var exists = true
+
+	// Check for CIVO_TOKEN environment variable
+	if token := os.Getenv("CIVO_TOKEN"); token != "" {
+		return token, exists
+	}
+
+	// Check for credentials file specified in provider config
+	if credFile, ok := d.GetOk("credential_file"); ok {
+		token, err := readTokenFromFile(credFile.(string))
+		if err == nil {
+			return token, exists
+		}
+	}
+
+	// Check for default CLI config file
+	homeDir, err := getHomeDir()
+	if err == nil {
+		token, err := readTokenFromFile(filepath.Join(homeDir, ".civo.json"))
+		if err == nil {
+			return token, exists
+		}
+	}
+
+	return nil, !exists
+
+}
+
+var getHomeDir = func() (string, error) {
+	if home := os.Getenv("HOME"); home != "" {
+		return home, nil
+	}
+	// Fall back to os.UserHomeDir() if HOME is not set
+	return os.UserHomeDir()
+}
+
+func readTokenFromFile(path string) (string, error) {
+	data, err := os.ReadFile(path)
+
+	if err != nil {
+		return "", err
+	}
+
+	var config struct {
+		APIKeys struct {
+			Token string `json:"CIVO_TOKEN"`
+		} `json:"apikeys"`
+	}
+
+	if err := json.Unmarshal(data, &config); err != nil {
+		return "", err
+	}
+
+	return config.APIKeys.Token, nil
 }
