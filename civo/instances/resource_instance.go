@@ -2,6 +2,7 @@ package instances
 
 import (
 	"context"
+	"errors"
 	"log"
 	"strings"
 	"time"
@@ -278,18 +279,29 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 	config.Tags = tags
 
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
-	err := utils.RetryUntilSuccessOrTimeout(func() error {
-		instance, err := apiClient.CreateInstance(config)
-		if err != nil {
-			return err
-		}
-		d.SetId(instance.ID)
-		return nil
-	}, 10*time.Second, 2*time.Minute)
 
+	instance, err := apiClient.CreateInstance(config)
 	if err != nil {
-		return diag.Errorf("[ERR] failed to create instance after multiple attempts: %s", err)
+		if errors.Is(err, civogo.DatabaseInstanceDuplicateNameError) {
+			return diag.Errorf("[ERR] instance with the name %s already exists", config.Hostname)
+		}
+
+		err := utils.RetryUntilSuccessOrTimeout(func() error {
+			log.Printf("[INFO] Attempting to create the instance %s", config.Hostname)
+			instance, err := apiClient.CreateInstance(config)
+			if err != nil {
+				return err
+			}
+			d.SetId(instance.ID)
+			return nil
+		}, 10*time.Second, 2*time.Minute)
+
+		if err != nil {
+			return diag.Errorf("[ERR] failed to create instance after multiple attempts: %s", err)
+		}
 	}
+
+	d.SetId(instance.ID)
 
 	createStateConf := &resource.StateChangeConf{
 		Pending: []string{"BUILDING"},
