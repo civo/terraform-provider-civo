@@ -98,6 +98,7 @@ func ResourceNetwork() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: customizeDiffNetwork,
 	}
 }
 
@@ -279,6 +280,13 @@ func expandStringList(input interface{}) []string {
 	return result
 }
 
+func customizeDiffNetwork(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Id() != "" && d.HasChange("cidr_v4") {
+		return fmt.Errorf("the 'cidr_v4' field is immutable")
+	}
+	return nil
+}
+
 // createDefaultFirewall function to create a default firewall
 func createDefaultFirewall(apiClient *civogo.Client, networkID string, networkName string) error {
 
@@ -293,6 +301,5 @@ func createDefaultFirewall(apiClient *civogo.Client, networkID string, networkNa
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
