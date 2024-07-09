@@ -1,5 +1,5 @@
-# Set the variable value in *.tfvars file or using -var="civo_token=..." CLI flag
-variable "civo_token" {}
+# Set the variable value in *.tfvars file or using -var="credential_file=..." CLI flag
+variable "credential_file" {}
 
 # Specify required provider as maintained by civo
 terraform {
@@ -12,7 +12,7 @@ terraform {
 
 # Configure the Civo Provider
 provider "civo" {
-  token = var.civo_token
+  credential_file = var.credential_file
   region = "LON1"
 }
 

@@ -37,6 +37,13 @@ var (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("CIVO_TOKEN", ""),
+				Description: "This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.",
+				Deprecated:  "\"token\" attribute is deprecated. Moving forward, please use \"credential_file\" attribute.",
+			},
 			"credential_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
