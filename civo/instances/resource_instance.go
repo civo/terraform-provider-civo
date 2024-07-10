@@ -3,6 +3,7 @@ package instances
 import (
 	"context"
 	"errors"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
 	"strings"
 	"time"
@@ -514,8 +515,8 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	return resourceInstanceRead(ctx, d, m)
 }
 
-// function to delete instance
-func resourceInstanceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+// function to delete instance.
+func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is defined in the datasource
@@ -528,5 +529,30 @@ func resourceInstanceDelete(_ context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete instance %s", d.Id())
 	}
+
+	// Wait for the instance to be completely deleted
+	deleteStateConf := &retry.StateChangeConf{
+		Pending: []string{"DELETING"},
+		Target:  []string{"DELETED"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.GetInstance(d.Id())
+			if err != nil {
+				if errors.Is(err, civogo.DatabaseInstanceNotFoundError) {
+					return 0, "DELETED", nil
+				}
+				return 0, "", err
+			}
+			return resp, resp.Status, nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 60,
+	}
+	_, err = deleteStateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("error waiting for instance (%s) to be deleted: %s", d.Id(), err)
+	}
+
 	return nil
 }
