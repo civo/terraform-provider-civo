@@ -33,6 +33,7 @@ if [ -z `which civo` ]; then
    exit
 fi
 
+civo_api_key=`civo apikey show | tail -n +4 | head -1 | awk '{print $4}'`
 
 # verify terraform is installed
 if [ -z `which terraform` ]; then
@@ -80,6 +81,7 @@ terraform {
   }
 }
 provider "civo" {
+  token = "$civo_api_key"
   region = "$region"
 }
 EOF
@@ -96,5 +98,3 @@ echo "${GREEN}Init${RESET} civo provider..."
 terraform init
 terraform plan
 printf "To apply desired resources, you can now use \n ${YELLOW}cd manifests_folder \n terraform apply${RESET}\n"
-
-

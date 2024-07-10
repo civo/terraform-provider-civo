@@ -42,7 +42,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_TOKEN", ""),
 				Description: "This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.",
-				Deprecated:  "\"token\" attribute is deprecated. Moving forward, please use \"credential_file\" attribute.",
+				Deprecated:  "\"token\" attribute is deprecated. Moving forward, please set the appropriate environment variable or use the \"credential_file\" attribute.",
 			},
 			"credential_file": {
 				Type:        schema.TypeString,
@@ -145,8 +145,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 func getToken(d *schema.ResourceData) (interface{}, bool) {
 	var exists = true
 
-	// Check for CIVO_TOKEN environment variable
-	if token := os.Getenv("CIVO_TOKEN"); token != "" {
+	// Gets you the token atrribute value or falls back to reading CIVO_TOKEN environment variable
+	if token, ok := d.GetOk("token"); ok {
 		return token, exists
 	}
 
