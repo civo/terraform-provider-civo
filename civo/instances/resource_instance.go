@@ -385,7 +385,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("status", resp.Status)
 	d.Set("script", resp.Script)
-	d.Set("reserved_ipv4", resp.ReservedIP)
+	d.Set("reserved_ipv4", resp.ReservedIPID)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 	d.Set("disk_image", resp.SourceID)
