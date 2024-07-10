@@ -385,7 +385,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("status", resp.Status)
 	d.Set("script", resp.Script)
-	d.Set("reserved_ipv4", resp.ReservedIP)
+	d.Set("reserved_ipv4", resp.ReservedIPID)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 	d.Set("disk_image", resp.SourceID)
@@ -466,6 +466,56 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		if err != nil {
 			return diag.Errorf("[ERR] an error occurred while updating notes or hostname of the instance %s", d.Id())
 		}
+	}
+
+	// If reserved_ipv4 has changed, update the instance with the new reserved IP
+	if d.HasChange("reserved_ipv4") {
+		oldReservedIP, newReservedIP := d.GetChange("reserved_ipv4")
+		instance, err := apiClient.GetInstance(d.Id())
+		if err != nil {
+			// Check if the instance no longer exists.
+			return diag.Errorf("[ERR] instance %s not found", d.Id())
+		}
+
+		// Unassign the old reserved IP if it exists
+		if oldReservedIP != "" {
+			ip, err := apiClient.FindIP(oldReservedIP.(string))
+			if err != nil {
+				if errors.Is(err, civogo.ZeroMatchesError) {
+					return diag.Errorf("sorry there is no %s IP in your account", oldReservedIP)
+				} else if errors.Is(err, civogo.MultipleMatchesError) {
+					return diag.Errorf("sorry we found more than one IP with that value in your account")
+				} else {
+					return diag.Errorf("error finding IP %s: %s", oldReservedIP, err)
+				}
+			}
+
+			_, err = apiClient.UnassignIP(ip.ID, apiClient.Region)
+			if err != nil {
+				return diag.Errorf("[ERR] an error occurred while unassigning reserved IP %s from instance %s: %s", ip.ID, instance.ID, err)
+			}
+			log.Printf("[INFO] unassigned reserved IP %s from the instance %s", oldReservedIP, d.Id())
+		}
+
+		// Find the new reserved IP
+		ip, err := apiClient.FindIP(newReservedIP.(string))
+		if err != nil {
+			if errors.Is(err, civogo.ZeroMatchesError) {
+				return diag.Errorf("sorry there is no %s IP in your account", newReservedIP)
+			} else if errors.Is(err, civogo.MultipleMatchesError) {
+				return diag.Errorf("sorry we found more than one IP with that value in your account")
+			} else {
+				return diag.Errorf("error finding IP %s: %s", newReservedIP, err)
+			}
+		}
+
+		// Assign the new reserved IP to the instance
+		_, err = apiClient.AssignIP(ip.ID, instance.ID, "instance", apiClient.Region)
+		if err != nil {
+			return diag.Errorf("[ERR] an error occurred while assigning reserved IP %s to instance %s: %s", ip.ID, instance.ID, err)
+		}
+
+		log.Printf("[INFO] assigned reserved IP %s to the instance %s", newReservedIP, d.Id())
 	}
 
 	// if a firewall is declared we update the instance
