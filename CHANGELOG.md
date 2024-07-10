@@ -1,4 +1,16 @@
 
+## [v1.0.46](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.46) (10 July 2024)
+
+### Merged
+- [#254](https://github.com/civo/terraform-provider-civo/pull/254) - Allow updating reserved_ip4 for instance resource
+- [#253](https://github.com/civo/terraform-provider-civo/pull/253) - Wait for the instance to be completely deleted
+- [#240](https://github.com/civo/terraform-provider-civo/pull/240) - Make CIDR immutable for network resource
+- [#243](https://github.com/civo/terraform-provider-civo/pull/243) - Check for Resource Already Exist Error before retry
+- [#237](https://github.com/civo/terraform-provider-civo/pull/237) - Make firewall ID to be a required field for instance
+- [#230](https://github.com/civo/terraform-provider-civo/pull/230) - Create Default firewall for network when not specified.
+- [#239](https://github.com/civo/terraform-provider-civo/pull/239) - Add cidr and Nameservers as computed
+- [#238](https://github.com/civo/terraform-provider-civo/pull/238) - ForceNew on Region in network resource
+
 ## [v1.0.45](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.45) (20 June 2024)
 
 ### Merged
