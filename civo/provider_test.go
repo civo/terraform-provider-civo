@@ -56,7 +56,7 @@ func TestToken(t *testing.T) {
 
 		credentialFile := filepath.Join(tempDir, "credential.json")
 		testToken := "file3409"
-		credContent := fmt.Sprintf(`{"apikeys":{"CIVO_TOKEN":"%s"}}`, testToken)
+		credContent := fmt.Sprintf(`{"apikeys":{"CIVO_TOKEN":"%s"}, "meta":{"current_apikey":"CIVO_TOKEN"}}`, testToken)
 		err = os.WriteFile(credentialFile, []byte(credContent), 0600)
 		if err != nil {
 			t.Fatalf("Failed to write credentials file: %v", err)
@@ -76,7 +76,7 @@ func TestToken(t *testing.T) {
 		}
 		defer os.RemoveAll(tempDir)
 
-		testToken := "12345"
+		testToken := "cliconfig12345"
 		cliConfigContent := fmt.Sprintf(`
 			{
 				"apikeys": {

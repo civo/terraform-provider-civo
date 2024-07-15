@@ -22,6 +22,8 @@ import (
 	"github.com/civo/terraform-provider-civo/civo/size"
 	"github.com/civo/terraform-provider-civo/civo/ssh"
 	"github.com/civo/terraform-provider-civo/civo/volume"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -38,11 +40,12 @@ func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("CIVO_TOKEN", ""),
-				Description: "This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.",
-				Deprecated:  "\"token\" attribute is deprecated. Moving forward, please set the appropriate environment variable or use the \"credential_file\" attribute.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				DefaultFunc:      schema.EnvDefaultFunc("CIVO_TOKEN", ""),
+				Description:      "This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.",
+				Deprecated:       "",
+				ValidateDiagFunc: validateTokenUsage,
 			},
 			"credential_file": {
 				Type:        schema.TypeString,
@@ -187,14 +190,45 @@ func readTokenFromFile(path string) (string, error) {
 	}
 
 	var config struct {
-		APIKeys struct {
-			Token string `json:"CIVO_TOKEN"`
-		} `json:"apikeys"`
+		APIKeys map[string]string `json:"apikeys"`
+		Meta    struct {
+			CurrentAPIKey string `json:"current_apikey"`
+		} `json:"meta"`
 	}
 
 	if err := json.Unmarshal(data, &config); err != nil {
 		return "", err
 	}
 
-	return config.APIKeys.Token, nil
+	// Get the current API key name
+	currentKeyName := config.Meta.CurrentAPIKey
+
+	// Fetch the corresponding token
+	token, ok := config.APIKeys[currentKeyName]
+
+	if !ok {
+		return "", fmt.Errorf("API key '%s' not found", currentKeyName)
+	}
+
+	return token, nil
+}
+
+func validateTokenUsage(v interface{}, path cty.Path) diag.Diagnostics {
+	val := v.(string)
+
+	// Ensures warning is not shown when "CIVO_TOKEN" environment variable is set.
+	if token := os.Getenv("CIVO_TOKEN"); token != "" {
+		val = ""
+	}
+	var diags diag.Diagnostics
+
+	if val != "" {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Deprecated Attribute Usage",
+			Detail:   "The \"token\" attribute is deprecated. Please use the CIVO_TOKEN environment variable or the credential_file attribute instead.",
+		})
+	}
+
+	return diags
 }
