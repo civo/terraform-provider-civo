@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -136,8 +135,8 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	network, err := apiClient.CreateNetwork(configs)
 	if err != nil {
 
-		// Check for the resource already exists error
-		if errors.Is(err, civogo.DatabaseNetworkExistsError) {
+		// Check for known API errors from civogo
+		if utils.IsKnownAPIError(err) {
 			return diag.Errorf("[ERR] %s", err)
 		}
 
