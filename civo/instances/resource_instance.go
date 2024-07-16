@@ -167,6 +167,7 @@ func ResourceInstance() *schema.Resource {
 			"private_ipv4": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The private IPv4 address for the instance (optional)",
 			},
 			"reserved_ipv4": {
