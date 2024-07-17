@@ -121,8 +121,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	if token, ok := getToken(d); ok {
 		tokenValue = token.(string)
-	} else {
-		return nil, fmt.Errorf("[ERR] token not found")
+	} else {		
+		return nil, fmt.Errorf("[ERR] No token configuration found in $CIVO_TOKEN or ~/.civo.json. Please go to https://dashboard.civo.com/security to fetch one")
 	}
 
 	if apiEndpoint, ok := d.GetOk("api_endpoint"); ok {
