@@ -367,6 +367,10 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("[ERR] Firewall change (%q) for existing cluster is not available at this moment", "firewall_id")
 	}
 
+	if d.HasChange("cluster_type") {
+		return diag.Errorf("[ERR] cluster_type cannot be changed after cluster has been created. If you wish to change the cluster type, either create another cluster of a different type or destroy this one first")
+	}
+
 	// Update the node pool if necessary
 	if !d.HasChange("pools") {
 		return resourceKubernetesClusterRead(ctx, d, m)
