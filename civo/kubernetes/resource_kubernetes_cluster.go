@@ -368,9 +368,9 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	// Update the node pool if necessary
-	if !d.HasChange("pools") {
-		return resourceKubernetesClusterRead(ctx, d, m)
-	}
+	// if !d.HasChange("pools") {
+	// 	return resourceKubernetesClusterRead(ctx, d, m)
+	// }
 
 	if d.HasChange("pools") {
 		old, new := d.GetChange("pools")
@@ -408,8 +408,9 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	if d.HasChange("applications") {
-		config.Applications = d.Get("applications").(string)
-		config.Region = apiClient.Region
+		// config.Applications = d.Get("applications").(string)
+		// config.Region = apiClient.Region
+		return diag.Errorf("[ERR] applications cannot be changed or removed after the kubernetes cluster has been created")
 	}
 
 	if d.HasChange("name") {
