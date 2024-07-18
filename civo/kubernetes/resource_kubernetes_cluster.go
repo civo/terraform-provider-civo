@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -155,6 +156,7 @@ func ResourceKubernetesCluster() *schema.Resource {
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
+		CustomizeDiff: customizeDiffKubernetesCluster,
 	}
 }
 
@@ -450,5 +452,12 @@ func resourceKubernetesClusterDelete(_ context.Context, d *schema.ResourceData, 
 		return diag.Errorf("[INFO] an error occurred while trying to delete the kubernetes cluster %s", err)
 	}
 
+	return nil
+}
+
+func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Id() != "" && d.HasChange("applications") {
+		return fmt.Errorf("the 'applications' field is immutable")
+	}
 	return nil
 }
