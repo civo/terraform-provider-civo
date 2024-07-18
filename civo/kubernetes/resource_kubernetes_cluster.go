@@ -456,8 +456,13 @@ func resourceKubernetesClusterDelete(_ context.Context, d *schema.ResourceData, 
 }
 
 func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	if d.Id() != "" && d.HasChange("applications") {
-		return fmt.Errorf("the 'applications' field is immutable")
+	if d.Id() != "" {
+		if d.HasChange("applications") {
+			return fmt.Errorf("the 'applications' field is immutable")
+		}
+		if d.HasChange("cluster_type") {
+			return fmt.Errorf("the 'cluster_type' field is immutable")
+		}
 	}
 	return nil
 }
