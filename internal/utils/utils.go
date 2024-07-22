@@ -4,14 +4,13 @@ package utils
 // func ValidateNameSize
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
-	"time"
+	"sync"
 
 	"github.com/civo/civogo"
 	"github.com/hashicorp/go-cty/cty"
@@ -175,22 +174,54 @@ func InPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
 	return false
 }
 
-// FunctionWithError is a type that defines a function returning an error.
-type FunctionWithError func() error
+// CustomError captures a specific portion of the full API error
+type CustomError struct {
+	Code   string `json:"code"`
+	Reason string `json:"reason"`
+}
 
-// RetryUntilSuccessOrTimeout calls the provided function repeatedly until it returns no error or the timeout has passed.
-func RetryUntilSuccessOrTimeout(fn FunctionWithError, interval time.Duration, timeout time.Duration) error {
-	start := time.Now()
-	for {
-		err := fn()
-		if err != nil {
-			if time.Since(start) > timeout {
-				return errors.New("timeout reached")
-			}
-			log.Printf("[INFO] Retrying after error: %s", err)
-			time.Sleep(interval)
-			continue
-		}
-		return nil
+// Error implements the error interface
+func (e *CustomError) Error() string {
+	return fmt.Sprintf("%s - %s", e.Code, e.Reason)
+}
+
+var jsonRegex *regexp.Regexp
+var once sync.Once
+var regexErr error
+
+func getJSONRegex() (*regexp.Regexp, error) {
+
+	once.Do(func() {
+		jsonRegex, regexErr = regexp.Compile(`\{.*\}`)
+	})
+	return jsonRegex, regexErr
+
+}
+
+// extractJSON uses regex to find JSON content within a string
+func extractJSON(s string) (string, error) {
+	re, err := getJSONRegex()
+	if err != nil {
+		return "", fmt.Errorf("failed to compile regex: %v", err)
 	}
+	match := re.FindString(s)
+	if match == "" {
+		return "", fmt.Errorf("no JSON object found in the string")
+	}
+	return match, nil
+}
+
+// ParseErrorResponse extracts and parses the JSON error response
+func ParseErrorResponse(errorMsg string) (*CustomError, error) {
+	jsonStr, err := extractJSON(errorMsg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract JSON: %v", err)
+	}
+
+	var customErr CustomError
+	err = json.Unmarshal([]byte(jsonStr), &customErr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse error response: %v", err)
+	}
+	return &customErr, nil
 }

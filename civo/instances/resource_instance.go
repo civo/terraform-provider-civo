@@ -284,23 +284,11 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	instance, err := apiClient.CreateInstance(config)
 	if err != nil {
-		if errors.Is(err, civogo.DatabaseInstanceDuplicateNameError) {
-			return diag.Errorf("[ERR] instance with the name %s already exists", config.Hostname)
+		customErr, parseErr := utils.ParseErrorResponse(err.Error())
+		if parseErr == nil {
+			err = customErr
 		}
-
-		err := utils.RetryUntilSuccessOrTimeout(func() error {
-			log.Printf("[INFO] Attempting to create the instance %s", config.Hostname)
-			instance, err := apiClient.CreateInstance(config)
-			if err != nil {
-				return err
-			}
-			d.SetId(instance.ID)
-			return nil
-		}, 10*time.Second, 2*time.Minute)
-
-		if err != nil {
-			return diag.Errorf("[ERR] failed to create instance after multiple attempts: %s", err)
-		}
+		return diag.Errorf("[ERR] failed to create instance: %s", err)
 	}
 
 	d.SetId(instance.ID)

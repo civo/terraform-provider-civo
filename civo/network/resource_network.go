@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -135,26 +134,11 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
 	network, err := apiClient.CreateNetwork(configs)
 	if err != nil {
-
-		// Check for the resource already exists error
-		if errors.Is(err, civogo.DatabaseNetworkExistsError) {
-			return diag.Errorf("[ERR] %s", err)
+		customErr, parseErr := utils.ParseErrorResponse(err.Error())
+		if parseErr == nil {
+			err = customErr
 		}
-
-		// Retry the network creation using the utility function for other errors
-		err := utils.RetryUntilSuccessOrTimeout(func() error {
-			log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
-			network, err := apiClient.CreateNetwork(configs)
-			if err != nil {
-				return err
-			}
-			d.SetId(network.ID)
-			return nil
-		}, 10*time.Second, 2*time.Minute)
-
-		if err != nil {
-			return diag.Errorf("[ERR] failed to create a new network after multiple attempts: %s", err)
-		}
+		return diag.Errorf("[ERR] failed to create network: %s", err)
 	}
 
 	d.SetId(network.ID)
