@@ -463,6 +463,9 @@ func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff,
 		if d.HasChange("cluster_type") {
 			return fmt.Errorf("the 'cluster_type' field is immutable")
 		}
+		if d.HasChange("cni") {
+			return fmt.Errorf("the 'cni' field is immutable")
+		}
 	}
 	return nil
 }
