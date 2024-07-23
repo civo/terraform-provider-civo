@@ -91,10 +91,10 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Description: "The existing firewall ID to use for this cluster",
 			},
 			"cluster_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The type of cluster to create, valid options are `k3s` or `talos` the default is `k3s`",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The type of cluster to create, valid options are `k3s` or `talos` the default is `k3s`",
 				ValidateDiagFunc: utils.ValidateClusterType,
 			},
 			// Computed resource

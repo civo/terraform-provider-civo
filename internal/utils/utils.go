@@ -178,10 +178,10 @@ func InPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
 func ValidateClusterType(v interface{}, path cty.Path) diag.Diagnostics {
 	val := v.(string)
 	var diags diag.Diagnostics
-	if val != "k3s" && val != "talos"{
+	if val != "k3s" && val != "talos" {
 
 		diags = append(diags, diag.Diagnostic{
-		Severity: diag.Error,
+			Severity: diag.Error,
 			Summary:  "Invalid Cluster Type",
 			Detail:   "The specified cluster type is invalid. Please choose either 'k3s' or 'talos'.",
 		})
