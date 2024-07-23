@@ -1,4 +1,13 @@
 
+## [v1.0.47](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.47) (23 July 2024)
+
+### Merged
+- [#275](https://github.com/civo/terraform-provider-civo/pull/275) - fix: remove unnecessary retries and improve error handling
+- [#274](https://github.com/civo/terraform-provider-civo/pull/274) - Make Cluster CNI immutable
+- [#268](https://github.com/civo/terraform-provider-civo/pull/268) - Make cluster_type feild immutable in clusters
+- [#267](https://github.com/civo/terraform-provider-civo/pull/267) - Make applications feild immutable in clusters
+- [#255](https://github.com/civo/terraform-provider-civo/pull/255) - change in private_ipv4 on instance value requires the replacement
+
 ## [v1.0.46](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.46) (10 July 2024)
 
 ### Merged
