@@ -174,6 +174,21 @@ func InPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
 	return false
 }
 
+// Validates if the user has provided a supported cluster type.
+func ValidateClusterType(v interface{}, path cty.Path) diag.Diagnostics {
+	val := v.(string)
+	var diags diag.Diagnostics
+	if val != "k3s" && val != "talos"{
+
+		diags = append(diags, diag.Diagnostic{
+		Severity: diag.Error,
+			Summary:  "Invalid Cluster Type",
+			Detail:   "The specified cluster type is invalid. Please choose either 'k3s' or 'talos'.",
+		})
+	}
+	return diags
+}
+
 // CustomError captures a specific portion of the full API error
 type CustomError struct {
 	Code   string `json:"code"`

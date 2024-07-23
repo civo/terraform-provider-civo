@@ -95,6 +95,7 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "The type of cluster to create, valid options are `k3s` or `talos` the default is `k3s`",
+				ValidateDiagFunc: utils.ValidateClusterType,
 			},
 			// Computed resource
 			"installed_applications": applicationSchema(),
