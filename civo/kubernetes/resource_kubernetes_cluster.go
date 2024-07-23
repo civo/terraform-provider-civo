@@ -366,7 +366,8 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	if d.HasChange("firewall_id") {
-		return diag.Errorf("[ERR] Firewall change (%q) for existing cluster is not available at this moment", "firewall_id")
+		config.FirewallID = d.Get("firewall_id").(string)
+		config.Region = apiClient.Region
 	}
 
 	// Update the node pool if necessary
