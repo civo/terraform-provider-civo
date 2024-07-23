@@ -370,9 +370,9 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	// Update the node pool if necessary
-	if !d.HasChange("pools") {
-		return resourceKubernetesClusterRead(ctx, d, m)
-	}
+	// if !d.HasChange("pools") {
+	// 	return resourceKubernetesClusterRead(ctx, d, m)
+	// }
 
 	if d.HasChange("pools") {
 		old, new := d.GetChange("pools")
@@ -404,9 +404,8 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	if d.HasChange("kubernetes_version") {
-		// config.KubernetesVersion = d.Get("kubernetes_version").(string)
-		// config.Region = apiClient.Region
-		return diag.Errorf("[ERR] Kubernetes version upgrade (%q attribute) is not supported yet", "kubernetes_version")
+		config.KubernetesVersion = d.Get("kubernetes_version").(string)
+		config.Region = apiClient.Region
 	}
 
 	if d.HasChange("applications") {
