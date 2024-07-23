@@ -174,7 +174,7 @@ func InPool(id string, list []civogo.KubernetesClusterPoolConfig) bool {
 	return false
 }
 
-// Validates if the user has provided a supported cluster type.
+// ValidateClusterType Validates if the user has provided a supported cluster type.
 func ValidateClusterType(v interface{}, path cty.Path) diag.Diagnostics {
 	val := v.(string)
 	var diags diag.Diagnostics
