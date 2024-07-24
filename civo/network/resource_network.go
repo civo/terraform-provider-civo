@@ -202,9 +202,21 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		log.Printf("[INFO] updating the network %s", d.Id())
 		_, err := apiClient.RenameNetwork(d.Get("label").(string), d.Id())
 		if err != nil {
-			return diag.Errorf("[ERR] An error occurred while rename the network %s", d.Id())
+			return diag.Errorf("[ERR] An error occurred while renaming the network %s", d.Id())
 		}
-		return resourceNetworkRead(ctx, d, m)
+	}
+
+	networkConfig := civogo.NetworkConfig{
+		Region:        apiClient.Region,
+		NameserversV4: expandStringList(d.Get("nameservers_v4")),
+	}
+
+	if d.HasChange("nameservers_v4") {
+		log.Printf("[INFO] updating the network nameservers %s", d.Id())
+		_, err := apiClient.UpdateNetwork(d.Id(), networkConfig)
+		if err != nil {
+			return diag.Errorf("[ERR] An error occurred while updating the nameservers for the network %s: %s", d.Id(), err)
+		}
 	}
 	return resourceNetworkRead(ctx, d, m)
 }
