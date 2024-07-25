@@ -389,7 +389,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 		d.Set("template", d.Get("template").(string))
 	}
 
-	if d.HasChange("reserved_ipv4"){
+	if d.HasChange("reserved_ipv4") {
 		_, new := d.GetChange("reserved_ipv4")
 		newValue := new.(string)
 		d.Set("reserved_ipv4", newValue)
