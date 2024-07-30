@@ -1,4 +1,14 @@
 
+## [v1.0.48](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.48) (30 July 2024)
+
+### Merged
+- [#286](https://github.com/civo/terraform-provider-civo/pull/286) - fix: handle application plans with spaces
+- [#281](https://github.com/civo/terraform-provider-civo/pull/281) -  fix: ensure 'instance' handles 'reserve_ipv4' field for both IP and ID correctly without constant updates
+- [#280](https://github.com/civo/terraform-provider-civo/pull/280) - Support to update network nameservers
+- [#278](https://github.com/civo/terraform-provider-civo/pull/278) - fix: support updating firewall_id for civo_kubernetes_cluster
+- [#279](https://github.com/civo/terraform-provider-civo/pull/279) - fix: validate cluster_type to ensure it is either 'k3s' or 'talos'
+- [#276](https://github.com/civo/terraform-provider-civo/pull/276) - fix: allow updating kubernetes_version after cluster creation
+
 ## [v1.0.47](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.47) (23 July 2024)
 
 ### Merged
