@@ -31,17 +31,6 @@ jobs:
         with:
           go-version: 1.21.x
 
-      - name: Install and run tfplugindocs CLI
-        run: |
-          mkdir downloads
-          cd downloads
-          wget https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.13.0/tfplugindocs_0.13.0_linux_amd64.zip
-          unzip tfplugindocs_0.13.0_linux_amd64.zip
-          cd ..
-          mv downloads/tfplugindocs .
-          ./tfplugindocs generate
-          rm -rf ./tfplugindocs downloads
-      
       - name: Install and run auto-changelog CLI
         run: |
           npm i -g auto-changelog@2.3.0
