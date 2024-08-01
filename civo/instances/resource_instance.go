@@ -61,10 +61,11 @@ func ResourceInstance() *schema.Resource {
 				Description: "This must be the ID of the network from the network listing (optional; default network used when not specified)",
 			},
 			"disk_image": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The ID for the disk image to use to build the instance",
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The ID for the disk image to use to build the instance",
+				ForceNew:     true,
+				ValidateFunc: utils.ValidateUUID,
 			},
 			"initial_user": {
 				Type:        schema.TypeString,
