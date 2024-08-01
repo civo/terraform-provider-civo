@@ -60,21 +60,11 @@ func ResourceInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: "This must be the ID of the network from the network listing (optional; default network used when not specified)",
 			},
-			"template": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ExactlyOneOf: []string{"template", "disk_image"},
-				Deprecated:   "\"template\" attribute is deprecated. Moving forward, please use \"disk_image\" attribute.",
-				Description:  "The ID for the template to use to build the instance",
-			},
 			"disk_image": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ExactlyOneOf: []string{"template", "disk_image"},
-				Description:  "The ID for the disk image to use to build the instance",
-				ForceNew:     true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The ID for the disk image to use to build the instance",
+				ForceNew:    true,
 			},
 			"initial_user": {
 				Type:        schema.TypeString,
@@ -244,14 +234,6 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 		config.NetworkID = defaultNetwork.ID
 	}
 
-	if attr, ok := d.GetOk("template"); ok {
-		findTemplate, err := apiClient.FindDiskImage(attr.(string))
-		if err != nil {
-			return diag.Errorf("[ERR] failed to get the template: %s", err)
-		}
-		config.TemplateID = findTemplate.ID
-	}
-
 	if attr, ok := d.GetOk("disk_image"); ok {
 		findDiskImage, err := apiClient.FindDiskImage(attr.(string))
 		if err != nil {
@@ -374,7 +356,6 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("status", resp.Status)
 	d.Set("script", resp.Script)
-	// d.Set("reserved_ipv4", resp.ReservedIPID)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 	d.Set("disk_image", resp.SourceID)
@@ -383,10 +364,6 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 		d.Set("public_ip_required", "create")
 	} else {
 		d.Set("public_ip_required", "none")
-	}
-
-	if _, ok := d.GetOk("template"); ok {
-		d.Set("template", d.Get("template").(string))
 	}
 
 	if d.HasChange("reserved_ipv4") {

@@ -52,10 +52,10 @@ resource "civo_instance" "foo" {
 ### Required
 
 - `firewall_id` (String) The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)
-
+- `disk_image` (String) The ID for the disk image to use to build the instance
+- 
 ### Optional
 
-- `disk_image` (String) The ID for the disk image to use to build the instance
 - `hostname` (String) A fully qualified domain name that should be set as the instance's hostname
 - `initial_user` (String) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)
 - `network_id` (String) This must be the ID of the network from the network listing (optional; default network used when not specified)
@@ -69,7 +69,6 @@ resource "civo_instance" "foo" {
 - `size` (String) The name of the size, from the current list, e.g. g3.xsmall
 - `sshkey_id` (String) The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)
 - `tags` (Set of String) An optional list of tags, represented as a key, value pair
-- `template` (String, Deprecated) The ID for the template to use to build the instance
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
