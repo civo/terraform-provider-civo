@@ -240,3 +240,12 @@ func ParseErrorResponse(errorMsg string) (*CustomError, error) {
 	}
 	return &customErr, nil
 }
+
+// ValidateUUID checks if a given string is a UUID or not
+func ValidateUUID(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	if matched, _ := regexp.MatchString(`^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$`, value); !matched {
+		errors = append(errors, fmt.Errorf("%q must be a valid UUID", k))
+	}
+	return
+}
