@@ -1,54 +1,31 @@
-name: Bug
-description: Report an issue to help improve the project.
-title: "[BUG] write a small description here"
+name: 🐞 Bug
+description: File a bug/issue
+title: "[BUG] <describe issue in one line>"
 labels:
   [
     "goal: fix",
     "status : under development",
-    " priority: high",
+    "priority: high",
   ]
 body:
-  - type: textarea
-    id: description
+- type: textarea
+  attributes:
+    label: Description
+    description: Describe the issue.
+    placeholder: |
+    Please provide the following information here:
+      1. What's the issue? 
+      1. Steps to reproduce it --> Use text for code/commands. Screenshots for output
+      1. Additional information --> Links to additional resources, etc.
+  validations:
+    required: true
+- type: textarea
     attributes:
-      label: Description
-      description: A brief description of the question or issue, also include what you tried and what didn't work
+      label: Acceptance Criteria
+      description: Tell us exactly what's required to complete in order to close this ticket
+      placeholder: |
+      Tell us in bullet points what it would it need to be done in order to close this ticket, for example:
+        1. Ensure that that resource x outputs the correct error message when doing y 
+        1. Reduce timeout on creation of resource x
     validations:
       required: true
-  - type: textarea
-    id: screenshots
-    attributes:
-      label: Screenshots
-      description: Please add screenshots if applicable
-    validations:
-      required: false
-  
-  - type: dropdown
-    id: browser
-    attributes:
-      label: "Browser "
-      description: "What browser are you using ?"
-      options:
-        - Google Chrome
-        - Brave
-        - Microsoft Edge
-        - Mozilla Firefox
-        - Safari
-        - Opera
-        - Other
-    validations:
-      required: true
-
-  - type: checkboxes
-    id: no-duplicate-issues
-    attributes:
-      label: "Checklist "
-      options:
-        - label: "I checked and didn't find similar issue"
-          required: true
-
-        - label: "I have read the [Contributing Guidelines](https://github.com/hashicorp/terraform/blob/main/.github/CONTRIBUTING.md)"
-          required: true
-
-        - label: "I am willing to work on this issue (blank for no)"
-          required: false
