@@ -1,6 +1,6 @@
 name: Documentation
 description: Issue or improvement suggestions for documentation
-title: "[DOCS] describe documentation idea/issue in one line"
+title: "[DOCS] <describe documentation idea/issue in one line>"
 labels: ["documentation"]
 body:
   - type: textarea
@@ -11,18 +11,18 @@ body:
       placeholder: |
         Please provide the following information here:
         1. What information is lacking or incorrect. Or suggestion for improvement. 
-        1. Additional information --> Links to additional resources or examples where you think we could learn from
+        2. Additional information --> Links to additional resources or examples where you think we could learn from
     validations:
       required: true
   - type: textarea
     id: acceptance-criteria
     attributes:
       label: Acceptance Criteria
-      description: Tell us exactly what would need to be done to complete this issue
+      description: What should be done in order for us to be able to mark this task as complete?
       placeholder: |
         Tell us in bullet points what it would it need to be done in order to close this ticket, for example:
-        1. Make it clear what this input is from
-        1. Provide additional context for x
-        1. Provide a guide explaining how to do y
+        * Make it clear what this input is from
+        * Provide additional context for x
+        * Provide a guide explaining how to do y
     validations:
       required: true

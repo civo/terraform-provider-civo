@@ -1,6 +1,6 @@
-name: Documentation
+name: Other
 description: Issue or improvement suggestions for documentation
-title: "[OTHER] describe request in one line"
+title: "[OTHER] <describe request in one line>"
 labels: ["other"]
 body:
   - type: textarea
@@ -20,10 +20,10 @@ body:
     id: acceptance-criteria
     attributes:
       label: Acceptance Criteria
-      description: Tell us exactly what would need to be done to implement this ticket
+      description: What should be done in order for us to be able to mark this task as complete?
       placeholder: |
         Tell us in bullet points what it would it need to be done in order to close this ticket, for example:
-        1. Add parameter to optionally not write kubeconfig to state.
-        1. Make the parameter default
+        * Add parameter to optionally not write kubeconfig to state.
+        * Make the parameter default
     validations:
       required: true
