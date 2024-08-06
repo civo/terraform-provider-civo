@@ -1,6 +1,6 @@
 name: Feature Request
 description: Have a new idea/feature for Terraform Provider? Please suggest!
-title: "[FEATURE] describe feature in one line"
+title: "[FEATURE] <describe feature in one line>"
 labels: ["feature"]
 body:
   - type: textarea
@@ -11,19 +11,19 @@ body:
       placeholder: |
         Please provide the following information here:
         1. What's the issue? 
-        1. Why do you think we should implement this feature?
-        1. Visualize your idea as much as possible so it's easy to understand what you mean. 
-        1. Additional information --> Links to additional resources, for example other tools with similar feature implemented.
+        2. Why do you think we should implement this feature?
+        3. Visualize your idea as much as possible so it's easy to understand what you mean. I.e. by providing examples 
+        4. Additional information --> Links to additional resources, for example other tools with similar feature implemented.
     validations:
       required: true
   - type: textarea
     id: acceptance-criteria
     attributes:
       label: Acceptance Criteria
-      description: Tell us exactly what would need to be done to implement this ticket
+      description: What should be done in order for us to be able to mark this task as complete?
       placeholder: |
         Tell us in bullet points what it would it need to be done in order to close this ticket, for example:
-        1. Add parameter to optionally not write kubeconfig to state.
-        1. Make the parameter default
+        * Add parameter to optionally not write kubeconfig to state.
+        * Make the parameter default
     validations:
       required: true
