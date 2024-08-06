@@ -1,31 +1,30 @@
-# Query small instance size
-data "civo_instances_size" "small" {
-    filter {
-        key = "name"
-        values = ["g3.small"]
-        match_by = "re"
-    }
 
-    filter {
-        key = "type"
-        values = ["instance"]
-    }
+provider "civo" {
+
+  region = "LON1"
+}
+
+resource "civo_firewall" "example" {
+    name = "example-firewall"
+    create_default_rules = true
+    network_id = civo_network.example.id
 
 }
 
-# Query instance disk image
-data "civo_disk_image" "debian" {
-   filter {
-        key = "name"
-        values = ["debian-10"]
-   }
+resource "civo_network" "example" {
+  label = "example-network3"
+
 }
 
-# Create a new instance
-resource "civo_instance" "foo" {
-    hostname = "foo.com"
-    tags = ["python", "nginx"]
-    notes = "this is a note for the server"
-    size = element(data.civo_instances_size.small.sizes, 0).name
-    disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
+resource "civo_instance" "example" {
+    hostname = "example-instance"
+    tags = ["nginx"]
+    notes = "Created with TF"
+    size = "g3.xsmall" # List on CLI: civo instances size
+    network_id = civo_network.example.id
+    firewall_id = civo_firewall.example.id
+    disk_image = "debian-11" # List on CLI: civo diskimage ls
 }
+
+# View instances on dashboard: https://dashboard.civo.com/instances
+# View instances on CLI: civo instance ls
