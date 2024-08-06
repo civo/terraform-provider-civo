@@ -1,26 +1,28 @@
-name: Documentation issue
-description: Found an issue in the documentation? You can use this one!
-title: "[DOCS] <description>"
+name: Documentation
+description: Issue or improvement suggestions for documentation
+title: "[DOCS] describe documentation idea/issue in one line"
 labels: ["documentation"]
 body:
   - type: textarea
     id: description
     attributes:
       label: Description
-      description: Description of the question or issue, also include what you tried and what didn't work
+      description: Describe where we can do better documenting this provider
+      placeholder: |
+        Please provide the following information here:
+        1. What information is lacking or incorrect. Or suggestion for improvement. 
+        1. Additional information --> Links to additional resources or examples where you think we could learn from
     validations:
       required: true
   - type: textarea
-    id: screenshots
+    id: acceptance-criteria
     attributes:
-      label: Screenshots
-      description: Screenshots if applicable
+      label: Acceptance Criteria
+      description: Tell us exactly what would need to be done to complete this issue
+      placeholder: |
+        Tell us in bullet points what it would it need to be done in order to close this ticket, for example:
+        1. Make it clear what this input is from
+        1. Provide additional context for x
+        1. Provide a guide explaining how to do y
     validations:
-      required: false
-  - type: textarea
-    id: additional-information
-    attributes:
-      label: Additional information
-      description: Is there anything else we should know about this bug?
-    validations:
-      required: false
+      required: true
