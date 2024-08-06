@@ -341,6 +341,11 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 		return diag.Errorf("[ERR] failed to retriving the instance: %s", err)
 	}
 
+	diskImg, err := apiClient.GetDiskImageByName(resp.SourceID)
+	if err != nil {
+		return diag.Errorf("[ERR] failed to get the disk image: %s", err)
+	}
+
 	d.Set("hostname", resp.Hostname)
 	d.Set("reverse_dns", resp.ReverseDNS)
 	d.Set("size", resp.Size)
@@ -361,7 +366,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("script", resp.Script)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
-	d.Set("disk_image", resp.SourceID)
+	d.Set("disk_image", diskImg.ID)
 
 	if resp.PublicIP != "" {
 		d.Set("public_ip_required", "create")
