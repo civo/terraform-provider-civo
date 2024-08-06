@@ -6,6 +6,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"regexp"
 	"sort"
 	"strconv"
@@ -239,4 +240,14 @@ func ParseErrorResponse(errorMsg string) (*CustomError, error) {
 		return nil, fmt.Errorf("failed to parse error response: %v", err)
 	}
 	return &customErr, nil
+}
+
+// ValidateUUID checks if a given string is a UUID or not
+func ValidateUUID(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	_, err := uuid.Parse(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be a valid UUID", k))
+	}
+	return
 }

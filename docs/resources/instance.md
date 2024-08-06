@@ -126,10 +126,10 @@ resource "civo_instance" "example" {
 ### Required
 
 - `firewall_id` (String) The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)
-
+- `disk_image` (String) The ID for the disk image to use to build the instance
+- 
 ### Optional
 
-- `disk_image` (String) The ID for the disk image to use to build the instance
 - `hostname` (String) A fully qualified domain name that should be set as the instance's hostname
 - `initial_user` (String) The name of the initial user created on the server (optional; this will default to the template's default_username and fallback to civo)
 - `network_id` (String) This must be the ID of the network from the network listing (optional; default network used when not specified)
@@ -144,7 +144,6 @@ resource "civo_instance" "example" {
 - `sshkey_id` (String) The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)
 - `tags` (Set of String) An optional list of tags, represented as a key, value pair
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts)) defines timeouts for cluster creation, read and update, default is 30 minutes for all
-
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
