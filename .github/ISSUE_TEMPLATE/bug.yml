@@ -1,4 +1,4 @@
-name: 🐞 Bug
+name: Bug
 description: File a bug/issue
 title: "[BUG] <describe issue in one line>"
 labels: ["bug"]
@@ -11,18 +11,18 @@ body:
       placeholder: |
         Please provide the following information here:
         1. What's the issue? 
-        1. Steps to reproduce it --> Use text for code/commands. Screenshots for output
-        1. Additional information --> Links to additional resources, etc.
+        2. Steps to reproduce it --> Use text for code/commands. Screenshots are okay for output
+        3. Additional information --> Links to additional resources, etc.
     validations:
       required: true
   - type: textarea
     id: acceptance-criteria
     attributes:
       label: Acceptance Criteria
-      description: Tell us exactly what's required to complete in order to close this ticket
+      description: What should be done in order for us to be able to mark this task as complete?
       placeholder: |
         Tell us in bullet points what it would it need to be done in order to close this ticket, for example:
-        1. Ensure that that resource x outputs the correct error message when doing y 
-        1. Reduce timeout on creation of resource x
+        * Ensure that that resource x outputs the correct error message when doing y 
+        * Reduce timeout on creation of resource x
     validations:
       required: true
