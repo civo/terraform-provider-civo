@@ -1,19 +1,29 @@
-name: Other
-description: Use this for any other issues. Please do NOT create blank issues
-title: "[OTHER] <description>"
+name: Documentation
+description: Issue or improvement suggestions for documentation
+title: "[OTHER] describe request in one line"
 labels: ["other"]
 body:
   - type: textarea
-    id: issuedescription
+    id: description
     attributes:
-      label: What would you like to share?
-      description: Provide a clear and concise explanation of your issue.
+      label: Description
+      description: Describe what you need
+      placeholder: |
+        Please provide the following information here:
+        1. What's the issue/request? 
+        1. Why do you think we should implement this feature?
+        1. Visualize your idea as much as possible so it's easy to understand what you mean. 
+        1. Additional information --> Links to additional resources, for example other tools with similar feature implemented.
     validations:
       required: true
   - type: textarea
-    id: additional-information
+    id: acceptance-criteria
     attributes:
-      label: Additional information
-      description: Is there anything else we should know about this bug?
+      label: Acceptance Criteria
+      description: Tell us exactly what would need to be done to implement this ticket
+      placeholder: |
+        Tell us in bullet points what it would it need to be done in order to close this ticket, for example:
+        1. Add parameter to optionally not write kubeconfig to state.
+        1. Make the parameter default
     validations:
-      required: false
+      required: true
