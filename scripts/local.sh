@@ -98,5 +98,3 @@ echo "${GREEN}Init${RESET} civo provider..."
 terraform init
 terraform plan
 printf "To apply desired resources, you can now use \n ${YELLOW}cd manifests_folder \n terraform apply${RESET}\n"
-
-

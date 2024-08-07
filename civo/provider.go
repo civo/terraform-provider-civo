@@ -1,8 +1,11 @@
 package civo
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/civo/database"
@@ -19,6 +22,8 @@ import (
 	"github.com/civo/terraform-provider-civo/civo/size"
 	"github.com/civo/terraform-provider-civo/civo/ssh"
 	"github.com/civo/terraform-provider-civo/civo/volume"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -35,10 +40,18 @@ func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"token": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				DefaultFunc:      schema.EnvDefaultFunc("CIVO_TOKEN", ""),
+				Description:      "This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.",
+				Deprecated:       "",
+				ValidateDiagFunc: validateTokenUsage,
+			},
+			"credentials_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("CIVO_TOKEN", ""),
-				Description: "This is the Civo API token. Alternatively, this can also be specified using `CIVO_TOKEN` environment variable.",
+				DefaultFunc: schema.EnvDefaultFunc("CIVO_CREDENTIAL_FILE", ""),
+				Description: "Path to the Civo credentials file. Can be specified using CIVO_CREDENTIAL_FILE environment variable.",
 			},
 			"region": {
 				Type:        schema.TypeString,
@@ -106,10 +119,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		regionValue = region.(string)
 	}
 
-	if token, ok := d.GetOk("token"); ok {
+	if token, ok := getToken(d); ok {
 		tokenValue = token.(string)
 	} else {
-		return nil, fmt.Errorf("[ERR] token not found")
+		return nil, fmt.Errorf("[ERR] No token configuration found in $CIVO_TOKEN or ~/.civo.json. Please go to https://dashboard.civo.com/security to fetch one")
 	}
 
 	if apiEndpoint, ok := d.GetOk("api_endpoint"); ok {
@@ -130,4 +143,92 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
 	return client, nil
+}
+
+func getToken(d *schema.ResourceData) (interface{}, bool) {
+	var exists = true
+
+	// Gets you the token atrribute value or falls back to reading CIVO_TOKEN environment variable
+	if token, ok := d.GetOk("token"); ok {
+		return token, exists
+	}
+
+	// Check for credentials file specified in provider config
+	if credFile, ok := d.GetOk("credentials_file"); ok {
+		token, err := readTokenFromFile(credFile.(string))
+		if err == nil {
+			return token, exists
+		}
+	}
+
+	// Check for default CLI config file
+	homeDir, err := getHomeDir()
+	if err == nil {
+		token, err := readTokenFromFile(filepath.Join(homeDir, ".civo.json"))
+		if err == nil {
+			return token, exists
+		}
+	}
+
+	return nil, !exists
+
+}
+
+var getHomeDir = func() (string, error) {
+	if home := os.Getenv("HOME"); home != "" {
+		return home, nil
+	}
+	// Fall back to os.UserHomeDir() if HOME is not set
+	return os.UserHomeDir()
+}
+
+func readTokenFromFile(path string) (string, error) {
+	data, err := os.ReadFile(path)
+
+	if err != nil {
+		return "", err
+	}
+
+	var config struct {
+		APIKeys map[string]string `json:"apikeys"`
+		Meta    struct {
+			CurrentAPIKey string `json:"current_apikey"`
+		} `json:"meta"`
+	}
+
+	if err := json.Unmarshal(data, &config); err != nil {
+		return "", err
+	}
+
+	// Get the current API key name
+	currentKeyName := config.Meta.CurrentAPIKey
+
+	// Fetch the corresponding token
+	token, ok := config.APIKeys[currentKeyName]
+
+	if !ok {
+		return "", fmt.Errorf("API key '%s' not found", currentKeyName)
+	}
+
+	return token, nil
+}
+
+func validateTokenUsage(v interface{}, path cty.Path) diag.Diagnostics {
+	val := v.(string)
+
+	// Ensures warning is not shown when "CIVO_TOKEN" environment variable is set.
+	if token := os.Getenv("CIVO_TOKEN"); token != "" {
+		val = ""
+	}
+	var diags diag.Diagnostics
+
+	if val != "" {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Deprecated Attribute Usage",
+			Detail:   "The \"token\" attribute is deprecated. Please use the CIVO_TOKEN environment variable or the credentials_file attribute instead.",
+		})
+	}
+
+	return diags
 }
