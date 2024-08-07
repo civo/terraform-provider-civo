@@ -1,4 +1,19 @@
 
+## [v1.0.49](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.49) (7 August 2024)
+
+### Merged
+- [#307](https://github.com/civo/terraform-provider-civo/pull/307) - fix disk img bug
+- [#306](https://github.com/civo/terraform-provider-civo/pull/306) - Fixing some minor issues with the template that we could not see until it was merged to master. Issue #301
+- [#304](https://github.com/civo/terraform-provider-civo/pull/304) - Removing confusing redundant ISSUE_TEMPLATE folder under workflows and implementing the feature properly this time. Fixes #301
+- [#303](https://github.com/civo/terraform-provider-civo/pull/303) - Add timeout to resources
+- [#295](https://github.com/civo/terraform-provider-civo/pull/295) - rm deprecated template and add UUID validation on disk_image
+- [#302](https://github.com/civo/terraform-provider-civo/pull/302) - Creating better templates to ensure we get better tickets. Issue #301
+- [#299](https://github.com/civo/terraform-provider-civo/pull/299) - Improving the civo instance documentation. Fixes issue #289
+- [#294](https://github.com/civo/terraform-provider-civo/pull/294) - Changing the kubernetes documentation to make it more user friendly. Issue #290
+- [#292](https://github.com/civo/terraform-provider-civo/pull/292) - Changing the document hierarchy as described in issue #288
+- [#291](https://github.com/civo/terraform-provider-civo/pull/291) - Remove tfdocs usage from release pipeline
+- [#282](https://github.com/civo/terraform-provider-civo/pull/282) - Updated the instance documentation example to match all changes
+
 ## [v1.0.48](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.48) (30 July 2024)
 
 ### Merged
