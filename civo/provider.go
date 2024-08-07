@@ -47,7 +47,7 @@ func Provider() *schema.Provider {
 				Deprecated:       "",
 				ValidateDiagFunc: validateTokenUsage,
 			},
-			"credential_file": {
+			"credentials_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CIVO_CREDENTIAL_FILE", ""),
@@ -121,7 +121,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	if token, ok := getToken(d); ok {
 		tokenValue = token.(string)
-	} else {		
+	} else {
 		return nil, fmt.Errorf("[ERR] No token configuration found in $CIVO_TOKEN or ~/.civo.json. Please go to https://dashboard.civo.com/security to fetch one")
 	}
 
@@ -154,7 +154,7 @@ func getToken(d *schema.ResourceData) (interface{}, bool) {
 	}
 
 	// Check for credentials file specified in provider config
-	if credFile, ok := d.GetOk("credential_file"); ok {
+	if credFile, ok := d.GetOk("credentials_file"); ok {
 		token, err := readTokenFromFile(credFile.(string))
 		if err == nil {
 			return token, exists
@@ -226,7 +226,7 @@ func validateTokenUsage(v interface{}, path cty.Path) diag.Diagnostics {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Warning,
 			Summary:  "Deprecated Attribute Usage",
-			Detail:   "The \"token\" attribute is deprecated. Please use the CIVO_TOKEN environment variable or the credential_file attribute instead.",
+			Detail:   "The \"token\" attribute is deprecated. Please use the CIVO_TOKEN environment variable or the credentials_file attribute instead.",
 		})
 	}
 

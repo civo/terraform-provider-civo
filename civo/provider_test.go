@@ -63,7 +63,7 @@ func TestToken(t *testing.T) {
 		}
 
 		raw := map[string]interface{}{
-			"credential_file": credentialFile,
+			"credentials_file": credentialFile,
 		}
 		configureProvider(t, raw)
 	})
