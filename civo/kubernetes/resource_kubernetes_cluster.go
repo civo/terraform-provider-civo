@@ -129,7 +129,7 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Optional:         true,
 				Default:          false,
 				Description:      "Whether to write the kubeconfig to state",
-				ValidateDiagFunc: utils.ValidateWriteKubeconfig,
+				ValidateDiagFunc: utils.ValidateProviderVersion,
 			},
 			"api_endpoint": {
 				Type:        schema.TypeString,
