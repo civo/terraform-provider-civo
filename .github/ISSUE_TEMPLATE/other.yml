@@ -11,9 +11,9 @@ body:
       placeholder: |
         Please provide the following information here:
         1. What's the issue/request? 
-        1. Why do you think we should implement this feature?
-        1. Visualize your idea as much as possible so it's easy to understand what you mean. 
-        1. Additional information --> Links to additional resources, for example other tools with similar feature implemented.
+        2. Why do you think we should implement this feature?
+        3. Visualize your idea as much as possible so it's easy to understand what you mean. 
+        4. Additional information --> Links to additional resources, for example other tools with similar feature implemented.
     validations:
       required: true
   - type: textarea

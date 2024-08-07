@@ -127,7 +127,7 @@ resource "civo_instance" "example" {
 
 - `firewall_id` (String) The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)
 - `disk_image` (String) The ID for the disk image to use to build the instance
-- 
+
 ### Optional
 
 - `hostname` (String) A fully qualified domain name that should be set as the instance's hostname
