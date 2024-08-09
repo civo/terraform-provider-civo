@@ -77,7 +77,6 @@ func ResourceFirewall() *schema.Resource {
 				}
 			}
 
-			// Existing validation code
 			ingressRules := diff.Get("ingress_rule")
 			for _, v := range ingressRules.(*schema.Set).List() {
 				ingress := v.(map[string]interface{})
