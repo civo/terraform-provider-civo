@@ -67,26 +67,36 @@ func ResourceFirewall() *schema.Resource {
 		DeleteContext: resourceFirewallDelete,
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
 
-			ingressRules := diff.Get("ingress_rule")
-			egressRules := diff.Get("egress_rule")
+			if diff.HasChange("create_default_rules") {
+				createDefaultRules := diff.Get("create_default_rules").(bool)
+				ingressRules := diff.Get("ingress_rule")
+				egressRules := diff.Get("egress_rule")
 
+				if createDefaultRules && (ingressRules.(*schema.Set).Len() > 0 || egressRules.(*schema.Set).Len() > 0) {
+					return fmt.Errorf("create_default_rules can't be true when ingress_rule or egress_rule is specified")
+				}
+			}
+
+			// Existing validation code
+			ingressRules := diff.Get("ingress_rule")
 			for _, v := range ingressRules.(*schema.Set).List() {
 				ingress := v.(map[string]interface{})
 				protocol := ingress["protocol"]
 
 				port := ingress["port_range"]
 				if protocol != "icmp" && port == "" {
-					return fmt.Errorf("`ports` of ingress rules is required if protocol is `tcp` or `udp`")
+					return fmt.Errorf("ports of ingress rules is required if protocol is tcp or udp")
 				}
 			}
 
+			egressRules := diff.Get("egress_rule")
 			for _, v := range egressRules.(*schema.Set).List() {
 				egress := v.(map[string]interface{})
 				protocol := egress["protocol"]
 
 				port := egress["port_range"]
 				if protocol != "icmp" && port == "" {
-					return fmt.Errorf("`ports` of egress rules is required if protocol is `tcp` or `udp`")
+					return fmt.Errorf("ports of egress rules is required if protocol is tcp or udp")
 				}
 			}
 
