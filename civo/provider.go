@@ -2,7 +2,6 @@ package civo
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -115,15 +114,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	var regionValue, tokenValue, apiURL string
 	var client *civogo.Client
 	var err error
-	var tokenSource string
 
 	if region, ok := d.GetOk("region"); ok {
 		regionValue = region.(string)
 	}
 
-	if token, ok, source := getToken(d); ok {
+	if token, ok := getToken(d); ok {
 		tokenValue = token.(string)
-		tokenSource = source
 	} else {
 		return nil, fmt.Errorf("[ERR] No token configuration found in $CIVO_TOKEN or ~/.civo.json. Please go to https://dashboard.civo.com/security to fetch one")
 	}
@@ -144,35 +141,23 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 	client.SetUserAgent(userAgent)
 
-	// Validate token by making a simple API request
-	_, err = client.ListRegions()
-	if err != nil {
-
-		// Check if the error is DatabaseAccountNotFoundError
-		if errors.Is(err, civogo.DatabaseAccountNotFoundError) {
-			return nil, fmt.Errorf("the Civo token from %s is invalid. Please go to https://dashboard.civo.com/security to generate one", tokenSource)
-		}
-
-		return nil, fmt.Errorf("an error occoured while connecting to Civo's API: %s", err)
-	}
-
 	log.Printf("[DEBUG] Civo API URL: %s\n", apiURL)
 	return client, nil
 }
 
-func getToken(d *schema.ResourceData) (interface{}, bool, string) {
+func getToken(d *schema.ResourceData) (interface{}, bool) {
 	var exists = true
 
 	// Gets you the token atrribute value or falls back to reading CIVO_TOKEN environment variable
 	if token, ok := d.GetOk("token"); ok {
-		return token, exists, "environment variable"
+		return token, exists
 	}
 
 	// Check for credentials file specified in provider config
 	if credFile, ok := d.GetOk("credentials_file"); ok {
 		token, err := readTokenFromFile(credFile.(string))
 		if err == nil {
-			return token, exists, "credentials file"
+			return token, exists
 		}
 	}
 
@@ -181,11 +166,11 @@ func getToken(d *schema.ResourceData) (interface{}, bool, string) {
 	if err == nil {
 		token, err := readTokenFromFile(filepath.Join(homeDir, ".civo.json"))
 		if err == nil {
-			return token, exists, "CLI config file"
+			return token, exists
 		}
 	}
 
-	return nil, !exists, ""
+	return nil, !exists
 
 }
 
