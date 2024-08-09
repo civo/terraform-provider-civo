@@ -35,10 +35,11 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Description: "The region for the cluster, if not declare we use the region in declared in the provider",
 			},
 			"network_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The network for the cluster, if not declare we use the default one",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: utils.ValidateUUID,
+				Description:  "The network for the cluster, if not declare we use the default one",
 			},
 			"num_target_nodes": {
 				Type:         schema.TypeInt,
@@ -86,9 +87,10 @@ func ResourceKubernetesCluster() *schema.Resource {
 				}, " "),
 			},
 			"firewall_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The existing firewall ID to use for this cluster",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: utils.ValidateUUID,
+				Description:  "The existing firewall ID to use for this cluster",
 			},
 			"cluster_type": {
 				Type:             schema.TypeString,
