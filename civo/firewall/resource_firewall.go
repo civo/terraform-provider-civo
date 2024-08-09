@@ -27,11 +27,12 @@ func ResourceFirewall() *schema.Resource {
 				Description:  "The firewall name",
 			},
 			"network_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
-				Description: "The firewall network, if is not defined we use the default network",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: utils.ValidateUUID,
+				Description:  "The firewall network, if is not defined we use the default network",
 			},
 			"region": {
 				Type:        schema.TypeString,
