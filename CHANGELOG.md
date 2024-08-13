@@ -1,4 +1,15 @@
 
+## [v1.1.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.0) (13 August 2024)
+
+### Merged
+- [#318](https://github.com/civo/terraform-provider-civo/pull/318) - Make saving initial_password in instance to state  as optional
+- [#308](https://github.com/civo/terraform-provider-civo/pull/308) - documentation for issue #296
+- [#309](https://github.com/civo/terraform-provider-civo/pull/309) - Make saving kubeconfig to state optional for civo_kubernetes resource
+- [#314](https://github.com/civo/terraform-provider-civo/pull/314) - Add UUID validation for diff fields
+- [#315](https://github.com/civo/terraform-provider-civo/pull/315) - Validation to set create_default_rules to false when any of the firewall rule is specified
+- [#313](https://github.com/civo/terraform-provider-civo/pull/313) - Flash Error msg upon invalid token in provider def
+- [#248](https://github.com/civo/terraform-provider-civo/pull/248) - Feat: fallback to CLI config for token
+
 ## [v1.0.49](https://github.com/civo/terraform-provider-civo/releases/tag/v1.0.49) (7 August 2024)
 
 ### Merged
