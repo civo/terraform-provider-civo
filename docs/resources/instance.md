@@ -144,6 +144,7 @@ resource "civo_instance" "example" {
 - `sshkey_id` (String) The ID of an already uploaded SSH public key to use for login to the default user (optional; if one isn't provided a random password will be set and returned in the initial_password field)
 - `tags` (Set of String) An optional list of tags, represented as a key, value pair
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts)) defines timeouts for cluster creation, read and update, default is 30 minutes for all
+- `write_password` (Boolean) If set to true then initial_password for the instance will be saved to terraform state file. (default: false)
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
