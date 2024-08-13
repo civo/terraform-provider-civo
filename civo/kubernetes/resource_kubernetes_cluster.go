@@ -126,6 +126,13 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Sensitive:   true,
 				Description: "The kubeconfig of the cluster",
 			},
+			"write_kubeconfig": {
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Default:          false,
+				Description:      "Whether to write the kubeconfig to state",
+				ValidateDiagFunc: utils.ValidateProviderVersion,
+			},
 			"api_endpoint": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -334,13 +341,20 @@ func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m 
 	d.Set("tags", strings.Join(resp.Tags, " ")) // space separated tags
 	d.Set("status", resp.Status)
 	d.Set("ready", resp.Ready)
-	d.Set("kubeconfig", resp.KubeConfig)
+	// d.Set("kubeconfig", resp.KubeConfig)
 	d.Set("api_endpoint", resp.APIEndPoint)
 	d.Set("master_ip", resp.MasterIP)
 	d.Set("dns_entry", resp.DNSEntry)
 	// d.Set("built_at", resp.BuiltAt.UTC().String())
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("firewall_id", resp.FirewallID)
+
+	writeKubeconfig := d.Get("write_kubeconfig").(bool)
+	if writeKubeconfig {
+		d.Set("kubeconfig", resp.KubeConfig)
+	} else {
+		d.Set("kubeconfig", "")
+	}
 
 	if err := d.Set("pools", flattenNodePool(resp)); err != nil {
 		return diag.Errorf("[ERR] error retrieving the pool for kubernetes cluster error: %#v", err)
@@ -424,6 +438,11 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 	if d.HasChange("tags") {
 		config.Tags = d.Get("tags").(string)
+	}
+
+	if d.HasChange("write_kubeconfig") {
+		// setting atleast one field inside the KubernetesClusterConfig, just to ensure we are not sending an empty config
+		config.FirewallID = d.Get("firewall_id").(string)
 	}
 
 	log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())

@@ -6,17 +6,26 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
+	"log"
+	"os/exec"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 
+	"github.com/google/uuid"
+
 	"github.com/civo/civogo"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
+
+// VersionInfo stores Provider's version Info
+type VersionInfo struct {
+	ProviderSelections map[string]string `json:"provider_selections"`
+}
 
 // ValidateName is a function to check if the name is valid
 func ValidateName(v interface{}, _ string) (ws []string, es []error) {
@@ -186,6 +195,63 @@ func ValidateClusterType(v interface{}, path cty.Path) diag.Diagnostics {
 			Summary:  "Invalid Cluster Type",
 			Detail:   "The specified cluster type is invalid. Please choose either 'k3s' or 'talos'.",
 		})
+	}
+	return diags
+}
+
+// ValidateProviderVersion function compares the current provider verson of the user with the threshold version and shows warning accordingly
+func ValidateProviderVersion(v interface{}, path cty.Path) diag.Diagnostics {
+	var versionInfo VersionInfo
+	diags := diag.Diagnostics{}
+
+	cmd := exec.Command("terraform", "version", "-json")
+	output, err := cmd.Output()
+	if err != nil {
+		log.Printf("[ERROR] error running terraform show: %v\n", err)
+		return diags
+	}
+
+	err = json.Unmarshal(output, &versionInfo)
+	if err != nil {
+		log.Printf("[ERROR] error parsing JSON: %v\n", err)
+		return diags
+	}
+	versionField := "registry.terraform.io/civo/civo"
+	currentProviderVersion := versionInfo.ProviderSelections[versionField]
+	thresholdProviderVersion := "1.0.49"
+
+	v1, err := version.NewSemver(currentProviderVersion)
+	if err != nil {
+		log.Println("[ERROR] error parsing the given version")
+		return diags
+	}
+	v2, err := version.NewVersion(thresholdProviderVersion)
+	if err != nil {
+		log.Println("[ERROR] error parsing the given version")
+		return diags
+	}
+
+	lastStep := path[len(path)-1]
+	var field string
+	if step, ok := lastStep.(cty.GetAttrStep); ok {
+		field = step.Name
+	}
+
+	if v1.LessThanOrEqual(v2) {
+		if field == "write_password" {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "Default initial_password behavior changed",
+				Detail:   "Starting from version 1.0.50 the initial password is not written to state by default, if you wish to keep the initial password configuration in state, please add the input write_password and set it to true. Example configuration: `write_password = true`.",
+			})
+
+		} else if field == "write_kubeconfig" {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "Default kubeconfig behavior changed",
+				Detail:   "Starting from version 1.0.50, kubeconfig will no longer be written to the Terraform state by default for the civo_kubernetes resource. This change is made to enhance security by preventing sensitive information from being stored in state files. If you want to retain kubeconfig in your state file, please update your configuration by adding the `write_kubeconfig` parameter and setting it to `true`. Example configuration: `write_kubeconfig = true`.",
+			})
+		}
 	}
 	return diags
 }
