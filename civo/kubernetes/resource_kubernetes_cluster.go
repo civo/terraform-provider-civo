@@ -60,7 +60,7 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "The version of k3s to install (optional, the default is currently the latest available)",
+				Description: "The version of k3s to install (optional, the default is currently the latest stable available)",
 			},
 			"cni": {
 				Type:         schema.TypeString,

@@ -203,7 +203,7 @@ Required:
 - `applications` (String) Comma separated list of applications to install. Spaces within application names are fine, but shouldn't be either side of the comma. Application names are case-sensitive; the available applications can be listed with the Civo CLI: 'civo kubernetes applications ls'. If you want to remove a default installed application, prefix it with a '-', e.g. -Traefik. For application that supports plans, you can use 'app_name:app_plan' format e.g. 'Linkerd:Linkerd & Jaeger' or 'MariaDB:5GB'. View list of apps on the [Civo CLI](https://www.civo.com/docs/overview/civo-cli) --> `civo kubernetes apps ls`
 - `cluster_type` (String) The type of cluster to create, valid options are `k3s` or `talos` the default is `k3s`
 - `cni` (String) The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`
-- `kubernetes_version` (String) The version of k3s to install (optional, the default is currently the latest available)
+- `kubernetes_version` (String) The version of k3s to install (optional, the default is currently the latest stable available)
 - `name` (String) Name for your cluster, must be unique within your account
 - `network_id` (String) The network for the cluster, if not declare we use the default one
 - `num_target_nodes` (Number, Deprecated) The number of instances to create (optional, the default at the time of writing is 3)
