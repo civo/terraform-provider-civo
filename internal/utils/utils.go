@@ -5,8 +5,11 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log"
+	"os"
 	"os/exec"
 	"regexp"
 	"sort"
@@ -20,6 +23,11 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+)
+
+const (
+	// FileSizeLimit limits the size of file to be used by the user
+	FileSizeLimit = int64(20 * 1024 * 1024) // 20 MB
 )
 
 // VersionInfo stores Provider's version Info
@@ -316,4 +324,19 @@ func ValidateUUID(v interface{}, k string) (ws []string, errors []error) {
 		errors = append(errors, fmt.Errorf("%q must be a valid UUID", k))
 	}
 	return
+}
+
+// CheckFileSize function checks if the file the file size is less than the allowed limit(current: 20MB)
+func CheckFileSize(path string) error {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return fmt.Errorf("file does not exist: %s", path)
+		}
+		return fmt.Errorf("error getting the file info: %w", err)
+	}
+	if fileInfo.Size() > FileSizeLimit {
+		return fmt.Errorf("file size exceeds the allowed limit of %d bytes", FileSizeLimit)
+	}
+	return nil
 }

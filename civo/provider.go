@@ -23,9 +23,11 @@ import (
 	"github.com/civo/terraform-provider-civo/civo/size"
 	"github.com/civo/terraform-provider-civo/civo/ssh"
 	"github.com/civo/terraform-provider-civo/civo/volume"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/mitchellh/go-homedir"
 )
 
 var (
@@ -121,11 +123,11 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		regionValue = region.(string)
 	}
 
-	if token, ok, source := getToken(d); ok {
+	if token, source, err := getToken(d); err == nil {
 		tokenValue = token.(string)
 		tokenSource = source
 	} else {
-		return nil, fmt.Errorf("[ERR] No token configuration found in $CIVO_TOKEN or ~/.civo.json. Please go to https://dashboard.civo.com/security to fetch one")
+		return nil, fmt.Errorf("[ERR] No token configuration found in $CIVO_TOKEN or credentials_file or ~/.civo.json. Please go to https://dashboard.civo.com/security to fetch one: %v", err)
 	}
 
 	if apiEndpoint, ok := d.GetOk("api_endpoint"); ok {
@@ -160,48 +162,50 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	return client, nil
 }
 
-func getToken(d *schema.ResourceData) (interface{}, bool, string) {
-	var exists = true
+func getToken(d *schema.ResourceData) (interface{}, string, error) {
 
 	// Gets you the token atrribute value or falls back to reading CIVO_TOKEN environment variable
 	if token, ok := d.GetOk("token"); ok {
-		return token, exists, "environment variable"
+		return token, "environment variable", nil
 	}
 
 	// Check for credentials file specified in provider config
 	if credFile, ok := d.GetOk("credentials_file"); ok {
-		token, err := readTokenFromFile(credFile.(string))
-		if err == nil {
-			return token, exists, "credentials file"
+		path, err := homedir.Expand(credFile.(string))
+		if err != nil {
+			return nil, "", fmt.Errorf("error expanding %v: %w", credFile, err)
 		}
+		token, err := readTokenFromFile(path)
+		if err == nil {
+			return token, "credentials file", nil
+		}
+		return nil, "", fmt.Errorf("error reading from credentials_file: %v", err)
 	}
 
 	// Check for default CLI config file
-	homeDir, err := getHomeDir()
+	homeDir, err := homedir.Dir()
 	if err == nil {
 		token, err := readTokenFromFile(filepath.Join(homeDir, ".civo.json"))
 		if err == nil {
-			return token, exists, "CLI config file"
+			return token, "CLI config file", nil
 		}
+		return nil, "", fmt.Errorf("error reading from ~/.civo.json: %v", err)
 	}
 
-	return nil, !exists, ""
+	return nil, "", err
 
-}
-
-var getHomeDir = func() (string, error) {
-	if home := os.Getenv("HOME"); home != "" {
-		return home, nil
-	}
-	// Fall back to os.UserHomeDir() if HOME is not set
-	return os.UserHomeDir()
 }
 
 func readTokenFromFile(path string) (string, error) {
-	data, err := os.ReadFile(path)
-
-	if err != nil {
+	// Check file size: 20 MB limit
+	if err := utils.CheckFileSize(path); err != nil {
 		return "", err
+	}
+
+	// read the file
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("error reading file (%s): %w", path, err)
 	}
 
 	var config struct {
@@ -211,8 +215,22 @@ func readTokenFromFile(path string) (string, error) {
 		} `json:"meta"`
 	}
 
+	exampleJSON := `
+{
+	"apikeys": {
+		"tf_key": "token_here"
+	},
+	"meta": {
+		"current_apikey": "tf_key"
+	}
+}`
+
 	if err := json.Unmarshal(data, &config); err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to parse JSON from '%s': %w. Please ensure the input JSON file is correctly formatted and all required fields are present. Expected format:\n%s", path, err, exampleJSON)
+	}
+
+	if config.APIKeys == nil || config.Meta.CurrentAPIKey == "" {
+		return "", fmt.Errorf("invalid structure in '%s', missing required fields. Expected format:\n%s", path, exampleJSON)
 	}
 
 	// Get the current API key name
@@ -220,11 +238,9 @@ func readTokenFromFile(path string) (string, error) {
 
 	// Fetch the corresponding token
 	token, ok := config.APIKeys[currentKeyName]
-
 	if !ok {
-		return "", fmt.Errorf("API key '%s' not found", currentKeyName)
+		return "", fmt.Errorf("API key '%s' not found in '%s'", currentKeyName, path)
 	}
-
 	return token, nil
 }
 
