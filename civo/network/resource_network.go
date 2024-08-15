@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
 	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -239,7 +239,7 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 	networkID := d.Id()
 	log.Printf("[INFO] Deleting the network %s", networkID)
 
-	deleteStateConf := &resource.StateChangeConf{
+	deleteStateConf := &retry.StateChangeConf{
 		Pending: []string{"deleting", "exists"},
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
@@ -248,7 +248,6 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 			if err != nil {
 				return 0, "", err
 			}
-
 			// If delete was successful, start polling
 			if resp.Result == "success" {
 				// Check if the network still exists

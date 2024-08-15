@@ -2,7 +2,9 @@ package kubernetes
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
 	"strings"
 	"time"
@@ -460,7 +462,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 // function to delete the kubernetes cluster
-func resourceKubernetesClusterDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if it is defined in the datasource
@@ -472,6 +474,30 @@ func resourceKubernetesClusterDelete(_ context.Context, d *schema.ResourceData, 
 	_, err := apiClient.DeleteKubernetesCluster(d.Id())
 	if err != nil {
 		return diag.Errorf("[INFO] an error occurred while trying to delete the kubernetes cluster %s", err)
+	}
+
+	// Wait for the cluster to be completely deleted
+	deleteStateConf := &retry.StateChangeConf{
+		Pending: []string{"DELETING"},
+		Target:  []string{"DELETED"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.GetKubernetesCluster(d.Id())
+			if err != nil {
+				if errors.Is(err, civogo.DatabaseKubernetesClusterNotFoundError) {
+					return 0, "DELETED", nil
+				}
+				return 0, "", err
+			}
+			return resp, resp.Status, nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          10 * time.Second,
+		MinTimeout:     5 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err = deleteStateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("error waiting for instance (%s) to be deleted: %s", d.Id(), err)
 	}
 
 	return nil
