@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -235,34 +236,43 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 		apiClient.Region = region.(string)
 	}
 
-	netowrkID := d.Id()
-	log.Printf("[INFO] Checking if firewall %s exists", netowrkID)
-	_, err := apiClient.FindNetwork(netowrkID)
-	if err != nil {
-		log.Printf("[INFO] Unable to find network %s - probably it's been deleted", netowrkID)
-		return nil
-	}
-
-	log.Printf("[INFO] deleting the network %s", netowrkID)
+	networkID := d.Id()
+	log.Printf("[INFO] Deleting the network %s", networkID)
 
 	deleteStateConf := &resource.StateChangeConf{
-		Pending: []string{"failed"},
-		Target:  []string{"success"},
+		Pending: []string{"deleting", "exists"},
+		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.DeleteNetwork(netowrkID)
+			// First, try to delete the network
+			resp, err := apiClient.DeleteNetwork(networkID)
 			if err != nil {
 				return 0, "", err
 			}
-			return resp, string(resp.Result), nil
+
+			// If delete was successful, start polling
+			if resp.Result == "success" {
+				// Check if the network still exists
+				_, err := apiClient.GetNetwork(networkID)
+				if err != nil {
+					if errors.Is(err, civogo.DatabaseNetworkNotFoundError) {
+						return resp, "deleted", nil
+					}
+					return nil, "", err
+				}
+				return resp, "deleting", nil
+			}
+
+			return resp, "exists", nil
 		},
 		Timeout:        60 * time.Minute,
-		Delay:          3 * time.Second,
+		Delay:          5 * time.Second,
 		MinTimeout:     3 * time.Second,
 		NotFoundChecks: 10,
 	}
-	_, err = deleteStateConf.WaitForStateContext(context.Background())
+
+	_, err := deleteStateConf.WaitForStateContext(context.Background())
 	if err != nil {
-		return diag.Errorf("error waiting for network (%s) to be deleted: %s", netowrkID, err)
+		return diag.Errorf("error waiting for network (%s) to be deleted: %s", networkID, err)
 	}
 
 	return nil
