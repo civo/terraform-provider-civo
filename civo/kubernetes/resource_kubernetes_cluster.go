@@ -355,7 +355,7 @@ func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m 
 	if writeKubeconfig {
 		d.Set("kubeconfig", resp.KubeConfig)
 	} else {
-		d.Set("kubeconfig", "")
+		d.Set("kubeconfig", nil)
 	}
 
 	if err := d.Set("pools", flattenNodePool(resp)); err != nil {
@@ -445,6 +445,16 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	if d.HasChange("write_kubeconfig") {
 		// setting atleast one field inside the KubernetesClusterConfig, just to ensure we are not sending an empty config
 		config.FirewallID = d.Get("firewall_id").(string)
+		writeKubeconfig := d.Get("write_kubeconfig").(bool)
+		if writeKubeconfig {
+			resp, err := apiClient.GetKubernetesCluster(d.Id())
+			if err != nil {
+				return diag.Errorf("[ERR] failed to get kubernetes cluster: %s", err)
+			}
+			d.Set("kubeconfig", resp.KubeConfig)
+		} else {
+			d.Set("kubeconfig", nil)
+		}
 	}
 
 	log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())
@@ -505,6 +515,13 @@ func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData
 
 func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if d.Id() != "" {
+		if d.HasChange("write_kubeconfig") {
+			err := d.SetNewComputed("kubeconfig")
+			if err != nil {
+				return err
+			}
+		}
+
 		if d.HasChange("applications") {
 			return fmt.Errorf("the 'applications' field is immutable")
 		}
