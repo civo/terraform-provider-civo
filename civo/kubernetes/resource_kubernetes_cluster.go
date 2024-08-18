@@ -69,11 +69,11 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Description: "The version of k3s to install (optional, the default is currently the latest stable available)",
 			},
 			"min_kubernetes_version": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"kubernetes_version"},
-				Description: "The minimum version of Kubernetes to install",
+				Description:   "The minimum version of Kubernetes to install",
 			},
 			"cni": {
 				Type:         schema.TypeString,
@@ -463,7 +463,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 		// Update kubernetes version if new min_kubernetes_version is higher
 		if newMin.GreaterThan(kubeVersion) {
 			clusterType := "k3s"
-			if res, ok := d.GetOk("cluster_type"); ok{
+			if res, ok := d.GetOk("cluster_type"); ok {
 				clusterType = res.(string)
 			}
 			kubeVersion, err := resolveKubernetesVersion(d.Get("min_kubernetes_version").(string), m, clusterType)
@@ -474,7 +474,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 			config.KubernetesVersion = kubeVersion
 			config.Region = apiClient.Region
 		}
-		
+
 		// Ensure we're not sending an empty config
 		config.FirewallID = d.Get("firewall_id").(string)
 	}
