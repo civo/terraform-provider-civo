@@ -4,10 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
+	"regexp"
+	"sort"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
@@ -63,6 +67,13 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "The version of k3s to install (optional, the default is currently the latest stable available)",
+			},
+			"min_kubernetes_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ConflictsWith: []string{"kubernetes_version"},
+				Description: "The minimum version of Kubernetes to install",
 			},
 			"cni": {
 				Type:         schema.TypeString,
@@ -236,8 +247,23 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 		config.NetworkID = defaultNetwork.ID
 	}
 
+	clusterType := "k3s" // Default
+	if attr, ok := d.GetOk("cluster_type"); ok {
+		config.ClusterType = attr.(string)
+		clusterType = attr.(string)
+	}
+
 	if attr, ok := d.GetOk("kubernetes_version"); ok {
 		config.KubernetesVersion = attr.(string)
+	}
+
+	// version resolution is needed only when min_kubernetes_version is specified
+	if attr, ok := d.GetOk("min_kubernetes_version"); ok {
+		KubeVersion, err := resolveKubernetesVersion(attr.(string), m, clusterType)
+		if err != nil {
+			return diag.Errorf("[ERR] failed to resolve kubernetes version: %s", err)
+		}
+		config.KubernetesVersion = KubeVersion
 	}
 
 	if attr, ok := d.GetOk("tags"); ok {
@@ -258,10 +284,6 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 		}
 	} else {
 		config.Applications = ""
-	}
-
-	if attr, ok := d.GetOk("cluster_type"); ok {
-		config.ClusterType = attr.(string)
 	}
 
 	if attr, ok := d.GetOk("firewall_id"); ok {
@@ -428,6 +450,35 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 		config.Region = apiClient.Region
 	}
 
+	if d.HasChange("min_kubernetes_version") {
+		newMin, err := version.NewVersion(d.Get("min_kubernetes_version").(string))
+		if err != nil {
+			return diag.Errorf("error parsing: %s", err)
+		}
+		kubeVersion, err := version.NewVersion(d.Get("kubernetes_version").(string))
+		if err != nil {
+			return diag.Errorf("error parsing: %s", err)
+		}
+
+		// Update kubernetes version if new min_kubernetes_version is higher
+		if newMin.GreaterThan(kubeVersion) {
+			clusterType := "k3s"
+			if res, ok := d.GetOk("cluster_type"); ok{
+				clusterType = res.(string)
+			}
+			kubeVersion, err := resolveKubernetesVersion(d.Get("min_kubernetes_version").(string), m, clusterType)
+			if err != nil {
+				return diag.Errorf("[ERR] failed to resolve kubernetes version: %s", err)
+			}
+			// Update to the new version
+			config.KubernetesVersion = kubeVersion
+			config.Region = apiClient.Region
+		}
+		
+		// Ensure we're not sending an empty config
+		config.FirewallID = d.Get("firewall_id").(string)
+	}
+
 	if d.HasChange("applications") {
 		config.Applications = d.Get("applications").(string)
 		config.Region = apiClient.Region
@@ -514,6 +565,36 @@ func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+
+	clusterType, _ := d.GetOk("cluster_type")
+	if clusterType != "talos" {
+		if v, ok := d.GetOk("kubernetes_version"); ok {
+
+			normalized, err := normalizeKubernetesVersion(v)
+			if err != nil {
+				return err
+			}
+
+			err = d.SetNew("kubernetes_version", normalized)
+			if err != nil {
+				return fmt.Errorf("error setting normalized kubernetes_version: %w", err)
+			}
+		}
+
+		if v, ok := d.GetOk("min_kubernetes_version"); ok {
+
+			normalized, err := normalizeKubernetesVersion(v)
+			if err != nil {
+				return err
+			}
+
+			err = d.SetNew("min_kubernetes_version", normalized)
+			if err != nil {
+				return fmt.Errorf("error setting normalized min_ kubernetes_version: %w", err)
+			}
+		}
+	}
+
 	if d.Id() != "" {
 		if d.HasChange("write_kubeconfig") {
 			err := d.SetNewComputed("kubeconfig")
@@ -533,4 +614,103 @@ func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff,
 		}
 	}
 	return nil
+}
+
+func normalizeKubernetesVersion(v interface{}) (string, error) {
+	var kubernetesVersionRegex = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-k3s\d+)?$`)
+	var versionOnlyRegex = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`)
+
+	version, ok := v.(string)
+	if !ok {
+		return "", fmt.Errorf("expected a string: %s", version)
+	}
+	normalized := strings.TrimPrefix(version, "v")
+	normalized = strings.ReplaceAll(normalized, "+", "-")
+	normalized = strings.ReplaceAll(normalized, "_", "-")
+	normalized = strings.ReplaceAll(normalized, "/", "-")
+	normalized = strings.ReplaceAll(normalized, ":", "-")
+
+	if versionOnlyRegex.MatchString(normalized) {
+		normalized += "-k3s1"
+	}
+
+	exampleKubeVersion := "1.29.2-k3s1"
+
+	if !kubernetesVersionRegex.MatchString(normalized) {
+		return "", fmt.Errorf("invalid Kubernetes version format: '%s'. Expected format: '%s'. Use 'civo kubernetes versions' command to list the available versions", version, exampleKubeVersion)
+	}
+
+	return normalized, nil
+}
+
+func resolveKubernetesVersion(minVersion string, m interface{}, clusterType string) (string, error) {
+	var mp map[string]interface{}
+	availableVersions, err := getKubernetesVersions(m, mp)
+	if err != nil {
+		return "", fmt.Errorf("failed to get available Kubernetes versions: %w", err)
+	}
+
+	// Filter versions based on cluster type: so we don't compare talos version with k3s
+	filteredVersions := filterVersionsByClusterType(availableVersions, clusterType)
+
+	// Sort versions in ascending order (oldest first)
+	sort.Slice(filteredVersions, func(i, j int) bool {
+		v1 := filteredVersions[i].Version
+		v2 := filteredVersions[j].Version
+		res, _ := compareVersions(v1, v2)
+		return !res
+	})
+
+	kubeVersion := minVersion
+	var changed bool
+	for _, v := range filteredVersions {
+		ok, err := compareVersions(v.Version, kubeVersion)
+		if err != nil {
+			return "", err
+		}
+		if ok {
+			if v.Default {
+				// Return the latest stable version greater than or equal to the min
+				return v.Version, nil
+			}
+			kubeVersion = v.Version
+			changed = true
+		}
+	}
+
+	// Return if found a suitable version
+	if kubeVersion != minVersion || changed {
+		return kubeVersion, nil
+	}
+
+	// If no available kubernetes version satisfies the minimum version
+	return "", fmt.Errorf("no available Kubernetes version for %s satisfies the minimum version %s", clusterType, minVersion)
+
+}
+
+func filterVersionsByClusterType(versions []interface{}, clusterType string) []civogo.KubernetesVersion {
+	var filtered []civogo.KubernetesVersion
+	for _, v := range versions {
+		kv := v.(civogo.KubernetesVersion)
+		if kv.ClusterType == clusterType {
+			filtered = append(filtered, kv)
+		}
+	}
+	return filtered
+}
+
+func compareVersions(version1, version2 string) (bool, error) {
+	v1, err := version.NewVersion(version1)
+	if err != nil {
+		return false, fmt.Errorf("error parsing: %w", err)
+	}
+	v2, err := version.NewVersion(version2)
+	if err != nil {
+		return false, fmt.Errorf("error parsing: %w", err)
+	}
+
+	if v1.GreaterThanOrEqual(v2) {
+		return true, nil
+	}
+	return false, nil
 }
