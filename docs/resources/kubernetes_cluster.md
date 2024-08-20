@@ -211,6 +211,7 @@ Required:
 - `tags` (String) Space separated list of tags, to be used freely as required
 - `target_nodes_size` (String, Deprecated) The size of each node (optional, the default is currently g4s.kube.medium)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts)) defines timeouts for cluster creation, read and update, default is 30 minutes for all
+- write_kubeconfig (Boolean) (false by default) when set to true, `kubeconfig` is saved to the terraform state file
 
 <a id="nestedblock--timeouts"></a>
 #### Nested Schema for `timeouts`
