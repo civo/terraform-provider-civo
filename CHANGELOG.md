@@ -1,4 +1,12 @@
 
+## [v1.1.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.1) (20 August 2024)
+
+### Merged
+- [#325](https://github.com/civo/terraform-provider-civo/pull/325) - Honouring write_kubeconfig post cluster creation
+- [#323](https://github.com/civo/terraform-provider-civo/pull/323) - Do Polling when deleting resources to ensure complete deletation
+- [#322](https://github.com/civo/terraform-provider-civo/pull/322) - fix: validate existence and structure of credentials_file
+- [#320](https://github.com/civo/terraform-provider-civo/pull/320) - default k8s version is latest stable available
+
 ## [v1.1.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.0) (13 August 2024)
 
 ### Merged
