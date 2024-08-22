@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
+	"regexp"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
@@ -236,6 +238,10 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 		config.NetworkID = defaultNetwork.ID
 	}
 
+	if attr, ok := d.GetOk("cluster_type"); ok {
+		config.ClusterType = attr.(string)
+	}
+
 	if attr, ok := d.GetOk("kubernetes_version"); ok {
 		config.KubernetesVersion = attr.(string)
 	}
@@ -258,10 +264,6 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 		}
 	} else {
 		config.Applications = ""
-	}
-
-	if attr, ok := d.GetOk("cluster_type"); ok {
-		config.ClusterType = attr.(string)
 	}
 
 	if attr, ok := d.GetOk("firewall_id"); ok {
@@ -514,6 +516,60 @@ func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+
+	// Check if kubernetes version string is correct
+	if kubeVersion, ok := d.GetOk("kubernetes_version"); ok {
+		version := kubeVersion.(string)
+		var k3sVersionRegex = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-k3s\d$`)
+		var talosVersionRegex = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`)
+
+		clusterType := "k3s" // Default
+		attr, ok := d.GetOk("cluster_type")
+		if ok {
+			clusterType = attr.(string)
+		}
+
+		availableVersions, err := getKubernetesVersions(meta, nil)
+		if err != nil {
+			return fmt.Errorf("failed to get available Kubernetes versions: %w", err)
+		}
+
+		var stableVersions []string
+		var developmentVersions []string
+
+		for _, v := range availableVersions {
+			kv := v.(civogo.KubernetesVersion)
+			if kv.ClusterType == clusterType {
+				switch kv.Type {
+				case "stable":
+					stableVersions = append(stableVersions, kv.Version)
+				case "development":
+					developmentVersions = append(developmentVersions, kv.Version)
+				}
+			}
+		}
+
+		isValidVersion := false
+		switch clusterType {
+		case "k3s":
+			isValidVersion = k3sVersionRegex.MatchString(version)
+			if !isValidVersion {
+				return fmt.Errorf("invalid Kubernetes version format: '%s' for cluster type '%s'.\n\n"+
+					"Please ensure your version matches the expected format, e.g., 'X.Y.Z-k3s1'.\n\n"+
+					"Available versions for '%s':\n- Stable: %v\n- Development: %v",
+					version, clusterType, clusterType, stableVersions, developmentVersions)
+			}
+		case "talos":
+			isValidVersion = talosVersionRegex.MatchString(version)
+			if !isValidVersion {
+				return fmt.Errorf("invalid Kubernetes version format: '%s' for cluster type '%s'.\n\n"+
+					"Please ensure your version matches the expected format, e.g., 'X.Y.Z'.\n\n"+
+					"Available versions for '%s':\n- Stable: %v",
+					version, clusterType, clusterType, stableVersions)
+			}
+		}
+	}
+
 	if d.Id() != "" {
 		if d.HasChange("write_kubeconfig") {
 			err := d.SetNewComputed("kubeconfig")
