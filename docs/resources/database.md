@@ -68,6 +68,7 @@ resource "civo_database" "custom_database" {
 - `port` (Number) The port of the database
 - `status` (String) The status of the database
 - `username` (String) The username of the database
+- `private_ipv4` (String) The private IP assigned to the database
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
