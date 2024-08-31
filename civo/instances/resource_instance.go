@@ -362,16 +362,16 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 		d.Set("initial_password", "")
 	}
 
-	if resp.Script != "" {
-		decodedScript, err := base64.StdEncoding.DecodeString(resp.Script)
-		if err != nil {
-			return diag.Errorf("[ERR] failed to decode base64 script: %s", err)
-		}
-		d.Set("script", string(decodedScript))
-	} else {
+	if resp.Script == "" {
 		d.Set("script", "")
 	}
 
+	decodedScript, err := base64.StdEncoding.DecodeString(resp.Script)
+	if err != nil {
+		return diag.Errorf("[ERR] failed to decode base64 script: %s", err)
+	}
+
+	d.Set("script", string(decodedScript))
 	d.Set("hostname", resp.Hostname)
 	d.Set("reverse_dns", resp.ReverseDNS)
 	d.Set("size", resp.Size)
