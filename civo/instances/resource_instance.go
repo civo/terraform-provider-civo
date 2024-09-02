@@ -417,7 +417,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 
 		createStateConf := &resource.StateChangeConf{
-			Pending: []string{"BUILDING"},
+			Pending: []string{"BUILDING", "REBOOTING"},
 			Target:  []string{"ACTIVE"},
 			Refresh: func() (interface{}, string, error) {
 				resp, err := apiClient.GetInstance(d.Id())
