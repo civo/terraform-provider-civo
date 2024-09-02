@@ -2,6 +2,7 @@ package instances
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
@@ -361,6 +362,16 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 		d.Set("initial_password", "")
 	}
 
+	if resp.Script == "" {
+		d.Set("script", "")
+	}
+
+	decodedScript, err := base64.StdEncoding.DecodeString(resp.Script)
+	if err != nil {
+		return diag.Errorf("[ERR] failed to decode base64 script: %s", err)
+	}
+
+	d.Set("script", string(decodedScript))
 	d.Set("hostname", resp.Hostname)
 	d.Set("reverse_dns", resp.ReverseDNS)
 	d.Set("size", resp.Size)
@@ -377,7 +388,6 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("network_id", resp.NetworkID)
 	d.Set("firewall_id", resp.FirewallID)
 	d.Set("status", resp.Status)
-	d.Set("script", resp.Script)
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 	d.Set("disk_image", diskImg.ID)
