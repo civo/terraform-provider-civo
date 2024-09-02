@@ -98,6 +98,11 @@ func ResourceDatabase() *schema.Resource {
 				Computed:    true,
 				Description: "The status of the database",
 			},
+			"private_ipv4": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The private IPv4 address for the database",
+			},
 		},
 		CreateContext: resourceDatabaseCreate,
 		ReadContext:   resourceDatabaseRead,
@@ -270,6 +275,7 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interfa
 	d.Set("dns_endpoint", fmt.Sprintf("%s.db.civo.com", resp.ID))
 	d.Set("port", resp.Port)
 	d.Set("status", resp.Status)
+	d.Set("private_ipv4", resp.PrivateIPv4)
 
 	return nil
 }
