@@ -104,7 +104,7 @@ resource "civo_kubernetes_cluster" "example" {
 
 ### 3 medium nodes and writing the kubeconfig to a file for kubectl
 
-This example shows how to output the configuration of the cluster to a kubeconfig file.
+This example shows how to output the configuration of the cluster to a kubeconfig file and then use that with the kubernetes provider to create a namespace.
 
 We will also enter a `kubernetes_version`. To see the list of kubernetes version use the  [Civo CLI](https://www.civo.com/docs/overview/civo-cli) command:
 ```
@@ -123,17 +123,15 @@ resource "civo_firewall" "example" {
     name = "example-firewall"
     create_default_rules = true
     network_id = civo_network.example.id
-
 }
 
 resource "civo_network" "example" {
   label = "example-network"
-
 }
-
 
 resource "civo_kubernetes_cluster" "example" {
     name = "example-cluster"
+    write_kubeconfig = true
     network_id = civo_network.example.id
     firewall_id = civo_firewall.example.id
     kubernetes_version = "1.28.7-k3s1"
@@ -145,23 +143,36 @@ resource "civo_kubernetes_cluster" "example" {
 }
 
 resource "local_file" "kubeconfig" {
+  filename = "/tmp/${civo_kubernetes_cluster.example.name}-kubeconfig"  # Define the path and file name
   content  = civo_kubernetes_cluster.example.kubeconfig
-  filename = "${path.module}/kubeconfig"
+}
+
+
+provider "kubernetes" {
+  config_path    = local_file.kubeconfig.filename
+}
+
+resource "kubernetes_namespace" "example" {
+  depends_on = [local_file.kubeconfig]
+  metadata {
+    name = "example-namespace"
+  }
 }
 ```
 
-The user can then run the following `kubectl` command to access the server, for example:
+The user can then run the following `kubectl` command to see the namespace created:
 
 ```
-kubectl --kubeconfig kubeconfig get nodes
+kubectl --kubeconfig=/tmp/example-cluster-kubeconfig get ns
 ```
 
-Another, perhaps more convenient and secure way of doing this is by using the [Civo CLI](https://www.civo.com/docs/overview/civo-cli) and running the following, to automatically configure kubectl:
+Unless you need to use terraform to configure your cluster, you can also access [Civo CLI](https://www.civo.com/docs/overview/civo-cli) and running the following, to automatically configure kubectl:
 
 ```
 civo kubernetes config example-cluster --save --switch
 ```
 
+This will prevent saving kubeconfig to state.
 
 ## Argument Reference
 
@@ -211,7 +222,7 @@ Required:
 - `tags` (String) Space separated list of tags, to be used freely as required
 - `target_nodes_size` (String, Deprecated) The size of each node (optional, the default is currently g4s.kube.medium)
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts)) defines timeouts for cluster creation, read and update, default is 30 minutes for all
-- write_kubeconfig (Boolean) (false by default) when set to true, `kubeconfig` is saved to the terraform state file
+- `write_kubeconfig` (Boolean) (false by default) when set to true, `kubeconfig` is saved to the terraform state file
 
 <a id="nestedblock--timeouts"></a>
 #### Nested Schema for `timeouts`
