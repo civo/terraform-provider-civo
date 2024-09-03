@@ -1,4 +1,15 @@
 
+## [v1.1.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.2) (3 September 2024)
+
+### Merged
+- [#338](https://github.com/civo/terraform-provider-civo/pull/338) - Make script field immutable for instance resource
+- [#333](https://github.com/civo/terraform-provider-civo/pull/333) - Addition of privateIP in DB resource
+- [#336](https://github.com/civo/terraform-provider-civo/pull/336) - Decode Base64 script before saving state
+- [#337](https://github.com/civo/terraform-provider-civo/pull/337) - Add missing instance states
+- [#329](https://github.com/civo/terraform-provider-civo/pull/329) - Fix: Enhance Kubernetes version handling
+- [#326](https://github.com/civo/terraform-provider-civo/pull/326) - Improving the documentation for firewall resource
+- [#321](https://github.com/civo/terraform-provider-civo/pull/321) - adding documentation for the new write_kubeconfig property
+
 ## [v1.1.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.1) (20 August 2024)
 
 ### Merged
