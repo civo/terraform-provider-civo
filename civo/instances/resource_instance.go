@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
 	"strings"
@@ -189,6 +190,7 @@ func ResourceInstance() *schema.Resource {
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
+		CustomizeDiff: customizeDiffInstance,
 	}
 }
 
@@ -608,5 +610,12 @@ func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("error waiting for instance (%s) to be deleted: %s", d.Id(), err)
 	}
 
+	return nil
+}
+
+func customizeDiffInstance(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Id() != "" && d.HasChange("script") {
+		return fmt.Errorf("the 'script' field is immutable")
+	}
 	return nil
 }
