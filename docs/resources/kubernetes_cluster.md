@@ -137,6 +137,7 @@ resource "civo_kubernetes_cluster" "example" {
     network_id = civo_network.example.id
     firewall_id = civo_firewall.example.id
     kubernetes_version = "1.28.7-k3s1"
+    write_kubeconfig = true
     pools {
         label = "shop"
         size = "g4s.kube.medium"
