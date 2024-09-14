@@ -287,7 +287,8 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 	log.Printf("[INFO] kubernertes config %+v", config)
 	resp, err := apiClient.NewKubernetesClusters(config)
 	if err != nil {
-		return diag.Errorf("[ERR] failed to create the kubernetes cluster: %s", err)
+		// quota errors introduce new line after each missing quota, causing formatting issues:
+		return diag.Errorf("[ERR] failed to create the kubernetes cluster: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 	}
 
 	d.SetId(resp.ID)
