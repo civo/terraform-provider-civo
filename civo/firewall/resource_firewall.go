@@ -180,15 +180,15 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 // function to read a firewall
-func resourceFirewallRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
+	// Overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
 
-	log.Printf("[INFO] retriving the firewall %s", d.Id())
+	log.Printf("[INFO] retrieving the firewall %s", d.Id())
 	resp, err := apiClient.FindFirewall(d.Id())
 	if err != nil {
 		if resp == nil {
@@ -201,8 +201,17 @@ func resourceFirewallRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("name", resp.Name)
 	d.Set("network_id", resp.NetworkID)
 	d.Set("region", apiClient.Region)
-	d.Set("create_default_rules", d.Get("create_default_rules").(bool))
 
+	// Check if the firewall uses the default rules
+	createDefaultRules, err := apiClient.IsUsingDefaultRules(d.Id())
+	if err != nil {
+		return diag.Errorf("[ERR] error checking default rules: %s", err)
+	}
+
+	// Set the create_default_rules field in the state
+	d.Set("create_default_rules", createDefaultRules)
+
+	// Set the ingress and egress rules
 	for _, rule := range resp.Rules {
 		if rule.Direction == "ingress" {
 			if err := d.Set("ingress_rule", flattenFirewallRules(resp.Rules, rule.Direction)); err != nil {
