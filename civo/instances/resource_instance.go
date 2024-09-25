@@ -5,10 +5,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
@@ -285,7 +286,8 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 		if parseErr == nil {
 			err = customErr
 		}
-		return diag.Errorf("[ERR] failed to create instance: %s", err)
+		// quota errors introduce new line after each missing quota, causing formatting issues:
+		return diag.Errorf("[ERR] failed to create instance: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 	}
 
 	d.SetId(instance.ID)
