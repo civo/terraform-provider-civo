@@ -102,9 +102,6 @@ provider "civo" {
   region = "LON1"
 }
 ```
-~> **Note** currently only full path is supported on the `credentials_file` input, but in the future using tilde (~) will work as well.
-
-
 
 ## Argument Reference
 
