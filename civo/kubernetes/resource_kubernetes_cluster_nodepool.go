@@ -43,7 +43,7 @@ func ResourceKubernetesClusterNodePool() *schema.Resource {
 func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -95,7 +95,7 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 		}
 	}
 
-	newPool := &civogo.KubernetesClusterPoolUpdateConfig{
+	newPool := &civogo.KubernetesClusterPoolConfig{
 		ID:     nodePoolLabel,
 		Count:  count,
 		Size:   size,
@@ -211,7 +211,7 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 	}
 
 	if d.HasChange("node_count") {
-		poolUpdate.Count = d.Get("node_count").(int)
+		poolUpdate.Count = d.Get("node_count").(*int)
 	}
 
 	if d.HasChange("labels") {

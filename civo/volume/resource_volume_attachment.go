@@ -49,6 +49,7 @@ func ResourceVolumeAttachment() *schema.Resource {
 // function to create the new volume
 func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
+	var diags diag.Diagnostics
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
@@ -57,6 +58,7 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 
 	instanceID := d.Get("instance_id").(string)
 	volumeID := d.Get("volume_id").(string)
+	attachAtBoot := d.Get("attach_at_boot").(bool)
 
 	log.Printf("[INFO] retrieving the volume %s", volumeID)
 	volume, err := apiClient.FindVolume(volumeID)
@@ -65,8 +67,25 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if volume.InstanceID == "" || volume.InstanceID != instanceID {
+
+		vuc := civogo.VolumeAttachConfig{
+			InstanceID: instanceID,
+			Region:     apiClient.Region,
+		}
+
+		if attachAtBoot {
+			// Notify the terminal
+			msg := fmt.Sprintf("To use the volume %s, The instance %s needs to be rebooted", volumeID, instanceID)
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  msg,
+			})
+
+			vuc.AttachAtBoot = true
+		}
+
 		log.Printf("[INFO] attaching the volume %s to instance %s", volumeID, instanceID)
-		_, err := apiClient.AttachVolume(volumeID, instanceID)
+		_, err := apiClient.AttachVolume(volumeID, vuc)
 		if err != nil {
 			return diag.Errorf("[ERR] error attaching volume to instance %s", err)
 		}
