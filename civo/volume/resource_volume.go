@@ -46,6 +46,11 @@ func ResourceVolume() *schema.Resource {
 				Computed:    true,
 				Description: "The mount point of the volume (from instance's perspective)",
 			},
+			"volume_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The type of the volume",
+			},
 		},
 		CreateContext: resourceVolumeCreate,
 		ReadContext:   resourceVolumeRead,
@@ -61,17 +66,22 @@ func ResourceVolume() *schema.Resource {
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
 
 	log.Printf("[INFO] configuring the volume %s", d.Get("name").(string))
+
 	config := &civogo.VolumeConfig{
 		Name:          d.Get("name").(string),
 		SizeGigabytes: d.Get("size_gb").(int),
 		NetworkID:     d.Get("network_id").(string),
 		Region:        apiClient.Region,
+	}
+
+	if v, ok := d.GetOk("volume_type"); ok {
+		config.VolumeType = v.(string)
 	}
 
 	_, err := apiClient.FindNetwork(config.NetworkID)
@@ -132,6 +142,7 @@ func resourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface{}
 	d.Set("network_id", resp.NetworkID)
 	d.Set("size_gb", resp.SizeGigabytes)
 	d.Set("mount_point", resp.MountPoint)
+	d.Set("volume_type", resp.VolumeType)
 
 	return nil
 }

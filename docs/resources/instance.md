@@ -116,6 +116,7 @@ resource "civo_instance" "example" {
     network_id = civo_network.example.id
     size = "g3.xsmall"
     disk_image = data.civo_disk_image.debian.diskimages[0].id
+    volume_type = "csi-s3"
 }
 
 ```
@@ -145,6 +146,7 @@ resource "civo_instance" "example" {
 - `tags` (Set of String) An optional list of tags, represented as a key, value pair
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts)) defines timeouts for cluster creation, read and update, default is 30 minutes for all
 - `write_password` (Boolean) If set to true then initial_password for the instance will be saved to terraform state file. (default: false)
+- `volume_type` (string) Type of volume that instance should be created with, e.g: ms-xfs-2-replicas, px-csi-db (default: csi-s3)
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

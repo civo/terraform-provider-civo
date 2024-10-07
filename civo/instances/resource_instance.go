@@ -95,6 +95,11 @@ func ResourceInstance() *schema.Resource {
 				ValidateFunc: utils.ValidateUUID,
 				Description:  "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
+			"volume_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The type of volume to use, either 'ssd' or 'bssd' (optional; default 'ssd')",
+			},
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -238,6 +243,10 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	if v, ok := d.GetOk("reserved_ipv4"); ok {
 		config.ReservedIPv4 = v.(string)
+	}
+
+	if v, ok := d.GetOk("volume_type"); ok {
+		config.VolumeType = v.(string)
 	}
 
 	if networtID, ok := d.GetOk("network_id"); ok {
@@ -395,6 +404,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("created_at", resp.CreatedAt.UTC().String())
 	d.Set("notes", resp.Notes)
 	d.Set("disk_image", diskImg.ID)
+	d.Set("volume_type", resp.VolumeType)
 
 	if resp.PublicIP != "" {
 		d.Set("public_ip_required", "create")
