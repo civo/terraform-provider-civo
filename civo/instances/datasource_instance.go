@@ -102,6 +102,20 @@ func DataSourceInstance() *schema.Resource {
 				Computed:    true,
 				Description: "An optional list of tags",
 			},
+			"attached_volume": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "A list of volumes to attached at boot to the instance.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The ID of the volume to attach.",
+						},
+					},
+				},
+			},
 			"script": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -191,6 +205,18 @@ func dataSourceInstanceRead(_ context.Context, d *schema.ResourceData, m interfa
 	d.Set("script", foundImage.Script)
 	d.Set("created_at", foundImage.CreatedAt.UTC().String())
 	d.Set("notes", foundImage.Notes)
+
+	if len(foundImage.AttachedVolumes) > 0 {
+		volumes := make([]map[string]interface{}, 0, len(foundImage.AttachedVolumes))
+		for _, volume := range foundImage.AttachedVolumes {
+			volumeMap := map[string]interface{}{
+				"id": volume.ID,
+			}
+			volumes = append(volumes, volumeMap)
+		}
+
+		d.Set("attached_volume", volumes)
+	}
 
 	return nil
 }

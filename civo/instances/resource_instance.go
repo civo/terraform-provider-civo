@@ -106,6 +106,20 @@ func ResourceInstance() *schema.Resource {
 				Description: "An optional list of tags, represented as a key, value pair",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"attached_volume": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "A list of volumes to attached at boot to the instance.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The ID of the volume to attach.",
+						},
+					},
+				},
+			},
 			"script": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -287,6 +301,18 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	config.Tags = tags
 
+	tfVolumeAttach := d.Get("attached_volume").([]interface{})
+	volumes := make([]civogo.AttachedVolume, 0, len(tfVolumeAttach))
+	for _, v := range tfVolumeAttach {
+		volumeData := v.(map[string]interface{})
+		volumes = append(volumes, civogo.AttachedVolume{
+			ID: volumeData["id"].(string),
+		})
+	}
+	if len(volumes) > 0 {
+		config.AttachedVolumes = volumes
+	}
+
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
 
 	instance, err := apiClient.CreateInstance(config)
@@ -295,8 +321,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 		if parseErr == nil {
 			err = customErr
 		}
-		// quota errors introduce new line after each missing quota, causing formatting issues:
-		return diag.Errorf("[ERR] failed to create instance: %s", strings.ReplaceAll(err.Error(), "\n", " "))
+		return diag.Errorf("[ERR] failed to create instance: %s", err)
 	}
 
 	d.SetId(instance.ID)
@@ -373,6 +398,18 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 		d.Set("initial_password", resp.InitialPassword)
 	} else {
 		d.Set("initial_password", "")
+	}
+
+	if len(resp.AttachedVolumes) > 0 {
+		volumes := make([]map[string]interface{}, 0, len(resp.AttachedVolumes))
+		for _, volume := range resp.AttachedVolumes {
+			volumeMap := map[string]interface{}{
+				"id": volume.ID,
+			}
+			volumes = append(volumes, volumeMap)
+		}
+
+		d.Set("attached_volume", volumes)
 	}
 
 	if resp.Script == "" {
