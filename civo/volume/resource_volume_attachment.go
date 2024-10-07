@@ -91,7 +91,7 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 		}
 
 		log.Printf("[INFO] attaching the volume %s to instance %s", volumeID, instanceID)
-		_, err := apiClient.AttachVolume(volumeID, vuc)
+		_, err = apiClient.AttachVolume(volumeID, vuc)
 		if err != nil {
 			return diag.Errorf("[ERR] error attaching volume to instance %s", err)
 		}
