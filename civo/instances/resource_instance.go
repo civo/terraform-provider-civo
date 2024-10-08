@@ -401,15 +401,29 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	}
 
 	if len(resp.AttachedVolumes) > 0 {
-		volumes := make([]map[string]interface{}, 0, len(resp.AttachedVolumes))
-		for _, volume := range resp.AttachedVolumes {
-			volumeMap := map[string]interface{}{
-				"id": volume.ID,
-			}
-			volumes = append(volumes, volumeMap)
+		// Get the attached volumes from the API response
+		attachedVolumes := resp.AttachedVolumes
+
+		// Get the attached volumes from the Terraform state
+		tfAttachedVolumes := d.Get("attached_volume").([]interface{})
+
+		// Create a map of volumes listed in the Terraform config for comparison
+		configVolumeMap := make(map[string]bool)
+		for _, v := range tfAttachedVolumes {
+			volume := v.(map[string]interface{})
+			configVolumeMap[volume["id"].(string)] = true
 		}
 
-		d.Set("attached_volume", volumes)
+		// Filter out API volumes that are not in the Terraform config
+		var filteredVolumes []civogo.AttachedVolume
+		for _, vol := range attachedVolumes {
+			if _, exists := configVolumeMap[vol.ID]; exists {
+				filteredVolumes = append(filteredVolumes, vol)
+			}
+		}
+
+		// Set only the filtered volumes in the Terraform state
+		d.Set("attached_volume", filteredVolumes)
 	}
 
 	if resp.Script == "" {
