@@ -20,7 +20,7 @@ import (
 )
 
 // ResourceInstance The instance resource represents an object of type instances
-// and with it you can handle the instances created with Terraform
+// and with it, you can handle the instances created with Terraform
 func ResourceInstance() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo instance resource. This can be used to create, modify, and delete instances.",
@@ -98,6 +98,7 @@ func ResourceInstance() *schema.Resource {
 			"volume_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "ms-xfs-2-replicas",
 				Description: "The type of volume to use, either 'ssd' or 'bssd' (optional; default 'ssd')",
 			},
 			"tags": {

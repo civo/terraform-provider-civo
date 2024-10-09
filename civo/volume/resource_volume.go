@@ -49,6 +49,7 @@ func ResourceVolume() *schema.Resource {
 			"volume_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "ms-xfs-2-replicas",
 				Description: "The type of the volume",
 			},
 		},
