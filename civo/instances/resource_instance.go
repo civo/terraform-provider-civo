@@ -96,9 +96,9 @@ func ResourceInstance() *schema.Resource {
 				Description:  "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
 			"volume_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "ms-xfs-2-replicas",
+				Type:     schema.TypeString,
+				Optional: true,
+				//Default:     "ms-xfs-2-replicas",
 				Description: "The type of volume to use, either 'ssd' or 'bssd' (optional; default 'ssd')",
 			},
 			"tags": {
@@ -535,6 +535,51 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		_, err = apiClient.UpdateInstance(instance)
 		if err != nil {
 			return diag.Errorf("[ERR] an error occurred while updating notes or hostname of the instance %s", d.Id())
+		}
+	}
+
+	if d.HasChange("attached_volume") {
+		oldVolumes, newVolumes := d.GetChange("attached_volume")
+		oldVolumeList := oldVolumes.([]interface{})
+		newVolumeList := newVolumes.([]interface{})
+
+		// Check if there are any new volumes being attached
+		for _, newVolume := range newVolumeList {
+			newVolumeData := newVolume.(map[string]interface{})
+			found := false
+			for _, oldVolume := range oldVolumeList {
+				oldVolumeData := oldVolume.(map[string]interface{})
+				if newVolumeData["id"] == oldVolumeData["id"] {
+					found = true
+					break
+				}
+			}
+			if !found {
+				// This is a new volume being attached, which is not allowed
+				return diag.Errorf("Attaching new volumes after instance creation is not allowed. Please create a new civo_volume_attachment resource for attaching additional volume.")
+			}
+		}
+
+		// Handle volume detachments
+		for _, oldVolume := range oldVolumeList {
+			oldVolumeData := oldVolume.(map[string]interface{})
+			found := false
+			for _, newVolume := range newVolumeList {
+				newVolumeData := newVolume.(map[string]interface{})
+				if oldVolumeData["id"] == newVolumeData["id"] {
+					found = true
+					break
+				}
+			}
+			if !found {
+				// This volume is no longer in the config, so detach it
+				volumeID := oldVolumeData["id"].(string)
+				_, err := apiClient.DetachVolume(volumeID)
+				if err != nil {
+					return diag.Errorf("Error detaching volume %s: %s", volumeID, err)
+				}
+				log.Printf("[INFO] Successfully detached volume %s from instance %s", volumeID, d.Id())
+			}
 		}
 	}
 
