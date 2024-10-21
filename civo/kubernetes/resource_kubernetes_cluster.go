@@ -522,7 +522,7 @@ func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff,
 	if kubeVersion, ok := d.GetOk("kubernetes_version"); ok {
 		version := kubeVersion.(string)
 		var k3sVersionRegex = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-k3s\d$`)
-		var talosVersionRegex = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`)
+		var talosVersionRegex = regexp.MustCompile(`^talos-v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`)
 
 		clusterType := "k3s" // Default
 		attr, ok := d.GetOk("cluster_type")
@@ -543,9 +543,9 @@ func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff,
 			if kv.ClusterType == clusterType {
 				switch kv.Type {
 				case "stable":
-					stableVersions = append(stableVersions, kv.Version)
+					stableVersions = append(stableVersions, kv.Label)
 				case "development":
-					developmentVersions = append(developmentVersions, kv.Version)
+					developmentVersions = append(developmentVersions, kv.Label)
 				}
 			}
 		}
@@ -564,9 +564,9 @@ func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff,
 			isValidVersion = talosVersionRegex.MatchString(version)
 			if !isValidVersion {
 				return fmt.Errorf("invalid Kubernetes version format: '%s' for cluster type '%s'.\n\n"+
-					"Please ensure your version matches the expected format, e.g., 'X.Y.Z'.\n\n"+
-					"Available versions for '%s':\n- Stable: %v",
-					version, clusterType, clusterType, stableVersions)
+					"Please ensure your version matches the expected format, e.g., 'talos-vX.Y.Z'.\n\n"+
+					"Available versions for '%s':\n- Stable: %v\n- Development: %v",
+					version, clusterType, clusterType, stableVersions, developmentVersions)
 			}
 		}
 	}
