@@ -5,10 +5,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
@@ -57,7 +58,7 @@ func ResourceInstance() *schema.Resource {
 			},
 			"network_id": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Required:     true,
 				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: utils.ValidateUUID,
