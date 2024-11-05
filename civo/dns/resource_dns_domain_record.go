@@ -25,13 +25,14 @@ func ResourceDNSDomainRecord() *schema.Resource {
 			"type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The choice of RR type from a, cname, mx or txt",
+				Description: "The choice of RR type from a, cname, mx, ns or txt",
 				ValidateFunc: validation.StringInSlice([]string{
 					civogo.DNSRecordTypeA,
 					civogo.DNSRecordTypeCName,
 					civogo.DNSRecordTypeMX,
 					civogo.DNSRecordTypeTXT,
 					civogo.DNSRecordTypeSRV,
+					civogo.DNSRecordTypeNS,
 				}, false),
 			},
 			"name": {
@@ -123,6 +124,10 @@ func resourceDNSDomainRecordCreate(ctx context.Context, d *schema.ResourceData, 
 		config.Type = civogo.DNSRecordTypeTXT
 	}
 
+	if d.Get("type").(string) == "NS" {
+		config.Type = civogo.DNSRecordTypeNS
+	}
+
 	log.Printf("[INFO] Creating the domain record %s", d.Get("name").(string))
 	dnsDomainRecord, err := apiClient.CreateDNSRecord(d.Get("domain_id").(string), config)
 	if err != nil {
@@ -198,6 +203,10 @@ func resourceDNSDomainRecordUpdate(ctx context.Context, d *schema.ResourceData, 
 
 		if d.Get("type").(string) == "TXT" {
 			config.Type = civogo.DNSRecordTypeTXT
+		}
+
+		if d.Get("type").(string) == "NS" {
+			config.Type = civogo.DNSRecordTypeNS
 		}
 	}
 
