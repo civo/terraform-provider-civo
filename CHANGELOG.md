@@ -1,4 +1,13 @@
 
+## [v1.1.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.3) (5 November 2024)
+
+### Merged
+- [#355](https://github.com/civo/terraform-provider-civo/pull/355) - Added support for NS DNS record
+- [#353](https://github.com/civo/terraform-provider-civo/pull/353) - honor Talos version string when creating clusters
+- [#350](https://github.com/civo/terraform-provider-civo/pull/350) - Add support for creating instances with custom volume type
+- [#339](https://github.com/civo/terraform-provider-civo/pull/339) - Adding some documentation changes to clarify additional features
+- [#347](https://github.com/civo/terraform-provider-civo/pull/347) - Ensuring the error message is properly formatted when it contains newlines. (Issue 346)
+
 ## [v1.1.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.2) (3 September 2024)
 
 ### Merged
