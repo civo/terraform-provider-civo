@@ -25,7 +25,7 @@ func ResourceDNSDomainRecord() *schema.Resource {
 			"type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The choice of RR type from a, cname, mx or txt",
+				Description: "The choice of RR type from a, cname, mx, ns or txt",
 				ValidateFunc: validation.StringInSlice([]string{
 					civogo.DNSRecordTypeA,
 					civogo.DNSRecordTypeCName,
