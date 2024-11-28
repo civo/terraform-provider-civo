@@ -274,9 +274,10 @@ func resourceLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, m i
 		conf.ClusterID = v.(string)
 	}
 
-	//if v, ok := d.GetOk("max_concurrent_requests"); ok {
-	//	conf.MaxConcurrentRequests = v.(int)
-	//}
+	if v, ok := d.GetOk("max_concurrent_requests"); ok {
+		num := v.(int)
+		conf.MaxConcurrentRequests = &num
+	}
 
 	// Set backend configurations if provided
 	if backendSet {
