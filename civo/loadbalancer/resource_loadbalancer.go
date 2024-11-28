@@ -209,12 +209,18 @@ func ResourceLoadBalancer() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		CustomizeDiff: customizeDiffLoadbalancer,
 	}
 }
 
 // function to create a new load balancer
 func resourceLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*civogo.Client)
+
+	// overwrite the region if is defined in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		client.Region = region.(string)
+	}
 
 	name := d.Get("name").(string)
 
@@ -228,7 +234,8 @@ func resourceLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	// Prepare the load balancer create request
 	conf := &civogo.LoadBalancerConfig{
-		Name: name,
+		Name:   name,
+		Region: client.Region,
 	}
 
 	if v, ok := d.GetOk("service_name"); ok {
@@ -256,7 +263,7 @@ func resourceLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	if v, ok := d.GetOk("session_affinity_config_timeout"); ok {
-		conf.SessionAffinityConfigTimeout = v.(int32)
+		conf.SessionAffinityConfigTimeout = int32(v.(int))
 	}
 
 	if v, ok := d.GetOk("enable_proxy_protocol"); ok {
@@ -321,6 +328,11 @@ func resourceLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, m i
 func resourceLoadBalancerRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*civogo.Client)
 
+	// overwrite the region if is defined in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		client.Region = region.(string)
+	}
+
 	// Retrieve the load balancer information from the API
 	loadBalancer, err := client.GetLoadBalancer(d.Id())
 	if err != nil {
@@ -339,8 +351,6 @@ func resourceLoadBalancerRead(_ context.Context, d *schema.ResourceData, meta in
 	d.Set("max_concurrent_requests", loadBalancer.MaxConcurrentRequests)
 	d.Set("cluster_id", loadBalancer.ClusterID)
 	d.Set("firewall_id", loadBalancer.FirewallID)
-
-	fmt.Println("FIREEEE ID", loadBalancer.FirewallID)
 
 	if err := d.Set("backend", flattenLoadBalancerBackend(loadBalancer.Backends)); err != nil {
 		return diag.Errorf("error setting backend: %s", err)
@@ -363,7 +373,8 @@ func resourceLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	// Initialize an update request
 	updateRequest := &civogo.LoadBalancerUpdateConfig{
-		Name: d.Get("name").(string),
+		Region: client.Region,
+		Name:   d.Get("name").(string),
 	}
 
 	// Check if any relevant fields have changed and update the request accordingly
@@ -393,46 +404,6 @@ func resourceLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	if d.HasChange("enable_proxy_protocol") {
 		updateRequest.EnableProxyProtocol = d.Get("enable_proxy_protocol").(string)
-	}
-
-	// If backend configuration has changed, update backends in the request
-	if d.HasChange("backend") {
-		backends := d.Get("backend").([]interface{})
-		updateRequest.Backends = make([]civogo.LoadBalancerBackendConfig, len(backends))
-
-		for i, backend := range backends {
-			b := backend.(map[string]interface{})
-			updateRequest.Backends[i] = civogo.LoadBalancerBackendConfig{
-				IP:              b["ip"].(string),
-				Protocol:        b["protocol"].(string),
-				SourcePort:      int32(b["source_port"].(int)),
-				TargetPort:      int32(b["target_port"].(int)),
-				HealthCheckPort: int32(b["health_check_port"].(int)),
-			}
-		}
-	}
-
-	// If instance pool configuration has changed, update instance pools in the request
-	if d.HasChange("instance_pool") {
-		instancePools := d.Get("instance_pool").([]interface{})
-		updateRequest.InstancePools = make([]civogo.LoadBalancerInstancePoolConfig, len(instancePools))
-
-		for i, instancePool := range instancePools {
-			p := instancePool.(map[string]interface{})
-			healthCheck := p["health_check"].([]interface{})[0].(map[string]interface{})
-
-			updateRequest.InstancePools[i] = civogo.LoadBalancerInstancePoolConfig{
-				Tags:       convertStringList(p["tags"].([]interface{})),
-				Names:      convertStringList(p["names"].([]interface{})),
-				Protocol:   p["protocol"].(string),
-				SourcePort: int32(p["source_port"].(int)),
-				TargetPort: int32(p["target_port"].(int)),
-				HealthCheck: civogo.HealthCheck{
-					Port: healthCheck["port"].(int32),
-					Path: healthCheck["path"].(string),
-				},
-			}
-		}
 	}
 
 	// Send the update request to the Civo API
@@ -527,4 +498,14 @@ func convertStringList(input []interface{}) []string {
 		strList[i] = v.(string)
 	}
 	return strList
+}
+
+func customizeDiffLoadbalancer(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if d.Id() != "" && d.HasChange("instance_pool") {
+		return fmt.Errorf("the 'instance_pool' field is immutable")
+	}
+	if d.Id() != "" && d.HasChange("backend") {
+		return fmt.Errorf("the 'backend' field is immutable")
+	}
+	return nil
 }
