@@ -275,8 +275,7 @@ func resourceLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	if v, ok := d.GetOk("max_concurrent_requests"); ok {
-		num := v.(int)
-		conf.MaxConcurrentRequests = &num
+		conf.MaxConcurrentRequests = utils.IntPtr(v.(int))
 	}
 
 	// Set backend configurations if provided
@@ -401,6 +400,10 @@ func resourceLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	if d.HasChange("session_affinity_config_timeout") {
 		updateRequest.SessionAffinityConfigTimeout = int32(d.Get("session_affinity_config_timeout").(int))
+	}
+
+	if d.HasChange("max_concurrent_requests") {
+		updateRequest.MaxConcurrentRequests = utils.IntPtr(d.Get("max_concurrent_requests").(int))
 	}
 
 	if d.HasChange("enable_proxy_protocol") {
