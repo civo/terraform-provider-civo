@@ -165,25 +165,3 @@ func dataSourceLoadBalancerRead(_ context.Context, d *schema.ResourceData, m int
 
 	return nil
 }
-
-// function to flatten the load balancer backend when is coming from the api
-func flattenLoadBalancerBackend(backend []civogo.LoadBalancerBackend) []interface{} {
-	if backend == nil {
-		return nil
-	}
-
-	flattenedBackend := make([]interface{}, len(backend))
-	for i, back := range backend {
-		rawRule := map[string]interface{}{
-			"ip":                back.IP,
-			"protocol":          back.Protocol,
-			"source_port":       back.SourcePort,
-			"target_port":       back.TargetPort,
-			"health_check_port": back.HealthCheckPort,
-		}
-
-		flattenedBackend[i] = rawRule
-	}
-
-	return flattenedBackend
-}

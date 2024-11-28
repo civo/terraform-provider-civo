@@ -326,7 +326,7 @@ func ValidateUUID(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-// CheckFileSize function checks if the file the file size is less than the allowed limit(current: 20MB)
+// CheckFileSize function checks if the file size is less than the allowed limit(current: 20MB)
 func CheckFileSize(path string) error {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
@@ -339,4 +339,9 @@ func CheckFileSize(path string) error {
 		return fmt.Errorf("file size exceeds the allowed limit of %d bytes", FileSizeLimit)
 	}
 	return nil
+}
+
+// IntPtr returns a pointer to an int
+func IntPtr(i int) *int {
+	return &i
 }

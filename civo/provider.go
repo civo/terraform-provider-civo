@@ -107,6 +107,7 @@ func Provider() *schema.Provider {
 			"civo_object_store":                    objectstorage.ResourceObjectStore(),
 			"civo_object_store_credential":         objectstorage.ResourceObjectStoreCredential(),
 			"civo_database":                        database.ResourceDatabase(),
+			"civo_load_balancer":                   loadbalancer.ResourceLoadBalancer(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
