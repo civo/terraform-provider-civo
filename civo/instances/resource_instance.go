@@ -289,6 +289,22 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
 
+	// Initialize diagnostics
+	diags := diag.Diagnostics{}
+
+	isFirstInstance, err := checkNetworkFirstInstance(apiClient, config.NetworkID)
+	if err != nil {
+		return diag.Errorf("[ERR] failed to check network instances: %s", err)
+	}
+
+	if isFirstInstance {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "First Instance in Network",
+			Detail:   fmt.Sprintf("The instance %s is the first instance in network %s and will be automatically assigned a public IP", config.Hostname, config.NetworkID),
+		})
+	}
+
 	instance, err := apiClient.CreateInstance(config)
 	if err != nil {
 		customErr, parseErr := utils.ParseErrorResponse(err.Error())
@@ -340,7 +356,11 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 	}
 
-	return resourceInstanceRead(ctx, d, m)
+	// Append read resource diagnostics
+	readDiags := resourceInstanceRead(ctx, d, m)
+	diags = append(diags, readDiags...)
+
+	return diags
 
 }
 
@@ -630,4 +650,24 @@ func customizeDiffInstance(ctx context.Context, d *schema.ResourceDiff, meta int
 		return fmt.Errorf("the 'script' field is immutable")
 	}
 	return nil
+}
+
+// checkNetworkFirstInstance checks if this is the first instance in a given network
+func checkNetworkFirstInstance(apiClient *civogo.Client, networkID string) (bool, error) {
+	// List all instances
+	instances, err := apiClient.ListAllInstances()
+	if err != nil {
+		return false, fmt.Errorf("failed to list instances: %v", err)
+	}
+
+	// Count instances in the specified network
+	networkInstanceCount := 0
+	for _, instance := range instances {
+		if instance.NetworkID == networkID {
+			networkInstanceCount++
+		}
+	}
+
+	// Return true if this is the first instance in the network
+	return networkInstanceCount == 0, nil
 }
