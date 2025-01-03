@@ -518,6 +518,13 @@ func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData
 
 func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 
+	// Check if cluster type is talos and CNI is cilium
+	if clusterType, ok := d.GetOk("cluster_type"); ok && clusterType.(string) == "talos" {
+		if cni, ok := d.GetOk("cni"); ok && cni.(string) == "cilium" {
+			return fmt.Errorf("cilium CNI is not supported with Talos cluster type. Please use flannel CNI instead")
+		}
+	}
+
 	// Check if kubernetes version string is correct
 	if kubeVersion, ok := d.GetOk("kubernetes_version"); ok {
 		version := kubeVersion.(string)
