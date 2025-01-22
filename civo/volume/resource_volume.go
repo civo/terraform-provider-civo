@@ -150,52 +150,56 @@ func resourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface{}
 // function to update the volume
 func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	// apiClient := m.(*civogo.Client)
+	apiClient := m.(*civogo.Client)
 
-	// // overwrite the region if is define in the datasource
-	// if region, ok := d.GetOk("region"); ok {
-	// 	apiClient.Region = region.(string)
-	// }
+	// overwrite the region if is defined in the datasource
+	if region, ok := d.GetOk("region"); ok {
+		apiClient.Region = region.(string)
+	}
 
-	// log.Printf("[INFO] retrieving the volume %s", d.Id())
-	// resp, err := apiClient.FindVolume(d.Id())
-	// if err != nil {
-	// 	return fmt.Errorf("[ERR] failed retrieving the volume: %s", err)
-	// }
+	log.Printf("[INFO] retrieving the volume %s", d.Id())
+	resp, err := apiClient.FindVolume(d.Id())
+	if err != nil {
+		return diag.Errorf("[ERR] failed retrieving the volume: %s", err)
+	}
 
 	if d.HasChange("size_gb") {
-		return diag.Errorf("[ERR] Resize operation is not available at this moment - we are working to re-enable it soon")
+		//return diag.Errorf("[ERR] Resize operation is not available at this moment - we are working to re-enable it soon")
 
-		/*
-			if resp.InstanceID != "" {
-				_, err := apiClient.DetachVolume(d.Id())
-				if err != nil {
-					return fmt.Errorf("[WARN] an error occurred while trying to detach volume %s, %s", d.Id(), err)
-				}
-
-				time.Sleep(10 * time.Second)
-
-				newSize := d.Get("size_gb").(int)
-				_, err = apiClient.ResizeVolume(d.Id(), newSize)
-				if err != nil {
-					return fmt.Errorf("[ERR] the volume (%s) size not change %s", d.Id(), err)
-				}
-
-				time.Sleep(2 * time.Second)
-
-				_, err = apiClient.AttachVolume(d.Id(), resp.InstanceID)
-				if err != nil {
-					return fmt.Errorf("[ERR] an error occurred while trying to attach the volume %s", d.Id())
-				}
-
-			} else {
-				newSize := d.Get("size_gb").(int)
-				_, err = apiClient.ResizeVolume(d.Id(), newSize)
-				if err != nil {
-					return fmt.Errorf("[ERR] the volume (%s) size not change %s", d.Id(), err)
-				}
+		if resp.InstanceID != "" {
+			_, err := apiClient.DetachVolume(d.Id())
+			if err != nil {
+				return diag.Errorf("[WARN] an error occurred while trying to detach volume %s, %s", d.Id(), err)
 			}
-		*/
+
+			time.Sleep(10 * time.Second)
+
+			newSize := d.Get("size_gb").(int)
+			_, err = apiClient.ResizeVolume(d.Id(), newSize)
+			if err != nil {
+				return diag.Errorf("[ERR] the volume (%s) size not change %s", d.Id(), err)
+			}
+
+			time.Sleep(2 * time.Second)
+
+			attachConfig := civogo.VolumeAttachConfig{
+				InstanceID:   resp.InstanceID,
+				AttachAtBoot: true,
+				Region:       apiClient.Region,
+			}
+
+			_, err = apiClient.AttachVolume(d.Id(), attachConfig)
+			if err != nil {
+				return diag.Errorf("[ERR] an error occurred while trying to attach the volume %s", d.Id())
+			}
+
+		} else {
+			newSize := d.Get("size_gb").(int)
+			_, err = apiClient.ResizeVolume(d.Id(), newSize)
+			if err != nil {
+				return diag.Errorf("[ERR] the volume (%s) size not change %s", d.Id(), err)
+			}
+		}
 	}
 
 	if d.HasChange("network_id") {
