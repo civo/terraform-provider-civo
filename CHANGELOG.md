@@ -1,4 +1,11 @@
 
+## [v1.1.4](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.4) (23 January 2025)
+
+### Merged
+- [#364](https://github.com/civo/terraform-provider-civo/pull/364) - volume resize
+- [#362](https://github.com/civo/terraform-provider-civo/pull/362) - validation check for CNI and cluster type
+- [#358](https://github.com/civo/terraform-provider-civo/pull/358) - flash warning if first instance in network
+
 ## [v1.1.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.3) (5 November 2024)
 
 ### Merged
