@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="74db640c-4fac-404c-a03b-7398aafb810a" name="Changes" comment="volume resize" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file:///usr/local/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;uzaxirr&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:civo/terraform-provider-civo.git&quot;,
+    &quot;accountId&quot;: &quot;011f462d-2af4-4962-b0f4-bb9f86abea68&quot;
+  }
+}</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/civo/civogo@v0.3.58/kubernetes.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/civo/civogo@v0.3.65/kubernetes.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/civo/civogo@v0.3.70/kubernetes.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/civo/civogo@v0.3.73/kubernetes.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/github.com/civo/civogo@v0.3.75/volume.go" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/go/pkg/mod/k8s.io/api@v0.29.1/core/v1/types.go" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2drE65X9wsKaswCQyDnV9Ydz7te" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;Go Build.TF Provider Civo.executor&quot;: &quot;Debug&quot;,
+    &quot;Go Build.go build github.com/civo/terraform-provider-civo.executor&quot;: &quot;Debug&quot;,
+    &quot;Go Test.TestAccCivoInstanceSize_update in github.com/civo/terraform-provider-civo/civo/instances.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestExpandNodePoolsWithValidInput in github.com/civo/terraform-provider-civo/civo/kubernetes.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestToken in github.com/civo/terraform-provider-civo/civo.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.go test github.com/civo/terraform-provider-civo/civo/instances.executor&quot;: &quot;Debug&quot;,
+    &quot;Makefile Target.testacc.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.automatic.dependencies.download&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;vol-re&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/uzair&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;TEXT&quot;
+    ]
+  }
+}</component>
+  <component name="RunManager" selected="Go Test.go test github.com/civo/terraform-provider-civo/civo/instances">
+    <configuration name="TF Provider Civo" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="terraform-provider-civo" />
+      <working_directory value="$PROJECT_DIR$" />
+      <parameters value="apply" />
+      <kind value="DIRECTORY" />
+      <package value="github.com/civo/terraform-provider-civo" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestAccCivoInstanceSize_update in github.com/civo/terraform-provider-civo/civo/instances" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="terraform-provider-civo" />
+      <working_directory value="$PROJECT_DIR$/civo/instances" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/civo/terraform-provider-civo/civo/instances" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestAccCivoInstanceSize_update\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestExpandNodePoolsWithValidInput in github.com/civo/terraform-provider-civo/civo/kubernetes" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="terraform-provider-civo" />
+      <working_directory value="$PROJECT_DIR$/civo/kubernetes" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/civo/terraform-provider-civo/civo/kubernetes" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestExpandNodePoolsWithValidInput\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestToken in github.com/civo/terraform-provider-civo/civo" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="terraform-provider-civo" />
+      <working_directory value="$PROJECT_DIR$/civo" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/civo/terraform-provider-civo/civo" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestToken\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go test github.com/civo/terraform-provider-civo/civo/instances" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="terraform-provider-civo" />
+      <working_directory value="$PROJECT_DIR$/civo/instances" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/civo/terraform-provider-civo/civo/instances" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
+    <configuration name="testacc" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="testacc" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Go Build.TF Provider Civo" />
+      <item itemvalue="Go Test.TestAccCivoInstanceSize_update in github.com/civo/terraform-provider-civo/civo/instances" />
+      <item itemvalue="Go Test.TestExpandNodePoolsWithValidInput in github.com/civo/terraform-provider-civo/civo/kubernetes" />
+      <item itemvalue="Go Test.TestToken in github.com/civo/terraform-provider-civo/civo" />
+      <item itemvalue="Go Test.go test github.com/civo/terraform-provider-civo/civo/instances" />
+      <item itemvalue="Makefile Target.testacc" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Test.go test github.com/civo/terraform-provider-civo/civo/instances" />
+        <item itemvalue="Makefile Target.testacc" />
+        <item itemvalue="Go Test.TestToken in github.com/civo/terraform-provider-civo/civo" />
+        <item itemvalue="Go Test.TestExpandNodePoolsWithValidInput in github.com/civo/terraform-provider-civo/civo/kubernetes" />
+        <item itemvalue="Go Test.TestAccCivoInstanceSize_update in github.com/civo/terraform-provider-civo/civo/instances" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-gosdk-33c477a475b1-e0158606a674-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-241.17890.21" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-GO-241.17890.21" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Addition of privateIP in DB resource" />
+    <MESSAGE value="docs for privateIP in DB resource" />
+    <MESSAGE value="Decode Base64 script before saving state" />
+    <MESSAGE value="Add missing instance states" />
+    <MESSAGE value="refactor" />
+    <MESSAGE value="Make script field immutable for instance resource" />
+    <MESSAGE value="docs update" />
+    <MESSAGE value="Add support for creating instances with custom volume type" />
+    <MESSAGE value="Update civogo" />
+    <MESSAGE value="update docs" />
+    <MESSAGE value="misc corrections and conflits" />
+    <MESSAGE value="go mod" />
+    <MESSAGE value="BUG" />
+    <MESSAGE value="solve bug" />
+    <MESSAGE value="Add default vol type" />
+    <MESSAGE value="Support volume detachment upon instance update" />
+    <MESSAGE value="Added support for NS DNS record" />
+    <MESSAGE value="desc change" />
+    <MESSAGE value="Enable LB support" />
+    <MESSAGE value="Mod tidy" />
+    <MESSAGE value="make backend and instance_pool immutable" />
+    <MESSAGE value="max_concurrent_requests" />
+    <MESSAGE value="flash warning if first instance in network" />
+    <MESSAGE value="validation check for CNI and cluster type" />
+    <MESSAGE value="volume resize" />
+    <option name="LAST_COMMIT_MESSAGE" value="volume resize" />
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>
