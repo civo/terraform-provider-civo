@@ -44,7 +44,7 @@ func flattenKubernetesVersion(version, _ interface{}, _ map[string]interface{}) 
 
 	flattenedVersion := map[string]interface{}{}
 	flattenedVersion["version"] = s.Version
-	flattenedVersion["label"] = fmt.Sprintf("v%s", s.Version)
+	flattenedVersion["label"] = s.Label
 	flattenedVersion["type"] = s.ClusterType
 	flattenedVersion["default"] = s.Default
 	return flattenedVersion, nil
