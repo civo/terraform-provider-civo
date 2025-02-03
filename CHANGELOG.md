@@ -1,4 +1,9 @@
 
+## [v1.1.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.5) (3 February 2025)
+
+### Merged
+- [#367](https://github.com/civo/terraform-provider-civo/pull/367) - Fix: Fetch correct label from kubernetes version datasource for talos cluster
+
 ## [v1.1.4](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.4) (23 January 2025)
 
 ### Merged
