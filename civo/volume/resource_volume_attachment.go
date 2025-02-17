@@ -39,6 +39,13 @@ func ResourceVolumeAttachment() *schema.Resource {
 				ForceNew:    true,
 				Description: "The region for the volume attachment",
 			},
+			"attach_at_boot": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
+				Description: "Whether to attach the instance to the volume at boot",
+			},
 		},
 		CreateContext: resourceVolumeAttachmentCreate,
 		ReadContext:   resourceVolumeAttachmentRead,
