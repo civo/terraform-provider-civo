@@ -8,7 +8,7 @@ description: |-
 
 # civo_instance_reserved_ip_assignment (Resource)
 
-The instance reserved ip assignment resource schema definition
+The instance reserved ip assignment resource schema definition. If you are using this resource to assign a reserved IP to an instance, instances `public_ip` attribute won't be updated until the next state refresh. If subsequent resources are relying instances public IP consider assigning the reserved ip address to the instance.
 
 ## Example Usage
 

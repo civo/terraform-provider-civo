@@ -12,9 +12,31 @@ Provides a Civo reserved IP to represent a publicly-accessible static IP address
 
 ## Example Usage
 
+A `civo_reserved_ip` can be assigned to an `civo-instance` either by setting `reserved_ipv4` field for `civo-instance` or using `civo_instance_reserved_ip_assignment` resource.
+
 ```terraform
 resource "civo_reserved_ip" "www" {
     name = "nginx-www" 
+}
+
+resource "civo_instance" "webserver" {
+    # ...  removed for brevity
+    reserved_ipv4 = civo_reserved_ip.www.ip
+}
+```
+
+```terraform
+resource "civo_reserved_ip" "www" {
+    name = "nginx-www" 
+}
+
+resource "civo_instance" "webserver" {
+    # ...  removed for brevity
+}
+
+resource "civo_instance_reserved_ip_assignment" "webserver-www" {
+    instance_id    = civo_instance.webserver.id
+    reserved_ip_id = civo_reserved_ip.www.id
 }
 ```
 
