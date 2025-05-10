@@ -287,6 +287,17 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	config.Tags = tags
 
+	// Add firewall_id validation here
+	if attr, ok := d.GetOk("firewall_id"); ok {
+		firewallID := attr.(string)
+		// Validate that the firewall_id exists
+		_, err := apiClient.GetFirewall(firewallID)
+		if err != nil {
+			return diag.Errorf("[ERR] invalid firewall_id %s: %s", firewallID, err)
+		}
+		config.FirewallID = firewallID // Set the firewall_id in the config
+	}
+
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
 
 	// Initialize diagnostics
@@ -337,13 +348,6 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("error waiting for instance (%s) to be created: %s", d.Id(), err)
 	}
 
-	if attr, ok := d.GetOk("firewall_id"); ok {
-		_, errInstance := apiClient.SetInstanceFirewall(d.Id(), attr.(string))
-		if errInstance != nil {
-			return diag.Errorf("[ERR] updating instance firewall: %s", err)
-		}
-	}
-
 	if attr, ok := d.GetOk("notes"); ok {
 		resp, err := apiClient.GetInstance(d.Id())
 		if err != nil {
@@ -361,7 +365,6 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 	diags = append(diags, readDiags...)
 
 	return diags
-
 }
 
 // function to read the instance
@@ -560,8 +563,14 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	if d.HasChange("firewall_id") {
 		firewallID := d.Get("firewall_id").(string)
 
+		// Validate the new firewall_id
+		_, err := apiClient.GetFirewall(firewallID)
+		if err != nil {
+			return diag.Errorf("[ERR] invalid firewall_id %s: %s", firewallID, err)
+		}
+
 		log.Printf("[INFO] adding firewall to the instance %s", d.Id())
-		_, err := apiClient.SetInstanceFirewall(d.Id(), firewallID)
+		_, err = apiClient.SetInstanceFirewall(d.Id(), firewallID)
 		if err != nil {
 			// check if the instance no longer exists.
 			return diag.Errorf("[ERR] an error occurred while set firewall to the instance %s", d.Id())
@@ -597,7 +606,6 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		if err != nil {
 			return diag.Errorf("[ERR] an error occurred while adding tags to the instance %s", d.Id())
 		}
-
 	}
 
 	return resourceInstanceRead(ctx, d, m)
