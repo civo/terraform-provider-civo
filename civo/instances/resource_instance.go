@@ -19,6 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+// ResourceInstance The instance resource represents an object of type instances
+// and with it you can handle the instances created with Terraform
 func ResourceInstance() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo instance resource. This can be used to create, modify, and delete instances.",
@@ -111,6 +113,7 @@ func ResourceInstance() *schema.Resource {
 					"read/write/executable only by root and then will be executed at the end of the cloud initialization",
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
+			// Computed resource
 			"cpu_cores": {
 				Type:        schema.TypeInt,
 				Computed:    true,
@@ -197,9 +200,11 @@ func ResourceInstance() *schema.Resource {
 	}
 }
 
+// function to create an instance
 func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -282,6 +287,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	config.Tags = tags
 
+	// Add firewall_id validation here
 	if attr, ok := d.GetOk("firewall_id"); ok {
 		firewallID := attr.(string)
 		// Validate that the firewall_id exists
@@ -294,6 +300,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
 
+	// Initialize diagnostics
 	diags := diag.Diagnostics{}
 
 	isFirstInstance, err := checkNetworkFirstInstance(apiClient, config.NetworkID)
@@ -353,15 +360,18 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 	}
 
+	// Append read resource diagnostics
 	readDiags := resourceInstanceRead(ctx, d, m)
 	diags = append(diags, readDiags...)
 
 	return diags
 }
 
+// function to read the instance
 func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -434,13 +444,16 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 	return nil
 }
 
+// function to update an instance
 func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
 
+	// check if the size change if change we send to resize the instance
 	if d.HasChange("size") {
 		newSize := d.Get("size").(string)
 
@@ -471,12 +484,14 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 	}
 
+	// if notes or hostname have changed, add them to the instance
 	if d.HasChange("notes") || d.HasChange("hostname") {
 		notes := d.Get("notes").(string)
 		hostname := d.Get("hostname").(string)
 
 		instance, err := apiClient.GetInstance(d.Id())
 		if err != nil {
+			// check if the instance no longer exists.
 			return diag.Errorf("[ERR] instance %s not found", d.Id())
 		}
 
@@ -494,6 +509,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 	}
 
+	// If reserved_ipv4 has changed, update the instance with the new reserved IP
 	if d.HasChange("reserved_ipv4") {
 		oldReservedIP, newReservedIP := d.GetChange("reserved_ipv4")
 		instance, err := apiClient.GetInstance(d.Id())
@@ -502,6 +518,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			return diag.Errorf("[ERR] instance %s not found", d.Id())
 		}
 
+		// Unassign the old reserved IP if it exists
 		if oldReservedIP != "" {
 			ip, err := apiClient.FindIP(oldReservedIP.(string))
 			if err != nil {
@@ -521,6 +538,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			log.Printf("[INFO] unassigned reserved IP %s from the instance %s", oldReservedIP, d.Id())
 		}
 
+		// Find the new reserved IP
 		ip, err := apiClient.FindIP(newReservedIP.(string))
 		if err != nil {
 			if errors.Is(err, civogo.ZeroMatchesError) {
@@ -532,6 +550,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			}
 		}
 
+		// Assign the new reserved IP to the instance
 		_, err = apiClient.AssignIP(ip.ID, instance.ID, "instance", apiClient.Region)
 		if err != nil {
 			return diag.Errorf("[ERR] an error occurred while assigning reserved IP %s to instance %s: %s", ip.ID, instance.ID, err)
@@ -540,6 +559,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		log.Printf("[INFO] assigned reserved IP %s to the instance %s", newReservedIP, d.Id())
 	}
 
+	// if a firewall is declared we update the instance
 	if d.HasChange("firewall_id") {
 		firewallID := d.Get("firewall_id").(string)
 
@@ -552,6 +572,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		log.Printf("[INFO] adding firewall to the instance %s", d.Id())
 		_, err = apiClient.SetInstanceFirewall(d.Id(), firewallID)
 		if err != nil {
+			// check if the instance no longer exists.
 			return diag.Errorf("[ERR] an error occurred while set firewall to the instance %s", d.Id())
 		}
 	}
@@ -564,6 +585,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("[ERR] updating sshkey_id is not supported")
 	}
 
+	// if tags is declare we update the instance with the tags
 	if d.HasChange("tags") {
 		tfTags := d.Get("tags").(*schema.Set).List()
 		tags := make([]string, len(tfTags))
@@ -589,9 +611,11 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	return resourceInstanceRead(ctx, d, m)
 }
 
+// function to delete instance.
 func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
+	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
 		apiClient.Region = region.(string)
 	}
@@ -636,12 +660,15 @@ func customizeDiffInstance(ctx context.Context, d *schema.ResourceDiff, meta int
 	return nil
 }
 
+// checkNetworkFirstInstance checks if this is the first instance in a given network
 func checkNetworkFirstInstance(apiClient *civogo.Client, networkID string) (bool, error) {
+	// List all instances
 	instances, err := apiClient.ListAllInstances()
 	if err != nil {
 		return false, fmt.Errorf("failed to list instances: %v", err)
 	}
 
+	// Count instances in the specified network
 	networkInstanceCount := 0
 	for _, instance := range instances {
 		if instance.NetworkID == networkID {
@@ -649,5 +676,6 @@ func checkNetworkFirstInstance(apiClient *civogo.Client, networkID string) (bool
 		}
 	}
 
+	// Return true if this is the first instance in the network
 	return networkInstanceCount == 0, nil
 }
