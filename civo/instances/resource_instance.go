@@ -557,17 +557,19 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	// if a firewall is declared we update the instance
+	firewallID := strings.TrimSpace(d.Get("firewall_id").(string))
+	
 	if d.HasChange("firewall_id") {
-		firewallID := d.Get("firewall_id").(string)
-
-		log.Printf("[INFO] adding firewall to the instance %s", d.Id())
-		_, err := apiClient.SetInstanceFirewall(d.Id(), firewallID)
-		if err != nil {
-			// check if the instance no longer exists.
-			return diag.Errorf("[ERR] an error occurred while set firewall to the instance %s", d.Id())
-		}
+	    if firewallID == "" {
+	        return diag.Errorf("[ERR] firewall_id must not be empty")
+	    }
+	
+	    log.Printf("[INFO] adding firewall to the instance %s", d.Id())
+	    if _, err := apiClient.SetInstanceFirewall(d.Id(), firewallID); err != nil {
+	        return diag.Errorf("[ERR] setting firewall to the instance %s: %s", d.Id(), err)
+	    }
 	}
-
+	
 	if d.HasChange("initial_user") {
 		return diag.Errorf("[ERR] updating initial_user is not supported")
 	}
