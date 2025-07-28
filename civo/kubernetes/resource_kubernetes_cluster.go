@@ -73,6 +73,11 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Description:  "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
 				ValidateFunc: utils.ValidateCNIName,
 			},
+			"volume_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The volume type used for the kubernetes nodes",
+			},
 			"tags": {
 				Type:        schema.TypeString,
 				Optional:    true,

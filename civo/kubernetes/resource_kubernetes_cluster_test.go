@@ -44,6 +44,7 @@ func TestAccCivoKubernetesCluster_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resName, "dns_entry"),
 					resource.TestCheckResourceAttrSet(resName, "created_at"),
 					resource.TestCheckResourceAttrSet(resName, "cluster_type"),
+					resource.TestCheckResourceAttrSet(resName, "volume_type"),
 				),
 			},
 		},
