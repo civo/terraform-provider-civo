@@ -63,6 +63,11 @@ func DataSourceKubernetesCluster() *schema.Resource {
 				Computed:    true,
 				Description: "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
 			},
+			"volume_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The volume type used for the Kubernetes nodes",
+			},
 			"tags": {
 				Type:        schema.TypeSet,
 				Computed:    true,
@@ -186,6 +191,7 @@ func dataSourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, 
 	d.Set("target_nodes_size", foundCluster.TargetNodeSize)
 	d.Set("kubernetes_version", foundCluster.KubernetesVersion)
 	d.Set("cni", foundCluster.CNIPlugin)
+	d.Set("volume_type", foundCluster.VolumeType)
 	d.Set("tags", foundCluster.Tags)
 	d.Set("status", foundCluster.Status)
 	d.Set("ready", foundCluster.Ready)

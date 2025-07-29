@@ -41,6 +41,11 @@ func DataSourceVolume() *schema.Resource {
 				Description:  "The region where volume is running",
 			},
 			// Computed resource
+			"volume_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The volume type name as returned by the volumetype resource",
+			},
 			"size_gb": {
 				Type:        schema.TypeInt,
 				Computed:    true,
@@ -60,7 +65,7 @@ func DataSourceVolume() *schema.Resource {
 	}
 }
 
-func dataSourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceVolumeRead(_ context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	// overwrite the region if is define in the datasource
@@ -97,6 +102,6 @@ func dataSourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface
 	d.Set("size_gb", foundVolume.SizeGigabytes)
 	d.Set("mount_point", foundVolume.MountPoint)
 	d.Set("created_at", foundVolume.CreatedAt.UTC().String())
-
+	d.Set("volume_type", foundVolume.VolumeType)
 	return nil
 }

@@ -12,6 +12,7 @@ import (
 func TestAccDataSourceCivoVolume_basic(t *testing.T) {
 	datasourceName := "data.civo_volume.foobar"
 	name := acctest.RandomWithPrefix("ds-test")
+	volumeType := "encrypted-standard"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { acceptance.TestAccPreCheck(t) },
@@ -22,6 +23,7 @@ func TestAccDataSourceCivoVolume_basic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 					resource.TestCheckResourceAttrSet(datasourceName, "size_gb"),
+					resource.TestCheckResourceAttr(datasourceName, "volume_type", volumeType),
 				),
 			},
 		},
@@ -39,6 +41,7 @@ resource "civo_volume" "newvolume" {
 	name = "%s"
 	size_gb = 10
 	network_id = data.civo_network.default.id
+	volume_type = "encrypted-standard"
 }
 
 data "civo_volume" "foobar" {
