@@ -1,4 +1,13 @@
 
+## [v1.1.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.6) (8 September 2025)
+
+### Merged
+- [#376](https://github.com/civo/terraform-provider-civo/pull/376) - add support for volume_type in kubernetes clusters
+- [#371](https://github.com/civo/terraform-provider-civo/pull/371) - docs: interaction between instances and reserved ip
+- [#370](https://github.com/civo/terraform-provider-civo/pull/370) - upgrade vulnerable deps
+- [#369](https://github.com/civo/terraform-provider-civo/pull/369) - add attach_on_boot to the resource_volume_attachement schema
+- [#368](https://github.com/civo/terraform-provider-civo/pull/368) - Update docs for TF modules
+
 ## [v1.1.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.5) (3 February 2025)
 
 ### Merged
