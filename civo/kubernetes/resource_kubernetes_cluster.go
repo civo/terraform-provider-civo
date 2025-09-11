@@ -533,7 +533,7 @@ func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff,
 	// Check if kubernetes version string is correct
 	if kubeVersion, ok := d.GetOk("kubernetes_version"); ok {
 		version := kubeVersion.(string)
-		var k3sVersionRegex = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-k3s\d$`)
+		var k3sVersionRegex = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-k3s\d(?:-gpu(?:-[a-zA-Z0-9]+)?)?$`)
 		var talosVersionRegex = regexp.MustCompile(`^talos-v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`)
 
 		clusterType := "k3s" // Default
