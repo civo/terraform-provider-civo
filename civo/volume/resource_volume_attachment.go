@@ -33,6 +33,12 @@ func ResourceVolumeAttachment() *schema.Resource {
 				ValidateFunc: validation.NoZeroValues,
 				Description:  "The ID of target volume for attachment",
 			},
+			"attach_at_boot": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The volume is attach at boot time",
+			},
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -92,7 +98,7 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 		}
 
 		log.Printf("[INFO] attaching the volume %s to instance %s", volumeID, instanceID)
-		_, err := apiClient.AttachVolume(volumeID, vuc)
+		_, err = apiClient.AttachVolume(volumeID, vuc)
 		if err != nil {
 			return diag.Errorf("[ERR] error attaching volume to instance %s", err)
 		}
@@ -115,12 +121,22 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 		MinTimeout:     3 * time.Second,
 		NotFoundChecks: 10,
 	}
-	_, err = createStateConf.WaitForStateContext(context.Background())
+	if attachAtBoot {
+		createStateConf.Pending = []string{"available", "attaching"}
+		createStateConf.Target = []string{"attaching"}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), createStateConf.Timeout)
+	defer cancel()
+
+	_, err = createStateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for volume (%s) to be attached: %s", d.Id(), err)
 	}
 
-	return resourceVolumeAttachmentRead(ctx, d, m)
+	ret := resourceVolumeAttachmentRead(ctx, d, m)
+	diags = append(diags, ret...)
+	return diags
 }
 
 // function to read the volume
@@ -157,6 +173,7 @@ func resourceVolumeAttachmentRead(_ context.Context, d *schema.ResourceData, m i
 // function to delete the volume
 func resourceVolumeAttachmentDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
+	var diags diag.Diagnostics
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
@@ -164,11 +181,22 @@ func resourceVolumeAttachmentDelete(_ context.Context, d *schema.ResourceData, m
 	}
 
 	volumeID := d.Get("volume_id").(string)
+	attachAtBoot := d.Get("attach_at_boot").(bool)
+	instanceID := d.Get("instance_id").(string)
+
+	if attachAtBoot {
+		// Notify the terminal
+		msg := fmt.Sprintf("To use the volume %s, The instance %s needs to be rebooted", volumeID, instanceID)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  msg,
+		})
+	}
 
 	log.Printf("[INFO] Detaching the volume %s", d.Id())
 	_, err := apiClient.DetachVolume(volumeID)
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to detach the volume %s", err)
 	}
-	return nil
+	return diags
 }
