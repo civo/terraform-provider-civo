@@ -1,4 +1,9 @@
 
+## [v1.1.7](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.7) (14 September 2025)
+
+### Merged
+- [#378](https://github.com/civo/terraform-provider-civo/pull/378) - fix: improve k3s gpu regex comparison
+
 ## [v1.1.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.6) (8 September 2025)
 
 ### Merged
