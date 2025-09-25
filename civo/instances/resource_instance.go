@@ -213,7 +213,6 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 	config := &civogo.InstanceConfig{
 		Count:            1,
 		Hostname:         utils.RandomName(),
-		Size:             "g3.medium",
 		Region:           apiClient.Region,
 		PublicIPRequired: "true",
 		InitialUser:      "civo",
