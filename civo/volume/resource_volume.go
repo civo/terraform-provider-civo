@@ -49,6 +49,7 @@ func ResourceVolume() *schema.Resource {
 			"volume_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "ms-xfs-2-replicas",
 				Description: "The type of the volume",
 			},
 		},
@@ -91,7 +92,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	volume, err := apiClient.NewVolume(config)
 	if err != nil {
-		return diag.Errorf("[ERR] failed to create a new volume: %s", err)
+		return diag.Errorf("[ERR] failed to create a new volume: %s   region: %s", err, apiClient.Region)
 	}
 
 	d.SetId(volume.ID)

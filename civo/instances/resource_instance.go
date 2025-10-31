@@ -20,7 +20,7 @@ import (
 )
 
 // ResourceInstance The instance resource represents an object of type instances
-// and with it you can handle the instances created with Terraform
+// and with it, you can handle the instances created with Terraform
 func ResourceInstance() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo instance resource. This can be used to create, modify, and delete instances.",
@@ -96,8 +96,9 @@ func ResourceInstance() *schema.Resource {
 				Description:  "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
 			"volume_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				//Default:     "ms-xfs-2-replicas",
 				Description: "The type of volume to use, either 'ssd' or 'bssd' (optional; default 'ssd')",
 			},
 			"tags": {
@@ -105,6 +106,20 @@ func ResourceInstance() *schema.Resource {
 				Optional:    true,
 				Description: "An optional list of tags, represented as a key, value pair",
 				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"attached_volume": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "A list of volumes to attached at boot to the instance.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The ID of the volume to attach.",
+						},
+					},
+				},
 			},
 			"script": {
 				Type:     schema.TypeString,
@@ -287,6 +302,18 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	config.Tags = tags
 
+	tfVolumeAttach := d.Get("attached_volume").([]interface{})
+	volumes := make([]civogo.AttachedVolume, 0, len(tfVolumeAttach))
+	for _, v := range tfVolumeAttach {
+		volumeData := v.(map[string]interface{})
+		volumes = append(volumes, civogo.AttachedVolume{
+			ID: volumeData["id"].(string),
+		})
+	}
+	if len(volumes) > 0 {
+		config.AttachedVolumes = volumes
+	}
+
 	log.Printf("[INFO] creating the instance %s", d.Get("hostname").(string))
 
 	// Initialize diagnostics
@@ -311,8 +338,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 		if parseErr == nil {
 			err = customErr
 		}
-		// quota errors introduce new line after each missing quota, causing formatting issues:
-		return diag.Errorf("[ERR] failed to create instance: %s", strings.ReplaceAll(err.Error(), "\n", " "))
+		return diag.Errorf("[ERR] failed to create instance: %s", err)
 	}
 
 	d.SetId(instance.ID)
@@ -393,6 +419,32 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 		d.Set("initial_password", resp.InitialPassword)
 	} else {
 		d.Set("initial_password", "")
+	}
+
+	if len(resp.AttachedVolumes) > 0 {
+		// Get the attached volumes from the API response
+		attachedVolumes := resp.AttachedVolumes
+
+		// Get the attached volumes from the Terraform state
+		tfAttachedVolumes := d.Get("attached_volume").([]interface{})
+
+		// Create a map of volumes listed in the Terraform config for comparison
+		configVolumeMap := make(map[string]bool)
+		for _, v := range tfAttachedVolumes {
+			volume := v.(map[string]interface{})
+			configVolumeMap[volume["id"].(string)] = true
+		}
+
+		// Filter out API volumes that are not in the Terraform config
+		var filteredVolumes []civogo.AttachedVolume
+		for _, vol := range attachedVolumes {
+			if _, exists := configVolumeMap[vol.ID]; exists {
+				filteredVolumes = append(filteredVolumes, vol)
+			}
+		}
+
+		// Set only the filtered volumes in the Terraform state
+		d.Set("attached_volume", filteredVolumes)
 	}
 
 	if resp.Script == "" {
@@ -503,6 +555,51 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		_, err = apiClient.UpdateInstance(instance)
 		if err != nil {
 			return diag.Errorf("[ERR] an error occurred while updating notes or hostname of the instance %s", d.Id())
+		}
+	}
+
+	if d.HasChange("attached_volume") {
+		oldVolumes, newVolumes := d.GetChange("attached_volume")
+		oldVolumeList := oldVolumes.([]interface{})
+		newVolumeList := newVolumes.([]interface{})
+
+		// Check if there are any new volumes being attached
+		for _, newVolume := range newVolumeList {
+			newVolumeData := newVolume.(map[string]interface{})
+			found := false
+			for _, oldVolume := range oldVolumeList {
+				oldVolumeData := oldVolume.(map[string]interface{})
+				if newVolumeData["id"] == oldVolumeData["id"] {
+					found = true
+					break
+				}
+			}
+			if !found {
+				// This is a new volume being attached, which is not allowed
+				return diag.Errorf("Attaching new volumes after instance creation is not allowed. Please create a new civo_volume_attachment resource for attaching additional volume.")
+			}
+		}
+
+		// Handle volume detachments
+		for _, oldVolume := range oldVolumeList {
+			oldVolumeData := oldVolume.(map[string]interface{})
+			found := false
+			for _, newVolume := range newVolumeList {
+				newVolumeData := newVolume.(map[string]interface{})
+				if oldVolumeData["id"] == newVolumeData["id"] {
+					found = true
+					break
+				}
+			}
+			if !found {
+				// This volume is no longer in the config, so detach it
+				volumeID := oldVolumeData["id"].(string)
+				_, err := apiClient.DetachVolume(volumeID)
+				if err != nil {
+					return diag.Errorf("Error detaching volume %s: %s", volumeID, err)
+				}
+				log.Printf("[INFO] Successfully detached volume %s from instance %s", volumeID, d.Id())
+			}
 		}
 	}
 
