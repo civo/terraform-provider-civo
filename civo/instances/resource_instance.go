@@ -58,7 +58,7 @@ func ResourceInstance() *schema.Resource {
 			},
 			"network_id": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Required:     true,
 				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: utils.ValidateUUID,
