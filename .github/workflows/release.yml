@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       newVersionTag:
-        description: 'New version tag (e.g. v0.10.11)'     
+        description: "New version tag (e.g. v0.10.11)"
         required: true
 
 jobs:
@@ -25,17 +25,17 @@ jobs:
 
       - name: Unshallow
         run: git fetch --prune --unshallow
-      
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.21.x
+          go-version: 1.24.x
 
       - name: Install and run auto-changelog CLI
         run: |
           npm i -g auto-changelog@2.3.0
           auto-changelog --config=.auto-changelog-config --latest-version=${{ github.event.inputs.newVersionTag }}
-      
+
       - name: Setup Git config
         run: |
           git config user.name "GitHub Actions"
@@ -51,14 +51,14 @@ jobs:
           git pull -r origin master
           git tag -a ${{ github.event.inputs.newVersionTag }} -m ""
           git push origin master --follow-tags
-      
+
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
-      
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
