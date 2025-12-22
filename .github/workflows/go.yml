@@ -1,28 +1,27 @@
 name: Go
 on: [push]
 jobs:
-
   build:
     strategy:
-        matrix:
-          go-version: [1.20.x]
-          os: [ubuntu-latest]
+      matrix:
+        go-version: [1.24.x]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go-version }}
-      id: go
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: Build
-      run: go build -v .
-    - name: Vet
-      run: go vet   
-    - name: Make test
-      run: make test
-  
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+        id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Build
+        run: go build -v .
+      - name: Vet
+        run: go vet
+      - name: Make test
+        run: make test
+
   # acceptance:
   #   # Runs the acceptance test suite using the `Acceptance Tests` environment.
   #   # The enviroment should be configured to require reviewers approve the
