@@ -12,8 +12,8 @@ github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmms
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
 github.com/bufbuild/protocompile v0.4.0/go.mod h1:3v93+mbWn/v3xzN+31nwkJfrEpAUwp+BagBSZWx+TP8=
 github.com/bwesterb/go-ristretto v1.2.3/go.mod h1:fUIoIZaG73pV5biE2Blr2xEzDoMj7NFEuV9ekS419A0=
-github.com/civo/civogo v0.6.5 h1:nS5TWJB2BnW1X26wN/nWGxYMgj6VEyZxSt/1OlKrQZw=
-github.com/civo/civogo v0.6.5/go.mod h1:akFVdRAQfJi4t8pGduUOiBwaW/NSC9i45m/dzhF09AY=
+github.com/civo/civogo v0.7.0-alpha1 h1:ggGS3PsOZ65C7ij9Mp7D3Oa275yX+MfHyJ63xa8Joz8=
+github.com/civo/civogo v0.7.0-alpha1/go.mod h1:0RNiA3NDI1imXDADWSCtzcHjUCV02E+SnRLoZKKo1wY=
 github.com/cloudflare/circl v1.3.3/go.mod h1:5XYMA4rFBvNIrhs50XuiBJ15vF2pZn4nnUKZrLbUZFA=
 github.com/cloudflare/circl v1.6.1 h1:zqIqSPIndyBh1bjLVVDHMPpVKqp8Su/V+6MeDzzQBQ0=
 github.com/cloudflare/circl v1.6.1/go.mod h1:uddAzsPgqdMAYatqJ0lsjX1oECcQLIlRpzZh3pJrofs=

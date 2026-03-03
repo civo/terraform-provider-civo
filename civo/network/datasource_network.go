@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// DataSourceNetwork function returns a schema.Resource that represents a Network.
-// This can be used to query and retrieve details about a specific Network in the infrastructure using its id or label.
-func DataSourceNetwork() *schema.Resource {
+// DataSourceVPCNetwork function returns a schema.Resource that represents a VPC Network.
+// This can be used to query and retrieve details about a specific VPC Network in the infrastructure using its id or label.
+func DataSourceVPCNetwork() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{
 			"Retrieve information about a network for use in other resources.",
@@ -69,7 +69,7 @@ func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interfac
 
 	if id, ok := d.GetOk("id"); ok {
 		log.Printf("[INFO] Getting the network by id")
-		network, err := apiClient.FindNetwork(id.(string))
+		network, err := apiClient.FindVPCNetwork(id.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive network: %s", err)
 		}
@@ -77,7 +77,7 @@ func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interfac
 		foundNetwork = network
 	} else if label, ok := d.GetOk("label"); ok {
 		log.Printf("[INFO] Getting the network by label")
-		network, err := apiClient.FindNetwork(label.(string))
+		network, err := apiClient.FindVPCNetwork(label.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive network: %s", err)
 		}

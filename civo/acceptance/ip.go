@@ -19,7 +19,7 @@ func CivoReservedIPResourceExists(n string, ip *civogo.IP) resource.TestCheckFun
 
 		// retrieve the configured client from the test setup
 		client := TestAccProvider.Meta().(*civogo.Client)
-		resp, err := client.FindIP(rs.Primary.ID)
+		resp, err := client.FindVPCIP(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("ip not found: (%s) %s", rs.Primary.ID, err)
 		}

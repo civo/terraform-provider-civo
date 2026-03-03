@@ -10,6 +10,8 @@ description: |-
 
 # civo_firewall (Data Source)
 
+~> **Deprecated:** This data source is deprecated. Please use [`civo_vpc_firewall`](vpc_firewall.md) instead, which uses the VPC-scoped API endpoints.
+
 Retrieve information about a firewall for use in other resources.
 
 This data source provides all of the firewall's properties as configured on your Civo account.

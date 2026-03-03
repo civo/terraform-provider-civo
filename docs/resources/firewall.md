@@ -8,6 +8,8 @@ description: |-
 
 # civo_firewall (Resource)
 
+~> **Deprecated:** This resource is deprecated. Please use [`civo_vpc_firewall`](vpc_firewall.md) instead, which uses the VPC-scoped API endpoints.
+
 Provides a Civo firewall resource. This can be used to create, modify, and delete firewalls.
 
 ## Example Usage

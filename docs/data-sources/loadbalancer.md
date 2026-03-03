@@ -9,6 +9,8 @@ description: |-
 
 # civo_loadbalancer (Data Source)
 
+~> **Deprecated:** This data source is deprecated. Please use [`civo_vpc_loadbalancer`](vpc_loadbalancer.md) instead, which uses the VPC-scoped API endpoints.
+
 Get information on a load balancer for use in other resources. This data source provides all of the load balancers properties as configured on your Civo account.
 
 An error will be raised if the provided load balancer name does not exist in your Civo account.

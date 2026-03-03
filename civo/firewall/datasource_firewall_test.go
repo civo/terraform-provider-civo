@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceCivoFirewall_basic(t *testing.T) {
-	datasourceName := "data.civo_firewall.foobar"
+func TestAccDataSourceCivoVPCFirewall_basic(t *testing.T) {
+	datasourceName := "data.civo_vpc_firewall.foobar"
 	name := acctest.RandomWithPrefix("net-test")
 
 	resource.Test(t, resource.TestCase{
@@ -18,7 +18,7 @@ func TestAccDataSourceCivoFirewall_basic(t *testing.T) {
 		Providers: acceptance.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: DataSourceCivoFirewallConfig(name),
+				Config: DataSourceCivoVPCFirewallConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 				),
@@ -27,14 +27,14 @@ func TestAccDataSourceCivoFirewall_basic(t *testing.T) {
 	})
 }
 
-func DataSourceCivoFirewallConfig(name string) string {
+func DataSourceCivoVPCFirewallConfig(name string) string {
 	return fmt.Sprintf(`
-resource "civo_firewall" "foobar" {
+resource "civo_vpc_firewall" "foobar" {
 	name = "%s"
 }
 
-data "civo_firewall" "foobar" {
-	name = civo_firewall.foobar.name
+data "civo_vpc_firewall" "foobar" {
+	name = civo_vpc_firewall.foobar.name
 	region = "LON1"
 }
 `, name)

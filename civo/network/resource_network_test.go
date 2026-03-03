@@ -12,27 +12,27 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func TestAccCivoNetwork_basic(t *testing.T) {
+func TestAccCivoVPCNetwork_basic(t *testing.T) {
 	var network civogo.Network
 
 	// generate a random name for each test run
-	resName := "civo_network.foobar"
+	resName := "civo_vpc_network.foobar"
 	var networkLabel = acctest.RandomWithPrefix("tf-test")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
 		Providers:    acceptance.TestAccProviders,
-		CheckDestroy: CivoNetworkDestroy,
+		CheckDestroy: CivoVPCNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				// use a dynamic configuration with the random name from above
-				Config: CivoNetworkConfigBasic(networkLabel),
+				Config: CivoVPCNetworkConfigBasic(networkLabel),
 				// compose a basic test, checking both remote and local values
 				Check: resource.ComposeTestCheckFunc(
 					// query the API to retrieve the widget object
-					CivoNetworkResourceExists(resName, &network),
+					CivoVPCNetworkResourceExists(resName, &network),
 					// verify remote values
-					CivoNetworkValues(&network, networkLabel),
+					CivoVPCNetworkValues(&network, networkLabel),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "label", networkLabel),
 					resource.TestCheckResourceAttr(resName, "default", "false"),
@@ -42,32 +42,32 @@ func TestAccCivoNetwork_basic(t *testing.T) {
 	})
 }
 
-func TestAccCivoNetwork_update(t *testing.T) {
+func TestAccCivoVPCNetwork_update(t *testing.T) {
 	var network civogo.Network
 
 	// generate a random name for each test run
-	resName := "civo_network.foobar"
+	resName := "civo_vpc_network.foobar"
 	var networkLabel = acctest.RandomWithPrefix("rename-tf-test")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
 		Providers:    acceptance.TestAccProviders,
-		CheckDestroy: CivoNetworkDestroy,
+		CheckDestroy: CivoVPCNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: CivoNetworkConfigUpdates(networkLabel),
+				Config: CivoVPCNetworkConfigUpdates(networkLabel),
 				Check: resource.ComposeTestCheckFunc(
-					CivoNetworkResourceExists(resName, &network),
-					CivoNetworkValues(&network, networkLabel),
+					CivoVPCNetworkResourceExists(resName, &network),
+					CivoVPCNetworkValues(&network, networkLabel),
 					resource.TestCheckResourceAttr(resName, "label", networkLabel),
 				),
 			},
 			{
 				// use a dynamic configuration with the random name from above
-				Config: CivoNetworkConfigUpdates(networkLabel),
+				Config: CivoVPCNetworkConfigUpdates(networkLabel),
 				Check: resource.ComposeTestCheckFunc(
-					CivoNetworkResourceExists(resName, &network),
-					CivoNetworkUpdated(&network, networkLabel),
+					CivoVPCNetworkResourceExists(resName, &network),
+					CivoVPCNetworkUpdated(&network, networkLabel),
 					resource.TestCheckResourceAttr(resName, "label", networkLabel),
 				),
 			},
@@ -75,7 +75,7 @@ func TestAccCivoNetwork_update(t *testing.T) {
 	})
 }
 
-func CivoNetworkValues(network *civogo.Network, name string) resource.TestCheckFunc {
+func CivoVPCNetworkValues(network *civogo.Network, name string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		if network.Label != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, network.Label)
@@ -85,7 +85,7 @@ func CivoNetworkValues(network *civogo.Network, name string) resource.TestCheckF
 }
 
 // CheckExampleResourceExists queries the API and retrieves the matching Widget.
-func CivoNetworkResourceExists(n string, network *civogo.Network) resource.TestCheckFunc {
+func CivoVPCNetworkResourceExists(n string, network *civogo.Network) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// find the corresponding state object
 		rs, ok := s.RootModule().Resources[n]
@@ -95,7 +95,7 @@ func CivoNetworkResourceExists(n string, network *civogo.Network) resource.TestC
 
 		// retrieve the configured client from the test setup
 		client := acceptance.TestAccProvider.Meta().(*civogo.Client)
-		resp, err := client.FindNetwork(rs.Primary.ID)
+		resp, err := client.FindVPCNetwork(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Network not found: (%s) %s", rs.Primary.ID, err)
 		}
@@ -108,7 +108,7 @@ func CivoNetworkResourceExists(n string, network *civogo.Network) resource.TestC
 	}
 }
 
-func CivoNetworkUpdated(network *civogo.Network, name string) resource.TestCheckFunc {
+func CivoVPCNetworkUpdated(network *civogo.Network, name string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		if network.Label != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, network.Label)
@@ -117,15 +117,15 @@ func CivoNetworkUpdated(network *civogo.Network, name string) resource.TestCheck
 	}
 }
 
-func CivoNetworkDestroy(s *terraform.State) error {
+func CivoVPCNetworkDestroy(s *terraform.State) error {
 	client := acceptance.TestAccProvider.Meta().(*civogo.Client)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "civo_network" {
+		if rs.Type != "civo_vpc_network" {
 			continue
 		}
 
-		_, err := client.FindNetwork(rs.Primary.ID)
+		_, err := client.FindVPCNetwork(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Network still exists")
 		}
@@ -134,16 +134,16 @@ func CivoNetworkDestroy(s *terraform.State) error {
 	return nil
 }
 
-func CivoNetworkConfigBasic(label string) string {
+func CivoVPCNetworkConfigBasic(label string) string {
 	return fmt.Sprintf(`
-resource "civo_network" "foobar" {
+resource "civo_vpc_network" "foobar" {
 	label = "%s"
 }`, label)
 }
 
-func CivoNetworkConfigUpdates(label string) string {
+func CivoVPCNetworkConfigUpdates(label string) string {
 	return fmt.Sprintf(`
-resource "civo_network" "foobar" {
+resource "civo_vpc_network" "foobar" {
 	label = "%s"
 }`, label)
 }

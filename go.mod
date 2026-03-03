@@ -1,9 +1,9 @@
 module github.com/civo/terraform-provider-civo
 
-go 1.24.9
+go 1.24.13
 
 require (
-	github.com/civo/civogo v0.6.5
+	github.com/civo/civogo v0.7.0-alpha1
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.31.0

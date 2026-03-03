@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// DataSourceReservedIP function returns a schema.Resource that represents a reserved IP.
-// This can be used to query and retrieve details about a specific reserved IP in the infrastructure.
-func DataSourceReservedIP() *schema.Resource {
+// DataSourceVPCReservedIP function returns a schema.Resource that represents a VPC reserved IP.
+// This can be used to query and retrieve details about a specific VPC reserved IP in the infrastructure.
+func DataSourceVPCReservedIP() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{
 			"Get information on a reserved IP. This data source provides the region and Instance id as configured on your Civo account.",
@@ -72,7 +72,7 @@ func dataSourceReservedIPRead(_ context.Context, d *schema.ResourceData, m inter
 
 	if id, ok := d.GetOk("id"); ok {
 		log.Printf("[INFO] Getting the ip by id")
-		resp, err := apiClient.FindIP(id.(string))
+		resp, err := apiClient.FindVPCIP(id.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive ip: %s", err)
 		}
@@ -80,7 +80,7 @@ func dataSourceReservedIPRead(_ context.Context, d *schema.ResourceData, m inter
 		foundIP = resp
 	} else if name, ok := d.GetOk("name"); ok {
 		log.Printf("[INFO] Getting the ip by name")
-		resp, err := apiClient.FindIP(name.(string))
+		resp, err := apiClient.FindVPCIP(name.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive ip: %s", err)
 		}

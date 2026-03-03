@@ -10,6 +10,8 @@ description: |-
 
 # civo_network (Data Source)
 
+~> **Deprecated:** This data source is deprecated. Please use [`civo_vpc_network`](vpc_network.md) instead, which uses the VPC-scoped API endpoints.
+
 Retrieve information about a network for use in other resources.
 
 This data source provides all of the network's properties as configured on your Civo account.

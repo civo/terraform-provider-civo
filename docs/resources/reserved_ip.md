@@ -8,6 +8,8 @@ description: |-
 
 # civo_reserved_ip (Resource)
 
+~> **Deprecated:** This resource is deprecated. Please use [`civo_vpc_reserved_ip`](vpc_reserved_ip.md) instead, which uses the VPC-scoped API endpoints.
+
 Provides a Civo reserved IP to represent a publicly-accessible static IP addresses that can be mapped to one of your Instancesor Load Balancer.
 
 ## Example Usage
