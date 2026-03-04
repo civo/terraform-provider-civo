@@ -10,8 +10,6 @@ description: |-
 
 # civo_reserved_ip (Data Source)
 
-~> **Deprecated:** This data source is deprecated. Please use [`civo_vpc_reserved_ip`](vpc_reserved_ip.md) instead, which uses the VPC-scoped API endpoints.
-
 Get information on a reserved IP. This data source provides the region and Instance id as configured on your Civo account.
 
 This is useful if the reserved IP in question is not managed by Terraform or you need to find the instance the IP is attached to.

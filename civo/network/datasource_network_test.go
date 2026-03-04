@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceCivoVPCNetwork_basic(t *testing.T) {
-	datasourceName := "data.civo_vpc_network.foobar"
+func TestAccDataSourceCivoNetwork_basic(t *testing.T) {
+	datasourceName := "data.civo_network.foobar"
 	name := acctest.RandomWithPrefix("net-test")
 
 	resource.Test(t, resource.TestCase{
@@ -18,7 +18,7 @@ func TestAccDataSourceCivoVPCNetwork_basic(t *testing.T) {
 		Providers: acceptance.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: DataSourceCivoVPCNetworkConfig(name),
+				Config: DataSourceCivoNetworkConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "label", name),
 				),
@@ -27,15 +27,15 @@ func TestAccDataSourceCivoVPCNetwork_basic(t *testing.T) {
 	})
 }
 
-func DataSourceCivoVPCNetworkConfig(name string) string {
+func DataSourceCivoNetworkConfig(name string) string {
 	return fmt.Sprintf(`
-resource "civo_vpc_network" "foobar" {
+resource "civo_network" "foobar" {
 	label = "%s"
 	region = "LON1"
 }
 
-data "civo_vpc_network" "foobar" {
-	label = civo_vpc_network.foobar.name
+data "civo_network" "foobar" {
+	label = civo_network.foobar.name
 	region = "LON1"
 }
 `, name)

@@ -11,27 +11,27 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccCivoVPCReservedIP_basic(t *testing.T) {
+func TestAccCivoReservedIP_basic(t *testing.T) {
 	var ip civogo.IP
 
 	// generate a random name for each test run
-	resName := "civo_vpc_reserved_ip.foobar"
+	resName := "civo_reserved_ip.foobar"
 	var nameIP = acctest.RandomWithPrefix("tf-test")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
 		Providers:    acceptance.TestAccProviders,
-		CheckDestroy: CivoVPCReservedIPDestroy,
+		CheckDestroy: CivoReservedIPDestroy,
 		Steps: []resource.TestStep{
 			{
 				// use a dynamic configuration with the random name from above
-				Config: CivoVPCReservedIPConfigBasic(nameIP),
+				Config: CivoReservedIPConfigBasic(nameIP),
 				// compose a basic test, checking both remote and local values
 				Check: resource.ComposeTestCheckFunc(
 					// query the API to retrieve the widget object
 					acceptance.CivoReservedIPResourceExists(resName, &ip),
 					// verify remote values
-					CivoVPCReservedIPValues(&ip, nameIP),
+					CivoReservedIPValues(&ip, nameIP),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", nameIP),
 				),
@@ -40,32 +40,32 @@ func TestAccCivoVPCReservedIP_basic(t *testing.T) {
 	})
 }
 
-func TestAccCivoVPCReservedIP_update(t *testing.T) {
+func TestAccCivoReservedIP_update(t *testing.T) {
 	var ip civogo.IP
 
 	// generate a random name for each test run
-	resName := "civo_vpc_reserved_ip.foobar"
+	resName := "civo_reserved_ip.foobar"
 	var nameIP = acctest.RandomWithPrefix("rename-tf-test")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
 		Providers:    acceptance.TestAccProviders,
-		CheckDestroy: CivoVPCReservedIPDestroy,
+		CheckDestroy: CivoReservedIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: CivoVPCReservedIPConfigUpdates(nameIP),
+				Config: CivoReservedIPConfigUpdates(nameIP),
 				Check: resource.ComposeTestCheckFunc(
 					acceptance.CivoReservedIPResourceExists(resName, &ip),
-					CivoVPCReservedIPValues(&ip, nameIP),
+					CivoReservedIPValues(&ip, nameIP),
 					resource.TestCheckResourceAttr(resName, "name", nameIP),
 				),
 			},
 			{
 				// use a dynamic configuration with the random name from above
-				Config: CivoVPCReservedIPConfigUpdates(nameIP),
+				Config: CivoReservedIPConfigUpdates(nameIP),
 				Check: resource.ComposeTestCheckFunc(
 					acceptance.CivoReservedIPResourceExists(resName, &ip),
-					CivoVPCReservedIPUpdated(&ip, nameIP),
+					CivoReservedIPUpdated(&ip, nameIP),
 					resource.TestCheckResourceAttr(resName, "name", nameIP),
 				),
 			},
@@ -73,7 +73,7 @@ func TestAccCivoVPCReservedIP_update(t *testing.T) {
 	})
 }
 
-func CivoVPCReservedIPValues(ip *civogo.IP, name string) resource.TestCheckFunc {
+func CivoReservedIPValues(ip *civogo.IP, name string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		if ip.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, ip.Name)
@@ -82,7 +82,7 @@ func CivoVPCReservedIPValues(ip *civogo.IP, name string) resource.TestCheckFunc 
 	}
 }
 
-func CivoVPCReservedIPUpdated(ip *civogo.IP, name string) resource.TestCheckFunc {
+func CivoReservedIPUpdated(ip *civogo.IP, name string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		if ip.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, ip.Name)
@@ -91,11 +91,11 @@ func CivoVPCReservedIPUpdated(ip *civogo.IP, name string) resource.TestCheckFunc
 	}
 }
 
-func CivoVPCReservedIPDestroy(s *terraform.State) error {
+func CivoReservedIPDestroy(s *terraform.State) error {
 	client := acceptance.TestAccProvider.Meta().(*civogo.Client)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "civo_vpc_reserved_ip" {
+		if rs.Type != "civo_reserved_ip" {
 			continue
 		}
 
@@ -108,16 +108,16 @@ func CivoVPCReservedIPDestroy(s *terraform.State) error {
 	return nil
 }
 
-func CivoVPCReservedIPConfigBasic(label string) string {
+func CivoReservedIPConfigBasic(label string) string {
 	return fmt.Sprintf(`
-resource "civo_vpc_reserved_ip" "foobar" {
+resource "civo_reserved_ip" "foobar" {
 	name = "%s"
 }`, label)
 }
 
-func CivoVPCReservedIPConfigUpdates(label string) string {
+func CivoReservedIPConfigUpdates(label string) string {
 	return fmt.Sprintf(`
-resource "civo_vpc_reserved_ip" "foobar" {
+resource "civo_reserved_ip" "foobar" {
 	name = "%s"
 }`, label)
 }

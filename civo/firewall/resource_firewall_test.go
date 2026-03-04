@@ -12,27 +12,27 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func TestAccCivoVPCFirewall_basic(t *testing.T) {
+func TestAccCivoFirewall_basic(t *testing.T) {
 	var firewall civogo.Firewall
 
 	// generate a random name for each test run
-	resName := "civo_vpc_firewall.foobar"
+	resName := "civo_firewall.foobar"
 	var firewallName = acctest.RandomWithPrefix("tf-fw")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
 		Providers:    acceptance.TestAccProviders,
-		CheckDestroy: CivoVPCFirewallDestroy,
+		CheckDestroy: CivoFirewallDestroy,
 		Steps: []resource.TestStep{
 			{
 				// use a dynamic configuration with the random name from above
-				Config: CivoVPCFirewallConfigBasic(firewallName),
+				Config: CivoFirewallConfigBasic(firewallName),
 				// compose a basic test, checking both remote and local values
 				Check: resource.ComposeTestCheckFunc(
 					// query the API to retrieve the widget object
-					CivoVPCFirewallResourceExists(resName, &firewall),
+					CivoFirewallResourceExists(resName, &firewall),
 					// verify remote values
-					CivoVPCFirewallValues(&firewall, firewallName),
+					CivoFirewallValues(&firewall, firewallName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", firewallName),
 					resource.TestCheckResourceAttrSet(resName, "ingress_rule.#"),
@@ -42,27 +42,27 @@ func TestAccCivoVPCFirewall_basic(t *testing.T) {
 	})
 }
 
-func TestAccCivoVPCFirewallWithIngressEgress_basic(t *testing.T) {
+func TestAccCivoFirewallWithIngressEgress_basic(t *testing.T) {
 	var firewall civogo.Firewall
 
 	// generate a random name for each test run
-	resName := "civo_vpc_firewall.foobar"
+	resName := "civo_firewall.foobar"
 	var firewallName = acctest.RandomWithPrefix("tf-fw")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
 		Providers:    acceptance.TestAccProviders,
-		CheckDestroy: CivoVPCFirewallDestroy,
+		CheckDestroy: CivoFirewallDestroy,
 		Steps: []resource.TestStep{
 			{
 				// use a dynamic configuration with the random name from above
-				Config: CivoVPCFirewallConfigWithIngressEgress(firewallName),
+				Config: CivoFirewallConfigWithIngressEgress(firewallName),
 				// compose a basic test, checking both remote and local values
 				Check: resource.ComposeTestCheckFunc(
 					// query the API to retrieve the widget object
-					CivoVPCFirewallResourceExists(resName, &firewall),
+					CivoFirewallResourceExists(resName, &firewall),
 					// verify remote values
-					CivoVPCFirewallValues(&firewall, firewallName),
+					CivoFirewallValues(&firewall, firewallName),
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", firewallName),
 					resource.TestCheckResourceAttrSet(resName, "ingress_rule.#"),
@@ -79,33 +79,33 @@ func TestAccCivoVPCFirewallWithIngressEgress_basic(t *testing.T) {
 	})
 }
 
-func TestAccCivoVPCFirewall_update(t *testing.T) {
+func TestAccCivoFirewall_update(t *testing.T) {
 	var firewall civogo.Firewall
 
 	// generate a random name for each test run
-	resName := "civo_vpc_firewall.foobar"
+	resName := "civo_firewall.foobar"
 	var firewallName = acctest.RandomWithPrefix("tf-fw")
 	var firewallNameUpdate = acctest.RandomWithPrefix("rename-fw")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
 		Providers:    acceptance.TestAccProviders,
-		CheckDestroy: CivoVPCFirewallDestroy,
+		CheckDestroy: CivoFirewallDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: CivoVPCFirewallConfigBasic(firewallName),
+				Config: CivoFirewallConfigBasic(firewallName),
 				Check: resource.ComposeTestCheckFunc(
-					CivoVPCFirewallResourceExists(resName, &firewall),
-					CivoVPCFirewallValues(&firewall, firewallName),
+					CivoFirewallResourceExists(resName, &firewall),
+					CivoFirewallValues(&firewall, firewallName),
 					resource.TestCheckResourceAttr(resName, "name", firewallName),
 				),
 			},
 			{
 				// use a dynamic configuration with the random name from above
-				Config: CivoVPCFirewallConfigUpdates(firewallNameUpdate),
+				Config: CivoFirewallConfigUpdates(firewallNameUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					CivoVPCFirewallResourceExists(resName, &firewall),
-					CivoVPCFirewallUpdated(&firewall, firewallNameUpdate),
+					CivoFirewallResourceExists(resName, &firewall),
+					CivoFirewallUpdated(&firewall, firewallNameUpdate),
 					resource.TestCheckResourceAttr(resName, "name", firewallNameUpdate),
 				),
 			},
@@ -113,7 +113,7 @@ func TestAccCivoVPCFirewall_update(t *testing.T) {
 	})
 }
 
-func CivoVPCFirewallValues(firewall *civogo.Firewall, name string) resource.TestCheckFunc {
+func CivoFirewallValues(firewall *civogo.Firewall, name string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		if firewall.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, firewall.Name)
@@ -123,7 +123,7 @@ func CivoVPCFirewallValues(firewall *civogo.Firewall, name string) resource.Test
 }
 
 // CheckExampleResourceExists queries the API and retrieves the matching Widget.
-func CivoVPCFirewallResourceExists(n string, firewall *civogo.Firewall) resource.TestCheckFunc {
+func CivoFirewallResourceExists(n string, firewall *civogo.Firewall) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// find the corresponding state object
 		rs, ok := s.RootModule().Resources[n]
@@ -146,7 +146,7 @@ func CivoVPCFirewallResourceExists(n string, firewall *civogo.Firewall) resource
 	}
 }
 
-func CivoVPCFirewallUpdated(firewall *civogo.Firewall, name string) resource.TestCheckFunc {
+func CivoFirewallUpdated(firewall *civogo.Firewall, name string) resource.TestCheckFunc {
 	return func(_ *terraform.State) error {
 		if firewall.Name != name {
 			return fmt.Errorf("bad name, expected \"%s\", got: %#v", name, firewall.Name)
@@ -155,11 +155,11 @@ func CivoVPCFirewallUpdated(firewall *civogo.Firewall, name string) resource.Tes
 	}
 }
 
-func CivoVPCFirewallDestroy(s *terraform.State) error {
+func CivoFirewallDestroy(s *terraform.State) error {
 	client := acceptance.TestAccProvider.Meta().(*civogo.Client)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "civo_vpc_firewall" {
+		if rs.Type != "civo_firewall" {
 			continue
 		}
 
@@ -172,18 +172,18 @@ func CivoVPCFirewallDestroy(s *terraform.State) error {
 	return nil
 }
 
-func CivoVPCFirewallConfigBasic(name string) string {
+func CivoFirewallConfigBasic(name string) string {
 	return fmt.Sprintf(`
-resource "civo_vpc_firewall" "foobar" {
+resource "civo_firewall" "foobar" {
 	name = "%s"
 	create_default_rules = true
 	region = "LOCAL"
 }`, name)
 }
 
-func CivoVPCFirewallConfigWithIngressEgress(name string) string {
+func CivoFirewallConfigWithIngressEgress(name string) string {
 	return fmt.Sprintf(`
-resource "civo_vpc_firewall" "foobar" {
+resource "civo_firewall" "foobar" {
 	name = "%s"
 	create_default_rules = false
 	region = "LOCAL"
@@ -206,9 +206,9 @@ resource "civo_vpc_firewall" "foobar" {
 }`, name)
 }
 
-func CivoVPCFirewallConfigUpdates(name string) string {
+func CivoFirewallConfigUpdates(name string) string {
 	return fmt.Sprintf(`
-resource "civo_vpc_firewall" "foobar" {
+resource "civo_firewall" "foobar" {
 	name = "%s"
 	create_default_rules = true
 	region = "LOCAL"

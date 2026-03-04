@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// ResourceVPCReservedIP function returns a schema.Resource that represents a VPC reserved IP.
-// This can be used to create, read, update, and delete operations for a VPC reserved IP in the infrastructure.
-func ResourceVPCReservedIP() *schema.Resource {
+// ResourceReservedIP function returns a schema.Resource that represents a reserved IP.
+// This can be used to create, read, update, and delete operations for a reserved IP in the infrastructure.
+func ResourceReservedIP() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo reserved IP to represent a publicly-accessible static IP addresses that can be mapped to one of your Instancesor Load Balancer.",
 		Schema: map[string]*schema.Schema{

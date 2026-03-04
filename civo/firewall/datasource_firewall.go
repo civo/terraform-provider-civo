@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// DataSourceVPCFirewall Data source to get from the api a specific VPC firewall
+// DataSourceFirewall Data source to get from the api a specific firewall
 // using the id or the label
-func DataSourceVPCFirewall() *schema.Resource {
+func DataSourceFirewall() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{
 			"Retrieve information about a firewall for use in other resources.",

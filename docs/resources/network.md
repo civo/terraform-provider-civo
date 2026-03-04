@@ -8,8 +8,6 @@ description: |-
 
 # civo_network (Resource)
 
-~> **Deprecated:** This resource is deprecated. Please use [`civo_vpc_network`](vpc_network.md) instead, which uses the VPC-scoped API endpoints.
-
 Provides a Civo network resource. This can be used to create, modify, and delete networks.
 
 ## Example Usage

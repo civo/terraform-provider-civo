@@ -12,26 +12,26 @@ import (
 )
 
 // example.Widget represents a concrete Go type that represents an API resource
-func TestAccCivoVPCReservedIPAssignment_basic(t *testing.T) {
+func TestAccCivoInstanceReservedIPAssignment_basic(t *testing.T) {
 	var ip civogo.IP
 	var instance civogo.Instance
 
 	// generate a random name for each test run
-	resName := "civo_vpc_reserved_ip_assignment.foobar"
+	resName := "civo_instance_reserved_ip_assignment.foobar"
 	var AttachmentName = acctest.RandomWithPrefix("tf-test")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
 		Providers:    acceptance.TestAccProviders,
-		CheckDestroy: CivoVPCReservedIPAssignmentDestroy,
+		CheckDestroy: CivoInstanceReservedIPAssignmentDestroy,
 		Steps: []resource.TestStep{
 			{
 				// use a dynamic configuration with the random name from above
-				Config: CivoVPCReservedIPAssignmentConfigBasic(AttachmentName),
+				Config: CivoInstanceReservedIPAssignmentConfigBasic(AttachmentName),
 				// compose a basic test, checking both remote and local values
 				Check: resource.ComposeTestCheckFunc(
 					// query the API to retrieve the widget object
-					acceptance.CivoReservedIPResourceExists("civo_vpc_reserved_ip.foo", &ip),
+					acceptance.CivoReservedIPResourceExists("civo_reserved_ip.foo", &ip),
 					acceptance.CivoInstanceResourceExists("civo_instance.vm", &instance),
 					// verify local values
 					resource.TestCheckResourceAttrSet(resName, "id"),
@@ -43,9 +43,9 @@ func TestAccCivoVPCReservedIPAssignment_basic(t *testing.T) {
 	})
 }
 
-func CivoVPCReservedIPAssignmentDestroy(s *terraform.State) error {
+func CivoInstanceReservedIPAssignmentDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "civo_vpc_reserved_ip_assignment" {
+		if rs.Type != "civo_instance_reserved_ip_assignment" {
 			continue
 		}
 	}
@@ -53,7 +53,7 @@ func CivoVPCReservedIPAssignmentDestroy(s *terraform.State) error {
 	return nil
 }
 
-func CivoVPCReservedIPAssignmentConfigBasic(name string) string {
+func CivoInstanceReservedIPAssignmentConfigBasic(name string) string {
 	return fmt.Sprintf(`
 data "civo_instances_size" "small" {
 	filter {
@@ -83,14 +83,14 @@ resource "civo_instance" "vm" {
 	disk_image = element(data.civo_disk_image.debian.diskimages, 0).id
 }
 
-resource "civo_vpc_reserved_ip" "foo" {
+resource "civo_reserved_ip" "foo" {
 	name = "%s"
 	region = "LON1"
 }
 
-resource "civo_vpc_reserved_ip_assignment" "foobar" {
+resource "civo_instance_reserved_ip_assignment" "foobar" {
 	instance_id = civo_instance.vm.id
-	reserved_ip_id  = civo_vpc_reserved_ip.foo.id
+	reserved_ip_id  = civo_reserved_ip.foo.id
 }
 `, name, name)
 }

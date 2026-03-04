@@ -15,8 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// ResourceVPCFirewall VPC Firewall resource with this we can create and manage all firewall
-func ResourceVPCFirewall() *schema.Resource {
+// ResourceFirewall Firewall resource with this we can create and manage all firewall
+func ResourceFirewall() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo firewall resource. This can be used to create, modify, and delete firewalls.",
 		Schema: map[string]*schema.Schema{

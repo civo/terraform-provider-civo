@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// DataSourceVPCLoadBalancer function returns a schema.Resource that represents a VPC Load Balancer.
-// This can be used to query and retrieve details about a specific VPC Load Balancer in the infrastructure using its id or hostname.
-func DataSourceVPCLoadBalancer() *schema.Resource {
+// DataSourceLoadBalancer function returns a schema.Resource that represents a Load Balancer.
+// This can be used to query and retrieve details about a specific Load Balancer in the infrastructure using its id or hostname.
+func DataSourceLoadBalancer() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{
 			"Get information on a load balancer for use in other resources. This data source provides all of the load balancers properties as configured on your Civo account.",

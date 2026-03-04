@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceVPCReservedIP_basic(t *testing.T) {
-	datasourceName := "data.civo_vpc_reserved_ip.foobar"
+func TestAccDataSourceCivoReservedIP_basic(t *testing.T) {
+	datasourceName := "data.civo_reserved_ip.foobar"
 	name := acctest.RandomWithPrefix("ip-test")
 
 	resource.Test(t, resource.TestCase{
@@ -18,7 +18,7 @@ func TestAccDataSourceVPCReservedIP_basic(t *testing.T) {
 		Providers: acceptance.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: DataSourceVPCReservedIPConfig(name),
+				Config: DataSourceCivoReservedIPConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "name", name),
 					resource.TestCheckResourceAttrSet(datasourceName, "ip"),
@@ -29,15 +29,15 @@ func TestAccDataSourceVPCReservedIP_basic(t *testing.T) {
 	})
 }
 
-func DataSourceVPCReservedIPConfig(name string) string {
+func DataSourceCivoReservedIPConfig(name string) string {
 	return fmt.Sprintf(`
-resource "civo_vpc_reserved_ip" "newip" {
+resource "civo_reserved_ip" "newip" {
 	name = "%s"
 	region = "LON1"
 }
 
-data "civo_vpc_reserved_ip" "foobar" {
-	name = civo_vpc_reserved_ip.newip.name
+data "civo_reserved_ip" "foobar" {
+	name = civo_reserved_ip.newip.name
 }
 `, name)
 }

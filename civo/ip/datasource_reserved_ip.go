@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// DataSourceVPCReservedIP function returns a schema.Resource that represents a VPC reserved IP.
-// This can be used to query and retrieve details about a specific VPC reserved IP in the infrastructure.
-func DataSourceVPCReservedIP() *schema.Resource {
+// DataSourceReservedIP function returns a schema.Resource that represents a reserved IP.
+// This can be used to query and retrieve details about a specific reserved IP in the infrastructure.
+func DataSourceReservedIP() *schema.Resource {
 	return &schema.Resource{
 		Description: strings.Join([]string{
 			"Get information on a reserved IP. This data source provides the region and Instance id as configured on your Civo account.",

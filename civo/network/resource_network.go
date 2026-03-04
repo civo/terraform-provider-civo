@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// ResourceVPCNetwork function returns a schema.Resource that represents a VPC Network.
-// This can be used to create, read, update, and delete operations for a VPC Network in the infrastructure.
-func ResourceVPCNetwork() *schema.Resource {
+// ResourceNetwork function returns a schema.Resource that represents a Network.
+// This can be used to create, read, update, and delete operations for a Network in the infrastructure.
+func ResourceNetwork() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides a Civo network resource. This can be used to create, modify, and delete networks.",
 		Schema: map[string]*schema.Schema{

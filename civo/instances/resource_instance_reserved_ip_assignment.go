@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// ResourceVPCReservedIPAssignment The VPC reserved ip assignment resource schema definition
-// represent the VPC reserved ip assignment resource
-func ResourceVPCReservedIPAssignment() *schema.Resource {
+// ResourceInstanceReservedIPAssignment The reserved ip assignment resource schema definition
+// represent the reserved ip assignment resource
+func ResourceInstanceReservedIPAssignment() *schema.Resource {
 	return &schema.Resource{
 		Description: "The instance reserved ip assignment resource schema definition",
 		Schema: map[string]*schema.Schema{
