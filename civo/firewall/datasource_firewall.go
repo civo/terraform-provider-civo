@@ -63,7 +63,7 @@ func dataSourceFirewallRead(_ context.Context, d *schema.ResourceData, m interfa
 
 	if id, ok := d.GetOk("id"); ok {
 		log.Printf("[INFO] Getting the firewall by id")
-		firewall, err := apiClient.FindFirewall(id.(string))
+		firewall, err := apiClient.FindVPCFirewall(id.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive firewall: %s", err)
 		}
@@ -71,7 +71,7 @@ func dataSourceFirewallRead(_ context.Context, d *schema.ResourceData, m interfa
 		foundFirewall = firewall
 	} else if name, ok := d.GetOk("name"); ok {
 		log.Printf("[INFO] Getting the firewall by name")
-		firewall, err := apiClient.FindFirewall(name.(string))
+		firewall, err := apiClient.FindVPCFirewall(name.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive firewall: %s", err)
 		}

@@ -138,7 +138,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
-	network, err := apiClient.CreateNetwork(configs)
+	network, err := apiClient.CreateVPCNetwork(configs)
 	if err != nil {
 		customErr, parseErr := utils.ParseErrorResponse(err.Error())
 		if parseErr == nil {
@@ -169,7 +169,7 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 	CurrentNetwork := civogo.Network{}
 
 	log.Printf("[INFO] retriving the network %s", d.Id())
-	resp, err := apiClient.ListNetworks()
+	resp, err := apiClient.ListVPCNetworks()
 	if err != nil {
 		if resp == nil {
 			d.SetId("")
@@ -206,7 +206,7 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if d.HasChange("label") {
 		log.Printf("[INFO] updating the network %s", d.Id())
-		_, err := apiClient.RenameNetwork(d.Get("label").(string), d.Id())
+		_, err := apiClient.RenameVPCNetwork(d.Get("label").(string), d.Id())
 		if err != nil {
 			return diag.Errorf("[ERR] An error occurred while renaming the network %s", d.Id())
 		}
@@ -219,7 +219,7 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if d.HasChange("nameservers_v4") {
 		log.Printf("[INFO] updating the network nameservers %s", d.Id())
-		_, err := apiClient.UpdateNetwork(d.Id(), networkConfig)
+		_, err := apiClient.UpdateVPCNetwork(d.Id(), networkConfig)
 		if err != nil {
 			return diag.Errorf("[ERR] An error occurred while updating the nameservers for the network %s: %s", d.Id(), err)
 		}
@@ -244,14 +244,14 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
 			// First, try to delete the network
-			resp, err := apiClient.DeleteNetwork(networkID)
+			resp, err := apiClient.DeleteVPCNetwork(networkID)
 			if err != nil {
 				return 0, "", err
 			}
 			// If delete was successful, start polling
 			if resp.Result == "success" {
 				// Check if the network still exists
-				_, err := apiClient.GetNetwork(networkID)
+				_, err := apiClient.GetVPCNetwork(networkID)
 				if err != nil {
 					if errors.Is(err, civogo.DatabaseNetworkNotFoundError) {
 						return resp, "deleted", nil
@@ -307,7 +307,7 @@ func createDefaultFirewall(apiClient *civogo.Client, networkID string, networkNa
 	}
 
 	// Create the default firewall
-	_, err := apiClient.NewFirewall(&firewallConfig)
+	_, err := apiClient.NewVPCFirewall(&firewallConfig)
 	if err != nil {
 		return err
 	}

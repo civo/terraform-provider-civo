@@ -133,7 +133,7 @@ func CivoFirewallResourceExists(n string, firewall *civogo.Firewall) resource.Te
 
 		// retrieve the configured client from the test setup
 		client := acceptance.TestAccProvider.Meta().(*civogo.Client)
-		resp, err := client.FindFirewall(rs.Primary.ID)
+		resp, err := client.FindVPCFirewall(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Firewall not found: (%s) %s", rs.Primary.ID, err)
 		}
@@ -163,7 +163,7 @@ func CivoFirewallDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.FindFirewall(rs.Primary.ID)
+		_, err := client.FindVPCFirewall(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("Firewall still exists")
 		}
@@ -195,7 +195,7 @@ resource "civo_firewall" "foobar" {
 		cidr = ["192.168.1.1/32", "192.168.10.4/32"]
 		action = "allow"
 	  }
-	  
+
 	  egress_rule {
 		label = "ssh"
 		protocol = "tcp"

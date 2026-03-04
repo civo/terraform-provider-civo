@@ -95,7 +95,7 @@ func CivoNetworkResourceExists(n string, network *civogo.Network) resource.TestC
 
 		// retrieve the configured client from the test setup
 		client := acceptance.TestAccProvider.Meta().(*civogo.Client)
-		resp, err := client.FindNetwork(rs.Primary.ID)
+		resp, err := client.FindVPCNetwork(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Network not found: (%s) %s", rs.Primary.ID, err)
 		}
@@ -125,7 +125,7 @@ func CivoNetworkDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.FindNetwork(rs.Primary.ID)
+		_, err := client.FindVPCNetwork(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Network still exists")
 		}

@@ -61,7 +61,7 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 		Name:   d.Get("name").(string),
 		Region: apiClient.Region,
 	}
-	ipAddress, err := apiClient.NewIP(newIP)
+	ipAddress, err := apiClient.NewVPCIP(newIP)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to create a new ip address: %s", err)
 	}
@@ -72,7 +72,7 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 		Pending: []string{"BUILDING"},
 		Target:  []string{"ACTIVE"},
 		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.FindIP(d.Id())
+			resp, err := apiClient.FindVPCIP(d.Id())
 			if err != nil {
 				return 0, "", err
 			}
@@ -104,7 +104,7 @@ func resourceReservedIPRead(_ context.Context, d *schema.ResourceData, m interfa
 	}
 
 	log.Printf("[INFO] retriving the ip address %s", d.Id())
-	resp, err := apiClient.FindIP(d.Id())
+	resp, err := apiClient.FindVPCIP(d.Id())
 	if err != nil {
 		if resp == nil {
 			d.SetId("")
@@ -135,7 +135,7 @@ func resourceReservedIPUpdate(ctx context.Context, d *schema.ResourceData, m int
 		ipUpdate := &civogo.UpdateIPRequest{
 			Name: d.Get("name").(string),
 		}
-		_, err := apiClient.UpdateIP(d.Id(), ipUpdate)
+		_, err := apiClient.UpdateVPCIP(d.Id(), ipUpdate)
 		if err != nil {
 			return diag.Errorf("[ERR] An error occurred while rename the ip resource %s", d.Id())
 		}
@@ -154,7 +154,7 @@ func resourceReservedIPDelete(_ context.Context, d *schema.ResourceData, m inter
 	}
 
 	log.Printf("[INFO] deleting the ip resource %s", d.Id())
-	_, err := apiClient.DeleteIP(d.Id())
+	_, err := apiClient.DeleteVPCIP(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the ip resource %s", d.Id())
 	}

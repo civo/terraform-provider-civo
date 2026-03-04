@@ -99,7 +99,7 @@ func CivoReservedIPDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.FindNetwork(rs.Primary.ID)
+		_, err := client.FindVPCNetwork(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("IP still exists")
 		}

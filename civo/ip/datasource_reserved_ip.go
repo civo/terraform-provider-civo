@@ -72,7 +72,7 @@ func dataSourceReservedIPRead(_ context.Context, d *schema.ResourceData, m inter
 
 	if id, ok := d.GetOk("id"); ok {
 		log.Printf("[INFO] Getting the ip by id")
-		resp, err := apiClient.FindIP(id.(string))
+		resp, err := apiClient.FindVPCIP(id.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive ip: %s", err)
 		}
@@ -80,7 +80,7 @@ func dataSourceReservedIPRead(_ context.Context, d *schema.ResourceData, m inter
 		foundIP = resp
 	} else if name, ok := d.GetOk("name"); ok {
 		log.Printf("[INFO] Getting the ip by name")
-		resp, err := apiClient.FindIP(name.(string))
+		resp, err := apiClient.FindVPCIP(name.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive ip: %s", err)
 		}

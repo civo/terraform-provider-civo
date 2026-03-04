@@ -141,7 +141,7 @@ func dataSourceLoadBalancerRead(_ context.Context, d *schema.ResourceData, m int
 		searchBy = id.(string)
 	}
 
-	lb, err := apiClient.FindLoadBalancer(searchBy)
+	lb, err := apiClient.FindVPCLoadBalancer(searchBy)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to retrive LoadBalancer: %s", err)
 	}

@@ -69,7 +69,7 @@ func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interfac
 
 	if id, ok := d.GetOk("id"); ok {
 		log.Printf("[INFO] Getting the network by id")
-		network, err := apiClient.FindNetwork(id.(string))
+		network, err := apiClient.FindVPCNetwork(id.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive network: %s", err)
 		}
@@ -77,7 +77,7 @@ func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interfac
 		foundNetwork = network
 	} else if label, ok := d.GetOk("label"); ok {
 		log.Printf("[INFO] Getting the network by label")
-		network, err := apiClient.FindNetwork(label.(string))
+		network, err := apiClient.FindVPCNetwork(label.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive network: %s", err)
 		}
