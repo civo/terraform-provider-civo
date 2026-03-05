@@ -211,7 +211,8 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 	}
 
 	if d.HasChange("node_count") {
-		poolUpdate.Count = d.Get("node_count").(*int)
+		nodeCount := d.Get("node_count").(int)
+		poolUpdate.Count = &nodeCount
 	}
 
 	if d.HasChange("labels") {
@@ -352,10 +353,16 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 }
 
 // UpdateNodePool is a utility function to update node pool from a kuberentes cluster
-func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int) []civogo.KubernetesClusterPoolConfig {
+func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int, labels map[string]string, taints []corev1.Taint) []civogo.KubernetesClusterPoolConfig {
 	for k, v := range s {
 		if strings.Contains(v.ID, id) {
 			s[k].Count = count
+			if labels != nil {
+				s[k].Labels = labels
+			}
+			if taints != nil {
+				s[k].Taints = taints
+			}
 			break
 		}
 	}
