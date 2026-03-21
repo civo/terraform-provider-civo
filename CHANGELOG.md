@@ -1,4 +1,18 @@
 
+## [v1.2.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.1) (21 March 2026)
+
+## [v1.2.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.0) (4 March 2026)
+
+### Merged
+- [#385](https://github.com/civo/terraform-provider-civo/pull/385) - feat: migrate resources to VPC-scoped API endpoints
+- [#383](https://github.com/civo/terraform-provider-civo/pull/383) - Add Docker-based testing environment
+- [#382](https://github.com/civo/terraform-provider-civo/pull/382) - chore: upgrade Go version and dependencies
+
+## [v1.1.8](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.8) (5 November 2025)
+
+### Merged
+- [#379](https://github.com/civo/terraform-provider-civo/pull/379) - Remove default size when creating instances
+
 ## [v1.1.7](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.7) (14 September 2025)
 
 ### Merged
