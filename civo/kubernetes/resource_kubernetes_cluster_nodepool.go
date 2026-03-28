@@ -76,10 +76,10 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 		nodePoolLabel = attr.(string)
 	}
 
-	nodePoolLabes := map[string]string{}
+	nodePoolLabels := map[string]string{}
 	if attr, ok := d.GetOk("labels"); ok {
 		for k, v := range attr.(map[string]interface{}) {
-			nodePoolLabes[k] = v.(string)
+			nodePoolLabels[k] = v.(string)
 		}
 	}
 
@@ -99,7 +99,7 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 		ID:     nodePoolLabel,
 		Count:  count,
 		Size:   size,
-		Labels: nodePoolLabes,
+		Labels: nodePoolLabels,
 		Taints: nodePoolTains,
 		Region: apiClient.Region,
 	}
@@ -352,10 +352,12 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 }
 
 // UpdateNodePool is a utility function to update node pool from a kuberentes cluster
-func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int) []civogo.KubernetesClusterPoolConfig {
+func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int, labels map[string]string, taints []corev1.Taint) []civogo.KubernetesClusterPoolConfig {
 	for k, v := range s {
 		if strings.Contains(v.ID, id) {
 			s[k].Count = count
+			s[k].Labels = labels
+			s[k].Taints = taints
 			break
 		}
 	}
