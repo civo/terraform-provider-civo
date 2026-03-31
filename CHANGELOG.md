@@ -1,5 +1,5 @@
 
-## [v1.2.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.1) (21 March 2026)
+## [v1.2.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.2) (31 March 2026)
 
 ## [v1.2.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.0) (4 March 2026)
 
