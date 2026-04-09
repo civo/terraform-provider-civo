@@ -35,10 +35,11 @@ func ResourceFirewall() *schema.Resource {
 				Description:  "The firewall network, if is not defined we use the default network",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The firewall region, if is not defined we use the global defined in the provider",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The firewall region, if is not defined we use the global defined in the provider",
+				DiffSuppressFunc: utils.CaseSensitiveDiff,
 			},
 			"create_default_rules": {
 				Type:        schema.TypeBool,

@@ -34,11 +34,12 @@ func ResourceVPCSubnet() *schema.Resource {
 				Description: "The ID of the VPC network this subnet belongs to",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
-				Description: "The region of the subnet",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         true,
+				Description:      "The region of the subnet",
+				DiffSuppressFunc: utils.CaseSensitiveDiff,
 			},
 			"subnet_size": {
 				Type:        schema.TypeString,

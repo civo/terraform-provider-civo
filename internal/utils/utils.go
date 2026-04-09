@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -33,6 +34,14 @@ const (
 // VersionInfo stores Provider's version Info
 type VersionInfo struct {
 	ProviderSelections map[string]string `json:"provider_selections"`
+}
+
+// CaseSensitiveDiff is a DiffSuppressFunc that suppresses diffs caused only by
+// case differences (e.g. "FRA1" vs "fra1"). This is used for the region field
+// across all resources so that changing the case of a region identifier does not
+// trigger an unnecessary update or replacement.
+func CaseSensitiveDiff(_, oldValue, newValue string, _ *schema.ResourceData) bool {
+	return strings.EqualFold(oldValue, newValue)
 }
 
 // ValidateName is a function to check if the name is valid

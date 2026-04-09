@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -30,10 +31,11 @@ func ResourceInstanceReservedIPAssignment() *schema.Resource {
 				Description: "The instance id",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The region of the ip",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The region of the ip",
+				DiffSuppressFunc: utils.CaseSensitiveDiff,
 			},
 		},
 		CreateContext: resourceInstanceReservedIPCreate,

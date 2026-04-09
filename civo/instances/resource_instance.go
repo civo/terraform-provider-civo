@@ -26,10 +26,11 @@ func ResourceInstance() *schema.Resource {
 		Description: "Provides a Civo instance resource. This can be used to create, modify, and delete instances.",
 		Schema: map[string]*schema.Schema{
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The region for the instance, if not declare we use the region in declared in the provider",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Description:      "The region for the instance, if not declare we use the region in declared in the provider",
+				DiffSuppressFunc: utils.CaseSensitiveDiff,
 			},
 			"hostname": {
 				Type:         schema.TypeString,

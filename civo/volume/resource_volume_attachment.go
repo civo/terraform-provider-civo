@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -34,10 +35,11 @@ func ResourceVolumeAttachment() *schema.Resource {
 				Description:  "The ID of target volume for attachment",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The region for the volume attachment",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Description:      "The region for the volume attachment",
+				DiffSuppressFunc: utils.CaseSensitiveDiff,
 			},
 			"attach_at_boot": {
 				Type:        schema.TypeBool,

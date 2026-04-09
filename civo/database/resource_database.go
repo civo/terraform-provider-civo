@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,10 +64,11 @@ func ResourceDatabase() *schema.Resource {
 				Description: "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				Description: "The region where the database will be created.",
+				Type:             schema.TypeString,
+				Computed:         true,
+				Optional:         true,
+				Description:      "The region where the database will be created.",
+				DiffSuppressFunc: utils.CaseSensitiveDiff,
 			},
 			"username": {
 				Type:        schema.TypeString,
