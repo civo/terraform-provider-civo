@@ -2,7 +2,7 @@ package utils
 
 import "testing"
 
-func TestCaseSensitiveDiff(t *testing.T) {
+func TestIgnoreCaseDiff(t *testing.T) {
 	tests := []struct {
 		name     string
 		old      string
@@ -73,9 +73,9 @@ func TestCaseSensitiveDiff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := CaseSensitiveDiff("region", tt.old, tt.new, nil)
+			got := IgnoreCaseDiff("region", tt.old, tt.new, nil)
 			if got != tt.suppress {
-				t.Errorf("CaseSensitiveDiff(%q, %q) = %v, want %v", tt.old, tt.new, got, tt.suppress)
+				t.Errorf("IgnoreCaseDiff(%q, %q) = %v, want %v", tt.old, tt.new, got, tt.suppress)
 			}
 		})
 	}

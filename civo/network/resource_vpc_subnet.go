@@ -39,7 +39,7 @@ func ResourceVPCSubnet() *schema.Resource {
 				Computed:         true,
 				ForceNew:         true,
 				Description:      "The region of the subnet",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"subnet_size": {
 				Type:        schema.TypeString,

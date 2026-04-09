@@ -37,7 +37,7 @@ func ResourceKubernetesCluster() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "The region for the cluster, if not declare we use the region in declared in the provider",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"network_id": {
 				Type:         schema.TypeString,

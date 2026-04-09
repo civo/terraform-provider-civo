@@ -35,7 +35,7 @@ func ResourceInstanceReservedIPAssignment() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "The region of the ip",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 		},
 		CreateContext: resourceInstanceReservedIPCreate,

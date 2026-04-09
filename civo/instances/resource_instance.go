@@ -30,7 +30,7 @@ func ResourceInstance() *schema.Resource {
 				Optional:         true,
 				ForceNew:         true,
 				Description:      "The region for the instance, if not declare we use the region in declared in the provider",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"hostname": {
 				Type:         schema.TypeString,

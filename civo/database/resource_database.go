@@ -68,7 +68,7 @@ func ResourceDatabase() *schema.Resource {
 				Computed:         true,
 				Optional:         true,
 				Description:      "The region where the database will be created.",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"username": {
 				Type:        schema.TypeString,

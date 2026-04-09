@@ -28,7 +28,7 @@ func ResourceObjectStoreCredential() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Description:      "The region where the Object Store Credential will be created.",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			// Computed values
 			"access_key_id": {

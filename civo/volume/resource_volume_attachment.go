@@ -39,7 +39,7 @@ func ResourceVolumeAttachment() *schema.Resource {
 				Optional:         true,
 				ForceNew:         true,
 				Description:      "The region for the volume attachment",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"attach_at_boot": {
 				Type:        schema.TypeBool,

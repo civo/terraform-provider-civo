@@ -39,7 +39,7 @@ func ResourceFirewall() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "The firewall region, if is not defined we use the global defined in the provider",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"create_default_rules": {
 				Type:        schema.TypeBool,

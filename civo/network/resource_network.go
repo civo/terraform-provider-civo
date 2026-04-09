@@ -32,7 +32,7 @@ func ResourceNetwork() *schema.Resource {
 				ForceNew:         true,
 				Computed:         true,
 				Description:      "The region of the network",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"cidr_v4": {
 				Type:        schema.TypeString,

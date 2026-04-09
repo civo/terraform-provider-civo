@@ -29,7 +29,7 @@ func ResourceReservedIP() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "The region of the ip",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			// Computed resource
 			"ip": {

@@ -29,7 +29,7 @@ func ResourceObjectStore() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "The region for the Object Store, if not declared we use the region as declared in the provider (Defaults to LON1)",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"max_size_gb": {
 				Type:        schema.TypeInt,

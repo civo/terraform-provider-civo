@@ -34,7 +34,7 @@ func ResourceVolume() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Description:      "The region for the volume, if not declare we use the region in declared in the provider.",
-				DiffSuppressFunc: utils.CaseSensitiveDiff,
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"network_id": {
 				Type:        schema.TypeString,
