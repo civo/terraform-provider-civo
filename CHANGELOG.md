@@ -1,4 +1,10 @@
 
+## [v1.2.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.3) (9 April 2026)
+
+### Merged
+- [#391](https://github.com/civo/terraform-provider-civo/pull/391) - fix: make region comparison case-insensitive across all resources
+- [#390](https://github.com/civo/terraform-provider-civo/pull/390) - Chore/upgrade dependencies
+
 ## [v1.2.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.2) (31 March 2026)
 
 ## [v1.2.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.0) (4 March 2026)
