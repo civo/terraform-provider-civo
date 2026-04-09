@@ -33,10 +33,11 @@ func ResourceKubernetesCluster() *schema.Resource {
 				ValidateFunc: utils.ValidateNameSize,
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The region for the cluster, if not declare we use the region in declared in the provider",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The region for the cluster, if not declare we use the region in declared in the provider",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"network_id": {
 				Type:         schema.TypeString,

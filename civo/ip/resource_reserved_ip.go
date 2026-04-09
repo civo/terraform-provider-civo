@@ -25,10 +25,11 @@ func ResourceReservedIP() *schema.Resource {
 				ValidateFunc: utils.ValidateName,
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The region of the ip",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The region of the ip",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			// Computed resource
 			"ip": {

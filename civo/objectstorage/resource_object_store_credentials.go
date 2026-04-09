@@ -25,9 +25,10 @@ func ResourceObjectStoreCredential() *schema.Resource {
 				Description:  "The name of the Object Store Credential. Must be unique.",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The region where the Object Store Credential will be created.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The region where the Object Store Credential will be created.",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			// Computed values
 			"access_key_id": {

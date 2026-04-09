@@ -25,10 +25,11 @@ func ResourceObjectStore() *schema.Resource {
 				Description:  "The name of the Object Store. Must be unique.",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The region for the Object Store, if not declared we use the region as declared in the provider (Defaults to LON1)",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The region for the Object Store, if not declared we use the region as declared in the provider (Defaults to LON1)",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"max_size_gb": {
 				Type:        schema.TypeInt,

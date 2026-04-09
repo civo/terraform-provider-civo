@@ -31,9 +31,10 @@ func ResourceVolume() *schema.Resource {
 				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes ",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The region for the volume, if not declare we use the region in declared in the provider.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The region for the volume, if not declare we use the region in declared in the provider.",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"network_id": {
 				Type:        schema.TypeString,
