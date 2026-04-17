@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // ResourceKubernetesCluster function returns a schema.Resource that represents a Kubernetes cluster.
@@ -428,7 +429,36 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		nodePools = updateNodePool(nodePools, targetNodePool, newPool["node_count"].(int))
+		// Extract labels from the new pool configuration
+		var newPoolLabels map[string]string
+		if labelsRaw, ok := newPool["labels"]; ok && labelsRaw != nil {
+			if labelsMap, ok := labelsRaw.(map[string]interface{}); ok {
+				newPoolLabels = make(map[string]string)
+				for k, v := range labelsMap {
+					if s, ok := v.(string); ok {
+						newPoolLabels[k] = s
+					}
+				}
+			}
+		}
+
+		// Extract taints from the new pool configuration
+		var newPoolTaints []corev1.Taint
+		if taintsRaw, ok := newPool["taint"]; ok && taintsRaw != nil {
+			if taintsList, ok := taintsRaw.([]interface{}); ok {
+				for _, t := range taintsList {
+					if taint, ok := t.(map[string]interface{}); ok {
+						newPoolTaints = append(newPoolTaints, corev1.Taint{
+							Key:    taint["key"].(string),
+							Value:  taint["value"].(string),
+							Effect: corev1.TaintEffect(taint["effect"].(string)),
+						})
+					}
+				}
+			}
+		}
+
+		nodePools = updateNodePool(nodePools, targetNodePool, newPool["node_count"].(int), newPoolLabels, newPoolTaints)
 		config.Pools = nodePools
 	}
 
