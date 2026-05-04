@@ -211,7 +211,8 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 	}
 
 	if d.HasChange("node_count") {
-		poolUpdate.Count = d.Get("node_count").(*int)
+		count := d.Get("node_count").(int)
+		poolUpdate.Count = &count
 	}
 
 	if d.HasChange("labels") {
