@@ -1,4 +1,9 @@
 
+## [v1.2.4](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.4) (6 May 2026)
+
+### Merged
+- [#392](https://github.com/civo/terraform-provider-civo/pull/392) - fix(381): fix for node scaling count
+
 ## [v1.2.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.3) (9 April 2026)
 
 ### Merged
