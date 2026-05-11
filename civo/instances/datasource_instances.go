@@ -47,13 +47,15 @@ func getDataSourceInstances(m interface{}, extra map[string]interface{}) ([]inte
 	}
 
 	var instance []interface{}
-	partialInstances, err := apiClient.ListInstances(1, 200)
+	// Use ListAllInstances so accounts with > 200 instances are not silently
+	// truncated; civogo v0.7.2 iterates server pagination internally.
+	allInstances, err := apiClient.ListAllInstances()
 	if err != nil {
 		return nil, fmt.Errorf("[ERR] error retrieving instances: %s", err)
 	}
 
-	for _, partialInstance := range partialInstances.Items {
-		instance = append(instance, partialInstance)
+	for _, ins := range allInstances {
+		instance = append(instance, ins)
 	}
 
 	return instance, nil
