@@ -1,4 +1,11 @@
 
+## [v1.2.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.6) (12 May 2026)
+
+## [v1.2.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.5) (11 May 2026)
+
+### Merged
+- [#393](https://github.com/civo/terraform-provider-civo/pull/393) - Chore/bump civogo v0.7.2
+
 ## [v1.2.4](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.4) (6 May 2026)
 
 ### Merged
