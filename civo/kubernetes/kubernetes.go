@@ -108,6 +108,22 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 		"public_ip_node_pool": cluster.Pools[0].PublicIPNodePool,
 	}
 
+	if len(cluster.Pools[0].Labels) > 0 {
+		rawPool["labels"] = cluster.Pools[0].Labels
+	}
+
+	if len(cluster.Pools[0].Taints) > 0 {
+		taints := make([]map[string]interface{}, 0, len(cluster.Pools[0].Taints))
+		for _, t := range cluster.Pools[0].Taints {
+			taints = append(taints, map[string]interface{}{
+				"key":    t.Key,
+				"value":  t.Value,
+				"effect": string(t.Effect),
+			})
+		}
+		rawPool["taint"] = taints
+	}
+
 	flattenedPool = append(flattenedPool, rawPool)
 
 	return flattenedPool
