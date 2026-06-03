@@ -91,37 +91,65 @@ func nodePoolSchema(isResource bool) map[string]*schema.Schema {
 
 // function to flatten all instances inside the cluster
 func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
-	if cluster.Pools == nil {
+	if len(cluster.Pools) == 0 && len(cluster.RequiredPools) == 0 {
 		return nil
 	}
 
-	flattenedPool := make([]interface{}, 0)
+	var poolID string
+	var count int
+	var size string
+	var labels map[string]string
+	var taints []corev1.Taint
+	var publicIP bool
+	var instanceNames []string
 
+	if len(cluster.Pools) > 0 {
+		p := cluster.Pools[0]
+		poolID = p.ID
+		count = p.Count
+		size = p.Size
+		labels = p.Labels
+		taints = p.Taints
+		publicIP = p.PublicIPNodePool
+		instanceNames = p.InstanceNames
+	} else {
+		p := cluster.RequiredPools[0]
+		poolID = p.ID
+		count = p.Count
+		size = p.Size
+		labels = p.Labels
+		taints = p.Taints
+		publicIP = p.PublicIPNodePool
+	}
+
+	flattenedPool := make([]interface{}, 0)
 	poolInstanceNames := make([]string, 0)
-	poolInstanceNames = append(poolInstanceNames, cluster.Pools[0].InstanceNames...)
+	if len(instanceNames) > 0 {
+		poolInstanceNames = append(poolInstanceNames, instanceNames...)
+	}
 
 	rawPool := map[string]interface{}{
-		"label":               cluster.Pools[0].ID,
-		"node_count":          cluster.Pools[0].Count,
-		"size":                cluster.Pools[0].Size,
+		"label":               poolID,
+		"node_count":          count,
+		"size":                size,
 		"instance_names":      poolInstanceNames,
-		"public_ip_node_pool": cluster.Pools[0].PublicIPNodePool,
+		"public_ip_node_pool": publicIP,
 	}
 
-	if len(cluster.Pools[0].Labels) > 0 {
-		rawPool["labels"] = cluster.Pools[0].Labels
+	if len(labels) > 0 {
+		rawPool["labels"] = labels
 	}
 
-	if len(cluster.Pools[0].Taints) > 0 {
-		taints := make([]map[string]interface{}, 0, len(cluster.Pools[0].Taints))
-		for _, t := range cluster.Pools[0].Taints {
-			taints = append(taints, map[string]interface{}{
+	if len(taints) > 0 {
+		rawTaints := make([]map[string]interface{}, 0, len(taints))
+		for _, t := range taints {
+			rawTaints = append(rawTaints, map[string]interface{}{
 				"key":    t.Key,
 				"value":  t.Value,
 				"effect": string(t.Effect),
 			})
 		}
-		rawPool["taint"] = taints
+		rawPool["taint"] = rawTaints
 	}
 
 	flattenedPool = append(flattenedPool, rawPool)
