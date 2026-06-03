@@ -320,6 +320,38 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("error waiting for cluster (%s) to be created: %s", d.Id(), err)
 	}
 
+	// Workaround: Civo API currently ignores labels and taints on the initial cluster creation.
+	// If the user requested them, we must explicitly update the cluster to apply them.
+	if len(pools) > 0 && (len(pools[0].Labels) > 0 || len(pools[0].Taints) > 0) {
+		kubernetesCluster, err := apiClient.GetKubernetesCluster(d.Id())
+		if err != nil {
+			return diag.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
+		}
+
+		var defaultPoolID string
+		if len(kubernetesCluster.Pools) > 0 {
+			defaultPoolID = kubernetesCluster.Pools[0].ID
+		} else if len(kubernetesCluster.RequiredPools) > 0 {
+			defaultPoolID = kubernetesCluster.RequiredPools[0].ID
+		}
+
+		if defaultPoolID != "" {
+			poolUpdate := &civogo.KubernetesClusterPoolUpdateConfig{
+				Region: apiClient.Region,
+				Labels: pools[0].Labels,
+				Taints: pools[0].Taints,
+			}
+			_, err = apiClient.UpdateKubernetesClusterPool(d.Id(), defaultPoolID, poolUpdate)
+			if err != nil {
+				return diag.Errorf("[ERR] failed to apply labels/taints to new kubernetes cluster: %s", err)
+			}
+			err = waitForPoolLabelsAndTaints(ctx, apiClient, d.Id(), defaultPoolID, pools[0].Labels, pools[0].Taints, d.Timeout(schema.TimeoutCreate))
+			if err != nil {
+				return diag.Errorf("[ERR] failed to verify labels/taints applied to new kubernetes cluster: %s", err)
+			}
+		}
+	}
+
 	return resourceKubernetesClusterRead(ctx, d, m)
 }
 
@@ -389,6 +421,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	config := &civogo.KubernetesClusterConfig{}
+	hasClusterUpdate := false
 
 	if d.HasChange("network_id") {
 		return diag.Errorf("[ERR] Network change (%q) for existing cluster is not available at this moment", "network_id")
@@ -397,88 +430,33 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 	if d.HasChange("firewall_id") {
 		config.FirewallID = d.Get("firewall_id").(string)
 		config.Region = apiClient.Region
-	}
-
-	// Update the node pool if necessary
-	// if !d.HasChange("pools") {
-	// 	return resourceKubernetesClusterRead(ctx, d, m)
-	// }
-
-	if d.HasChange("pools") {
-		old, new := d.GetChange("pools")
-		oldPool := old.([]interface{})[0].(map[string]interface{})
-		newPool := new.([]interface{})[0].(map[string]interface{})
-
-		// if the size is different, then return and error as we can't change the size of a pool
-		if oldPool["size"].(string) != newPool["size"].(string) {
-			return diag.Errorf("[ERR] Size change (%q) for existing cluster is not available at this moment", "size")
-		}
-
-		config.Region = apiClient.Region
-		kubernetesCluster, err := apiClient.FindKubernetesCluster(d.Id())
-		if err != nil {
-			return diag.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
-		}
-
-		targetNodePool := ""
-		nodePools := []civogo.KubernetesClusterPoolConfig{}
-		for _, v := range kubernetesCluster.Pools {
-			nodePools = append(nodePools, civogo.KubernetesClusterPoolConfig{ID: v.ID, Count: v.Count, Size: v.Size, Labels: v.Labels, Taints: v.Taints})
-			if targetNodePool == "" && v.ID == newPool["label"].(string) {
-				targetNodePool = v.ID
-			}
-		}
-
-		// Extract labels from new desired state
-		var newLabels map[string]string
-		if rawLabels, ok := newPool["labels"].(map[string]interface{}); ok && len(rawLabels) > 0 {
-			newLabels = make(map[string]string, len(rawLabels))
-			for k, v := range rawLabels {
-				if strVal, ok := v.(string); ok {
-					newLabels[k] = strVal
-				}
-			}
-		}
-
-		// Extract taints from new desired state
-		var newTaints []corev1.Taint
-		if taintSet, ok := newPool["taint"].(*schema.Set); ok {
-			for _, taintInterface := range taintSet.List() {
-				taintMap := taintInterface.(map[string]interface{})
-				newTaints = append(newTaints, corev1.Taint{
-					Key:    taintMap["key"].(string),
-					Value:  taintMap["value"].(string),
-					Effect: corev1.TaintEffect(taintMap["effect"].(string)),
-				})
-			}
-		}
-
-		nodePools = updateNodePool(nodePools, targetNodePool, newPool["node_count"].(int), newLabels, newTaints)
-		config.Pools = nodePools
+		hasClusterUpdate = true
 	}
 
 	if d.HasChange("kubernetes_version") {
 		config.KubernetesVersion = d.Get("kubernetes_version").(string)
 		config.Region = apiClient.Region
+		hasClusterUpdate = true
 	}
 
 	if d.HasChange("applications") {
 		config.Applications = d.Get("applications").(string)
 		config.Region = apiClient.Region
+		hasClusterUpdate = true
 	}
 
 	if d.HasChange("name") {
 		config.Name = d.Get("name").(string)
 		config.Region = apiClient.Region
+		hasClusterUpdate = true
 	}
 
 	if d.HasChange("tags") {
 		config.Tags = d.Get("tags").(string)
+		hasClusterUpdate = true
 	}
 
 	if d.HasChange("write_kubeconfig") {
-		// setting atleast one field inside the KubernetesClusterConfig, just to ensure we are not sending an empty config
-		config.FirewallID = d.Get("firewall_id").(string)
 		writeKubeconfig := d.Get("write_kubeconfig").(bool)
 		if writeKubeconfig {
 			resp, err := apiClient.GetKubernetesCluster(d.Id())
@@ -491,18 +469,123 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())
-	_, err := apiClient.UpdateKubernetesCluster(d.Id(), config)
-	if err != nil {
-		return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
+	if hasClusterUpdate {
+		log.Printf("[INFO] updating the kubernetes cluster %s", d.Id())
+		_, err := apiClient.UpdateKubernetesCluster(d.Id(), config)
+		if err != nil {
+			return diag.Errorf("[ERR] failed to update kubernetes cluster: %s", err)
+		}
+
+		err = waitForClusterActive(ctx, apiClient, d.Id(), d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return diag.Errorf("Error waiting for Kubernetes cluster update: %s", err)
+		}
 	}
 
-	err = waitForKubernetesNodePoolCreate(apiClient, d, d.Id())
-	if err != nil {
-		return diag.Errorf("Error updating Kubernetes node pool: %s", err)
+	if d.HasChange("pools") {
+		old, new := d.GetChange("pools")
+		oldPool := old.([]interface{})[0].(map[string]interface{})
+		newPool := new.([]interface{})[0].(map[string]interface{})
+
+		// if the size is different, then return and error as we can't change the size of a pool
+		if oldPool["size"].(string) != newPool["size"].(string) {
+			return diag.Errorf("[ERR] Size change (%q) for existing cluster is not available at this moment", "size")
+		}
+
+		kubernetesCluster, err := apiClient.FindKubernetesCluster(d.Id())
+		if err != nil {
+			return diag.Errorf("[ERR] failed to find the kubernetes cluster: %s", err)
+		}
+
+		targetNodePool := ""
+		for _, v := range kubernetesCluster.Pools {
+			if targetNodePool == "" && v.ID == newPool["label"].(string) {
+				targetNodePool = v.ID
+			}
+		}
+		if targetNodePool == "" {
+			for _, v := range kubernetesCluster.RequiredPools {
+				if v.ID == newPool["label"].(string) {
+					targetNodePool = v.ID
+					break
+				}
+			}
+		}
+		if targetNodePool == "" {
+			if len(kubernetesCluster.Pools) > 0 {
+				targetNodePool = kubernetesCluster.Pools[0].ID
+			} else if len(kubernetesCluster.RequiredPools) > 0 {
+				targetNodePool = kubernetesCluster.RequiredPools[0].ID
+			}
+		}
+
+		// Extract labels from new desired state
+		var newLabels map[string]string
+		if rawLabels, ok := newPool["labels"].(map[string]interface{}); ok {
+			newLabels = make(map[string]string, len(rawLabels))
+			for k, v := range rawLabels {
+				if strVal, ok := v.(string); ok {
+					newLabels[k] = strVal
+				}
+			}
+		}
+
+		// Extract taints from new desired state
+		var newTaints []corev1.Taint
+		if taintSet, ok := newPool["taint"].(*schema.Set); ok {
+			newTaints = make([]corev1.Taint, 0, taintSet.Len())
+			for _, taintInterface := range taintSet.List() {
+				taintMap := taintInterface.(map[string]interface{})
+				newTaints = append(newTaints, corev1.Taint{
+					Key:    taintMap["key"].(string),
+					Value:  taintMap["value"].(string),
+					Effect: corev1.TaintEffect(taintMap["effect"].(string)),
+				})
+			}
+		}
+
+		poolUpdate := &civogo.KubernetesClusterPoolUpdateConfig{
+			Region: apiClient.Region,
+			Labels: newLabels,
+			Taints: newTaints,
+		}
+
+		newCount := newPool["node_count"].(int)
+		poolUpdate.Count = &newCount
+
+		log.Printf("[INFO] updating the kubernetes cluster pool %s", targetNodePool)
+		_, err = apiClient.UpdateKubernetesClusterPool(d.Id(), targetNodePool, poolUpdate)
+		if err != nil {
+			return diag.Errorf("[ERR] failed to update kubernetes cluster pool: %s", err)
+		}
+
+		err = waitForPoolLabelsAndTaints(ctx, apiClient, d.Id(), targetNodePool, newLabels, newTaints, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return diag.Errorf("Error waiting for Kubernetes node pool update: %s", err)
+		}
 	}
 
 	return resourceKubernetesClusterRead(ctx, d, m)
+}
+
+func waitForClusterActive(ctx context.Context, apiClient *civogo.Client, clusterID string, timeout time.Duration) error {
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{"BUILDING", "AVAILABLE", "UPGRADING", "SCALING"},
+		Target:  []string{"ACTIVE"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.GetKubernetesCluster(clusterID)
+			if err != nil {
+				return 0, "", err
+			}
+			return resp, resp.Status, nil
+		},
+		Timeout:        timeout,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err := stateConf.WaitForStateContext(ctx)
+	return err
 }
 
 // function to delete the kubernetes cluster
@@ -628,4 +711,82 @@ func customizeDiffKubernetesCluster(ctx context.Context, d *schema.ResourceDiff,
 		}
 	}
 	return nil
+}
+
+func waitForPoolLabelsAndTaints(ctx context.Context, apiClient *civogo.Client, clusterID, poolID string, expectedLabels map[string]string, expectedTaints []corev1.Taint, timeout time.Duration) error {
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{"PENDING"},
+		Target:  []string{"READY"},
+		Refresh: func() (interface{}, string, error) {
+			cluster, err := apiClient.GetKubernetesCluster(clusterID)
+			if err != nil {
+				return nil, "PENDING", err
+			}
+
+			// Find the target pool in Pools or RequiredPools
+			var labels map[string]string
+			var taints []corev1.Taint
+			found := false
+
+			for _, p := range cluster.Pools {
+				if p.ID == poolID {
+					labels = p.Labels
+					taints = p.Taints
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				for _, p := range cluster.RequiredPools {
+					if p.ID == poolID {
+						labels = p.Labels
+						taints = p.Taints
+						found = true
+						break
+					}
+				}
+			}
+
+			if !found {
+				return cluster, "PENDING", nil
+			}
+
+			// Check if labels match
+			for k, v := range expectedLabels {
+				if lv, ok := labels[k]; !ok || lv != v {
+					return cluster, "PENDING", nil
+				}
+			}
+			// If expectedLabels is empty but we wanted to clear them, check if labels is empty
+			if len(expectedLabels) == 0 && len(labels) > 0 {
+				return cluster, "PENDING", nil
+			}
+
+			// Check if taints match
+			if len(expectedTaints) != len(taints) {
+				return cluster, "PENDING", nil
+			}
+			for _, et := range expectedTaints {
+				tFound := false
+				for _, t := range taints {
+					if t.Key == et.Key && t.Value == et.Value && t.Effect == et.Effect {
+						tFound = true
+						break
+					}
+				}
+				if !tFound {
+					return cluster, "PENDING", nil
+				}
+			}
+
+			return cluster, "READY", nil
+		},
+		Timeout:        timeout,
+		Delay:          5 * time.Second,
+		MinTimeout:     5 * time.Second,
+		NotFoundChecks: 10,
+	}
+	_, err := stateConf.WaitForStateContext(ctx)
+	return err
 }
