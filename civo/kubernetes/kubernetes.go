@@ -1,6 +1,10 @@
 package kubernetes
 
 import (
+	"encoding/json"
+	"fmt"
+	"strings"
+
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/google/uuid"
@@ -136,8 +140,18 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 		"public_ip_node_pool": publicIP,
 	}
 
+	var filteredLabels map[string]string
 	if len(labels) > 0 {
-		rawPool["labels"] = labels
+		filteredLabels = make(map[string]string)
+		for k, v := range labels {
+			if !strings.HasPrefix(k, "kubernetes.civo.com/") {
+				filteredLabels[k] = v
+			}
+		}
+	}
+
+	if len(filteredLabels) > 0 {
+		rawPool["labels"] = filteredLabels
 	}
 
 	if len(taints) > 0 {
@@ -229,4 +243,32 @@ func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConf
 	}
 
 	return expandedNodePools
+}
+
+// kubernetesClusterPoolUpdatePayload defines the payload for updating a Kubernetes cluster node pool.
+// It uses pointers to map/slice with omitempty to distinguish between:
+// - Not updating a field (pointer is nil: omitted)
+// - Clearing a field (pointer points to an empty map/slice: marshals to {} or [])
+type kubernetesClusterPoolUpdatePayload struct {
+	ID               string             `json:"id,omitempty"`
+	Count            *int               `json:"count,omitempty"`
+	Size             string             `json:"size,omitempty"`
+	Labels           *map[string]string `json:"labels,omitempty"`
+	Taints           *[]corev1.Taint    `json:"taints,omitempty"`
+	PublicIPNodePool bool               `json:"public_ip_node_pool,omitempty"`
+	Region           string             `json:"region,omitempty"`
+}
+
+func updateKubernetesClusterPoolHelper(client *civogo.Client, cid, pid string, config *kubernetesClusterPoolUpdatePayload) (*civogo.KubernetesPool, error) {
+	resp, err := client.SendPutRequest(fmt.Sprintf("/v2/kubernetes/clusters/%s/pools/%s", cid, pid), config)
+	if err != nil {
+		return nil, err
+	}
+
+	pool := &civogo.KubernetesPool{}
+	if err := json.Unmarshal(resp, pool); err != nil {
+		return nil, err
+	}
+
+	return pool, nil
 }

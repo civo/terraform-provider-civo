@@ -155,7 +155,7 @@ resource "civo_kubernetes_cluster" "foobar" {
 		size = "g4s.kube.small"
 	}
 	cni = "cilium"
-} `, name, name)
+}`, name, name)
 }
 
 func TestAccCivoKubernetesCluster_labels_update(t *testing.T) {
@@ -173,20 +173,6 @@ func TestAccCivoKubernetesCluster_labels_update(t *testing.T) {
 				Config: CivoKubernetesClusterConfigLabels(kubernetesClusterName, "dev"),
 				Check: resource.ComposeTestCheckFunc(
 					CivoKubernetesClusterResourceExists(resName, &kubernetes),
-					func(s *terraform.State) error {
-						rs, ok := s.RootModule().Resources[resName]
-						if !ok {
-							return fmt.Errorf("Not found: %s", resName)
-						}
-						fmt.Println("--- ATTRIBUTES ---")
-						for k, v := range rs.Primary.Attributes {
-							if len(k) > 5 && k[:5] == "pools" {
-								fmt.Printf("ATTR: %s = %v\n", k, v)
-							}
-						}
-						fmt.Println("------------------")
-						return nil
-					},
 					resource.TestCheckResourceAttr(resName, "pools.0.labels.env", "dev"),
 				),
 			},

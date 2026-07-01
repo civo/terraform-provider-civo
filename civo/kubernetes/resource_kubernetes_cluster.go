@@ -336,12 +336,16 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 		}
 
 		if defaultPoolID != "" {
-			poolUpdate := &civogo.KubernetesClusterPoolUpdateConfig{
+			poolUpdate := &kubernetesClusterPoolUpdatePayload{
 				Region: apiClient.Region,
-				Labels: pools[0].Labels,
-				Taints: pools[0].Taints,
 			}
-			_, err = apiClient.UpdateKubernetesClusterPool(d.Id(), defaultPoolID, poolUpdate)
+			if pools[0].Labels != nil {
+				poolUpdate.Labels = &pools[0].Labels
+			}
+			if pools[0].Taints != nil {
+				poolUpdate.Taints = &pools[0].Taints
+			}
+			_, err = updateKubernetesClusterPoolHelper(apiClient, d.Id(), defaultPoolID, poolUpdate)
 			if err != nil {
 				return diag.Errorf("[ERR] failed to apply labels/taints to new kubernetes cluster: %s", err)
 			}
@@ -521,7 +525,9 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 		// Extract labels from new desired state
 		var newLabels map[string]string
-		if rawLabels, ok := newPool["labels"].(map[string]interface{}); ok {
+		hasLabels := false
+		if rawLabels, ok := newPool["labels"].(map[string]interface{}); ok && rawLabels != nil && len(rawLabels) > 0 {
+			hasLabels = true
 			newLabels = make(map[string]string, len(rawLabels))
 			for k, v := range rawLabels {
 				if strVal, ok := v.(string); ok {
@@ -530,9 +536,19 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
+		// If newLabels is nil/unset, but oldPool had labels, it means the user removed them.
+		// In this case, we want to explicitly clear them on the node pool.
+		if !hasLabels {
+			if oldLabels, ok := oldPool["labels"].(map[string]interface{}); ok && len(oldLabels) > 0 {
+				newLabels = make(map[string]string)
+			}
+		}
+
 		// Extract taints from new desired state
 		var newTaints []corev1.Taint
-		if taintSet, ok := newPool["taint"].(*schema.Set); ok {
+		hasTaints := false
+		if taintSet, ok := newPool["taint"].(*schema.Set); ok && taintSet != nil && taintSet.Len() > 0 {
+			hasTaints = true
 			newTaints = make([]corev1.Taint, 0, taintSet.Len())
 			for _, taintInterface := range taintSet.List() {
 				taintMap := taintInterface.(map[string]interface{})
@@ -544,17 +560,27 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		poolUpdate := &civogo.KubernetesClusterPoolUpdateConfig{
+		if !hasTaints {
+			if oldTaints, ok := oldPool["taint"].(*schema.Set); ok && oldTaints != nil && oldTaints.Len() > 0 {
+				newTaints = make([]corev1.Taint, 0)
+			}
+		}
+
+		poolUpdate := &kubernetesClusterPoolUpdatePayload{
 			Region: apiClient.Region,
-			Labels: newLabels,
-			Taints: newTaints,
+		}
+		if newLabels != nil {
+			poolUpdate.Labels = &newLabels
+		}
+		if newTaints != nil {
+			poolUpdate.Taints = &newTaints
 		}
 
 		newCount := newPool["node_count"].(int)
 		poolUpdate.Count = &newCount
 
 		log.Printf("[INFO] updating the kubernetes cluster pool %s", targetNodePool)
-		_, err = apiClient.UpdateKubernetesClusterPool(d.Id(), targetNodePool, poolUpdate)
+		_, err = updateKubernetesClusterPoolHelper(apiClient, d.Id(), targetNodePool, poolUpdate)
 		if err != nil {
 			return diag.Errorf("[ERR] failed to update kubernetes cluster pool: %s", err)
 		}
@@ -724,13 +750,13 @@ func waitForPoolLabelsAndTaints(ctx context.Context, apiClient *civogo.Client, c
 			}
 
 			// Find the target pool in Pools or RequiredPools
-			var labels map[string]string
+			var rawLabels map[string]string
 			var taints []corev1.Taint
 			found := false
 
 			for _, p := range cluster.Pools {
 				if p.ID == poolID {
-					labels = p.Labels
+					rawLabels = p.Labels
 					taints = p.Taints
 					found = true
 					break
@@ -740,7 +766,7 @@ func waitForPoolLabelsAndTaints(ctx context.Context, apiClient *civogo.Client, c
 			if !found {
 				for _, p := range cluster.RequiredPools {
 					if p.ID == poolID {
-						labels = p.Labels
+						rawLabels = p.Labels
 						taints = p.Taints
 						found = true
 						break
@@ -752,31 +778,43 @@ func waitForPoolLabelsAndTaints(ctx context.Context, apiClient *civogo.Client, c
 				return cluster, "PENDING", nil
 			}
 
-			// Check if labels match
-			for k, v := range expectedLabels {
-				if lv, ok := labels[k]; !ok || lv != v {
-					return cluster, "PENDING", nil
+			// Filter out Civo/k3s-managed labels to avoid infinite spin
+			labels := make(map[string]string)
+			for k, v := range rawLabels {
+				if !strings.HasPrefix(k, "kubernetes.civo.com/") {
+					labels[k] = v
 				}
-			}
-			// If expectedLabels is empty but we wanted to clear them, check if labels is empty
-			if len(expectedLabels) == 0 && len(labels) > 0 {
-				return cluster, "PENDING", nil
 			}
 
-			// Check if taints match
-			if len(expectedTaints) != len(taints) {
-				return cluster, "PENDING", nil
-			}
-			for _, et := range expectedTaints {
-				tFound := false
-				for _, t := range taints {
-					if t.Key == et.Key && t.Value == et.Value && t.Effect == et.Effect {
-						tFound = true
-						break
+			// Check if labels match (only if expectedLabels is not nil)
+			if expectedLabels != nil {
+				for k, v := range expectedLabels {
+					if lv, ok := labels[k]; !ok || lv != v {
+						return cluster, "PENDING", nil
 					}
 				}
-				if !tFound {
+				// If expectedLabels is explicitly empty but we wanted to clear them, check if labels is empty
+				if len(expectedLabels) == 0 && len(labels) > 0 {
 					return cluster, "PENDING", nil
+				}
+			}
+
+			// Check if taints match (only if expectedTaints is not nil)
+			if expectedTaints != nil {
+				if len(expectedTaints) != len(taints) {
+					return cluster, "PENDING", nil
+				}
+				for _, et := range expectedTaints {
+					tFound := false
+					for _, t := range taints {
+						if t.Key == et.Key && t.Value == et.Value && t.Effect == et.Effect {
+							tFound = true
+							break
+						}
+					}
+					if !tFound {
+						return cluster, "PENDING", nil
+					}
 				}
 			}
 

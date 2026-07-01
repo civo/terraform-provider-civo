@@ -168,7 +168,19 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 	d.Set("instance_names", poolInstanceNames)
 
 	if len(respPool.Labels) > 0 {
-		d.Set("labels", respPool.Labels)
+		filteredLabels := make(map[string]string)
+		for k, v := range respPool.Labels {
+			if !strings.HasPrefix(k, "kubernetes.civo.com/") {
+				filteredLabels[k] = v
+			}
+		}
+		if len(filteredLabels) > 0 {
+			d.Set("labels", filteredLabels)
+		} else {
+			d.Set("labels", nil)
+		}
+	} else {
+		d.Set("labels", nil)
 	}
 
 	if len(respPool.Taints) > 0 {
@@ -201,7 +213,7 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 	}
 
 	clusterID := d.Get("cluster_id").(string)
-	poolUpdate := &civogo.KubernetesClusterPoolUpdateConfig{
+	poolUpdate := &kubernetesClusterPoolUpdatePayload{
 		Region: apiClient.Region,
 	}
 
@@ -216,23 +228,21 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 	}
 
 	if d.HasChange("labels") {
+		nodePoolLabels := make(map[string]string)
 		if attr, ok := d.GetOk("labels"); ok {
-			nodePoolLabels := make(map[string]string)
 			for k, v := range attr.(map[string]interface{}) {
 				if s, ok := v.(string); ok {
 					nodePoolLabels[k] = s
 				}
 			}
-			poolUpdate.Labels = nodePoolLabels
-		} else {
-			poolUpdate.Labels = nil
 		}
+		poolUpdate.Labels = &nodePoolLabels
 	}
 
 	if d.HasChange("taint") {
+		nodePoolTains := []corev1.Taint{}
 		if attr, ok := d.GetOk("taint"); ok {
 			log.Printf("[INFO] dentro de tains")
-			nodePoolTains := []corev1.Taint{}
 			for _, v := range attr.(*schema.Set).List() {
 				taint := v.(map[string]interface{})
 				nodePoolTains = append(nodePoolTains, corev1.Taint{
@@ -241,14 +251,12 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 					Effect: corev1.TaintEffect(taint["effect"].(string)),
 				})
 			}
-			poolUpdate.Taints = nodePoolTains
-		} else {
-			poolUpdate.Taints = []corev1.Taint{}
 		}
+		poolUpdate.Taints = &nodePoolTains
 	}
 
 	log.Printf("[INFO] updating the kubernetes cluster pool %s", d.Id())
-	_, err = apiClient.UpdateKubernetesClusterPool(getKubernetesCluster.ID, d.Id(), poolUpdate)
+	_, err = updateKubernetesClusterPoolHelper(apiClient, getKubernetesCluster.ID, d.Id(), poolUpdate)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to update kubernetes cluster pool: %s", err)
 	}
@@ -350,19 +358,6 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-// UpdateNodePool is a utility function to update node pool from a kuberentes cluster
-func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int, labels map[string]string, taints []corev1.Taint) []civogo.KubernetesClusterPoolConfig {
-	for k, v := range s {
-		if strings.Contains(v.ID, id) {
-			s[k].Count = count
-			s[k].Labels = labels
-			s[k].Taints = taints
-			break
-		}
-	}
-	return s
 }
 
 // waitForKubernetesNodePoolCreate is a utility function to wait for a node pool to be created
