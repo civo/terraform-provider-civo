@@ -185,7 +185,7 @@ func TestAccCivoKubernetesCluster_labels_update(t *testing.T) {
 			},
 			{
 				// Remove labels completely to test clearing them
-				Config: CivoKubernetesClusterConfigBasic(kubernetesClusterName),
+				Config: CivoKubernetesClusterConfigNoLabels(kubernetesClusterName),
 				Check: resource.ComposeTestCheckFunc(
 					CivoKubernetesClusterResourceExists(resName, &kubernetes),
 					resource.TestCheckNoResourceAttr(resName, "pools.0.labels.env"),
@@ -214,4 +214,22 @@ resource "civo_kubernetes_cluster" "foobar" {
 		}
 	}
 }`, name, name, env)
+}
+
+func CivoKubernetesClusterConfigNoLabels(name string) string {
+	return fmt.Sprintf(`
+resource "civo_firewall" "default" {
+	name = "%s"
+	create_default_rules = true
+	region = "NYC1"
+}
+
+resource "civo_kubernetes_cluster" "foobar" {
+	name = "%s"
+	firewall_id = civo_firewall.default.id
+	pools {
+		node_count = 2
+		size = "g4s.kube.small"
+	}
+}`, name, name)
 }

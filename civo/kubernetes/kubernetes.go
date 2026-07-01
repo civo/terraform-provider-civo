@@ -114,6 +114,13 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 		size = p.Size
 		labels = p.Labels
 		taints = p.Taints
+		for _, rp := range cluster.RequiredPools {
+			if rp.ID == p.ID {
+				labels = rp.Labels
+				taints = rp.Taints
+				break
+			}
+		}
 		publicIP = p.PublicIPNodePool
 		instanceNames = p.InstanceNames
 	} else {

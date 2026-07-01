@@ -749,12 +749,12 @@ func waitForPoolLabelsAndTaints(ctx context.Context, apiClient *civogo.Client, c
 				return nil, "PENDING", err
 			}
 
-			// Find the target pool in Pools or RequiredPools
+			// Find the target pool in RequiredPools or Pools
 			var rawLabels map[string]string
 			var taints []corev1.Taint
 			found := false
 
-			for _, p := range cluster.Pools {
+			for _, p := range cluster.RequiredPools {
 				if p.ID == poolID {
 					rawLabels = p.Labels
 					taints = p.Taints
@@ -764,7 +764,7 @@ func waitForPoolLabelsAndTaints(ctx context.Context, apiClient *civogo.Client, c
 			}
 
 			if !found {
-				for _, p := range cluster.RequiredPools {
+				for _, p := range cluster.Pools {
 					if p.ID == poolID {
 						rawLabels = p.Labels
 						taints = p.Taints
