@@ -22,8 +22,14 @@ Networks may be looked up by id or label, and you can optionally pass region if 
 data "civo_network" "test" {
     label = "test-network"
     region = "LON1"
-    cidr_v4        = "10.0.0.0/24"
-    nameservers_v4 = ["8.8.8.8", "8.8.4.4", "1.1.1.1"]
+}
+
+output "network_cidr_v4" {
+  value = data.civo_network.test.cidr_v4
+}
+
+output "network_nameservers_v4" {
+  value = data.civo_network.test.nameservers_v4
 }
 ```
 
@@ -37,8 +43,8 @@ data "civo_network" "test" {
 
 ### Read-Only
 
+- `cidr_v4` (String) The CIDR block for the network
 - `default` (Boolean) If is the default network
 - `id` (String) The ID of this resource.
 - `name` (String) The name of the network
-
-
+- `nameservers_v4` (List of String) List of nameservers for the network

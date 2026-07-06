@@ -1,6 +1,12 @@
 data "civo_network" "test" {
     label = "test-network"
     region = "LON1"
-    cidr_v4        = "10.0.0.0/24"
-    nameservers_v4 = ["8.8.8.8", "8.8.4.4", "1.1.1.1"]
+}
+
+output "network_cidr_v4" {
+  value = data.civo_network.test.cidr_v4
+}
+
+output "network_nameservers_v4" {
+  value = data.civo_network.test.nameservers_v4
 }

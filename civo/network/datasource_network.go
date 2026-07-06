@@ -53,6 +53,19 @@ func DataSourceNetwork() *schema.Resource {
 				Computed:    true,
 				Description: "If is the default network",
 			},
+			"cidr_v4": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The CIDR block for the network",
+			},
+			"nameservers_v4": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "List of nameservers for the network",
+			},
 		},
 	}
 }
@@ -90,6 +103,8 @@ func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interfac
 	d.Set("label", foundNetwork.Label)
 	d.Set("region", apiClient.Region)
 	d.Set("default", foundNetwork.Default)
+	d.Set("cidr_v4", foundNetwork.CIDR)
+	d.Set("nameservers_v4", foundNetwork.NameserversV4)
 
 	return nil
 }
