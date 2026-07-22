@@ -79,6 +79,10 @@ func dataSourceFirewallRead(_ context.Context, d *schema.ResourceData, m interfa
 		foundFirewall = firewall
 	}
 
+	if foundFirewall == nil {
+		return diag.Errorf("[ERR] firewall not found; specify a valid id or name")
+	}
+
 	d.SetId(foundFirewall.ID)
 	d.Set("name", foundFirewall.Name)
 	d.Set("network_id", foundFirewall.NetworkID)
