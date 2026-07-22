@@ -196,5 +196,3 @@ func TestFlattenNodePool(t *testing.T) {
 		})
 	}
 }
-
-
