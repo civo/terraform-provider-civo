@@ -26,21 +26,20 @@ func DataSourceNetwork() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				AtLeastOneOf: []string{"id", "label", "region"},
+				AtLeastOneOf: []string{"id", "label"},
 			},
 			"label": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				AtLeastOneOf: []string{"id", "label", "region"},
+				AtLeastOneOf: []string{"id", "label"},
 				Description:  "The label of an existing network",
 			},
 			"region": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				AtLeastOneOf: []string{"id", "label", "region"},
-				Description:  "The region of an existing network",
+				Description:  "The region an existing network lives in; used to scope the lookup by id or label",
 			},
 			// Computed resource
 			"name": {
@@ -96,6 +95,10 @@ func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interfac
 		}
 
 		foundNetwork = network
+	}
+
+	if foundNetwork == nil {
+		return diag.Errorf("[ERR] network not found; specify a valid id or label")
 	}
 
 	d.SetId(foundNetwork.ID)

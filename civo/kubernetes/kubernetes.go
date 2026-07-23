@@ -1,6 +1,10 @@
 package kubernetes
 
 import (
+	"encoding/json"
+	"fmt"
+	"strings"
+
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/google/uuid"
@@ -91,21 +95,82 @@ func nodePoolSchema(isResource bool) map[string]*schema.Schema {
 
 // function to flatten all instances inside the cluster
 func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
-	if cluster.Pools == nil {
+	if len(cluster.Pools) == 0 && len(cluster.RequiredPools) == 0 {
 		return nil
 	}
 
-	flattenedPool := make([]interface{}, 0)
+	var poolID string
+	var count int
+	var size string
+	var labels map[string]string
+	var taints []corev1.Taint
+	var publicIP bool
+	var instanceNames []string
 
+	if len(cluster.Pools) > 0 {
+		p := cluster.Pools[0]
+		poolID = p.ID
+		count = p.Count
+		size = p.Size
+		labels = p.Labels
+		taints = p.Taints
+		for _, rp := range cluster.RequiredPools {
+			if rp.ID == p.ID {
+				labels = rp.Labels
+				taints = rp.Taints
+				break
+			}
+		}
+		publicIP = p.PublicIPNodePool
+		instanceNames = p.InstanceNames
+	} else {
+		p := cluster.RequiredPools[0]
+		poolID = p.ID
+		count = p.Count
+		size = p.Size
+		labels = p.Labels
+		taints = p.Taints
+		publicIP = p.PublicIPNodePool
+	}
+
+	flattenedPool := make([]interface{}, 0)
 	poolInstanceNames := make([]string, 0)
-	poolInstanceNames = append(poolInstanceNames, cluster.Pools[0].InstanceNames...)
+	if len(instanceNames) > 0 {
+		poolInstanceNames = append(poolInstanceNames, instanceNames...)
+	}
 
 	rawPool := map[string]interface{}{
-		"label":               cluster.Pools[0].ID,
-		"node_count":          cluster.Pools[0].Count,
-		"size":                cluster.Pools[0].Size,
+		"label":               poolID,
+		"node_count":          count,
+		"size":                size,
 		"instance_names":      poolInstanceNames,
-		"public_ip_node_pool": cluster.Pools[0].PublicIPNodePool,
+		"public_ip_node_pool": publicIP,
+	}
+
+	var filteredLabels map[string]string
+	if len(labels) > 0 {
+		filteredLabels = make(map[string]string)
+		for k, v := range labels {
+			if !strings.HasPrefix(k, "kubernetes.civo.com/") {
+				filteredLabels[k] = v
+			}
+		}
+	}
+
+	if len(filteredLabels) > 0 {
+		rawPool["labels"] = filteredLabels
+	}
+
+	if len(taints) > 0 {
+		rawTaints := make([]map[string]interface{}, 0, len(taints))
+		for _, t := range taints {
+			rawTaints = append(rawTaints, map[string]interface{}{
+				"key":    t.Key,
+				"value":  t.Value,
+				"effect": string(t.Effect),
+			})
+		}
+		rawPool["taint"] = rawTaints
 	}
 
 	flattenedPool = append(flattenedPool, rawPool)
@@ -185,4 +250,32 @@ func expandNodePools(nodePools []interface{}) []civogo.KubernetesClusterPoolConf
 	}
 
 	return expandedNodePools
+}
+
+// kubernetesClusterPoolUpdatePayload defines the payload for updating a Kubernetes cluster node pool.
+// It uses pointers to map/slice with omitempty to distinguish between:
+// - Not updating a field (pointer is nil: omitted)
+// - Clearing a field (pointer points to an empty map/slice: marshals to {} or [])
+type kubernetesClusterPoolUpdatePayload struct {
+	ID               string             `json:"id,omitempty"`
+	Count            *int               `json:"count,omitempty"`
+	Size             string             `json:"size,omitempty"`
+	Labels           *map[string]string `json:"labels,omitempty"`
+	Taints           *[]corev1.Taint    `json:"taints,omitempty"`
+	PublicIPNodePool bool               `json:"public_ip_node_pool,omitempty"`
+	Region           string             `json:"region,omitempty"`
+}
+
+func updateKubernetesClusterPoolHelper(client *civogo.Client, cid, pid string, config *kubernetesClusterPoolUpdatePayload) (*civogo.KubernetesPool, error) {
+	resp, err := client.SendPutRequest(fmt.Sprintf("/v2/kubernetes/clusters/%s/pools/%s", cid, pid), config)
+	if err != nil {
+		return nil, err
+	}
+
+	pool := &civogo.KubernetesPool{}
+	if err := json.Unmarshal(resp, pool); err != nil {
+		return nil, err
+	}
+
+	return pool, nil
 }

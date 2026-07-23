@@ -157,3 +157,79 @@ resource "civo_kubernetes_cluster" "foobar" {
 	cni = "cilium"
 }`, name, name)
 }
+
+func TestAccCivoKubernetesCluster_labels_update(t *testing.T) {
+	var kubernetes civogo.KubernetesCluster
+
+	resName := "civo_kubernetes_cluster.foobar"
+	var kubernetesClusterName = acctest.RandomWithPrefix("tf-test") + ".example"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { acceptance.TestAccPreCheck(t) },
+		Providers:    acceptance.TestAccProviders,
+		CheckDestroy: acceptance.CivoKubernetesClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: CivoKubernetesClusterConfigLabels(kubernetesClusterName, "dev"),
+				Check: resource.ComposeTestCheckFunc(
+					CivoKubernetesClusterResourceExists(resName, &kubernetes),
+					resource.TestCheckResourceAttr(resName, "pools.0.labels.env", "dev"),
+				),
+			},
+			{
+				Config: CivoKubernetesClusterConfigLabels(kubernetesClusterName, "prod"),
+				Check: resource.ComposeTestCheckFunc(
+					CivoKubernetesClusterResourceExists(resName, &kubernetes),
+					resource.TestCheckResourceAttr(resName, "pools.0.labels.env", "prod"),
+				),
+			},
+			{
+				// Remove labels completely to test clearing them
+				Config: CivoKubernetesClusterConfigNoLabels(kubernetesClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					CivoKubernetesClusterResourceExists(resName, &kubernetes),
+					resource.TestCheckNoResourceAttr(resName, "pools.0.labels.env"),
+				),
+			},
+		},
+	})
+}
+
+func CivoKubernetesClusterConfigLabels(name, env string) string {
+	return fmt.Sprintf(`
+resource "civo_firewall" "default" {
+	name = "%s"
+	create_default_rules = true
+	region = "NYC1"
+}
+
+resource "civo_kubernetes_cluster" "foobar" {
+	name = "%s"
+	firewall_id = civo_firewall.default.id
+	pools {
+		node_count = 2
+		size = "g4s.kube.small"
+		labels = {
+			env = "%s"
+		}
+	}
+}`, name, name, env)
+}
+
+func CivoKubernetesClusterConfigNoLabels(name string) string {
+	return fmt.Sprintf(`
+resource "civo_firewall" "default" {
+	name = "%s"
+	create_default_rules = true
+	region = "NYC1"
+}
+
+resource "civo_kubernetes_cluster" "foobar" {
+	name = "%s"
+	firewall_id = civo_firewall.default.id
+	pools {
+		node_count = 2
+		size = "g4s.kube.small"
+	}
+}`, name, name)
+}
