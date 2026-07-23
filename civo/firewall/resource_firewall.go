@@ -120,7 +120,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	createDefaultRules := d.Get("create_default_rules").(bool)
@@ -186,7 +186,7 @@ func resourceFirewallRead(_ context.Context, d *schema.ResourceData, m interface
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retriving the firewall %s", d.Id())
@@ -225,7 +225,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	if d.HasChange("name") {
@@ -318,7 +318,7 @@ func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interfa
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	firewallID := d.Id()

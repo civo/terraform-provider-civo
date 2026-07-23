@@ -349,3 +349,14 @@ func CheckFileSize(path string) error {
 	}
 	return nil
 }
+
+// RegionalClient returns a shallow copy of the API client scoped to the given
+// region. Resources must use this instead of mutating apiClient.Region directly:
+// the provider shares a single *civogo.Client across all resources, and Terraform
+// runs resource operations concurrently, so mutating the shared client's Region
+// races and can send requests to the wrong region.
+func RegionalClient(apiClient *civogo.Client, region string) *civogo.Client {
+	c := *apiClient
+	c.Region = region
+	return &c
+}

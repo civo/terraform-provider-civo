@@ -207,7 +207,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] configuring the instance %s", d.Get("hostname").(string))
@@ -370,7 +370,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retriving the instance %s", d.Id())
@@ -447,7 +447,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	// check if the size change if change we send to resize the instance
@@ -609,7 +609,7 @@ func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] deleting the instance %s", d.Id())

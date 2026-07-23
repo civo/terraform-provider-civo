@@ -66,7 +66,7 @@ func resourceVPCSubnetCreate(ctx context.Context, d *schema.ResourceData, m inte
 	apiClient := m.(*civogo.Client)
 
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	networkID := d.Get("network_id").(string)
@@ -89,7 +89,7 @@ func resourceVPCSubnetRead(_ context.Context, d *schema.ResourceData, m interfac
 	apiClient := m.(*civogo.Client)
 
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	networkID := d.Get("network_id").(string)
@@ -117,7 +117,7 @@ func resourceVPCSubnetDelete(_ context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*civogo.Client)
 
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	networkID := d.Get("network_id").(string)

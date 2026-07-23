@@ -62,7 +62,7 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	instanceID := d.Get("instance_id").(string)
@@ -131,7 +131,7 @@ func resourceVolumeAttachmentRead(_ context.Context, d *schema.ResourceData, m i
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	instanceID := d.Get("instance_id").(string)
@@ -162,7 +162,7 @@ func resourceVolumeAttachmentDelete(_ context.Context, d *schema.ResourceData, m
 
 	// overwrite the region if it's defined
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	volumeID := d.Get("volume_id").(string)
