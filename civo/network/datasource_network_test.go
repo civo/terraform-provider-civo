@@ -21,6 +21,8 @@ func TestAccDataSourceCivoNetwork_basic(t *testing.T) {
 				Config: DataSourceCivoNetworkConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(datasourceName, "label", name),
+					resource.TestCheckResourceAttr(datasourceName, "cidr_v4", "10.0.0.0/24"),
+					resource.TestCheckResourceAttr(datasourceName, "nameservers_v4.#", "3"),
 				),
 			},
 		},
@@ -32,6 +34,8 @@ func DataSourceCivoNetworkConfig(name string) string {
 resource "civo_network" "foobar" {
 	label = "%s"
 	region = "LON1"
+	cidr_v4 = "10.0.0.0/24"
+	nameservers_v4 = ["8.8.8.8", "8.8.4.4", "1.1.1.1"]
 }
 
 data "civo_network" "foobar" {
