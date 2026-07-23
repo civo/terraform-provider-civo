@@ -66,7 +66,7 @@ resource "civo_dns_domain_record" "www" {
 
 - `domain_id` (String) ID from domain name
 - `name` (String) The portion before the domain name (e.g. www) or an @ for the apex/root domain (you cannot use an A record with an amex/root domain)
-- `ttl` (Number) How long caching DNS servers should cache this record for, in seconds (the minimum is 600 and the default if unspecified is 600)
+- `ttl` (Number) How long caching DNS servers should cache this record for, in seconds (the minimum is 60 and the default if unspecified is 600)
 - `type` (String) The choice of RR type from a, cname, mx or txt
 - `value` (String) The IP address (A or MX), hostname (CNAME or MX) or text value (TXT) to serve for this record
 
