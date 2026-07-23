@@ -1,4 +1,11 @@
 
+## [v1.2.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.6) (22 July 2026)
+
+### Merged
+- [#403](https://github.com/civo/terraform-provider-civo/pull/403) - chore(deps): bump golang.org/x/crypto to v0.52.0 and x/net to v0.55.0
+- [#402](https://github.com/civo/terraform-provider-civo/pull/402) - fix: prevent nil pointer panic in network/firewall data sources
+- [#388](https://github.com/civo/terraform-provider-civo/pull/388) - fix(380): apply labels and taints to nodes in default node pool
+
 ## [v1.2.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.5) (12 May 2026)
 
 ### Merged
