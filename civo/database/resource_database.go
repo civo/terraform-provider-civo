@@ -127,7 +127,7 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] configuring the database %s", d.Get("name").(string))
@@ -208,7 +208,7 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	_, err := apiClient.FindDatabase(d.Id())
@@ -250,7 +250,7 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interfa
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retriving the Database %s", d.Id())
@@ -288,7 +288,7 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] deleting the Database %s", d.Id())

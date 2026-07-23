@@ -53,7 +53,7 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	// We check if the instance is valid and if it is not we return an error
@@ -115,7 +115,7 @@ func resourceInstanceReservedIPRead(_ context.Context, d *schema.ResourceData, m
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	instanceID := d.Get("instance_id").(string)
@@ -141,7 +141,7 @@ func resourceInstanceReservedIPDelete(ctx context.Context, d *schema.ResourceDat
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	reservedIP := d.Get("reserved_ip_id").(string)

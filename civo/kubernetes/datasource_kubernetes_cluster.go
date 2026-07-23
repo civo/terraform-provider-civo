@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -163,7 +164,7 @@ func dataSourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, 
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	var foundCluster *civogo.KubernetesCluster

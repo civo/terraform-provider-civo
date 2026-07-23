@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -65,7 +66,7 @@ func dataSourceVPCSubnetRead(_ context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*civogo.Client)
 
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	networkID := d.Get("network_id").(string)
