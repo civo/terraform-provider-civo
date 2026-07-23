@@ -219,7 +219,7 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] configuring a new kubernetes cluster %s", d.Get("name").(string))
@@ -365,7 +365,7 @@ func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m 
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retrieving the kubernetes cluster %s", d.Id())
@@ -421,7 +421,7 @@ func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	config := &civogo.KubernetesClusterConfig{}
@@ -620,7 +620,7 @@ func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())

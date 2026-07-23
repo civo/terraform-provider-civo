@@ -54,7 +54,7 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] creating the new ip address %s", d.Get("name").(string))
@@ -101,7 +101,7 @@ func resourceReservedIPRead(_ context.Context, d *schema.ResourceData, m interfa
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retriving the ip address %s", d.Id())
@@ -128,7 +128,7 @@ func resourceReservedIPUpdate(ctx context.Context, d *schema.ResourceData, m int
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	if d.HasChange("name") {
@@ -151,7 +151,7 @@ func resourceReservedIPDelete(_ context.Context, d *schema.ResourceData, m inter
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] deleting the ip resource %s", d.Id())

@@ -45,7 +45,7 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	clusterID := d.Get("cluster_id").(string)
@@ -204,7 +204,7 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	old, new := d.GetChange("size")
@@ -281,7 +281,7 @@ func resourceKubernetesClusterNodePoolDelete(ctx context.Context, d *schema.Reso
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
@@ -331,7 +331,7 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 		}
 
 		currentRegionCode := region.Code
-		apiClient.Region = currentRegionCode
+		apiClient = utils.RegionalClient(apiClient, currentRegionCode)
 
 		log.Printf("[INFO] Retriving the node pool %s from region %s", nodePoolID, currentRegionCode)
 		respPool, err := apiClient.GetKubernetesClusterPool(clusterID, nodePoolID)

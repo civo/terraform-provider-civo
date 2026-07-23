@@ -114,7 +114,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
@@ -164,7 +164,7 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	CurrentNetwork := civogo.Network{}
@@ -202,7 +202,7 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	if d.HasChange("label") {
@@ -234,7 +234,7 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	networkID := d.Id()

@@ -73,7 +73,7 @@ func resourceObjectStoreCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] configuring the Object Store %s", d.Get("name").(string))
@@ -125,7 +125,7 @@ func resourceObjectStoreRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retriving the Object Store %s", d.Id())
@@ -155,7 +155,7 @@ func resourceObjectStoreUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	_, err := apiClient.FindObjectStore(d.Id())
@@ -186,7 +186,7 @@ func resourceObjectStoreDelete(ctx context.Context, d *schema.ResourceData, m in
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] deleting the Object Store %s", d.Id())

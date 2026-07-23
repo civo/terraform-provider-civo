@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -128,7 +129,7 @@ func dataSourceLoadBalancerRead(_ context.Context, d *schema.ResourceData, m int
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	var searchBy string

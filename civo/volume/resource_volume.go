@@ -69,7 +69,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] configuring the volume %s", d.Get("name").(string))
@@ -126,7 +126,7 @@ func resourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface{}
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retrieving the volume %s", d.Id())
@@ -155,7 +155,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	// overwrite the region if is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retrieving the volume %s", d.Id())
@@ -220,7 +220,7 @@ func resourceVolumeDelete(_ context.Context, d *schema.ResourceData, m interface
 
 	// overwrite the region if is define in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] deleting the volume %s", d.Id())
@@ -246,7 +246,7 @@ func resourceVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 		}
 
 		currentRegion := region.Code
-		apiClient.Region = currentRegion
+		apiClient = utils.RegionalClient(apiClient, currentRegion)
 
 		volumes, err := apiClient.ListVolumes()
 		if err != nil {

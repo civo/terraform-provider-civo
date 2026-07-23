@@ -68,7 +68,7 @@ func resourceObjectStoreCredentialCreate(ctx context.Context, d *schema.Resource
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] configuring the Object Store Credential %s", d.Get("name").(string))
@@ -124,7 +124,7 @@ func resourceObjectStoreCredentialRead(ctx context.Context, d *schema.ResourceDa
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] retriving the Object Store Credential %s", d.Id())
@@ -151,7 +151,7 @@ func resourceObjectStoreCredentialUpdate(ctx context.Context, d *schema.Resource
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	_, err := apiClient.FindObjectStoreCredential(d.Id())
@@ -188,7 +188,7 @@ func resourceObjectStoreCredentialDelete(ctx context.Context, d *schema.Resource
 
 	// overwrite the region if it is defined in the datasource
 	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+		apiClient = utils.RegionalClient(apiClient, region.(string))
 	}
 
 	log.Printf("[INFO] deleting the Object Store Credential %s", d.Id())

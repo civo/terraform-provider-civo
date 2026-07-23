@@ -6,6 +6,7 @@ import (
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -43,7 +44,7 @@ func getDataSourceInstances(m interface{}, extra map[string]interface{}) ([]inte
 	}
 
 	if region != "" {
-		apiClient.Region = region
+		apiClient = utils.RegionalClient(apiClient, region)
 	}
 
 	var instance []interface{}
