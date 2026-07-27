@@ -44,7 +44,11 @@ func getDataSourceInstances(m interface{}, extra map[string]interface{}) ([]inte
 	}
 
 	if region != "" {
-		apiClient = utils.RegionalClient(apiClient, region)
+		var err error
+		apiClient, err = utils.RegionalClient(apiClient, utils.WithRegion(region))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var instance []interface{}

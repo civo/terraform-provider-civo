@@ -118,9 +118,9 @@ func ResourceFirewall() *schema.Resource {
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.NetworkRef("network_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	createDefaultRules := d.Get("create_default_rules").(bool)
@@ -184,9 +184,9 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceFirewallRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the firewall %s", d.Id())
@@ -223,9 +223,9 @@ func resourceFirewallRead(_ context.Context, d *schema.ResourceData, m interface
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("name") {
@@ -316,14 +316,14 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	firewallID := d.Id()
 	log.Printf("[INFO] Checking if firewall %s exists", firewallID)
-	_, err := apiClient.FindVPCFirewall(firewallID)
+	_, err = apiClient.FindVPCFirewall(firewallID)
 	if err != nil {
 		log.Printf("[INFO] Unable to find firewall %s - probably it's been deleted", firewallID)
 		return nil

@@ -43,9 +43,9 @@ func ResourceKubernetesClusterNodePool() *schema.Resource {
 func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	clusterID := d.Get("cluster_id").(string)
@@ -202,9 +202,9 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	old, new := d.GetChange("size")
@@ -279,9 +279,9 @@ func resourceKubernetesClusterNodePoolDelete(ctx context.Context, d *schema.Reso
 		return diag.Errorf("[INFO] error getting kubernetes cluster: %s", clusterID)
 	}
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err = utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
@@ -331,7 +331,10 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 		}
 
 		currentRegionCode := region.Code
-		apiClient = utils.RegionalClient(apiClient, currentRegionCode)
+		apiClient, err = utils.RegionalClient(apiClient, utils.WithRegion(currentRegionCode))
+		if err != nil {
+			return nil, err
+		}
 
 		log.Printf("[INFO] Retriving the node pool %s from region %s", nodePoolID, currentRegionCode)
 		respPool, err := apiClient.GetKubernetesClusterPool(clusterID, nodePoolID)

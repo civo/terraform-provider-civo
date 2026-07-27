@@ -51,9 +51,9 @@ func ResourceInstanceReservedIPAssignment() *schema.Resource {
 func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.InstanceRef("instance_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	// We check if the instance is valid and if it is not we return an error
@@ -113,9 +113,9 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 func resourceInstanceReservedIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	instanceID := d.Get("instance_id").(string)
@@ -139,16 +139,16 @@ func resourceInstanceReservedIPRead(_ context.Context, d *schema.ResourceData, m
 func resourceInstanceReservedIPDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	reservedIP := d.Get("reserved_ip_id").(string)
 
 	// We check if the reserved ip is valid and if it is not we return an error
 	log.Printf("[INFO] unassign the ip (%s) from the instance", reservedIP)
-	_, err := apiClient.UnassignVPCIP(reservedIP, apiClient.Region)
+	_, err = apiClient.UnassignVPCIP(reservedIP, apiClient.Region)
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to unassign the ip %s: %s", reservedIP, err)
 	}

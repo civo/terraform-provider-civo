@@ -217,9 +217,9 @@ func applicationSchema() *schema.Schema {
 func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.NetworkRef("network_id"), utils.FirewallRef("firewall_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] configuring a new kubernetes cluster %s", d.Get("name").(string))
@@ -363,9 +363,9 @@ func resourceKubernetesClusterCreate(ctx context.Context, d *schema.ResourceData
 func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retrieving the kubernetes cluster %s", d.Id())
@@ -419,9 +419,9 @@ func resourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m 
 func resourceKubernetesClusterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	config := &civogo.KubernetesClusterConfig{}
@@ -618,13 +618,13 @@ func waitForClusterActive(ctx context.Context, apiClient *civogo.Client, cluster
 func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
-	_, err := apiClient.DeleteKubernetesCluster(d.Id())
+	_, err = apiClient.DeleteKubernetesCluster(d.Id())
 	if err != nil {
 		return diag.Errorf("[INFO] an error occurred while trying to delete the kubernetes cluster %s", err)
 	}

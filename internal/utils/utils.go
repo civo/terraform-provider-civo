@@ -350,12 +350,196 @@ func CheckFileSize(path string) error {
 	return nil
 }
 
-// RegionalClient returns a shallow copy of the API client scoped to the given
-// region. Resources must use this instead of mutating apiClient.Region directly:
-// the provider shares a single *civogo.Client across all resources, and Terraform
-// runs resource operations concurrently, so mutating the shared client's Region
-// races and can send requests to the wrong region.
-func RegionalClient(apiClient *civogo.Client, region string) *civogo.Client {
+// RegionRef points at a schema field holding the ID of another region-scoped
+// resource, plus a probe that reports whether that ID is visible in a given
+// region. It lets a resource work out which region it belongs in when the user
+// did not spell out `region` themselves.
+type RegionRef struct {
+	// Field is the schema key holding the referenced resource's ID.
+	Field string
+	// Kind names the referenced resource type, for log and error messages.
+	Kind string
+	// Probe reports whether id exists in the region c is scoped to. False with a
+	// nil error means definitely absent; an error means the lookup itself failed
+	// and says nothing either way. A 200 carrying an empty record counts as
+	// absent, so a lenient endpoint cannot make us settle on the wrong region.
+	Probe func(c *civogo.Client, id string) (bool, error)
+}
+
+// NetworkRef builds a RegionRef for a field holding a network ID.
+func NetworkRef(field string) RegionRef {
+	return RegionRef{Field: field, Kind: "network", Probe: func(c *civogo.Client, id string) (bool, error) {
+		n, err := c.GetVPCNetwork(id)
+		if err != nil {
+			return false, err
+		}
+		return n != nil && n.ID != "", nil
+	}}
+}
+
+// FirewallRef builds a RegionRef for a field holding a firewall ID.
+func FirewallRef(field string) RegionRef {
+	return RegionRef{Field: field, Kind: "firewall", Probe: func(c *civogo.Client, id string) (bool, error) {
+		f, err := c.FindVPCFirewall(id)
+		if err != nil {
+			return false, err
+		}
+		return f != nil && f.ID != "", nil
+	}}
+}
+
+// InstanceRef builds a RegionRef for a field holding an instance ID.
+func InstanceRef(field string) RegionRef {
+	return RegionRef{Field: field, Kind: "instance", Probe: func(c *civogo.Client, id string) (bool, error) {
+		i, err := c.GetInstance(id)
+		if err != nil {
+			return false, err
+		}
+		return i != nil && i.ID != "", nil
+	}}
+}
+
+// VolumeRef builds a RegionRef for a field holding a volume ID.
+func VolumeRef(field string) RegionRef {
+	return RegionRef{Field: field, Kind: "volume", Probe: func(c *civogo.Client, id string) (bool, error) {
+		v, err := c.GetVolume(id)
+		if err != nil {
+			return false, err
+		}
+		return v != nil && v.ID != "", nil
+	}}
+}
+
+// RegionOption configures how RegionalClient picks a region.
+type RegionOption func(*regionSpec)
+
+type regionSpec struct {
+	region string
+	d      *schema.ResourceData
+	refs   []RegionRef
+}
+
+// WithRegion pins the client to a region the caller already knows.
+func WithRegion(region string) RegionOption {
+	return func(s *regionSpec) { s.region = region }
+}
+
+// ResolveRegion takes the region from the resource's own "region" field, and
+// when that is empty infers it from the first ref whose ID is set.
+//
+// An inferred region is written back into d, so the Read that follows a create,
+// and every operation after it, scope themselves from state without repeating
+// the lookup. Pass refs only for resources whose "region" field is Computed;
+// otherwise that write-back reads as a diff against an empty configuration.
+func ResolveRegion(d *schema.ResourceData, refs ...RegionRef) RegionOption {
+	return func(s *regionSpec) {
+		s.d = d
+		s.refs = refs
+	}
+}
+
+// RegionalClient returns a shallow copy of the API client scoped to a region.
+//
+// Resources must use this rather than mutating apiClient.Region: the provider
+// shares one *civogo.Client across every resource and Terraform runs their
+// operations concurrently, so mutating it races and can send requests to the
+// wrong region (issue #395).
+//
+// The region is picked in this order:
+//
+//  1. WithRegion, when the caller already knows it
+//  2. the resource's own "region" field
+//  3. the region of the first ResolveRegion ref whose ID is set, via an API lookup
+//  4. otherwise the client unchanged, leaving the provider's region or the
+//     account default to apply
+//
+// Step 3 is what makes a firewall that only names a network_id land in that
+// network's region. Step 4 is deliberate: configs that set no region anywhere
+// and rely on the account default must keep working, and a resource with no
+// region and no reference is unambiguous anyway.
+func RegionalClient(apiClient *civogo.Client, opts ...RegionOption) (*civogo.Client, error) {
+	spec := &regionSpec{}
+	for _, opt := range opts {
+		opt(spec)
+	}
+
+	if spec.region != "" {
+		return regionScoped(apiClient, spec.region), nil
+	}
+	if spec.d == nil {
+		return apiClient, nil
+	}
+
+	if region, ok := spec.d.GetOk("region"); ok && region.(string) != "" {
+		return regionScoped(apiClient, region.(string)), nil
+	}
+
+	for _, ref := range spec.refs {
+		id, ok := spec.d.GetOk(ref.Field)
+		if !ok || id.(string) == "" {
+			continue
+		}
+
+		region, err := findRegionOf(apiClient, ref, id.(string))
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("[INFO] resolved region %q from %s %s (%q was not set)", region, ref.Kind, id, ref.Field)
+
+		if err := spec.d.Set("region", region); err != nil {
+			return nil, fmt.Errorf("could not record the resolved region %q: %w", region, err)
+		}
+		return regionScoped(apiClient, region), nil
+	}
+
+	return apiClient, nil
+}
+
+// findRegionOf searches the account's regions for the one holding id.
+func findRegionOf(apiClient *civogo.Client, ref RegionRef, id string) (string, error) {
+	regions, err := apiClient.ListRegions()
+	if err != nil {
+		return "", fmt.Errorf("could not list regions to find %s %s: %w", ref.Kind, id, err)
+	}
+
+	// The client's own region first when it has one: the likeliest answer, so the
+	// common case costs a single extra call.
+	codes := make([]string, 0, len(regions)+1)
+	if apiClient.Region != "" {
+		codes = append(codes, apiClient.Region)
+	}
+	for _, r := range regions {
+		if !strings.EqualFold(r.Code, apiClient.Region) {
+			codes = append(codes, r.Code)
+		}
+	}
+
+	// A probe that errors says nothing about whether the resource is there, so
+	// keep looking but hold on to the failure. Without it, one unhealthy region
+	// would be reported as "not found anywhere", sending people after the wrong
+	// problem.
+	var probeErr error
+	for _, code := range codes {
+		found, err := ref.Probe(regionScoped(apiClient, code), id)
+		if err != nil {
+			probeErr = fmt.Errorf("looking in %s: %w", code, err)
+			continue
+		}
+		if found {
+			return code, nil
+		}
+	}
+
+	msg := fmt.Sprintf(
+		"could not find %s %s in any of your regions (%s); set `region` on this resource to say where it belongs",
+		ref.Kind, id, strings.Join(codes, ", "))
+	if probeErr != nil {
+		return "", fmt.Errorf("%s. A lookup also failed, which may be the real cause: %w", msg, probeErr)
+	}
+	return "", errors.New(msg)
+}
+
+func regionScoped(apiClient *civogo.Client, region string) *civogo.Client {
 	c := *apiClient
 	c.Region = region
 	return &c

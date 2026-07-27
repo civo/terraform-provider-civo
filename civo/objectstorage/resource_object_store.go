@@ -71,9 +71,9 @@ func ResourceObjectStore() *schema.Resource {
 func resourceObjectStoreCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] configuring the Object Store %s", d.Get("name").(string))
@@ -123,9 +123,9 @@ func resourceObjectStoreCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceObjectStoreRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the Object Store %s", d.Id())
@@ -153,12 +153,12 @@ func resourceObjectStoreRead(ctx context.Context, d *schema.ResourceData, m inte
 func resourceObjectStoreUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	_, err := apiClient.FindObjectStore(d.Id())
+	_, err = apiClient.FindObjectStore(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] failed to find Object Store: %s", err)
 	}
@@ -184,13 +184,13 @@ func resourceObjectStoreUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceObjectStoreDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the Object Store %s", d.Id())
-	_, err := apiClient.DeleteObjectStore(d.Id())
+	_, err = apiClient.DeleteObjectStore(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the Object Store %s", d.Id())
 	}
