@@ -1,4 +1,14 @@
 
+## [v1.3.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.0) (27 July 2026)
+
+### Merged
+- [#408](https://github.com/civo/terraform-provider-civo/pull/408) - fix: infer region from referenced resource (#395)
+- [#406](https://github.com/civo/terraform-provider-civo/pull/406) - fix: scope API client per-region to avoid shared-client data race
+- [#405](https://github.com/civo/terraform-provider-civo/pull/405) - fix(384): lower minimum DNS record TTL to 60
+- [#404](https://github.com/civo/terraform-provider-civo/pull/404) - Bump google.golang.org/grpc from 1.79.3 to 1.82.1
+- [#399](https://github.com/civo/terraform-provider-civo/pull/399) - feat(397): expose cidr_v4 and nameservers_v4 in network data source
+- [#400](https://github.com/civo/terraform-provider-civo/pull/400) - docs: add missing pages for civo_vpc_* aliases
+
 ## [v1.2.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.6) (22 July 2026)
 
 ### Merged
