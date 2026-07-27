@@ -125,9 +125,9 @@ func ResourceDatabase() *schema.Resource {
 func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.NetworkRef("network_id"), utils.FirewallRef("firewall_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] configuring the database %s", d.Get("name").(string))
@@ -206,12 +206,12 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	_, err := apiClient.FindDatabase(d.Id())
+	_, err = apiClient.FindDatabase(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] failed to find Database: %s", err)
 	}
@@ -248,9 +248,9 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the Database %s", d.Id())
@@ -286,13 +286,13 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interfa
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the Database %s", d.Id())
-	_, err := apiClient.DeleteDatabase(d.Id())
+	_, err = apiClient.DeleteDatabase(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the Database %s", d.Id())
 	}

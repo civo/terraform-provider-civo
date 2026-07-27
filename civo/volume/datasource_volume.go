@@ -69,9 +69,9 @@ func DataSourceVolume() *schema.Resource {
 func dataSourceVolumeRead(_ context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	var foundVolume *civogo.Volume

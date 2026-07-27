@@ -65,8 +65,9 @@ func ResourceVPCSubnet() *schema.Resource {
 func resourceVPCSubnetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.NetworkRef("network_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	networkID := d.Get("network_id").(string)
@@ -88,8 +89,9 @@ func resourceVPCSubnetCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceVPCSubnetRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	networkID := d.Get("network_id").(string)
@@ -116,14 +118,15 @@ func resourceVPCSubnetRead(_ context.Context, d *schema.ResourceData, m interfac
 func resourceVPCSubnetDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	networkID := d.Get("network_id").(string)
 
 	log.Printf("[INFO] deleting VPC subnet %s from network %s", d.Id(), networkID)
-	_, err := apiClient.DeleteVPCSubnet(networkID, d.Id())
+	_, err = apiClient.DeleteVPCSubnet(networkID, d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] failed to delete VPC subnet: %s", err)
 	}

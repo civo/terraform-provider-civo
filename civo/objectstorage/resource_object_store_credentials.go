@@ -66,9 +66,9 @@ func ResourceObjectStoreCredential() *schema.Resource {
 func resourceObjectStoreCredentialCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] configuring the Object Store Credential %s", d.Get("name").(string))
@@ -122,9 +122,9 @@ func resourceObjectStoreCredentialCreate(ctx context.Context, d *schema.Resource
 func resourceObjectStoreCredentialRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the Object Store Credential %s", d.Id())
@@ -149,12 +149,12 @@ func resourceObjectStoreCredentialRead(ctx context.Context, d *schema.ResourceDa
 func resourceObjectStoreCredentialUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	_, err := apiClient.FindObjectStoreCredential(d.Id())
+	_, err = apiClient.FindObjectStoreCredential(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] failed to find Object Store Credential: %s", err)
 	}
@@ -186,13 +186,13 @@ func resourceObjectStoreCredentialUpdate(ctx context.Context, d *schema.Resource
 func resourceObjectStoreCredentialDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the Object Store Credential %s", d.Id())
-	_, err := apiClient.DeleteObjectStoreCredential(d.Id())
+	_, err = apiClient.DeleteObjectStoreCredential(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the Object Store Credential %s", d.Id())
 	}

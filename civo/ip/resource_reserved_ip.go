@@ -52,9 +52,9 @@ func ResourceReservedIP() *schema.Resource {
 func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] creating the new ip address %s", d.Get("name").(string))
@@ -99,9 +99,9 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 func resourceReservedIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the ip address %s", d.Id())
@@ -126,9 +126,9 @@ func resourceReservedIPRead(_ context.Context, d *schema.ResourceData, m interfa
 func resourceReservedIPUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("name") {
@@ -149,13 +149,13 @@ func resourceReservedIPUpdate(ctx context.Context, d *schema.ResourceData, m int
 func resourceReservedIPDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the ip resource %s", d.Id())
-	_, err := apiClient.DeleteVPCIP(d.Id())
+	_, err = apiClient.DeleteVPCIP(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the ip resource %s", d.Id())
 	}

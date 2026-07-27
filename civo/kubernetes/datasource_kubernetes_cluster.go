@@ -162,9 +162,9 @@ func dataSourceApplicationSchema() *schema.Schema {
 func dataSourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	var foundCluster *civogo.KubernetesCluster
