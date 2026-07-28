@@ -313,7 +313,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 // function to delete a firewall
-func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
@@ -332,11 +332,18 @@ func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] deleting the firewall %s", firewallID)
 
 	deleteStateConf := &retry.StateChangeConf{
-		Pending: []string{"failed"},
+		Pending: []string{"in-use", "failed"},
 		Target:  []string{"success"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.DeleteVPCFirewall(firewallID)
 			if err != nil {
+				// An instance, cluster or load balancer that references this
+				// firewall is still being torn down; keep polling until the
+				// reference is released.
+				if utils.IsResourceInUseError(err) {
+					log.Printf("[INFO] firewall %s is still in use, retrying: %s", firewallID, err)
+					return 0, "in-use", nil
+				}
 				return 0, "", err
 			}
 			return resp, string(resp.Result), nil
@@ -346,7 +353,7 @@ func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interfa
 		MinTimeout:     3 * time.Second,
 		NotFoundChecks: 10,
 	}
-	_, err = deleteStateConf.WaitForStateContext(context.Background())
+	_, err = deleteStateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for firewall (%s) to be deleted: %s", firewallID, err)
 	}
