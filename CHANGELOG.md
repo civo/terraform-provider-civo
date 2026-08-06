@@ -1,4 +1,9 @@
 
+## [v1.3.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.1) (6 August 2026)
+
+### Merged
+- [#412](https://github.com/civo/terraform-provider-civo/pull/412) - fix: make firewall create_default_rules updatable in-place (no longer ForceNew)
+
 ## [v1.3.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.0) (27 July 2026)
 
 ### Merged
