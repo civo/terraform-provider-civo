@@ -1,4 +1,9 @@
 
+## [v1.3.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.2) (31 August 2026)
+
+### Merged
+- [#413](https://github.com/civo/terraform-provider-civo/pull/413) - Bump civogo to v0.7.3
+
 ## [v1.3.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.1) (6 August 2026)
 
 ### Merged
