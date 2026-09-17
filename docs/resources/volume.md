@@ -36,7 +36,7 @@ resource "civo_volume" "db" {
 
 - `name` (String) A name that you wish to use to refer to this volume
 - `network_id` (String) The network that the volume belongs to
-- `size_gb` (Number) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes
+- `size_gb` (Number) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes. Increases are applied in place, on an attached volume too when its volume type supports online expansion; decreases are rejected at plan time.
 
 ### Optional
 
