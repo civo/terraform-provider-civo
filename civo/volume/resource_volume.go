@@ -28,7 +28,7 @@ func ResourceVolume() *schema.Resource {
 			"size_gb": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes ",
+				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes. Increases are applied in place, on an attached volume too when its volume type supports online expansion; decreases are rejected at plan time.",
 			},
 			"region": {
 				Type:             schema.TypeString,
@@ -58,10 +58,24 @@ func ResourceVolume() *schema.Resource {
 		ReadContext:   resourceVolumeRead,
 		UpdateContext: resourceVolumeUpdate,
 		DeleteContext: resourceVolumeDelete,
+		CustomizeDiff: customizeDiffVolume,
 		Importer: &schema.ResourceImporter{
 			State: resourceVolumeImport,
 		},
 	}
+}
+
+// customizeDiffVolume rejects a size decrease at plan time. Volume size is additive only: the API
+// refuses a shrink, so failing the plan is friendlier than failing the apply.
+func customizeDiffVolume(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	if diff.Id() == "" || !diff.HasChange("size_gb") {
+		return nil
+	}
+	oldSize, newSize := diff.GetChange("size_gb")
+	if newSize.(int) < oldSize.(int) {
+		return fmt.Errorf("size_gb cannot be decreased (from %d to %d): volume size is additive only", oldSize.(int), newSize.(int))
+	}
+	return nil
 }
 
 // function to create the new volume
@@ -166,41 +180,35 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if d.HasChange("size_gb") {
-		//return diag.Errorf("[ERR] Resize operation is not available at this moment - we are working to re-enable it soon")
+		// Resize in place, attached or not. The API grows an attached volume online when its volume
+		// type supports expansion, and refuses with a clear message when it does not (code
+		// "volume_onlie_resize": detach the volume, or move it to an expandable volume type). That
+		// verdict belongs to the user, so it is surfaced rather than worked around: the previous
+		// detach / resize / re-attach sequence took the instance's storage offline for every resize
+		// and re-attached hotplugged volumes as boot attachments.
+		newSize := d.Get("size_gb").(int)
+		log.Printf("[INFO] resizing the volume %s to %dGB (attached to %q)", d.Id(), newSize, resp.InstanceID)
+		if _, err := apiClient.ResizeVolume(d.Id(), newSize); err != nil {
+			return diag.Errorf("[ERR] failed to resize the volume %s to %dGB: %s", d.Id(), newSize, err)
+		}
 
-		if resp.InstanceID != "" {
-			_, err := apiClient.DetachVolume(d.Id())
+		// The API reports the requested size as soon as the resize is admitted, so a delivered
+		// resize cannot be told apart from a pending one from here; wait only for the volume to
+		// leave the transitional states before reading it back. Any other state (available,
+		// attached, attaching, ...) is a settled one for this purpose.
+		err = resource.RetryContext(ctx, 60*time.Minute, func() *resource.RetryError {
+			volume, err := apiClient.FindVolume(d.Id())
 			if err != nil {
-				return diag.Errorf("[WARN] an error occurred while trying to detach volume %s, %s", d.Id(), err)
+				return resource.NonRetryableError(err)
 			}
-
-			time.Sleep(10 * time.Second)
-
-			newSize := d.Get("size_gb").(int)
-			_, err = apiClient.ResizeVolume(d.Id(), newSize)
-			if err != nil {
-				return diag.Errorf("[ERR] the volume (%s) size not change %s", d.Id(), err)
+			switch volume.Status {
+			case "resizing", "migrating":
+				return resource.RetryableError(fmt.Errorf("volume %s is still %s", d.Id(), volume.Status))
 			}
-
-			time.Sleep(2 * time.Second)
-
-			attachConfig := civogo.VolumeAttachConfig{
-				InstanceID:   resp.InstanceID,
-				AttachAtBoot: true,
-				Region:       apiClient.Region,
-			}
-
-			_, err = apiClient.AttachVolume(d.Id(), attachConfig)
-			if err != nil {
-				return diag.Errorf("[ERR] an error occurred while trying to attach the volume %s", d.Id())
-			}
-
-		} else {
-			newSize := d.Get("size_gb").(int)
-			_, err = apiClient.ResizeVolume(d.Id(), newSize)
-			if err != nil {
-				return diag.Errorf("[ERR] the volume (%s) size not change %s", d.Id(), err)
-			}
+			return nil
+		})
+		if err != nil {
+			return diag.Errorf("[ERR] error waiting for the volume %s to finish resizing: %s", d.Id(), err)
 		}
 	}
 
