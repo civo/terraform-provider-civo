@@ -113,6 +113,8 @@ civo kubernetes version
 
 ~> **Careful!** The `kubeconfig` file will have the credentials to your cluster, take care not to commit it to a public repository or store it somewhere unsafe. 
 
+~> **Important:** You must set `write_kubeconfig = true` on the resource (it defaults to `false`) for the `kubeconfig` attribute to be populated. When it is `false`, `civo_kubernetes_cluster.example.kubeconfig` is empty, so references like the `local_file` below will not work. This opt-in avoids storing cluster credentials in the Terraform state file unless you explicitly ask for it.
+
 
 ```terraform
 provider "civo" {
@@ -241,7 +243,7 @@ Optional:
 - `dns_entry` (String) The DNS name of the cluster
 - `id` (String) The ID of this resource.
 - `installed_applications` (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
-- `kubeconfig` (String, Sensitive) The kubeconfig of the cluster
+- `kubeconfig` (String, Sensitive) The kubeconfig of the cluster. Only populated when `write_kubeconfig = true` is set on the resource; otherwise it is empty
 - `master_ip` (String) The IP address of the master node
 - `ready` (Boolean) When cluster is ready, this will return `true`
 - `status` (String) Status of the cluster
