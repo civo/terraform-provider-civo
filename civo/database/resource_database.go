@@ -79,6 +79,7 @@ func ResourceDatabase() *schema.Resource {
 			"password": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: "The password of the database",
 			},
 			"endpoint": {

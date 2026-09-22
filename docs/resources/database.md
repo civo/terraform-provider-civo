@@ -64,7 +64,7 @@ resource "civo_database" "custom_database" {
 - `dns_endpoint` (String) The DNS endpoint of the database
 - `endpoint` (String) The endpoint of the database
 - `id` (String) The ID of this resource.
-- `password` (String) The password of the database
+- `password` (String, Sensitive) The password of the database
 - `port` (Number) The port of the database
 - `status` (String) The status of the database
 - `username` (String) The username of the database
