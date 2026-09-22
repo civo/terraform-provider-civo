@@ -33,6 +33,7 @@ func ResourceVolume() *schema.Resource {
 			"region": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				Description:      "The region for the volume, if not declare we use the region in declared in the provider.",
 				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
@@ -67,9 +68,9 @@ func ResourceVolume() *schema.Resource {
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.NetworkRef("network_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] configuring the volume %s", d.Get("name").(string))
@@ -85,7 +86,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		config.VolumeType = v.(string)
 	}
 
-	_, err := apiClient.FindNetwork(config.NetworkID)
+	_, err = apiClient.FindNetwork(config.NetworkID)
 	if err != nil {
 		return diag.Errorf("[ERR] Unable to find network ID %q in %q region", config.NetworkID, config.Region)
 	}
@@ -124,9 +125,9 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 func resourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retrieving the volume %s", d.Id())
@@ -153,9 +154,9 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retrieving the volume %s", d.Id())
@@ -218,13 +219,13 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 func resourceVolumeDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the volume %s", d.Id())
-	_, err := apiClient.DeleteVolume(d.Id())
+	_, err = apiClient.DeleteVolume(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the volume %s", err)
 	}
@@ -246,7 +247,10 @@ func resourceVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 		}
 
 		currentRegion := region.Code
-		apiClient = utils.RegionalClient(apiClient, currentRegion)
+		apiClient, err = utils.RegionalClient(apiClient, utils.WithRegion(currentRegion))
+		if err != nil {
+			return nil, err
+		}
 
 		volumes, err := apiClient.ListVolumes()
 		if err != nil {

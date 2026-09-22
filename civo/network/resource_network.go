@@ -112,9 +112,9 @@ func ResourceNetwork() *schema.Resource {
 func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
@@ -162,9 +162,9 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	CurrentNetwork := civogo.Network{}
@@ -200,9 +200,9 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("label") {
@@ -232,9 +232,9 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient = utils.RegionalClient(apiClient, region.(string))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	networkID := d.Id()
@@ -270,7 +270,7 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 		NotFoundChecks: 10,
 	}
 
-	_, err := deleteStateConf.WaitForStateContext(context.Background())
+	_, err = deleteStateConf.WaitForStateContext(context.Background())
 	if err != nil {
 		return diag.Errorf("error waiting for network (%s) to be deleted: %s", networkID, err)
 	}

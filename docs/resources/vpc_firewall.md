@@ -21,7 +21,7 @@ Provides a Civo firewall resource. This can be used to create, modify, and delet
 
 ### Optional
 
-- `create_default_rules` (Boolean) The create rules flag is used to create the default firewall rules, if is not defined will be set to true, and if you set to false you need to define at least one ingress or egress rule
+- `create_default_rules` (Boolean) The create rules flag is used to create the default firewall rules, if is not defined will be set to true. This flag only takes effect when the firewall is created; changing it on an existing firewall never recreates the firewall and does not re-create the default rules. If you set it to false you need to define at least one ingress or egress rule
 - `egress_rule` (Block Set) The egress rules, this is a list of rules that will be applied to the firewall (see [below for nested schema](#nestedblock--egress_rule))
 - `ingress_rule` (Block Set) The ingress rules, this is a list of rules that will be applied to the firewall (see [below for nested schema](#nestedblock--ingress_rule))
 - `network_id` (String) The firewall network, if is not defined we use the default network
