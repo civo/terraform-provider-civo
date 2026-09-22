@@ -47,6 +47,7 @@ func DataSourceObjectStoreCredential() *schema.Resource {
 			"secret_access_key": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: "The secret access key of the Object Store Credential",
 			},
 			"status": {
