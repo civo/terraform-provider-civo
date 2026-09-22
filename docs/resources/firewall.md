@@ -10,6 +10,8 @@ description: |-
 
 Provides a Civo firewall resource. This can be used to create, modify, and delete firewalls.
 
+~> **Deprecated:** `civo_firewall` is the legacy name for this resource. Use [`civo_vpc_firewall`](https://registry.terraform.io/providers/civo/civo/latest/docs/resources/vpc_firewall) instead; both names manage the same resource.
+
 ## Example Usage
 
 * View firewalls after creation on the [CLI](https://www.civo.com/docs/overview/civo-cli):
