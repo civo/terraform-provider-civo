@@ -325,3 +325,104 @@ func TestRegionalClientSurfacesProbeFailure(t *testing.T) {
 		t.Errorf("error %q hides the underlying probe failure", err.Error())
 	}
 }
+
+// apiError builds the error civogo produces for a response code it has no
+// dedicated error for: the JSON body is embedded in the message verbatim.
+func apiError(status, code string) error {
+	return fmt.Errorf(
+		"unknown error response - status: %s, code: 409, reason: {\"code\":%q,\"result\":\"failed\",\"reason\":\"Failed to delete\"}",
+		status, code)
+}
+
+func TestIsResourceInUseError(t *testing.T) {
+	tests := []struct {
+		name  string
+		err   error
+		inUse bool
+	}{
+		{"nil", nil, false},
+		{
+			// The error from civo/terraform-provider-civo#410.
+			name:  "firewall in use by instance",
+			err:   apiError("409 Conflict", "database_firewall_inuse_by_instance"),
+			inUse: true,
+		},
+		{
+			name:  "firewall in use by cluster",
+			err:   apiError("409 Conflict", "database_firewall_inuse_by_cluster"),
+			inUse: true,
+		},
+		{
+			name:  "firewall in use by load balancer",
+			err:   apiError("409 Conflict", "database_firewall_used_by_loadbalancer"),
+			inUse: true,
+		},
+		{
+			name:  "network in use by instance",
+			err:   apiError("409 Conflict", "database_network_inuse_by_instance"),
+			inUse: true,
+		},
+		{
+			name:  "network in use by database",
+			err:   apiError("409 Conflict", "database_network_inuse_by_database"),
+			inUse: true,
+		},
+		{
+			// civogo maps this one, so the code never reaches us -- only the
+			// sentinel does.
+			name:  "network in use by volumes sentinel",
+			err:   fmt.Errorf("%w: still in use", civogo.DatabaseNetworkInUseByVolumes),
+			inUse: true,
+		},
+		{
+			name:  "network delete with instance sentinel",
+			err:   fmt.Errorf("%w: still in use", civogo.DatabaseNetworkDeleteWithInstanceError),
+			inUse: true,
+		},
+		{
+			// Also a 409, but retrying will never clear it.
+			name:  "unrelated conflict",
+			err:   apiError("409 Conflict", "database_firewall_duplicate_name"),
+			inUse: false,
+		},
+		{
+			name:  "not found",
+			err:   apiError("404 Not Found", "database_firewall_not_found"),
+			inUse: false,
+		},
+		{"plain error carrying no code", fmt.Errorf("connection reset"), false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsResourceInUseError(tt.err); got != tt.inUse {
+				t.Errorf("IsResourceInUseError() = %v, want %v", got, tt.inUse)
+			}
+		})
+	}
+}
+
+func TestAPIErrorCode(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		code string
+	}{
+		{"nil", nil, ""},
+		{
+			name: "code extracted from embedded JSON",
+			err:  apiError("404 Not Found", "database_database_find"),
+			code: "database_database_find",
+		},
+		{"no JSON in message", fmt.Errorf("connection reset"), ""},
+		{"JSON without a code field", fmt.Errorf(`failed: {"reason":"nope"}`), ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := APIErrorCode(tt.err); got != tt.code {
+				t.Errorf("APIErrorCode() = %q, want %q", got, tt.code)
+			}
+		})
+	}
+}

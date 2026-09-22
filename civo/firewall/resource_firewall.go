@@ -338,11 +338,18 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] deleting the firewall %s", firewallID)
 
 	deleteStateConf := &retry.StateChangeConf{
-		Pending: []string{"failed"},
+		Pending: []string{"in-use", "failed"},
 		Target:  []string{"success"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.DeleteVPCFirewall(firewallID)
 			if err != nil {
+				// An instance, cluster or load balancer that references this
+				// firewall is still being torn down; keep polling until the
+				// reference is released.
+				if utils.IsResourceInUseError(err) {
+					log.Printf("[INFO] firewall %s is still in use, retrying: %s", firewallID, err)
+					return 0, "in-use", nil
+				}
 				return 0, "", err
 			}
 			return resp, string(resp.Result), nil

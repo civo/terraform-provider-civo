@@ -629,19 +629,22 @@ func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData
 		return diag.Errorf("[INFO] an error occurred while trying to delete the kubernetes cluster %s", err)
 	}
 
-	// Wait for the cluster to be completely deleted
+	// Wait for the cluster to be completely deleted. Any status other than
+	// "gone" counts as pending: enumerating the intermediate ones would fail
+	// the destroy on an unexpected state and leave the network and firewall
+	// the cluster references behind.
 	deleteStateConf := &retry.StateChangeConf{
-		Pending: []string{"DELETING"},
-		Target:  []string{"DELETED"},
+		Pending: []string{"exists"},
+		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
 			resp, err := apiClient.GetKubernetesCluster(d.Id())
 			if err != nil {
 				if errors.Is(err, civogo.DatabaseKubernetesClusterNotFoundError) {
-					return 0, "DELETED", nil
+					return 0, "deleted", nil
 				}
 				return 0, "", err
 			}
-			return resp, resp.Status, nil
+			return resp, "exists", nil
 		},
 		Timeout:        60 * time.Minute,
 		Delay:          10 * time.Second,
@@ -650,7 +653,7 @@ func resourceKubernetesClusterDelete(ctx context.Context, d *schema.ResourceData
 	}
 	_, err = deleteStateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return diag.Errorf("error waiting for instance (%s) to be deleted: %s", d.Id(), err)
+		return diag.Errorf("error waiting for kubernetes cluster (%s) to be deleted: %s", d.Id(), err)
 	}
 
 	return nil

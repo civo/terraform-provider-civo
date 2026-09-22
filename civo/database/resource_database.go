@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -297,5 +298,39 @@ func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.Errorf("[ERR] an error occurred while trying to delete the Database %s", d.Id())
 	}
 
+	// Wait for the database to be completely gone. Deleting it is asynchronous,
+	// so returning early races the teardown of the network and firewall it
+	// references, which the API then refuses to delete as still in use.
+	deleteStateConf := &resource.StateChangeConf{
+		Pending: []string{"exists"},
+		Target:  []string{"deleted"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.GetDatabase(d.Id())
+			if err != nil {
+				if isDatabaseNotFound(err) {
+					return 0, "deleted", nil
+				}
+				return 0, "", err
+			}
+			return resp, "exists", nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 60,
+	}
+	_, err = deleteStateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("error waiting for Database (%s) to be deleted: %s", d.Id(), err)
+	}
+
 	return nil
+}
+
+// isDatabaseNotFound reports whether err from GetDatabase means the database no
+// longer exists. civogo has no dedicated error for the API's 404 here, so the
+// error code has to be matched directly.
+func isDatabaseNotFound(err error) bool {
+	return errors.Is(err, civogo.ZeroMatchesError) ||
+		utils.APIErrorCode(err) == "database_database_find"
 }

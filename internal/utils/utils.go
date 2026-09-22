@@ -544,3 +544,50 @@ func regionScoped(apiClient *civogo.Client, region string) *civogo.Client {
 	c.Region = region
 	return &c
 }
+
+// inUseErrorCodes are the API error codes returned when a resource cannot be
+// deleted yet because another resource still references it. During a
+// `terraform destroy` these are transient: the referencing resource is being
+// torn down at the same time, so the delete only needs retrying until the
+// reference is gone.
+var inUseErrorCodes = map[string]bool{
+	"database_firewall_inuse_by_cluster":          true,
+	"database_firewall_inuse_by_instance":         true,
+	"database_firewall_used_by_loadbalancer":      true,
+	"database_network_inuse_by_cluster":           true,
+	"database_network_inuse_by_database":          true,
+	"database_network_inuse_by_instance":          true,
+	"database_network_inuse_by_instance_snapshot": true,
+	"database_network_inuse_by_volumes":           true,
+}
+
+// APIErrorCode returns the Civo API error code carried by err, or "" if err
+// does not wrap an API error response. civogo only surfaces the code for
+// responses it has no dedicated error for; those it recognises are reduced to
+// their reason string, so use IsResourceInUseError rather than calling this
+// directly.
+func APIErrorCode(err error) string {
+	if err == nil {
+		return ""
+	}
+	customErr, parseErr := ParseErrorResponse(err.Error())
+	if parseErr != nil {
+		return ""
+	}
+	return customErr.Code
+}
+
+// IsResourceInUseError reports whether err is a conflict caused by another
+// resource still referencing the one being deleted, and so is worth retrying.
+func IsResourceInUseError(err error) bool {
+	if err == nil {
+		return false
+	}
+	// The two conflicts civogo has dedicated errors for; the code does not
+	// survive in the message for these, so match on the sentinel.
+	if errors.Is(err, civogo.DatabaseNetworkInUseByVolumes) ||
+		errors.Is(err, civogo.DatabaseNetworkDeleteWithInstanceError) {
+		return true
+	}
+	return inUseErrorCodes[APIErrorCode(err)]
+}
