@@ -426,3 +426,43 @@ func TestAPIErrorCode(t *testing.T) {
 		})
 	}
 }
+
+// KubernetesClusterRef is what lets a node pool inherit its cluster's region
+// (issue #415). The empty-record case is the one worth pinning: the probe must
+// read a 200 carrying no cluster as "absent", or the first region asked would
+// always win and pools would be created in the wrong one.
+func TestKubernetesClusterRef(t *testing.T) {
+	ref := KubernetesClusterRef("cluster_id")
+	if ref.Field != "cluster_id" {
+		t.Errorf("Field = %q, want %q", ref.Field, "cluster_id")
+	}
+
+	cases := []struct {
+		name string
+		body string
+		want bool
+	}{
+		{name: "cluster is in this region", body: `{"id":"cluster-1"}`, want: true},
+		{name: "200 carrying no cluster", body: `{}`, want: false},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			client, server, err := civogo.NewClientForTesting(map[string]string{
+				"/v2/kubernetes/clusters/cluster-1": tc.body,
+			})
+			if err != nil {
+				t.Fatalf("could not build the test client: %v", err)
+			}
+			t.Cleanup(server.Close)
+
+			got, err := ref.Probe(client, "cluster-1")
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Errorf("Probe = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}

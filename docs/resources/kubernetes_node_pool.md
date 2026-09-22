@@ -60,6 +60,7 @@ resource "civo_kubernetes_node_pool" "back-end" {
 - `label` (String) Node pool label, if you don't provide one, we will generate one for you
 - `labels` (Map of String)
 - `public_ip_node_pool` (Boolean) Node pool belongs to the public ip node pool
+- `region` (String) The region of the node pool, if not declare we use the region of the cluster
 - `taint` (Block Set) (see [below for nested schema](#nestedblock--taint))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
