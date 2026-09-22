@@ -39,7 +39,7 @@ resource "civo_network" "example" {
 resource "civo_firewall" "example" {
   name                 = "example-firewall"
   network_id           = civo_network.example.id
-  create_default_rules = false # Needs to be false when custom rules are applied.
+  create_default_rules = false # Needs to be false when declaring custom rules at creation time.
   ingress_rule {
     label      = "http"
     protocol   = "tcp"
@@ -116,7 +116,7 @@ resource "civo_firewall" "example" {
 
 ### Optional
 
-- `create_default_rules` (Boolean) The create rules flag is used to create the default firewall rules, if is not defined will be set to true, and if you set to false you need to define at least one ingress or egress rule. Needs to be false if custom rules are set.
+- `create_default_rules` (Boolean) The create rules flag is used to create the default firewall rules, if is not defined will be set to true. If you set it to false you need to define at least one ingress or egress rule, and it needs to be false when custom rules are declared at creation time. This flag only takes effect when the firewall is created: changing it on an existing firewall is applied in-place (the firewall is never recreated). Changing it to `false` requires declaring at least one `ingress_rule` or `egress_rule` to replace the default rules; changing it back to `true` is a no-op and does not re-create the default rules.
 - `egress_rule` (Block Set) The egress rules, this is a list of rules that will be applied to the firewall (see [below for nested schema](#nestedblock--egress_rule))
 - `ingress_rule` (Block Set) The ingress rules, this is a list of rules that will be applied to the firewall (see [below for nested schema](#nestedblock--ingress_rule))
 - `network_id` (String) The firewall network, if is not defined we use the default network
