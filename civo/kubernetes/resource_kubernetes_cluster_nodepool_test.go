@@ -10,6 +10,7 @@ import (
 	"github.com/civo/terraform-provider-civo/civo/kubernetes"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -194,5 +195,32 @@ func TestFlattenNodePool(t *testing.T) {
 				t.Fatalf("expected: %#v, got: %#v", tc.expected, actual)
 			}
 		})
+	}
+}
+
+// The node pool schema is shared with the cluster's inline `pools` block
+// (issue #415). `region` belongs to the standalone resource only: on the inline
+// block it would be a second, contradictable source of truth for a region the
+// cluster already owns.
+func TestNodePoolRegionIsResourceOnly(t *testing.T) {
+	poolResource := kubernetes.ResourceKubernetesClusterNodePool().Schema
+
+	region, ok := poolResource["region"]
+	if !ok {
+		t.Fatal("civo_kubernetes_node_pool has no `region`; it cannot be placed in a region other than the provider's")
+	}
+	if !region.Optional {
+		t.Error("`region` must be Optional so it can be left to the cluster")
+	}
+	if !region.Computed {
+		t.Error("`region` must be Computed so the region inferred from the cluster can be written back without reading as a diff")
+	}
+	if region.DiffSuppressFunc == nil {
+		t.Error("`region` must suppress case-only diffs, as every other region field does")
+	}
+
+	inline := kubernetes.ResourceKubernetesCluster().Schema["pools"].Elem.(*schema.Resource).Schema
+	if _, ok := inline["region"]; ok {
+		t.Error("the cluster's inline `pools` block gained a `region`; it must follow the cluster's own")
 	}
 }

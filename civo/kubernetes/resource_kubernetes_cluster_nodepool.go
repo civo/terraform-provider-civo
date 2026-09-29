@@ -43,7 +43,7 @@ func ResourceKubernetesClusterNodePool() *schema.Resource {
 func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.KubernetesClusterRef("cluster_id")))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -128,6 +128,12 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 // function to read the kubernetes cluster
 func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
+
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.KubernetesClusterRef("cluster_id")))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	clusterID := d.Get("cluster_id").(string)
 
 	// Warning or errors can be collected in a slice type
@@ -202,7 +208,7 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.KubernetesClusterRef("cluster_id")))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -273,15 +279,15 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 func resourceKubernetesClusterNodePoolDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.KubernetesClusterRef("cluster_id")))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	clusterID := d.Get("cluster_id").(string)
 	getKubernetesCluster, err := apiClient.GetKubernetesCluster(clusterID)
 	if err != nil {
 		return diag.Errorf("[INFO] error getting kubernetes cluster: %s", clusterID)
-	}
-
-	apiClient, err = utils.RegionalClient(apiClient, utils.ResolveRegion(d))
-	if err != nil {
-		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
