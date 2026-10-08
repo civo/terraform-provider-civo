@@ -2,6 +2,7 @@ package volume
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -28,7 +29,7 @@ func ResourceVolume() *schema.Resource {
 			"size_gb": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes. Increases are applied in place: on a detached volume, and on a volume attached to a running instance when its volume type supports online expansion (otherwise the API refuses with `volume_onlie_resize`, detach the volume or move it to an expandable volume type, or with `volume_resize_requires_running_instance`, start the instance). Decreases are rejected at plan time.",
+				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes. Increases are applied in place: on a detached volume, and on a volume attached to a running instance when its volume type supports online expansion. Otherwise the API refuses the resize with `volume_onlie_resize` (detach the volume or move it to an expandable volume type) or `volume_resize_requires_running_instance` (start the instance). Decreases are rejected at plan time; recreate the volume with `terraform apply -replace` for a smaller size.",
 			},
 			"region": {
 				Type:             schema.TypeString,
@@ -62,6 +63,9 @@ func ResourceVolume() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceVolumeImport,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(60 * time.Minute),
+		},
 	}
 }
 
@@ -75,7 +79,10 @@ func customizeDiffVolume(_ context.Context, diff *schema.ResourceDiff, _ interfa
 	}
 	oldSize, newSize := diff.GetChange("size_gb")
 	if newSize.(int) < oldSize.(int) {
-		return fmt.Errorf("size_gb cannot be decreased (from %d to %d): volume size is additive only", oldSize.(int), newSize.(int))
+		return fmt.Errorf("size_gb cannot be decreased (from %d to %d): volume size is additive only. "+
+			"To get a smaller volume, recreate it with `terraform apply -replace=<address of this civo_volume>`. "+
+			"This also applies right after an import whose configuration declares less than the real size: set size_gb to the real size first",
+			oldSize.(int), newSize.(int))
 	}
 	return nil
 }
@@ -184,26 +191,40 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	if d.HasChange("size_gb") {
 		// Resize in place, attached or not. The API grows a detached volume with a clone-and-swap,
 		// and a volume attached to a running instance online when its volume type supports
-		// expansion. It refuses with a clear code when it cannot: "volume_onlie_resize" (attached,
-		// volume type without online expansion: detach the volume or move it to an expandable
-		// type) or "volume_resize_requires_running_instance" (instance stopped: start it). That
-		// verdict belongs to the user, so it is surfaced rather than worked around: the previous
-		// detach / resize / re-attach sequence took the instance's storage offline for every resize
-		// and re-attached hotplugged volumes as boot attachments.
+		// expansion; when it cannot, it refuses with volume_onlie_resize or
+		// volume_resize_requires_running_instance (see the size_gb description), and that verdict is
+		// returned to the user rather than worked around with a detach / resize / re-attach cycle.
 		newSize := d.Get("size_gb").(int)
 		log.Printf("[INFO] resizing the volume %s to %dGB (attached to %q)", d.Id(), newSize, resp.InstanceID)
 		if _, err := apiClient.ResizeVolume(d.Id(), newSize); err != nil {
 			return diag.Errorf("[ERR] failed to resize the volume %s to %dGB: %s", d.Id(), newSize, err)
 		}
+		// The request is accepted from here on: record the new size now, so an error while waiting
+		// below does not leave the old size in state and re-issue the resize on the next apply.
+		if err := d.Set("size_gb", newSize); err != nil {
+			return diag.FromErr(err)
+		}
 
-		if err := waitForVolumeResize(ctx, d.Id(), func() (string, error) {
-			volume, err := apiClient.FindVolume(d.Id())
-			if err != nil {
-				return "", err
-			}
-			return volume.Status, nil
-		}, resizeWaitTimings{grace: resizeGraceWindow, gracePoll: resizeGracePoll, timeout: resizeTimeout, poll: resizePoll}); err != nil {
-			return diag.Errorf("[ERR] error waiting for the volume %s to finish resizing: %s", d.Id(), err)
+		w := resizeWait{
+			find:      func() (*civogo.Volume, error) { return apiClient.FindVolume(d.Id()) },
+			baseline:  resp,
+			requested: newSize,
+			grace:     resizeGraceWindow,
+			gracePoll: resizeGracePoll,
+			poll:      resizePoll,
+		}
+		confirmed, err := waitForVolumeResize(ctx, d.Id(), w)
+		if err != nil {
+			return diag.Errorf("[ERR] resizing the volume %s to %dGB: %s", d.Id(), newSize, err)
+		}
+		if !confirmed {
+			diags := diag.Diagnostics{{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Resize of volume %s to %dGB accepted but not confirmed", d.Id(), newSize),
+				Detail: fmt.Sprintf("The API accepted the resize but the volume did not report any progress within %s, and this API version does not report the delivered size. "+
+					"Verify the volume's size before relying on it (civo volume ls, or the dashboard).", resizeGraceWindow),
+			}}
+			return append(diags, resourceVolumeRead(ctx, d, m)...)
 		}
 	}
 
@@ -218,69 +239,138 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	return resourceVolumeRead(ctx, d, m)
 }
 
-// Timings for waitForVolumeResize. The API accepts a resize before the volume's status moves to
-// "resizing", so the first poll after ResizeVolume returns usually still reads the settled state.
+// Timings for waitForVolumeResize. The API accepts a resize before the platform picks it up, so
+// the first polls after ResizeVolume returns usually still read the previous state.
 const (
 	resizeGraceWindow = 60 * time.Second
 	resizeGracePoll   = 5 * time.Second
-	resizeTimeout     = 60 * time.Minute
 	resizePoll        = 10 * time.Second
 )
 
-type resizeWaitTimings struct {
-	grace, gracePoll, timeout, poll time.Duration
+// Volume status the platform reports while it is carrying a resize out.
+const volumeStatusResizing = "resizing"
+
+// resizeWait describes one resize to follow: the volume as it was read just before the request
+// (baseline), the size that was requested, and the polling cadence. now and sleep are injectable
+// for tests; nil means the real clock.
+type resizeWait struct {
+	find      func() (*civogo.Volume, error)
+	baseline  *civogo.Volume
+	requested int
+	grace     time.Duration
+	gracePoll time.Duration
+	poll      time.Duration
+	now       func() time.Time
+	sleep     func(context.Context, time.Duration) error
 }
 
-// waitForVolumeResize waits for a resize admitted by the API to run its course, as far as the
-// volume status allows. The status is the only signal civogo exposes today: the API reports the
-// requested size as soon as it admits the resize, so a delivered resize cannot be told apart from
-// a pending one here. api-go !1469 adds delivered_size_gb and resize.state to the volume; once
-// civogo carries them this wait should read those instead
-// (https://git.civo.com/civo/team/core/core/-/issues/227).
-//
-// Two phases: first a grace window in which the status is polled until "resizing" or "migrating"
-// is seen once (the operator takes a moment to pick the request up); then, if it was seen, a
-// longer wait until the volume leaves those states. A resize that never shows the transitional
-// state within the grace window (a no-op, or one completed between two polls) is logged and
-// treated as settled rather than failed.
-func waitForVolumeResize(ctx context.Context, id string, status func() (string, error), t resizeWaitTimings) error {
-	transitional := func(s string) bool { return s == "resizing" || s == "migrating" }
+// resizeOf returns the volume's resize outcome when it belongs to this request, nil when the
+// volume reports none or only the outcome of an earlier resize (same timestamp as the baseline).
+func (w resizeWait) resizeOf(v *civogo.Volume) *civogo.VolumeResize {
+	r := v.Resize
+	if r == nil {
+		return nil
+	}
+	if b := w.baseline.Resize; b != nil && r.UpdatedAt.Equal(b.UpdatedAt) && r.State == b.State {
+		return nil
+	}
+	return r
+}
 
-	graceDeadline := time.Now().Add(t.grace)
+// delivered reports whether the volume says it now provides at least the requested size. Zero
+// means the API does not report the delivered size at all.
+func (w resizeWait) delivered(v *civogo.Volume) bool {
+	return v.DeliveredSizeGigabytes > 0 && v.DeliveredSizeGigabytes >= w.requested
+}
+
+// evidence reports whether the volume shows that this request has been picked up: the resizing
+// status, or a resize outcome newer than the baseline's. The delivered size alone is not evidence:
+// the API falls back to the requested size when the platform has not reported one, so it can read
+// as delivered before anything happened. A migrating status alone is not evidence either, it
+// belongs to volume-type migrations.
+func (w resizeWait) evidence(v *civogo.Volume) bool {
+	return v.Status == volumeStatusResizing || w.resizeOf(v) != nil
+}
+
+// waitForVolumeResize follows a resize the API has accepted until it is delivered or has failed.
+// It returns true when the volume confirms the new size (the delivered size reached the request,
+// the resize outcome says completed, or, on an API that reports neither, the resizing status was
+// seen and has cleared), an error when the resize settled without delivering, when the context
+// ends, or when the volume cannot be read, and false with no error when the volume showed no sign
+// of the request within the grace window and reports no delivered size: the caller then warns
+// rather than claims success. A resize outcome that predates the request is never judged.
+func waitForVolumeResize(ctx context.Context, id string, w resizeWait) (bool, error) {
+	if w.now == nil {
+		w.now = time.Now
+	}
+	if w.sleep == nil {
+		w.sleep = sleepContext
+	}
+	if w.baseline == nil {
+		w.baseline = &civogo.Volume{}
+	}
+
+	start := w.now()
 	seen := false
 	for {
-		s, err := status()
+		v, err := w.find()
 		if err != nil {
-			return err
+			return false, fmt.Errorf("reading the volume while waiting for the resize: %w", err)
 		}
-		if transitional(s) {
+		if w.evidence(v) {
 			seen = true
-			break
 		}
-		if time.Now().After(graceDeadline) {
-			break
-		}
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(t.gracePoll):
-		}
-	}
-	if !seen {
-		log.Printf("[INFO] volume %s did not report a resizing state within %s; treating the resize as settled", id, t.grace)
-		return nil
-	}
 
-	return resource.RetryContext(ctx, t.timeout, func() *resource.RetryError {
-		s, err := status()
-		if err != nil {
-			return resource.NonRetryableError(err)
+		switch {
+		case seen && w.delivered(v):
+			return true, nil
+		case seen && w.resizeOf(v) != nil && w.resizeOf(v).Settled():
+			r := w.resizeOf(v)
+			if r.Succeeded() {
+				return true, nil
+			}
+			msg := fmt.Sprintf("the resize %s (%s)", r.State, r.Reason)
+			if r.Message != "" {
+				msg += ": " + r.Message
+			}
+			if v.DeliveredSizeGigabytes > 0 {
+				msg += fmt.Sprintf("; the volume still delivers %dGB of the %dGB requested", v.DeliveredSizeGigabytes, w.requested)
+			}
+			return false, errors.New(msg)
+		case seen && v.Status != volumeStatusResizing && v.Resize == nil && v.DeliveredSizeGigabytes == 0:
+			// An API that reports neither the delivered size nor the outcome: the resizing
+			// status was seen and has cleared, which is all it can tell.
+			return true, nil
+		case !seen && w.now().Sub(start) >= w.grace:
+			if w.baseline.DeliveredSizeGigabytes > 0 || v.DeliveredSizeGigabytes > 0 {
+				// The API reports the delivered size, so the request will show up as evidence
+				// when it is picked up: keep waiting for it within the context's deadline.
+				break
+			}
+			log.Printf("[WARN] volume %s showed no sign of the resize within %s and the API reports no delivered size", id, w.grace)
+			return false, nil
 		}
-		if transitional(s) {
-			return resource.RetryableError(fmt.Errorf("volume %s is still %s", id, s))
+
+		interval := w.poll
+		if !seen {
+			interval = w.gracePoll
 		}
+		if err := w.sleep(ctx, interval); err != nil {
+			return false, fmt.Errorf("gave up waiting for the resize (last status %q, delivered %dGB of %dGB): %w", v.Status, v.DeliveredSizeGigabytes, w.requested, err)
+		}
+	}
+}
+
+// sleepContext sleeps for d or until ctx ends, returning ctx.Err() in the latter case.
+func sleepContext(ctx context.Context, d time.Duration) error {
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-t.C:
 		return nil
-	})
+	}
 }
 
 // function to delete the volume

@@ -43,6 +43,9 @@ func TestCivoVolume_sizeDecreaseRejectedAtPlan(t *testing.T) {
 				"network_id": "net-1",
 				"region":     "LON1",
 			})
+			if tc.sizeGB == unknownValue && !config.IsComputed("size_gb") {
+				t.Fatal("the SDK does not read the sentinel as a computed (unknown) value")
+			}
 			_, err := volume.ResourceVolume().Diff(context.Background(), state, config, nil)
 			switch {
 			case tc.wantErr == "" && err != nil:
