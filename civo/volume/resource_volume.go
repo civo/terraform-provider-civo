@@ -28,7 +28,7 @@ func ResourceVolume() *schema.Resource {
 			"size_gb": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes. Increases are applied in place, on an attached volume too when its volume type supports online expansion; decreases are rejected at plan time.",
+				Description: "A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes. Increases are applied in place: on a detached volume, and on a volume attached to a running instance when its volume type supports online expansion (otherwise the API refuses with `volume_onlie_resize`, detach the volume or move it to an expandable volume type, or with `volume_resize_requires_running_instance`, start the instance). Decreases are rejected at plan time.",
 			},
 			"region": {
 				Type:             schema.TypeString,
@@ -66,9 +66,11 @@ func ResourceVolume() *schema.Resource {
 }
 
 // customizeDiffVolume rejects a size decrease at plan time. Volume size is additive only: the API
-// refuses a shrink, so failing the plan is friendlier than failing the apply.
+// refuses a shrink, so failing the plan is friendlier than failing the apply. A size that is not
+// known yet at plan time (derived from another resource's computed attribute) reads as zero through
+// GetChange, so it is left alone here and checked by the API at apply.
 func customizeDiffVolume(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	if diff.Id() == "" || !diff.HasChange("size_gb") {
+	if diff.Id() == "" || !diff.NewValueKnown("size_gb") || !diff.HasChange("size_gb") {
 		return nil
 	}
 	oldSize, newSize := diff.GetChange("size_gb")
@@ -180,9 +182,11 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if d.HasChange("size_gb") {
-		// Resize in place, attached or not. The API grows an attached volume online when its volume
-		// type supports expansion, and refuses with a clear message when it does not (code
-		// "volume_onlie_resize": detach the volume, or move it to an expandable volume type). That
+		// Resize in place, attached or not. The API grows a detached volume with a clone-and-swap,
+		// and a volume attached to a running instance online when its volume type supports
+		// expansion. It refuses with a clear code when it cannot: "volume_onlie_resize" (attached,
+		// volume type without online expansion: detach the volume or move it to an expandable
+		// type) or "volume_resize_requires_running_instance" (instance stopped: start it). That
 		// verdict belongs to the user, so it is surfaced rather than worked around: the previous
 		// detach / resize / re-attach sequence took the instance's storage offline for every resize
 		// and re-attached hotplugged volumes as boot attachments.
@@ -192,22 +196,13 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 			return diag.Errorf("[ERR] failed to resize the volume %s to %dGB: %s", d.Id(), newSize, err)
 		}
 
-		// The API reports the requested size as soon as the resize is admitted, so a delivered
-		// resize cannot be told apart from a pending one from here; wait only for the volume to
-		// leave the transitional states before reading it back. Any other state (available,
-		// attached, attaching, ...) is a settled one for this purpose.
-		err = resource.RetryContext(ctx, 60*time.Minute, func() *resource.RetryError {
+		if err := waitForVolumeResize(ctx, d.Id(), func() (string, error) {
 			volume, err := apiClient.FindVolume(d.Id())
 			if err != nil {
-				return resource.NonRetryableError(err)
+				return "", err
 			}
-			switch volume.Status {
-			case "resizing", "migrating":
-				return resource.RetryableError(fmt.Errorf("volume %s is still %s", d.Id(), volume.Status))
-			}
-			return nil
-		})
-		if err != nil {
+			return volume.Status, nil
+		}, resizeWaitTimings{grace: resizeGraceWindow, gracePoll: resizeGracePoll, timeout: resizeTimeout, poll: resizePoll}); err != nil {
 			return diag.Errorf("[ERR] error waiting for the volume %s to finish resizing: %s", d.Id(), err)
 		}
 	}
@@ -221,6 +216,71 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	return resourceVolumeRead(ctx, d, m)
+}
+
+// Timings for waitForVolumeResize. The API accepts a resize before the volume's status moves to
+// "resizing", so the first poll after ResizeVolume returns usually still reads the settled state.
+const (
+	resizeGraceWindow = 60 * time.Second
+	resizeGracePoll   = 5 * time.Second
+	resizeTimeout     = 60 * time.Minute
+	resizePoll        = 10 * time.Second
+)
+
+type resizeWaitTimings struct {
+	grace, gracePoll, timeout, poll time.Duration
+}
+
+// waitForVolumeResize waits for a resize admitted by the API to run its course, as far as the
+// volume status allows. The status is the only signal civogo exposes today: the API reports the
+// requested size as soon as it admits the resize, so a delivered resize cannot be told apart from
+// a pending one here. api-go !1469 adds delivered_size_gb and resize.state to the volume; once
+// civogo carries them this wait should read those instead
+// (https://git.civo.com/civo/team/core/core/-/issues/227).
+//
+// Two phases: first a grace window in which the status is polled until "resizing" or "migrating"
+// is seen once (the operator takes a moment to pick the request up); then, if it was seen, a
+// longer wait until the volume leaves those states. A resize that never shows the transitional
+// state within the grace window (a no-op, or one completed between two polls) is logged and
+// treated as settled rather than failed.
+func waitForVolumeResize(ctx context.Context, id string, status func() (string, error), t resizeWaitTimings) error {
+	transitional := func(s string) bool { return s == "resizing" || s == "migrating" }
+
+	graceDeadline := time.Now().Add(t.grace)
+	seen := false
+	for {
+		s, err := status()
+		if err != nil {
+			return err
+		}
+		if transitional(s) {
+			seen = true
+			break
+		}
+		if time.Now().After(graceDeadline) {
+			break
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(t.gracePoll):
+		}
+	}
+	if !seen {
+		log.Printf("[INFO] volume %s did not report a resizing state within %s; treating the resize as settled", id, t.grace)
+		return nil
+	}
+
+	return resource.RetryContext(ctx, t.timeout, func() *resource.RetryError {
+		s, err := status()
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		if transitional(s) {
+			return resource.RetryableError(fmt.Errorf("volume %s is still %s", id, s))
+		}
+		return nil
+	})
 }
 
 // function to delete the volume

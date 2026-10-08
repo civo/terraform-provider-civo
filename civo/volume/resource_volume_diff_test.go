@@ -22,14 +22,18 @@ func TestCivoVolume_sizeDecreaseRejectedAtPlan(t *testing.T) {
 			"region":     "LON1",
 		},
 	}
+	// unknownValue is the sentinel the SDK uses for a value that is not known at plan time, for
+	// example a size derived from another resource's computed attribute.
+	const unknownValue = "74D93920-ED26-11E3-AC10-0800200C9A66"
 	cases := []struct {
 		name    string
-		sizeGB  int
+		sizeGB  interface{}
 		wantErr string
 	}{
 		{name: "shrink is rejected", sizeGB: 5, wantErr: "size_gb cannot be decreased (from 10 to 5)"},
 		{name: "grow plans", sizeGB: 20},
 		{name: "same size plans", sizeGB: 10},
+		{name: "unknown size plans", sizeGB: unknownValue},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
