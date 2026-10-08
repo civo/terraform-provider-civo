@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -57,9 +58,26 @@ func ResourceVPCSubnet() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceVPCSubnetImport,
 		},
 	}
+}
+
+// resourceVPCSubnetImport imports a subnet from a "NETWORK_ID:SUBNET_ID" pair.
+// The subnet ID on its own is not enough: every read and delete call is scoped
+// to the network the subnet belongs to.
+func resourceVPCSubnetImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	networkID, subnetID, err := utils.ResourceCommonParseID(d.Id())
+	if err != nil {
+		return nil, fmt.Errorf("unexpected format of ID (%s), expected NETWORK_ID:SUBNET_ID", d.Id())
+	}
+
+	d.SetId(subnetID)
+	if err := d.Set("network_id", networkID); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceVPCSubnetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

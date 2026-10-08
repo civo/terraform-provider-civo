@@ -10,6 +10,8 @@ description: |-
 
 The instance reserved ip assignment resource schema definition. If you are using this resource to assign a reserved IP to an instance, instances `public_ip` attribute won't be updated until the next state refresh. If subsequent resources are relying instances public IP consider assigning the reserved ip address to the instance.
 
+~> **Deprecated:** `civo_instance_reserved_ip_assignment` is the legacy name for this resource. Use [`civo_vpc_reserved_ip_assignment`](https://registry.terraform.io/providers/civo/civo/latest/docs/resources/vpc_reserved_ip_assignment) instead; both names manage the same resource.
+
 ## Example Usage
 
 ```terraform

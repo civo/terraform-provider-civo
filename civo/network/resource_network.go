@@ -229,7 +229,7 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 // function to delete a network
-func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNetworkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
 	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
@@ -241,12 +241,18 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 	log.Printf("[INFO] Deleting the network %s", networkID)
 
 	deleteStateConf := &retry.StateChangeConf{
-		Pending: []string{"deleting", "exists"},
+		Pending: []string{"deleting", "exists", "in-use"},
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
 			// First, try to delete the network
 			resp, err := apiClient.DeleteVPCNetwork(networkID)
 			if err != nil {
+				// An instance, cluster, database or volume on this network is
+				// still being torn down; keep polling until it has gone.
+				if utils.IsResourceInUseError(err) {
+					log.Printf("[INFO] network %s is still in use, retrying: %s", networkID, err)
+					return 0, "in-use", nil
+				}
 				return 0, "", err
 			}
 			// If delete was successful, start polling
@@ -270,7 +276,7 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 		NotFoundChecks: 10,
 	}
 
-	_, err = deleteStateConf.WaitForStateContext(context.Background())
+	_, err = deleteStateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for network (%s) to be deleted: %s", networkID, err)
 	}
