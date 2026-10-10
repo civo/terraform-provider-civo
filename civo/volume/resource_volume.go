@@ -293,9 +293,10 @@ func (w resizeWait) evidence(v *civogo.Volume) bool {
 }
 
 // waitForVolumeResize follows a resize the API has accepted until it is delivered or has failed.
-// It returns true when the volume confirms the new size (the delivered size reached the request,
-// the resize outcome says completed, or, on an API that reports neither, the resizing status was
-// seen and has cleared), an error when the resize settled without delivering, when the context
+// It returns true when the volume confirms the new size (the resize outcome says completed, the
+// delivered size reached the request once the resizing status cleared and no outcome of this
+// request says otherwise, or, on an API that reports neither, the resizing status was seen and
+// has cleared), an error when the resize settled without delivering, when the context
 // ends, or when the volume cannot be read, and false with no error when the volume showed no sign
 // of the request within the grace window and reports no delivered size: the caller then warns
 // rather than claims success. A resize outcome that predates the request is never judged.
@@ -321,22 +322,27 @@ func waitForVolumeResize(ctx context.Context, id string, w resizeWait) (bool, er
 			seen = true
 		}
 
+		// Order matters: an outcome of this request is the authoritative verdict and is judged
+		// first. The delivered size decides only once the status has left resizing and this
+		// request has no outcome of its own, because the API serves the requested size as the
+		// delivered size until the platform reports one, which would otherwise confirm a resize
+		// still running, or hide one that failed.
+		own := w.resizeOf(v)
 		switch {
-		case seen && w.delivered(v):
-			return true, nil
-		case seen && w.resizeOf(v) != nil && w.resizeOf(v).Settled():
-			r := w.resizeOf(v)
-			if r.Succeeded() {
+		case seen && own != nil && own.Settled():
+			if own.Succeeded() {
 				return true, nil
 			}
-			msg := fmt.Sprintf("the resize %s (%s)", r.State, r.Reason)
-			if r.Message != "" {
-				msg += ": " + r.Message
+			msg := fmt.Sprintf("the resize %s (%s)", own.State, own.Reason)
+			if own.Message != "" {
+				msg += ": " + own.Message
 			}
 			if v.DeliveredSizeGigabytes > 0 {
 				msg += fmt.Sprintf("; the volume still delivers %dGB of the %dGB requested", v.DeliveredSizeGigabytes, w.requested)
 			}
 			return false, errors.New(msg)
+		case seen && own == nil && v.Status != volumeStatusResizing && w.delivered(v):
+			return true, nil
 		case seen && v.Status != volumeStatusResizing && v.Resize == nil && v.DeliveredSizeGigabytes == 0:
 			// An API that reports neither the delivered size nor the outcome: the resizing
 			// status was seen and has cleared, which is all it can tell.

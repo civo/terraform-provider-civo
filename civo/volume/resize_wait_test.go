@@ -131,6 +131,24 @@ func TestWaitForVolumeResize(t *testing.T) {
 			wantMaxSlept:  0,
 		},
 		{
+			name:     "fallback delivered size while resizing keeps waiting and follows the real outcome",
+			baseline: &civogo.Volume{Status: "attached", SizeGigabytes: 20, DeliveredSizeGigabytes: 20},
+			reads: []*civogo.Volume{
+				{Status: "resizing", SizeGigabytes: 60, DeliveredSizeGigabytes: 60},
+				{Status: "resizing", SizeGigabytes: 60, DeliveredSizeGigabytes: 60},
+				{Status: "attached", SizeGigabytes: 60, DeliveredSizeGigabytes: 20, Resize: failed},
+			},
+			wantErr: "the resize failed (InsufficientStorage): pool is full; the volume still delivers 20GB of the 60GB requested",
+		},
+		{
+			name:     "fallback delivered size with a newer failed outcome is an error, not delivered",
+			baseline: &civogo.Volume{Status: "attached", SizeGigabytes: 20, DeliveredSizeGigabytes: 20},
+			reads: []*civogo.Volume{
+				{Status: "resizing", SizeGigabytes: 60, DeliveredSizeGigabytes: 60, Resize: failed},
+			},
+			wantErr: "the resize failed (InsufficientStorage): pool is full; the volume still delivers 60GB of the 60GB requested",
+		},
+		{
 			name:     "stuck in progress hits the deadline",
 			baseline: &civogo.Volume{Status: "attached", SizeGigabytes: 20, DeliveredSizeGigabytes: 20},
 			reads: []*civogo.Volume{
