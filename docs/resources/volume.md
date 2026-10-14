@@ -36,16 +36,40 @@ resource "civo_volume" "db" {
 
 - `name` (String) A name that you wish to use to refer to this volume
 - `network_id` (String) The network that the volume belongs to
-- `size_gb` (Number) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes
+- `size_gb` (Number) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes. Increases are applied in place: on a detached volume, and on a volume attached to a running instance when its volume type supports online expansion. Otherwise the API refuses the resize with `volume_onlie_resize` (detach the volume or move it to an expandable volume type) or `volume_resize_requires_running_instance` (start the instance). Decreases are rejected at plan time; recreate the volume with `terraform apply -replace` for a smaller size.
 
 ### Optional
 
 - `region` (String) The region for the volume, if not declare we use the region in declared in the provider.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `volume_type` (String) The type of the volume
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
 - `mount_point` (String) The mount point of the volume (from instance's perspective)
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `update` (String) How long to wait for a resize to be confirmed. Defaults to `60m`.
+
+## Resizing
+
+Increasing `size_gb` resizes the volume in place. A detached volume is resized offline; a volume attached to a running instance is grown online when its volume type supports expansion. The provider then follows the resize until the API confirms the new size and fails the apply when the platform reports that the resize failed (for example `InsufficientStorage` or `Timeout`). On an API that does not yet report the delivered size, the apply warns that the resize was accepted but could not be confirmed.
+
+The API refuses a resize it cannot perform:
+
+- `volume_onlie_resize` (the code's spelling matches the API): the volume is attached and its volume type does not support online expansion. Detach the volume, or move it to a volume type that supports expansion.
+- `volume_resize_requires_running_instance`: the volume is attached to a stopped instance. Start the instance.
+
+Decreasing `size_gb` is rejected at plan time. To get a smaller volume, recreate it with `terraform apply -replace=civo_volume.<name>`.
+
+### Upgrade notes
+
+Before this behaviour, a `size_gb` change on an attached volume detached the volume, resized it and re-attached it at boot, taking the instance's storage offline and turning a hot-plugged attachment into a boot attachment. The provider no longer does that. An attached volume on a volume type without online expansion now fails with `volume_onlie_resize` instead of being detached behind your back: detach it (or change its volume type) explicitly, then resize.
 
 ## Import
 
