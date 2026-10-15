@@ -39,7 +39,7 @@ data "civo_database" "test" {
 - `firewall_id` (String) The firewall id of the Database
 - `network_id` (String) The network id of the Database
 - `nodes` (Number) Count of nodes
-- `password` (String) The password of the database
+- `password` (String, Sensitive) The password of the database
 - `port` (Number) The port of the database
 - `size` (String) Size of the database
 - `status` (String) The status of the database
