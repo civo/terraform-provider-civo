@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/civo/civogo"
@@ -167,32 +166,14 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 
 	d.Set("instance_names", poolInstanceNames)
 
-	if len(respPool.Labels) > 0 {
-		filteredLabels := make(map[string]string)
-		for k, v := range respPool.Labels {
-			if !strings.HasPrefix(k, "kubernetes.civo.com/") {
-				filteredLabels[k] = v
-			}
-		}
-		if len(filteredLabels) > 0 {
-			d.Set("labels", filteredLabels)
-		} else {
-			d.Set("labels", nil)
-		}
+	if filteredLabels := filterUserLabels(respPool.Labels); len(filteredLabels) > 0 {
+		d.Set("labels", filteredLabels)
 	} else {
 		d.Set("labels", nil)
 	}
 
 	if len(respPool.Taints) > 0 {
-		taints := make([]map[string]interface{}, 0)
-		for _, taint := range respPool.Taints {
-			taints = append(taints, map[string]interface{}{
-				"key":    taint.Key,
-				"value":  taint.Value,
-				"effect": string(taint.Effect),
-			})
-		}
-		d.Set("taint", taints)
+		d.Set("taint", flattenTaints(respPool.Taints))
 	}
 
 	return diags

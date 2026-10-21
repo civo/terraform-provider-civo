@@ -147,35 +147,41 @@ func flattenNodePool(cluster *civogo.KubernetesCluster) []interface{} {
 		"public_ip_node_pool": publicIP,
 	}
 
-	var filteredLabels map[string]string
-	if len(labels) > 0 {
-		filteredLabels = make(map[string]string)
-		for k, v := range labels {
-			if !strings.HasPrefix(k, "kubernetes.civo.com/") {
-				filteredLabels[k] = v
-			}
-		}
-	}
-
-	if len(filteredLabels) > 0 {
-		rawPool["labels"] = filteredLabels
+	if userLabels := filterUserLabels(labels); len(userLabels) > 0 {
+		rawPool["labels"] = userLabels
 	}
 
 	if len(taints) > 0 {
-		rawTaints := make([]map[string]interface{}, 0, len(taints))
-		for _, t := range taints {
-			rawTaints = append(rawTaints, map[string]interface{}{
-				"key":    t.Key,
-				"value":  t.Value,
-				"effect": string(t.Effect),
-			})
-		}
-		rawPool["taint"] = rawTaints
+		rawPool["taint"] = flattenTaints(taints)
 	}
 
 	flattenedPool = append(flattenedPool, rawPool)
 
 	return flattenedPool
+}
+
+// filterUserLabels returns the labels without the kubernetes.civo.com/ ones that Civo manages on every node
+func filterUserLabels(labels map[string]string) map[string]string {
+	userLabels := make(map[string]string)
+	for k, v := range labels {
+		if !strings.HasPrefix(k, "kubernetes.civo.com/") {
+			userLabels[k] = v
+		}
+	}
+	return userLabels
+}
+
+// flattenTaints converts node pool taints to the shape of the `taint` schema
+func flattenTaints(taints []corev1.Taint) []map[string]interface{} {
+	flattened := make([]map[string]interface{}, 0, len(taints))
+	for _, t := range taints {
+		flattened = append(flattened, map[string]interface{}{
+			"key":    t.Key,
+			"value":  t.Value,
+			"effect": string(t.Effect),
+		})
+	}
+	return flattened
 }
 
 // function to flatten all applications inside the cluster

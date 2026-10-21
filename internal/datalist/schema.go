@@ -137,7 +137,7 @@ func computeFilterKeys(recordSchema map[string]*schema.Schema) []string {
 	var filterKeys []string
 
 	for key, schemaForKey := range recordSchema {
-		if schemaForKey.Type != schema.TypeMap {
+		if isFilterable(schemaForKey) {
 			filterKeys = append(filterKeys, key)
 		}
 	}
@@ -145,18 +145,26 @@ func computeFilterKeys(recordSchema map[string]*schema.Schema) []string {
 	return filterKeys
 }
 
+// isFilterable reports whether a field can be filtered on: a primitive field, or a list or
+// set of primitives. Lists and sets of anything else are rejected by expandFilterValues when
+// the data is read, and maps are left out because valueMatches never matches them.
+func isFilterable(s *schema.Schema) bool {
+	if isPrimitiveType(s.Type) {
+		return true
+	}
+	if s.Type != schema.TypeList && s.Type != schema.TypeSet {
+		return false
+	}
+	elem, ok := s.Elem.(*schema.Schema)
+	return ok && isPrimitiveType(elem.Type)
+}
+
 // Compute the set of sort keys for the source.
 func computeSortKeys(recordSchema map[string]*schema.Schema) []string {
 	var sortKeys []string
 
 	for key, schemaForKey := range recordSchema {
-		supported := false
-		switch schemaForKey.Type {
-		case schema.TypeString, schema.TypeBool, schema.TypeInt, schema.TypeFloat:
-			supported = true
-		}
-
-		if supported {
+		if isPrimitiveType(schemaForKey.Type) {
 			sortKeys = append(sortKeys, key)
 		}
 	}
