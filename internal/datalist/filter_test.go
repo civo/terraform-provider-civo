@@ -299,3 +299,30 @@ func TestApplyFilters(t *testing.T) {
 		})
 	}
 }
+
+func TestApplyFiltersOnSetOfStrings(t *testing.T) {
+	recordSchema := map[string]*schema.Schema{
+		"hostname": {Type: schema.TypeString},
+		"tags": {
+			Type: schema.TypeSet,
+			Elem: &schema.Schema{Type: schema.TypeString},
+		},
+	}
+	// The set field as each kind of value a flatten function may produce.
+	records := []map[string]interface{}{
+		{"hostname": "plain-slice", "tags": []string{"prod", "web"}},
+		{"hostname": "interface-slice", "tags": []interface{}{"prod"}},
+		{"hostname": "schema-set", "tags": schema.NewSet(schema.HashString, []interface{}{"prod", "db"})},
+		{"hostname": "untagged", "tags": []string{}},
+		{"hostname": "staging", "tags": []string{"staging"}},
+	}
+	filters := []commonFilter{{"tags", []interface{}{"prod"}, false, "exact"}}
+
+	filtered := applyFilters(recordSchema, records, filters)
+
+	var hostnames []string
+	for _, record := range filtered {
+		hostnames = append(hostnames, record["hostname"].(string))
+	}
+	assert.Equal(t, []string{"plain-slice", "interface-slice", "schema-set"}, hostnames)
+}

@@ -43,8 +43,19 @@ func valueMatches(s *schema.Schema, value interface{}, filterValue interface{}, 
 		return result
 
 	case schema.TypeSet:
-		setValue := value.(*schema.Set)
-		listValues := setValue.List()
+		var listValues []interface{}
+		switch setValue := value.(type) {
+		case *schema.Set:
+			listValues = setValue.List()
+		// A flatten function may hand over a plain slice for a set field, such as an
+		// instance's tags as []string, and asserting *schema.Set panicked (#429).
+		case []string:
+			for _, item := range setValue {
+				listValues = append(listValues, item)
+			}
+		case []interface{}:
+			listValues = setValue
+		}
 		result := false
 		for _, listValue := range listValues {
 			valueDoesMatch := valueMatches(s.Elem.(*schema.Schema), listValue, filterValue, matchBy)
