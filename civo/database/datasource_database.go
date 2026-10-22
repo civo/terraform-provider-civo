@@ -99,6 +99,48 @@ func DataSourceDatabase() *schema.Resource {
 				Computed:    true,
 				Description: "The status of the database",
 			},
+			"storage_gb": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Storage of every node in GB",
+			},
+			"base_storage_gb": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Storage in GB included in the plan of the database",
+			},
+			"extensions": {
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Enabled PostgreSQL extensions",
+			},
+			"database_parameters": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Custom PostgreSQL server parameters",
+			},
+			"read_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Host of the read-only endpoint, available on databases with 3 or more nodes",
+			},
+			"read_endpoint_port": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Port of the read-only endpoint",
+			},
+			"read_endpoint_dns": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "DNS entry of the read-only endpoint",
+			},
+			"earliest_restore_time": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Earliest point in time (RFC 3339) the database can be restored or forked to",
+			},
 		},
 		ReadContext: dataSourceDatabaseRead,
 	}
@@ -149,6 +191,8 @@ func dataSourceDatabaseRead(_ context.Context, d *schema.ResourceData, m interfa
 	d.Set("dns_endpoint", fmt.Sprintf("%s.db.civo.com", foundDatabase.ID))
 	d.Set("port", foundDatabase.Port)
 	d.Set("status", foundDatabase.Status)
+
+	setDatabaseDetails(d, apiClient, foundDatabase.ID)
 
 	return nil
 }

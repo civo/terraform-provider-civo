@@ -33,16 +33,24 @@ data "civo_database" "test" {
 
 ### Read-Only
 
+- `base_storage_gb` (Number) Storage in GB included in the plan of the database
+- `database_parameters` (Map of String) Custom PostgreSQL server parameters
 - `dns_endpoint` (String) The DNS endpoint of the database
+- `earliest_restore_time` (String) Earliest point in time (RFC 3339) the database can be restored or forked to
 - `endpoint` (String) The endpoint of the database
 - `engine` (String) The engine of the database
+- `extensions` (Set of String) Enabled PostgreSQL extensions
 - `firewall_id` (String) The firewall id of the Database
 - `network_id` (String) The network id of the Database
 - `nodes` (Number) Count of nodes
 - `password` (String) The password of the database
 - `port` (Number) The port of the database
+- `read_endpoint` (String) Host of the read-only endpoint, available on databases with 3 or more nodes
+- `read_endpoint_dns` (String) DNS entry of the read-only endpoint
+- `read_endpoint_port` (Number) Port of the read-only endpoint
 - `size` (String) Size of the database
 - `status` (String) The status of the database
+- `storage_gb` (Number) Storage of every node in GB
 - `username` (String) The username of the database
 - `version` (String) The version of the database
 
