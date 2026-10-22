@@ -44,6 +44,15 @@ func reads(volumes ...*civogo.Volume) func() (*civogo.Volume, error) {
 	}
 }
 
+// repeat returns n copies of v, for a read sequence that stays unchanged for a while.
+func repeat(n int, v *civogo.Volume) []*civogo.Volume {
+	out := make([]*civogo.Volume, n)
+	for i := range out {
+		out[i] = v
+	}
+	return out
+}
+
 func TestWaitForVolumeResize(t *testing.T) {
 	t0 := time.Date(2026, 10, 8, 12, 0, 0, 0, time.UTC)
 	earlier := t0.Add(-time.Hour)
@@ -129,6 +138,15 @@ func TestWaitForVolumeResize(t *testing.T) {
 			},
 			wantConfirmed: true,
 			wantMaxSlept:  0,
+		},
+		{
+			name:     "completed between two polls after the grace window, resizing never seen: the outcome is the evidence",
+			baseline: &civogo.Volume{Status: "attached", SizeGigabytes: 20, DeliveredSizeGigabytes: 20},
+			// 14 unchanged reads at the 5s grace poll carry the wait past the 60s window.
+			reads: append(repeat(14, &civogo.Volume{Status: "attached", SizeGigabytes: 60, DeliveredSizeGigabytes: 20}),
+				&civogo.Volume{Status: "attached", SizeGigabytes: 60, DeliveredSizeGigabytes: 60, Resize: completed}),
+			wantConfirmed: true,
+			wantMaxSlept:  resizeGraceWindow + 2*resizeGracePoll,
 		},
 		{
 			name:     "fallback delivered size while resizing keeps waiting and follows the real outcome",

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/civo/civogo"
@@ -197,7 +198,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		newSize := d.Get("size_gb").(int)
 		log.Printf("[INFO] resizing the volume %s to %dGB (attached to %q)", d.Id(), newSize, resp.InstanceID)
 		if _, err := apiClient.ResizeVolume(d.Id(), newSize); err != nil {
-			return diag.Errorf("[ERR] failed to resize the volume %s to %dGB: %s", d.Id(), newSize, err)
+			return diag.Errorf("[ERR] failed to resize the volume %s to %dGB: %s%s", d.Id(), newSize, err, resizeRefusalHint(err))
 		}
 		// The request is accepted from here on: record the new size now, so an error while waiting
 		// below does not leave the old size in state and re-issue the resize on the next apply.
@@ -237,6 +238,18 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	return resourceVolumeRead(ctx, d, m)
+}
+
+// resizeRefusalHint spells out, on the API's detach-to-resize refusal, that the provider no longer
+// detaches the volume on the user's behalf, and what to do instead. civogo has no typed error for
+// the code, so it is matched on the error text. Empty for every other error.
+func resizeRefusalHint(err error) string {
+	if err == nil || !strings.Contains(err.Error(), "volume_onlie_resize") {
+		return ""
+	}
+	return ". Note: this provider version resizes in place and no longer detaches the volume for you. " +
+		"Detach it first (with civo_volume_attachment: remove the attachment from the configuration and apply, resize, then add it back), " +
+		"or move the volume to a volume type that supports online expansion"
 }
 
 // Timings for waitForVolumeResize. The API accepts a resize before the platform picks it up, so
@@ -350,7 +363,13 @@ func waitForVolumeResize(ctx context.Context, id string, w resizeWait) (bool, er
 		case !seen && w.now().Sub(start) >= w.grace:
 			if w.baseline.DeliveredSizeGigabytes > 0 || v.DeliveredSizeGigabytes > 0 {
 				// The API reports the delivered size, so the request will show up as evidence
-				// when it is picked up: keep waiting for it within the context's deadline.
+				// when it is picked up: keep waiting for it within the context's deadline. The
+				// delivered size itself cannot end the wait here: the API serves the requested
+				// size as the delivered size until the platform reports one, so trusting it
+				// would confirm a request the platform never looked at. Nor can a resize that
+				// finished between two polls be missed: the outcome and the delivered size come
+				// from the same platform record, so a delivered resize always carries its
+				// completed outcome, which is evidence on the next read.
 				break
 			}
 			log.Printf("[WARN] volume %s showed no sign of the resize within %s and the API reports no delivered size", id, w.grace)
