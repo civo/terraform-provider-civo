@@ -238,3 +238,48 @@ func TestWaitForVolumeResize_LookupError(t *testing.T) {
 		t.Fatalf("expected the lookup error, got %v", err)
 	}
 }
+
+func TestWaitForVolumeToSettle(t *testing.T) {
+	t0 := time.Date(2026, 10, 8, 12, 0, 0, 0, time.UTC)
+	inProgress := &civogo.VolumeResize{State: civogo.VolumeResizeInProgress, Reason: "Expanding", UpdatedAt: t0}
+	failed := &civogo.VolumeResize{State: civogo.VolumeResizeFailed, Reason: "Timeout", UpdatedAt: t0.Add(20 * time.Second)}
+
+	t.Run("an earlier resize still running is waited out and the settled read is returned", func(t *testing.T) {
+		clock := &fakeClock{t: t0}
+		settled := &civogo.Volume{Status: "attached", SizeGigabytes: 60, DeliveredSizeGigabytes: 20, Resize: failed}
+		w := resizeWait{
+			find: reads(
+				&civogo.Volume{Status: "resizing", SizeGigabytes: 60, DeliveredSizeGigabytes: 20, Resize: inProgress},
+				&civogo.Volume{Status: "attached", SizeGigabytes: 60, DeliveredSizeGigabytes: 20, Resize: inProgress},
+				settled,
+			),
+			poll: resizePoll, sleep: clock.sleep,
+		}
+		v, err := waitForVolumeToSettle(context.Background(), "vol-1", w)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if v != settled {
+			t.Errorf("returned %+v, want the settled read", v)
+		}
+		if clock.slept != 2*resizePoll {
+			t.Errorf("slept %s, want %s", clock.slept, 2*resizePoll)
+		}
+	})
+
+	t.Run("a settled volume returns at once", func(t *testing.T) {
+		clock := &fakeClock{t: t0}
+		w := resizeWait{find: reads(&civogo.Volume{Status: "available", SizeGigabytes: 20}), poll: resizePoll, sleep: clock.sleep}
+		if _, err := waitForVolumeToSettle(context.Background(), "vol-1", w); err != nil || clock.slept != 0 {
+			t.Fatalf("err %v, slept %s", err, clock.slept)
+		}
+	})
+
+	t.Run("the deadline ends the wait", func(t *testing.T) {
+		clock := &fakeClock{t: t0, deadline: t0.Add(time.Minute)}
+		w := resizeWait{find: reads(&civogo.Volume{Status: "resizing", SizeGigabytes: 60}), poll: resizePoll, sleep: clock.sleep}
+		if _, err := waitForVolumeToSettle(context.Background(), "vol-1", w); !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatalf("expected the deadline error, got %v", err)
+		}
+	})
+}

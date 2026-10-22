@@ -183,13 +183,41 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] retrieving the volume %s", d.Id())
-	resp, err := apiClient.FindVolume(d.Id())
-	if err != nil {
-		return diag.Errorf("[ERR] failed retrieving the volume: %s", err)
+	// The SDK writes the planned configuration into state when Update returns an error, even
+	// without a d.Set. Nothing below changes the volume until the API has accepted the resize, so
+	// until then an error must leave the state as it was: a refused size, or a name or network
+	// change, is not recorded as done.
+	d.Partial(true)
+
+	// Guards for changes the API does not support run before anything is mutated, so a plan that
+	// combines one of them with a size change does not resize and then fail.
+	if d.HasChange("network_id") {
+		return diag.Errorf("[ERR] Network change for volume is not supported at this moment")
+	}
+	if d.HasChange("name") {
+		return diag.Errorf("[ERR] Name change for volume is not supported at this moment")
 	}
 
 	if d.HasChange("size_gb") {
+		log.Printf("[INFO] retrieving the volume %s", d.Id())
+		resp, err := apiClient.FindVolume(d.Id())
+		if err != nil {
+			return diag.Errorf("[ERR] failed retrieving the volume: %s", err)
+		}
+		find := func() (*civogo.Volume, error) { return apiClient.FindVolume(d.Id()) }
+
+		// An earlier resize may still be running, for instance when a previous apply timed out
+		// while following it. A second request now would be refused on a detached volume, and on
+		// an attached one it would be admitted and cancel the running grow; in either case the
+		// stale resizing status would pass for evidence of the new request. Wait for the earlier
+		// one to settle first, and take that read as the baseline of this request.
+		if resizeOutstanding(resp) {
+			resp, err = waitForVolumeToSettle(ctx, d.Id(), resizeWait{find: find, poll: resizePoll})
+			if err != nil {
+				return diag.Errorf("[ERR] volume %s is still carrying out an earlier resize: %s", d.Id(), err)
+			}
+		}
+
 		// Resize in place, attached or not. The API grows a detached volume with a clone-and-swap,
 		// and a volume attached to a running instance online when its volume type supports
 		// expansion; when it cannot, it refuses with volume_onlie_resize or
@@ -202,12 +230,13 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 		// The request is accepted from here on: record the new size now, so an error while waiting
 		// below does not leave the old size in state and re-issue the resize on the next apply.
+		d.Partial(false)
 		if err := d.Set("size_gb", newSize); err != nil {
 			return diag.FromErr(err)
 		}
 
 		w := resizeWait{
-			find:      func() (*civogo.Volume, error) { return apiClient.FindVolume(d.Id()) },
+			find:      find,
 			baseline:  resp,
 			requested: newSize,
 			grace:     resizeGraceWindow,
@@ -229,22 +258,26 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 	}
 
-	if d.HasChange("network_id") {
-		return diag.Errorf("[ERR] Network change for volume is not supported at this moment")
-	}
-
-	if d.HasChange("name") {
-		return diag.Errorf("[ERR] Name change for volume is not supported at this moment")
-	}
-
+	d.Partial(false)
 	return resourceVolumeRead(ctx, d, m)
 }
+
+// resizeRefusalCodes are the API codes of the detach-to-resize refusal: the misspelling the API
+// ships today, and the spelling it would take if the typo were fixed, so the hint survives that.
+var resizeRefusalCodes = []string{"volume_onlie_resize", "volume_online_resize"}
 
 // resizeRefusalHint spells out, on the API's detach-to-resize refusal, that the provider no longer
 // detaches the volume on the user's behalf, and what to do instead. civogo has no typed error for
 // the code, so it is matched on the error text. Empty for every other error.
 func resizeRefusalHint(err error) string {
-	if err == nil || !strings.Contains(err.Error(), "volume_onlie_resize") {
+	if err == nil {
+		return ""
+	}
+	refused := false
+	for _, code := range resizeRefusalCodes {
+		refused = refused || strings.Contains(err.Error(), code)
+	}
+	if !refused {
 		return ""
 	}
 	return ". Note: this provider version resizes in place and no longer detaches the volume for you. " +
@@ -382,6 +415,34 @@ func waitForVolumeResize(ctx context.Context, id string, w resizeWait) (bool, er
 		}
 		if err := w.sleep(ctx, interval); err != nil {
 			return false, fmt.Errorf("gave up waiting for the resize (last status %q, delivered %dGB of %dGB): %w", v.Status, v.DeliveredSizeGigabytes, w.requested, err)
+		}
+	}
+}
+
+// resizeOutstanding reports whether the volume is still carrying out an earlier resize: the
+// resizing status, or a resize outcome that says in progress.
+func resizeOutstanding(v *civogo.Volume) bool {
+	return v.Status == volumeStatusResizing || !v.Resize.Settled()
+}
+
+// waitForVolumeToSettle polls the volume until no earlier resize is outstanding and returns that
+// read, so it can serve as the baseline of a new request. It gives up when the context ends or the
+// volume cannot be read.
+func waitForVolumeToSettle(ctx context.Context, id string, w resizeWait) (*civogo.Volume, error) {
+	if w.sleep == nil {
+		w.sleep = sleepContext
+	}
+	for {
+		v, err := w.find()
+		if err != nil {
+			return nil, fmt.Errorf("reading the volume while waiting for an earlier resize to settle: %w", err)
+		}
+		if !resizeOutstanding(v) {
+			return v, nil
+		}
+		log.Printf("[INFO] volume %s is still carrying out an earlier resize (status %q); waiting for it to settle before resizing again", id, v.Status)
+		if err := w.sleep(ctx, w.poll); err != nil {
+			return nil, fmt.Errorf("gave up waiting for the earlier resize to settle (status %q): %w", v.Status, err)
 		}
 	}
 }

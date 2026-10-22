@@ -21,6 +21,8 @@ description: |-
 
 Increasing `size_gb` resizes the volume in place. A detached volume is resized offline; a volume attached to a running instance is grown online when its volume type supports expansion. The provider then follows the resize until the API confirms the new size and fails the apply when the platform reports that the resize failed (for example `InsufficientStorage` or `Timeout`). On an API that does not yet report the delivered size, the apply warns that the resize was accepted but could not be confirmed.
 
+If an earlier resize is still running when the apply starts (for example after a previous apply timed out while following it), the provider waits for it to settle before issuing the new one, within the same `update` timeout.
+
 The API refuses a resize it cannot perform:
 
 - `volume_onlie_resize` (the code's spelling matches the API): the volume is attached and its volume type does not support online expansion. Detach the volume, or move it to a volume type that supports expansion.
