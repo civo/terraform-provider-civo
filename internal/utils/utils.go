@@ -399,6 +399,17 @@ func InstanceRef(field string) RegionRef {
 	}}
 }
 
+// KubernetesClusterRef builds a RegionRef for a field holding a cluster ID.
+func KubernetesClusterRef(field string) RegionRef {
+	return RegionRef{Field: field, Kind: "kubernetes cluster", Probe: func(c *civogo.Client, id string) (bool, error) {
+		k, err := c.GetKubernetesCluster(id)
+		if err != nil {
+			return false, err
+		}
+		return k != nil && k.ID != "", nil
+	}}
+}
+
 // VolumeRef builds a RegionRef for a field holding a volume ID.
 func VolumeRef(field string) RegionRef {
 	return RegionRef{Field: field, Kind: "volume", Probe: func(c *civogo.Client, id string) (bool, error) {
