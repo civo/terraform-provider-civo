@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"sync"
 	"testing"
@@ -283,6 +286,9 @@ func TestRegionalClientErrorsWhenRefNotFoundAnywhere(t *testing.T) {
 	if len(probed) != 3 {
 		t.Errorf("probed %v, want all 3 regions tried", probed)
 	}
+	if !errors.Is(err, ErrRefNotFound) {
+		t.Errorf("error %q does not wrap ErrRefNotFound", err.Error())
+	}
 }
 
 // A ref that is not set must be skipped so a later one still gets a chance.
@@ -323,6 +329,9 @@ func TestRegionalClientSurfacesProbeFailure(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "503 from the API") {
 		t.Errorf("error %q hides the underlying probe failure", err.Error())
+	} // a failed lookup proves nothing is gone, so it must not read as not-found
+	if errors.Is(err, ErrRefNotFound) {
+		t.Errorf("error %q wraps ErrRefNotFound although a lookup failed", err.Error())
 	}
 }
 
@@ -464,5 +473,26 @@ func TestKubernetesClusterRef(t *testing.T) {
 				t.Errorf("Probe = %v, want %v", got, tc.want)
 			}
 		})
+	}
+}
+
+// A real API 404 for the cluster means "not in this region", not a failed lookup.
+func TestKubernetesClusterRefNotFound(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
+		rw.WriteHeader(http.StatusNotFound)
+		rw.Write([]byte(`{"code":"database_kubernetes_cluster_not_found","reason":"not found"}`))
+	}))
+	t.Cleanup(server.Close)
+	client, err := civogo.NewClientForTestingWithServer(server)
+	if err != nil {
+		t.Fatalf("could not build the test client: %v", err)
+	}
+
+	got, err := KubernetesClusterRef("cluster_id").Probe(client, "cluster-1")
+	if err != nil {
+		t.Fatalf("a 404 must report absent, not an error: %v", err)
+	}
+	if got {
+		t.Error("Probe = true for a 404")
 	}
 }

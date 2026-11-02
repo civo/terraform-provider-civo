@@ -129,6 +129,11 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 	apiClient := m.(*civogo.Client)
 
 	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.KubernetesClusterRef("cluster_id")))
+	if errors.Is(err, utils.ErrRefNotFound) {
+		// a pool in state with no region whose cluster is gone: same as the 404 below
+		d.SetId("")
+		return nil
+	}
 	if err != nil {
 		return diag.FromErr(err)
 	}

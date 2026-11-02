@@ -403,6 +403,9 @@ func InstanceRef(field string) RegionRef {
 func KubernetesClusterRef(field string) RegionRef {
 	return RegionRef{Field: field, Kind: "kubernetes cluster", Probe: func(c *civogo.Client, id string) (bool, error) {
 		k, err := c.GetKubernetesCluster(id)
+		if errors.Is(err, civogo.DatabaseKubernetesClusterNotFoundError) {
+			return false, nil
+		}
 		if err != nil {
 			return false, err
 		}
@@ -506,6 +509,11 @@ func RegionalClient(apiClient *civogo.Client, opts ...RegionOption) (*civogo.Cli
 	return apiClient, nil
 }
 
+// ErrRefNotFound is wrapped by RegionalClient when every region answered and
+// none holds the referenced resource, so a Read can drop a resource whose parent
+// is gone instead of failing the refresh.
+var ErrRefNotFound = errors.New("referenced resource not found in any region")
+
 // findRegionOf searches the account's regions for the one holding id.
 func findRegionOf(apiClient *civogo.Client, ref RegionRef, id string) (string, error) {
 	regions, err := apiClient.ListRegions()
@@ -547,7 +555,7 @@ func findRegionOf(apiClient *civogo.Client, ref RegionRef, id string) (string, e
 	if probeErr != nil {
 		return "", fmt.Errorf("%s. A lookup also failed, which may be the real cause: %w", msg, probeErr)
 	}
-	return "", errors.New(msg)
+	return "", fmt.Errorf("%s: %w", msg, ErrRefNotFound)
 }
 
 func regionScoped(apiClient *civogo.Client, region string) *civogo.Client {
