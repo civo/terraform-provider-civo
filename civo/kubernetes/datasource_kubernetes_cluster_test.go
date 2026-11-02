@@ -27,6 +27,7 @@ func TestAccDataSourceCivoKubernetesCluster_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(datasourceName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(datasourceName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(datasourceName, "master_ip"),
+					resource.TestCheckResourceAttrSet(datasourceName, "volume_type"),
 				),
 			},
 		},
@@ -51,6 +52,7 @@ func TestAccDataSourceCivoKubernetesClusterByID_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(datasourceName, "kubeconfig"),
 					resource.TestCheckResourceAttrSet(datasourceName, "api_endpoint"),
 					resource.TestCheckResourceAttrSet(datasourceName, "master_ip"),
+					resource.TestCheckResourceAttrSet(datasourceName, "volume_type"),
 				),
 			},
 		},
@@ -71,6 +73,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 		node_count = 2
 		size = "g4s.kube.small"
 	}
+	volume_type = "encrypted-standard"
 }
 
 data "civo_kubernetes_cluster" "foobar" {
@@ -93,6 +96,7 @@ resource "civo_kubernetes_cluster" "my-cluster" {
 		node_count = 2
 		size = "g4s.kube.small"
 	}
+	volume_type = "encrypted-standard"
 }
 
 data "civo_kubernetes_cluster" "foobar" {

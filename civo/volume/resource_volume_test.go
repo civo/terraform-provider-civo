@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// example.Widget represents a concrete Go type that represents an API resource
+// TestAccCivoVolume_basic tests that the basic fields against a Volume are set correctly
 func TestAccCivoVolume_basic(t *testing.T) {
 	var volume civogo.Volume
 
@@ -36,6 +36,7 @@ func TestAccCivoVolume_basic(t *testing.T) {
 					// verify local values
 					resource.TestCheckResourceAttr(resName, "name", VolumeName),
 					resource.TestCheckResourceAttr(resName, "size_gb", "10"),
+					resource.TestCheckResourceAttr(resName, "volume_type", "encrypted-standard"),
 				),
 			},
 		},
@@ -104,5 +105,6 @@ resource "civo_volume" "foobar" {
 	size_gb = 10
 	network_id = data.civo_network.default.id
 	region = "LON1"
+	volume_type = "encrypted-standard"
 }`, name)
 }

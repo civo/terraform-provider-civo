@@ -37,6 +37,7 @@ func TestAccCivoVolumeAttachment_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resName, "id"),
 					resource.TestCheckResourceAttrSet(resName, "instance_id"),
 					resource.TestCheckResourceAttrSet(resName, "volume_id"),
+					resource.TestCheckResourceAttrSet(resName, "attach_on_boot"),
 				),
 			},
 		},
@@ -98,6 +99,7 @@ resource "civo_volume_attachment" "foobar" {
 	instance_id = civo_instance.vm.id
 	volume_id  = civo_volume.foo.id
 	region = "LON1"
+    attach_on_boot = true
 }
 `, name, name)
 }

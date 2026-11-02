@@ -6,6 +6,7 @@ import (
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -43,17 +44,23 @@ func getDataSourceInstances(m interface{}, extra map[string]interface{}) ([]inte
 	}
 
 	if region != "" {
-		apiClient.Region = region
+		var err error
+		apiClient, err = utils.RegionalClient(apiClient, utils.WithRegion(region))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var instance []interface{}
-	partialInstances, err := apiClient.ListInstances(1, 200)
+	// Use ListAllInstances so accounts with > 200 instances are not silently
+	// truncated; civogo v0.7.2 iterates server pagination internally.
+	allInstances, err := apiClient.ListAllInstances()
 	if err != nil {
 		return nil, fmt.Errorf("[ERR] error retrieving instances: %s", err)
 	}
 
-	for _, partialInstance := range partialInstances.Items {
-		instance = append(instance, partialInstance)
+	for _, ins := range allInstances {
+		instance = append(instance, ins)
 	}
 
 	return instance, nil

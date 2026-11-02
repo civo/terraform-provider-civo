@@ -23,7 +23,8 @@ builds:
     ldflags:
       - -s -w -X github.com/civo/terraform-provider-civo/civo.ProviderVersion={{.Version}}
 archives:
-- format: zip
+- formats:
+    - zip
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'

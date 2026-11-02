@@ -112,3 +112,53 @@ provider "civo" {
 <a id="credentials_file"></a>
 - `credentials_file` (string) specify a location for a file containing your civo credentials token 
 - `token` (String) (**Deprecated**) for legacy reasons the user can still specify the token as an input, but in order to avoid storing that in terraform state we have deprecated this and will be remove in future versions - don't use it.
+
+## Configuring Modules
+
+Terraform modules allow you to group resources and reuse configurations efficiently. Below are examples of how to configure modules with the Civo provider.
+
+### Example Module Usage
+
+To use a module with the Civo provider, create a module directory and define your infrastructure in it.
+
+**Module Definition** (`modules/civo-instance/main.tf`)
+
+```
+variable "region" {}
+variable "instance_size" {}
+
+provider "civo" {
+    region = var.region
+}
+
+resource "civo_instance" "example" {
+    hostname = "example-instance"
+    size     = var.instance_size
+    region   = var.region
+}
+```
+**Root Module** (`main.tf`)
+```
+module "civo_instance" {
+    source        = "./modules/civo-instance"
+    region        = "LON1"
+    instance_size = "g3.small"
+} 
+```
+
+This approach helps in managing infrastructure more efficiently by keeping configurations modular and reusable.
+**Please note since this is a non-hashicorp maintained provider, every module should have its own provider block.**
+Reference: [Terraform Modules](https://developer.hashicorp.com/terraform/language/providers/requirements)
+
+## Argument Reference
+
+### Optional
+
+`api_endpoint` (String) The Base URL to use for CIVO API.
+
+`region` (String) This sets the default region for all resources. If no default region is set, you will need to specify individually in every resource.
+
+
+`credentials_file` (string) Specify a location for a file containing your Civo credentials token.
+
+`token` (String) (Deprecated) For legacy reasons, the user can still specify the token as an input, but in order to avoid storing that in Terraform state, we have deprecated this and will remove it in future versions—don't use it.

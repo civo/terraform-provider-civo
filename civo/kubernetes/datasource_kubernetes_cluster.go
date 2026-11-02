@@ -6,9 +6,11 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // DataSourceKubernetesCluster function returns a schema.Resource that represents a Kubernetes cluster.
@@ -62,6 +64,11 @@ func DataSourceKubernetesCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The cni for the k3s to install (the default is `flannel`) valid options are `cilium` or `flannel`",
+			},
+			"volume_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The volume type used for the Kubernetes nodes",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
@@ -156,9 +163,9 @@ func dataSourceApplicationSchema() *schema.Schema {
 func dataSourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	var foundCluster *civogo.KubernetesCluster
@@ -186,6 +193,7 @@ func dataSourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, 
 	d.Set("target_nodes_size", foundCluster.TargetNodeSize)
 	d.Set("kubernetes_version", foundCluster.KubernetesVersion)
 	d.Set("cni", foundCluster.CNIPlugin)
+	d.Set("volume_type", foundCluster.VolumeType)
 	d.Set("tags", foundCluster.Tags)
 	d.Set("status", foundCluster.Status)
 	d.Set("ready", foundCluster.Ready)
@@ -207,25 +215,48 @@ func dataSourceKubernetesClusterRead(_ context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-// function to flatten all instances inside the cluster
+// function to flatten all node pools of the cluster
 func flattenDataSourceNodePool(cluster *civogo.KubernetesCluster) []interface{} {
-	if cluster.Pools == nil {
+	if cluster.Pools == nil && cluster.RequiredPools == nil {
 		return nil
+	}
+
+	flattenPool := func(id string, count int, size string, instanceNames []string, publicIP bool, labels map[string]string, taints []corev1.Taint) map[string]interface{} {
+		poolInstanceNames := make([]string, 0)
+		poolInstanceNames = append(poolInstanceNames, instanceNames...)
+		return map[string]interface{}{
+			"label":               id,
+			"node_count":          count,
+			"size":                size,
+			"instance_names":      poolInstanceNames,
+			"public_ip_node_pool": publicIP,
+			"labels":              filterUserLabels(labels),
+			"taint":               flattenTaints(taints),
+		}
+	}
+
+	required := make(map[string]civogo.RequiredPools, len(cluster.RequiredPools))
+	for _, rp := range cluster.RequiredPools {
+		required[rp.ID] = rp
 	}
 
 	flattenedPool := make([]interface{}, 0)
 	for _, pool := range cluster.Pools {
-		poolInstanceNames := make([]string, 0)
-		poolInstanceNames = append(poolInstanceNames, pool.InstanceNames...)
-
-		rawPool := map[string]interface{}{
-			"label":               pool.ID,
-			"node_count":          pool.Count,
-			"size":                pool.Size,
-			"instance_names":      poolInstanceNames,
-			"public_ip_node_pool": pool.PublicIPNodePool,
+		// Labels and taints set by the user are kept on the matching required pool, as in flattenNodePool
+		labels, taints := pool.Labels, pool.Taints
+		if rp, ok := required[pool.ID]; ok {
+			labels, taints = rp.Labels, rp.Taints
+			delete(required, pool.ID)
 		}
-		flattenedPool = append(flattenedPool, rawPool)
+		flattenedPool = append(flattenedPool, flattenPool(pool.ID, pool.Count, pool.Size, pool.InstanceNames, pool.PublicIPNodePool, labels, taints))
+	}
+
+	// A pool that is requested but not built yet, for example while the cluster is
+	// being created, is only listed in required_pools. Keep the API's order for those.
+	for _, rp := range cluster.RequiredPools {
+		if _, notBuilt := required[rp.ID]; notBuilt {
+			flattenedPool = append(flattenedPool, flattenPool(rp.ID, rp.Count, rp.Size, nil, rp.PublicIPNodePool, rp.Labels, rp.Taints))
+		}
 	}
 
 	return flattenedPool

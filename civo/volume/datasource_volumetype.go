@@ -2,7 +2,9 @@ package volume
 
 import (
 	"context"
+
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -32,9 +34,9 @@ func DataSourceVolumeType() *schema.Resource {
 func dataSourceCivoVolumeTypeRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		client.Region = region.(string)
+	client, err := utils.RegionalClient(client, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	// Get the name of the volume type from the Terraform configuration

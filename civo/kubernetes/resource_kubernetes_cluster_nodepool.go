@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/civo/civogo"
@@ -43,9 +42,9 @@ func ResourceKubernetesClusterNodePool() *schema.Resource {
 func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	clusterID := d.Get("cluster_id").(string)
@@ -76,10 +75,10 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 		nodePoolLabel = attr.(string)
 	}
 
-	nodePoolLabes := map[string]string{}
+	nodePoolLabels := map[string]string{}
 	if attr, ok := d.GetOk("labels"); ok {
 		for k, v := range attr.(map[string]interface{}) {
-			nodePoolLabes[k] = v.(string)
+			nodePoolLabels[k] = v.(string)
 		}
 	}
 
@@ -99,7 +98,7 @@ func resourceKubernetesClusterNodePoolCreate(ctx context.Context, d *schema.Reso
 		ID:     nodePoolLabel,
 		Count:  count,
 		Size:   size,
-		Labels: nodePoolLabes,
+		Labels: nodePoolLabels,
 		Taints: nodePoolTains,
 		Region: apiClient.Region,
 	}
@@ -167,20 +166,14 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 
 	d.Set("instance_names", poolInstanceNames)
 
-	if len(respPool.Labels) > 0 {
-		d.Set("labels", respPool.Labels)
+	if filteredLabels := filterUserLabels(respPool.Labels); len(filteredLabels) > 0 {
+		d.Set("labels", filteredLabels)
+	} else {
+		d.Set("labels", nil)
 	}
 
 	if len(respPool.Taints) > 0 {
-		taints := make([]map[string]interface{}, 0)
-		for _, taint := range respPool.Taints {
-			taints = append(taints, map[string]interface{}{
-				"key":    taint.Key,
-				"value":  taint.Value,
-				"effect": string(taint.Effect),
-			})
-		}
-		d.Set("taint", taints)
+		d.Set("taint", flattenTaints(respPool.Taints))
 	}
 
 	return diags
@@ -190,9 +183,9 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	old, new := d.GetChange("size")
@@ -201,7 +194,7 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 	}
 
 	clusterID := d.Get("cluster_id").(string)
-	poolUpdate := &civogo.KubernetesClusterPoolUpdateConfig{
+	poolUpdate := &kubernetesClusterPoolUpdatePayload{
 		Region: apiClient.Region,
 	}
 
@@ -211,27 +204,26 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 	}
 
 	if d.HasChange("node_count") {
-		poolUpdate.Count = d.Get("node_count").(*int)
+		count := d.Get("node_count").(int)
+		poolUpdate.Count = &count
 	}
 
 	if d.HasChange("labels") {
+		nodePoolLabels := make(map[string]string)
 		if attr, ok := d.GetOk("labels"); ok {
-			nodePoolLabels := make(map[string]string)
 			for k, v := range attr.(map[string]interface{}) {
 				if s, ok := v.(string); ok {
 					nodePoolLabels[k] = s
 				}
 			}
-			poolUpdate.Labels = nodePoolLabels
-		} else {
-			poolUpdate.Labels = nil
 		}
+		poolUpdate.Labels = &nodePoolLabels
 	}
 
 	if d.HasChange("taint") {
+		nodePoolTains := []corev1.Taint{}
 		if attr, ok := d.GetOk("taint"); ok {
 			log.Printf("[INFO] dentro de tains")
-			nodePoolTains := []corev1.Taint{}
 			for _, v := range attr.(*schema.Set).List() {
 				taint := v.(map[string]interface{})
 				nodePoolTains = append(nodePoolTains, corev1.Taint{
@@ -240,14 +232,12 @@ func resourceKubernetesClusterNodePoolUpdate(ctx context.Context, d *schema.Reso
 					Effect: corev1.TaintEffect(taint["effect"].(string)),
 				})
 			}
-			poolUpdate.Taints = nodePoolTains
-		} else {
-			poolUpdate.Taints = []corev1.Taint{}
 		}
+		poolUpdate.Taints = &nodePoolTains
 	}
 
 	log.Printf("[INFO] updating the kubernetes cluster pool %s", d.Id())
-	_, err = apiClient.UpdateKubernetesClusterPool(getKubernetesCluster.ID, d.Id(), poolUpdate)
+	_, err = updateKubernetesClusterPoolHelper(apiClient, getKubernetesCluster.ID, d.Id(), poolUpdate)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to update kubernetes cluster pool: %s", err)
 	}
@@ -270,9 +260,9 @@ func resourceKubernetesClusterNodePoolDelete(ctx context.Context, d *schema.Reso
 		return diag.Errorf("[INFO] error getting kubernetes cluster: %s", clusterID)
 	}
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err = utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the kubernetes cluster %s", d.Id())
@@ -322,7 +312,10 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 		}
 
 		currentRegionCode := region.Code
-		apiClient.Region = currentRegionCode
+		apiClient, err = utils.RegionalClient(apiClient, utils.WithRegion(currentRegionCode))
+		if err != nil {
+			return nil, err
+		}
 
 		log.Printf("[INFO] Retriving the node pool %s from region %s", nodePoolID, currentRegionCode)
 		respPool, err := apiClient.GetKubernetesClusterPool(clusterID, nodePoolID)
@@ -349,17 +342,6 @@ func resourceKubernetesClusterNodePoolImport(d *schema.ResourceData, m interface
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-// UpdateNodePool is a utility function to update node pool from a kuberentes cluster
-func updateNodePool(s []civogo.KubernetesClusterPoolConfig, id string, count int) []civogo.KubernetesClusterPoolConfig {
-	for k, v := range s {
-		if strings.Contains(v.ID, id) {
-			s[k].Count = count
-			break
-		}
-	}
-	return s
 }
 
 // waitForKubernetesNodePoolCreate is a utility function to wait for a node pool to be created

@@ -2,11 +2,13 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,10 +65,11 @@ func ResourceDatabase() *schema.Resource {
 				Description: "The ID of the firewall to use, from the current list. If left blank or not sent, the default firewall will be used (open to all)",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				Description: "The region where the database will be created.",
+				Type:             schema.TypeString,
+				Computed:         true,
+				Optional:         true,
+				Description:      "The region where the database will be created.",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"username": {
 				Type:        schema.TypeString,
@@ -76,6 +79,7 @@ func ResourceDatabase() *schema.Resource {
 			"password": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: "The password of the database",
 			},
 			"endpoint": {
@@ -123,9 +127,9 @@ func ResourceDatabase() *schema.Resource {
 func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.NetworkRef("network_id"), utils.FirewallRef("firewall_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] configuring the database %s", d.Get("name").(string))
@@ -204,12 +208,12 @@ func resourceDatabaseCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	_, err := apiClient.FindDatabase(d.Id())
+	_, err = apiClient.FindDatabase(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] failed to find Database: %s", err)
 	}
@@ -246,9 +250,9 @@ func resourceDatabaseUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the Database %s", d.Id())
@@ -284,16 +288,50 @@ func resourceDatabaseRead(ctx context.Context, d *schema.ResourceData, m interfa
 func resourceDatabaseDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the Database %s", d.Id())
-	_, err := apiClient.DeleteDatabase(d.Id())
+	_, err = apiClient.DeleteDatabase(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the Database %s", d.Id())
 	}
 
+	// Wait for the database to be completely gone. Deleting it is asynchronous,
+	// so returning early races the teardown of the network and firewall it
+	// references, which the API then refuses to delete as still in use.
+	deleteStateConf := &resource.StateChangeConf{
+		Pending: []string{"exists"},
+		Target:  []string{"deleted"},
+		Refresh: func() (interface{}, string, error) {
+			resp, err := apiClient.GetDatabase(d.Id())
+			if err != nil {
+				if isDatabaseNotFound(err) {
+					return 0, "deleted", nil
+				}
+				return 0, "", err
+			}
+			return resp, "exists", nil
+		},
+		Timeout:        60 * time.Minute,
+		Delay:          3 * time.Second,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: 60,
+	}
+	_, err = deleteStateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.Errorf("error waiting for Database (%s) to be deleted: %s", d.Id(), err)
+	}
+
 	return nil
+}
+
+// isDatabaseNotFound reports whether err from GetDatabase means the database no
+// longer exists. civogo has no dedicated error for the API's 404 here, so the
+// error code has to be matched directly.
+func isDatabaseNotFound(err error) bool {
+	return errors.Is(err, civogo.ZeroMatchesError) ||
+		utils.APIErrorCode(err) == "database_database_find"
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -26,21 +27,20 @@ func DataSourceNetwork() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				AtLeastOneOf: []string{"id", "label", "region"},
+				AtLeastOneOf: []string{"id", "label"},
 			},
 			"label": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				AtLeastOneOf: []string{"id", "label", "region"},
+				AtLeastOneOf: []string{"id", "label"},
 				Description:  "The label of an existing network",
 			},
 			"region": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.NoZeroValues,
-				AtLeastOneOf: []string{"id", "label", "region"},
-				Description:  "The region of an existing network",
+				Description:  "The region an existing network lives in; used to scope the lookup by id or label",
 			},
 			// Computed resource
 			"name": {
@@ -53,6 +53,19 @@ func DataSourceNetwork() *schema.Resource {
 				Computed:    true,
 				Description: "If is the default network",
 			},
+			"cidr_v4": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The CIDR block for the network",
+			},
+			"nameservers_v4": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "List of nameservers for the network",
+			},
 		},
 	}
 }
@@ -60,16 +73,16 @@ func DataSourceNetwork() *schema.Resource {
 func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	var foundNetwork *civogo.Network
 
 	if id, ok := d.GetOk("id"); ok {
 		log.Printf("[INFO] Getting the network by id")
-		network, err := apiClient.FindNetwork(id.(string))
+		network, err := apiClient.FindVPCNetwork(id.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive network: %s", err)
 		}
@@ -77,7 +90,7 @@ func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interfac
 		foundNetwork = network
 	} else if label, ok := d.GetOk("label"); ok {
 		log.Printf("[INFO] Getting the network by label")
-		network, err := apiClient.FindNetwork(label.(string))
+		network, err := apiClient.FindVPCNetwork(label.(string))
 		if err != nil {
 			return diag.Errorf("[ERR] failed to retrive network: %s", err)
 		}
@@ -85,11 +98,17 @@ func dataSourceNetworkRead(_ context.Context, d *schema.ResourceData, m interfac
 		foundNetwork = network
 	}
 
+	if foundNetwork == nil {
+		return diag.Errorf("[ERR] network not found; specify a valid id or label")
+	}
+
 	d.SetId(foundNetwork.ID)
 	d.Set("name", foundNetwork.Name)
 	d.Set("label", foundNetwork.Label)
 	d.Set("region", apiClient.Region)
 	d.Set("default", foundNetwork.Default)
+	d.Set("cidr_v4", foundNetwork.CIDR)
+	d.Set("nameservers_v4", foundNetwork.NameserversV4)
 
 	return nil
 }

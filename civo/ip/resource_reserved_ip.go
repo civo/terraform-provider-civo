@@ -25,10 +25,11 @@ func ResourceReservedIP() *schema.Resource {
 				ValidateFunc: utils.ValidateName,
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The region of the ip",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The region of the ip",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			// Computed resource
 			"ip": {
@@ -51,9 +52,9 @@ func ResourceReservedIP() *schema.Resource {
 func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] creating the new ip address %s", d.Get("name").(string))
@@ -61,7 +62,7 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 		Name:   d.Get("name").(string),
 		Region: apiClient.Region,
 	}
-	ipAddress, err := apiClient.NewIP(newIP)
+	ipAddress, err := apiClient.NewVPCIP(newIP)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to create a new ip address: %s", err)
 	}
@@ -72,7 +73,7 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 		Pending: []string{"BUILDING"},
 		Target:  []string{"ACTIVE"},
 		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.FindIP(d.Id())
+			resp, err := apiClient.FindVPCIP(d.Id())
 			if err != nil {
 				return 0, "", err
 			}
@@ -98,13 +99,13 @@ func resourceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m int
 func resourceReservedIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the ip address %s", d.Id())
-	resp, err := apiClient.FindIP(d.Id())
+	resp, err := apiClient.FindVPCIP(d.Id())
 	if err != nil {
 		if resp == nil {
 			d.SetId("")
@@ -125,9 +126,9 @@ func resourceReservedIPRead(_ context.Context, d *schema.ResourceData, m interfa
 func resourceReservedIPUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("name") {
@@ -135,7 +136,7 @@ func resourceReservedIPUpdate(ctx context.Context, d *schema.ResourceData, m int
 		ipUpdate := &civogo.UpdateIPRequest{
 			Name: d.Get("name").(string),
 		}
-		_, err := apiClient.UpdateIP(d.Id(), ipUpdate)
+		_, err := apiClient.UpdateVPCIP(d.Id(), ipUpdate)
 		if err != nil {
 			return diag.Errorf("[ERR] An error occurred while rename the ip resource %s", d.Id())
 		}
@@ -148,13 +149,13 @@ func resourceReservedIPUpdate(ctx context.Context, d *schema.ResourceData, m int
 func resourceReservedIPDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the ip resource %s", d.Id())
-	_, err := apiClient.DeleteIP(d.Id())
+	_, err = apiClient.DeleteVPCIP(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete the ip resource %s", d.Id())
 	}

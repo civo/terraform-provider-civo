@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// ResourceInstanceReservedIPAssignment The instance reserved ip assignment resource schema definition
-// represent the instance reserved ip assignment resource
+// ResourceInstanceReservedIPAssignment The reserved ip assignment resource schema definition
+// represent the reserved ip assignment resource
 func ResourceInstanceReservedIPAssignment() *schema.Resource {
 	return &schema.Resource{
 		Description: "The instance reserved ip assignment resource schema definition",
@@ -30,10 +31,11 @@ func ResourceInstanceReservedIPAssignment() *schema.Resource {
 				Description: "The instance id",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The region of the ip",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The region of the ip",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 		},
 		CreateContext: resourceInstanceReservedIPCreate,
@@ -49,9 +51,9 @@ func ResourceInstanceReservedIPAssignment() *schema.Resource {
 func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.InstanceRef("instance_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	// We check if the instance is valid and if it is not we return an error
@@ -61,7 +63,7 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	// We check if the reserved ip is valid and if it is not we return an error
-	reservedIP, err := apiClient.FindIP(d.Get("reserved_ip_id").(string))
+	reservedIP, err := apiClient.FindVPCIP(d.Get("reserved_ip_id").(string))
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to get reserved ip %s", d.Get("reserved_ip_id").(string))
 	}
@@ -73,7 +75,7 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 	// We send to assign the reserved ip to the instance
 	log.Printf("[INFO] assigning the reserved ip %s to the instance %s", d.Get("reserved_ip_id").(string), d.Get("instance_id").(string))
 
-	_, err = apiClient.AssignIP(reservedIP.ID, instance.ID, "instance", apiClient.Region)
+	_, err = apiClient.AssignVPCIP(reservedIP.ID, instance.ID, "instance", apiClient.Region)
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to assign reserved ip %s to instance %s", d.Get("reserved_ip_id").(string), d.Get("instance_id").(string))
 	}
@@ -111,16 +113,16 @@ func resourceInstanceReservedIPCreate(ctx context.Context, d *schema.ResourceDat
 func resourceInstanceReservedIPRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	instanceID := d.Get("instance_id").(string)
 	reservedID := d.Get("reserved_ip_id").(string)
 
 	// We check if the reserved ip is valid and if it is not we return an error
-	reservedIP, err := apiClient.FindIP(reservedID)
+	reservedIP, err := apiClient.FindVPCIP(reservedID)
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to get reserved ip %s", reservedID)
 	}
@@ -137,16 +139,16 @@ func resourceInstanceReservedIPRead(_ context.Context, d *schema.ResourceData, m
 func resourceInstanceReservedIPDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	reservedIP := d.Get("reserved_ip_id").(string)
 
 	// We check if the reserved ip is valid and if it is not we return an error
 	log.Printf("[INFO] unassign the ip (%s) from the instance", reservedIP)
-	_, err := apiClient.UnassignIP(reservedIP, apiClient.Region)
+	_, err = apiClient.UnassignVPCIP(reservedIP, apiClient.Region)
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to unassign the ip %s: %s", reservedIP, err)
 	}
@@ -155,7 +157,7 @@ func resourceInstanceReservedIPDelete(ctx context.Context, d *schema.ResourceDat
 		Pending: []string{"PENDING"},
 		Target:  []string{"DONE"},
 		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.FindIP(reservedIP)
+			resp, err := apiClient.FindVPCIP(reservedIP)
 			if err != nil {
 				return 0, "", err
 			}
