@@ -89,7 +89,7 @@ func nodePoolSchema(isResource bool) map[string]*schema.Schema {
 			ValidateFunc: validation.StringIsNotEmpty,
 		}
 		// a pool lives in the same region as its cluster, so this is only worth
-		// setting to override that, or to save the lookup that infers it
+		// setting to save the lookup that infers it
 		s["region"] = &schema.Schema{
 			Type:             schema.TypeString,
 			Optional:         true,

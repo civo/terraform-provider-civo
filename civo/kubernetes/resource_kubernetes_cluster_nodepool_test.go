@@ -215,6 +215,9 @@ func TestNodePoolRegionIsResourceOnly(t *testing.T) {
 	if !region.Computed {
 		t.Error("`region` must be Computed so the region inferred from the cluster can be written back without reading as a diff")
 	}
+	if !region.ForceNew {
+		t.Error("`region` must be ForceNew; a pool cannot move region in place")
+	}
 	if region.DiffSuppressFunc == nil {
 		t.Error("`region` must suppress case-only diffs, as every other region field does")
 	}
