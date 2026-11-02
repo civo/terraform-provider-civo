@@ -1,4 +1,15 @@
 
+## [v1.3.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.3) (29 September 2026)
+
+### Merged
+- [#424](https://github.com/civo/terraform-provider-civo/pull/424) - fix(417): mark object store secret_access_key and database password sensitive
+- [#394](https://github.com/civo/terraform-provider-civo/pull/394) - ci: pin goreleaser to 2.15.3 and fix deprecated config
+- [#423](https://github.com/civo/terraform-provider-civo/pull/423) - fix(419): add civo_vpc_* examples, deprecate legacy docs, fix subnet import
+- [#411](https://github.com/civo/terraform-provider-civo/pull/411) - fix(410): retry deletes blocked by an in-use reference
+- [#422](https://github.com/civo/terraform-provider-civo/pull/422) - Bump google.golang.org/grpc from 1.83.1 to 1.83.2
+- [#407](https://github.com/civo/terraform-provider-civo/pull/407) - docs(344): clarify write_kubeconfig is required to populate kubeconfig
+- [#414](https://github.com/civo/terraform-provider-civo/pull/414) - Bump google.golang.org/grpc from 1.82.1 to 1.83.1
+
 ## [v1.3.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.2) (31 August 2026)
 
 ### Merged

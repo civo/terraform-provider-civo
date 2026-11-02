@@ -299,3 +299,19 @@ func TestApplyFilters(t *testing.T) {
 		})
 	}
 }
+
+func TestComputeFilterKeysSkipsNestedObjects(t *testing.T) {
+	recordSchema := map[string]*schema.Schema{
+		"name": {Type: schema.TypeString},
+		"tags": {Type: schema.TypeSet, Elem: &schema.Schema{Type: schema.TypeString}},
+		"ips":  {Type: schema.TypeList, Elem: &schema.Schema{Type: schema.TypeString}},
+		"meta": {Type: schema.TypeMap, Elem: &schema.Schema{Type: schema.TypeString}},
+		"maps": {Type: schema.TypeList, Elem: &schema.Schema{Type: schema.TypeMap}},
+		"pools": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{"size": {Type: schema.TypeString}}},
+		},
+	}
+
+	assert.ElementsMatch(t, []string{"name", "tags", "ips"}, computeFilterKeys(recordSchema))
+}
