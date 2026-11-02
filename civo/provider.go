@@ -74,6 +74,7 @@ func Provider() *schema.Provider {
 			"civo_disk_image":              disk.DataSourceDiskImage(),
 			"civo_kubernetes_version":      kubernetes.DataSourceKubernetesVersion(),
 			"civo_kubernetes_cluster":      kubernetes.DataSourceKubernetesCluster(),
+			"civo_kubernetes_clusters":     kubernetes.DataSourceKubernetesClusters(),
 			"civo_size":                    size.DataSourceSize(),
 			"civo_instances":               instances.DataSourceInstances(),
 			"civo_instance":                instances.DataSourceInstance(),

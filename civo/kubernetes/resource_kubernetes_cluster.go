@@ -782,12 +782,7 @@ func waitForPoolLabelsAndTaints(ctx context.Context, apiClient *civogo.Client, c
 			}
 
 			// Filter out Civo/k3s-managed labels to avoid infinite spin
-			labels := make(map[string]string)
-			for k, v := range rawLabels {
-				if !strings.HasPrefix(k, "kubernetes.civo.com/") {
-					labels[k] = v
-				}
-			}
+			labels := filterUserLabels(rawLabels)
 
 			// Check if labels match (only if expectedLabels is not nil)
 			if expectedLabels != nil {
