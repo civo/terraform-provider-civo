@@ -591,3 +591,15 @@ func IsResourceInUseError(err error) bool {
 	}
 	return inUseErrorCodes[APIErrorCode(err)]
 }
+
+// MaxConsecutiveTransientErrors is how many transient API errors in a row a
+// wait loop tolerates before it gives up and reports the last one.
+const MaxConsecutiveTransientErrors = 5
+
+// IsTransientError reports whether err is a client-side failure to reach the
+// API (a network timeout, a refused or reset connection, a DNS failure).
+// civogo reports all of these as TimeoutError. The request may never have
+// reached the API, so it is worth repeating.
+func IsTransientError(err error) bool {
+	return err != nil && errors.Is(err, civogo.TimeoutError)
+}

@@ -123,15 +123,9 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	d.SetId(volume.ID)
 
 	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"creating"},
-		Target:  []string{"available"},
-		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.FindVolume(d.Id())
-			if err != nil {
-				return 0, "", err
-			}
-			return resp, resp.Status, nil
-		},
+		Pending:        []string{"creating"},
+		Target:         []string{"available"},
+		Refresh:        volumeCreateRefresh(apiClient.FindVolume, d.Id()),
 		Timeout:        60 * time.Minute,
 		Delay:          3 * time.Second,
 		MinTimeout:     3 * time.Second,
@@ -519,4 +513,25 @@ func resourceVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// volumeCreateRefresh polls a new volume for the create wait. A transient
+// error reaching the API keeps the wait in "creating" instead of failing a
+// create whose volume ID has already been assigned; only a run of
+// utils.MaxConsecutiveTransientErrors of them in a row ends the wait.
+func volumeCreateRefresh(findVolume func(string) (*civogo.Volume, error), volumeID string) resource.StateRefreshFunc {
+	transientErrors := 0
+	return func() (interface{}, string, error) {
+		resp, err := findVolume(volumeID)
+		if err != nil {
+			if utils.IsTransientError(err) && transientErrors < utils.MaxConsecutiveTransientErrors {
+				transientErrors++
+				log.Printf("[WARN] transient error reading volume %s, retrying: %s", volumeID, err)
+				return 0, "creating", nil
+			}
+			return 0, "", err
+		}
+		transientErrors = 0
+		return resp, resp.Status, nil
+	}
 }

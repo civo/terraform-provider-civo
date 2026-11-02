@@ -2,6 +2,7 @@ package firewall
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -338,22 +339,9 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] deleting the firewall %s", firewallID)
 
 	deleteStateConf := &retry.StateChangeConf{
-		Pending: []string{"in-use", "failed"},
-		Target:  []string{"success"},
-		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.DeleteVPCFirewall(firewallID)
-			if err != nil {
-				// An instance, cluster or load balancer that references this
-				// firewall is still being torn down; keep polling until the
-				// reference is released.
-				if utils.IsResourceInUseError(err) {
-					log.Printf("[INFO] firewall %s is still in use, retrying: %s", firewallID, err)
-					return 0, "in-use", nil
-				}
-				return 0, "", err
-			}
-			return resp, string(resp.Result), nil
-		},
+		Pending:        []string{"in-use", "failed", "retrying"},
+		Target:         []string{"success"},
+		Refresh:        firewallDeleteRefresh(apiClient.DeleteVPCFirewall, firewallID),
 		Timeout:        60 * time.Minute,
 		Delay:          3 * time.Second,
 		MinTimeout:     3 * time.Second,
@@ -365,6 +353,38 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	return nil
+}
+
+// firewallDeleteRefresh issues the firewall DELETE on every poll of the delete
+// wait and maps the outcome onto the wait's states.
+func firewallDeleteRefresh(deleteFirewall func(string) (*civogo.SimpleResponse, error), firewallID string) retry.StateRefreshFunc {
+	transientErrors := 0
+	return func() (interface{}, string, error) {
+		resp, err := deleteFirewall(firewallID)
+		if err == nil {
+			transientErrors = 0
+			return resp, string(resp.Result), nil
+		}
+		switch {
+		case utils.IsResourceInUseError(err):
+			// An instance, cluster or load balancer that references this
+			// firewall is still being torn down; keep polling until the
+			// reference is released.
+			transientErrors = 0
+			log.Printf("[INFO] firewall %s is still in use, retrying: %s", firewallID, err)
+			return 0, "in-use", nil
+		case errors.Is(err, civogo.DatabaseFirewallNotFoundError):
+			// An earlier DELETE in this wait already went through (its
+			// response may have been lost), so the firewall is gone.
+			log.Printf("[INFO] firewall %s no longer exists, treating it as deleted", firewallID)
+			return &civogo.SimpleResponse{Result: "success"}, "success", nil
+		case utils.IsTransientError(err) && transientErrors < utils.MaxConsecutiveTransientErrors:
+			transientErrors++
+			log.Printf("[WARN] transient error deleting firewall %s, retrying: %s", firewallID, err)
+			return 0, "retrying", nil
+		}
+		return 0, "", err
+	}
 }
 
 // ingressRulesContains check if the ingress rules contains the rule
