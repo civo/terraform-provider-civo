@@ -93,8 +93,8 @@ func flattenDataSourceInstances(instance, _ interface{}, extra map[string]interf
 	flattenedInstance["tags"] = i.Tags
 	flattenedInstance["script"] = i.Script
 	flattenedInstance["initial_password"] = i.InitialPassword
-	flattenedInstance["private_ip"] = i.PublicIP
-	flattenedInstance["public_ip"] = i.PrivateIP
+	flattenedInstance["private_ip"] = i.PrivateIP
+	flattenedInstance["public_ip"] = i.PublicIP
 	flattenedInstance["pseudo_ip"] = i.PseudoIP
 	flattenedInstance["status"] = i.Status
 	flattenedInstance["created_at"] = i.CreatedAt.UTC().String()
