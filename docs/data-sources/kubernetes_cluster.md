@@ -42,7 +42,7 @@ output "kubernetes_cluster_output" {
 - `dns_entry` (String) The unique dns entry for the cluster in this case point to the master
 - `id` (String) The ID of this resource.
 - `installed_applications` (List of Object) (see [below for nested schema](#nestedatt--installed_applications))
-- `kubeconfig` (String) A representation of the Kubernetes cluster's kubeconfig in yaml format
+- `kubeconfig` (String, Sensitive) A representation of the Kubernetes cluster's kubeconfig in yaml format
 - `kubernetes_version` (String) The version of Kubernetes
 - `master_ip` (String) The IP of the Kubernetes master node
 - `num_target_nodes` (Number, Deprecated) The size of the Kubernetes cluster

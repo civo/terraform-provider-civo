@@ -102,6 +102,7 @@ func DataSourceKubernetesCluster() *schema.Resource {
 			"kubeconfig": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: "A representation of the Kubernetes cluster's kubeconfig in yaml format",
 			},
 			"api_endpoint": {
