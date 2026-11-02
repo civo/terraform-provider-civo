@@ -1,4 +1,86 @@
 
+## [v1.3.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.3) (29 September 2026)
+
+### Merged
+- [#424](https://github.com/civo/terraform-provider-civo/pull/424) - fix(417): mark object store secret_access_key and database password sensitive
+- [#394](https://github.com/civo/terraform-provider-civo/pull/394) - ci: pin goreleaser to 2.15.3 and fix deprecated config
+- [#423](https://github.com/civo/terraform-provider-civo/pull/423) - fix(419): add civo_vpc_* examples, deprecate legacy docs, fix subnet import
+- [#411](https://github.com/civo/terraform-provider-civo/pull/411) - fix(410): retry deletes blocked by an in-use reference
+- [#422](https://github.com/civo/terraform-provider-civo/pull/422) - Bump google.golang.org/grpc from 1.83.1 to 1.83.2
+- [#407](https://github.com/civo/terraform-provider-civo/pull/407) - docs(344): clarify write_kubeconfig is required to populate kubeconfig
+- [#414](https://github.com/civo/terraform-provider-civo/pull/414) - Bump google.golang.org/grpc from 1.82.1 to 1.83.1
+
+## [v1.3.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.2) (31 August 2026)
+
+### Merged
+- [#413](https://github.com/civo/terraform-provider-civo/pull/413) - Bump civogo to v0.7.3
+
+## [v1.3.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.1) (6 August 2026)
+
+### Merged
+- [#412](https://github.com/civo/terraform-provider-civo/pull/412) - fix: make firewall create_default_rules updatable in-place (no longer ForceNew)
+
+## [v1.3.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.0) (27 July 2026)
+
+### Merged
+- [#408](https://github.com/civo/terraform-provider-civo/pull/408) - fix: infer region from referenced resource (#395)
+- [#406](https://github.com/civo/terraform-provider-civo/pull/406) - fix: scope API client per-region to avoid shared-client data race
+- [#405](https://github.com/civo/terraform-provider-civo/pull/405) - fix(384): lower minimum DNS record TTL to 60
+- [#404](https://github.com/civo/terraform-provider-civo/pull/404) - Bump google.golang.org/grpc from 1.79.3 to 1.82.1
+- [#399](https://github.com/civo/terraform-provider-civo/pull/399) - feat(397): expose cidr_v4 and nameservers_v4 in network data source
+- [#400](https://github.com/civo/terraform-provider-civo/pull/400) - docs: add missing pages for civo_vpc_* aliases
+
+## [v1.2.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.6) (22 July 2026)
+
+### Merged
+- [#403](https://github.com/civo/terraform-provider-civo/pull/403) - chore(deps): bump golang.org/x/crypto to v0.52.0 and x/net to v0.55.0
+- [#402](https://github.com/civo/terraform-provider-civo/pull/402) - fix: prevent nil pointer panic in network/firewall data sources
+- [#388](https://github.com/civo/terraform-provider-civo/pull/388) - fix(380): apply labels and taints to nodes in default node pool
+
+## [v1.2.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.5) (12 May 2026)
+
+### Merged
+- [#393](https://github.com/civo/terraform-provider-civo/pull/393) - Chore/bump civogo v0.7.2
+
+## [v1.2.4](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.4) (6 May 2026)
+
+### Merged
+- [#392](https://github.com/civo/terraform-provider-civo/pull/392) - fix(381): fix for node scaling count
+
+## [v1.2.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.3) (9 April 2026)
+
+### Merged
+- [#391](https://github.com/civo/terraform-provider-civo/pull/391) - fix: make region comparison case-insensitive across all resources
+- [#390](https://github.com/civo/terraform-provider-civo/pull/390) - Chore/upgrade dependencies
+
+## [v1.2.2](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.2) (31 March 2026)
+
+## [v1.2.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.2.0) (4 March 2026)
+
+### Merged
+- [#385](https://github.com/civo/terraform-provider-civo/pull/385) - feat: migrate resources to VPC-scoped API endpoints
+- [#383](https://github.com/civo/terraform-provider-civo/pull/383) - Add Docker-based testing environment
+- [#382](https://github.com/civo/terraform-provider-civo/pull/382) - chore: upgrade Go version and dependencies
+
+## [v1.1.8](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.8) (5 November 2025)
+
+### Merged
+- [#379](https://github.com/civo/terraform-provider-civo/pull/379) - Remove default size when creating instances
+
+## [v1.1.7](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.7) (14 September 2025)
+
+### Merged
+- [#378](https://github.com/civo/terraform-provider-civo/pull/378) - fix: improve k3s gpu regex comparison
+
+## [v1.1.6](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.6) (8 September 2025)
+
+### Merged
+- [#376](https://github.com/civo/terraform-provider-civo/pull/376) - add support for volume_type in kubernetes clusters
+- [#371](https://github.com/civo/terraform-provider-civo/pull/371) - docs: interaction between instances and reserved ip
+- [#370](https://github.com/civo/terraform-provider-civo/pull/370) - upgrade vulnerable deps
+- [#369](https://github.com/civo/terraform-provider-civo/pull/369) - add attach_on_boot to the resource_volume_attachement schema
+- [#368](https://github.com/civo/terraform-provider-civo/pull/368) - Update docs for TF modules
+
 ## [v1.1.5](https://github.com/civo/terraform-provider-civo/releases/tag/v1.1.5) (3 February 2025)
 
 ### Merged

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -34,10 +35,12 @@ func ResourceVolumeAttachment() *schema.Resource {
 				Description:  "The ID of target volume for attachment",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The region for the volume attachment",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         true,
+				Description:      "The region for the volume attachment",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"attach_at_boot": {
 				Type:        schema.TypeBool,
@@ -58,9 +61,9 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 	apiClient := m.(*civogo.Client)
 	var diags diag.Diagnostics
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.InstanceRef("instance_id"), utils.VolumeRef("volume_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	instanceID := d.Get("instance_id").(string)
@@ -127,9 +130,9 @@ func resourceVolumeAttachmentCreate(ctx context.Context, d *schema.ResourceData,
 func resourceVolumeAttachmentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	instanceID := d.Get("instance_id").(string)
@@ -158,15 +161,15 @@ func resourceVolumeAttachmentRead(_ context.Context, d *schema.ResourceData, m i
 func resourceVolumeAttachmentDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	volumeID := d.Get("volume_id").(string)
 
 	log.Printf("[INFO] Detaching the volume %s", d.Id())
-	_, err := apiClient.DetachVolume(volumeID)
+	_, err = apiClient.DetachVolume(volumeID)
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to detach the volume %s", err)
 	}

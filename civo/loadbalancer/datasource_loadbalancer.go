@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/civo/civogo"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -126,9 +127,9 @@ func DataSourceLoadBalancer() *schema.Resource {
 func dataSourceLoadBalancerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is define in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	var searchBy string
@@ -141,7 +142,7 @@ func dataSourceLoadBalancerRead(_ context.Context, d *schema.ResourceData, m int
 		searchBy = id.(string)
 	}
 
-	lb, err := apiClient.FindLoadBalancer(searchBy)
+	lb, err := apiClient.FindVPCLoadBalancer(searchBy)
 	if err != nil {
 		return diag.Errorf("[ERR] failed to retrive LoadBalancer: %s", err)
 	}

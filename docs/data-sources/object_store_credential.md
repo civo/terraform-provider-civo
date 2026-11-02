@@ -42,7 +42,7 @@ resource "civo_object_store" "backup" {
 ### Read-Only
 
 - `access_key_id` (String) The access key id of the Object Store Credential
-- `secret_access_key` (String) The secret access key of the Object Store Credential
+- `secret_access_key` (String, Sensitive) The secret access key of the Object Store Credential
 - `status` (String) The status of the Object Store Credential
 
 

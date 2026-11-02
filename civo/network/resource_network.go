@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"log"
 	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -27,11 +27,12 @@ func ResourceNetwork() *schema.Resource {
 				ValidateFunc: utils.ValidateName,
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Computed:    true,
-				Description: "The region of the network",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Computed:         true,
+				Description:      "The region of the network",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"cidr_v4": {
 				Type:        schema.TypeString,
@@ -111,9 +112,9 @@ func ResourceNetwork() *schema.Resource {
 func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] creating the new network %s", d.Get("label").(string))
@@ -138,7 +139,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	log.Printf("[INFO] Attempting to create the network %s", d.Get("label").(string))
-	network, err := apiClient.CreateNetwork(configs)
+	network, err := apiClient.CreateVPCNetwork(configs)
 	if err != nil {
 		customErr, parseErr := utils.ParseErrorResponse(err.Error())
 		if parseErr == nil {
@@ -161,15 +162,15 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	CurrentNetwork := civogo.Network{}
 
 	log.Printf("[INFO] retriving the network %s", d.Id())
-	resp, err := apiClient.ListNetworks()
+	resp, err := apiClient.ListVPCNetworks()
 	if err != nil {
 		if resp == nil {
 			d.SetId("")
@@ -199,14 +200,14 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("label") {
 		log.Printf("[INFO] updating the network %s", d.Id())
-		_, err := apiClient.RenameNetwork(d.Get("label").(string), d.Id())
+		_, err := apiClient.RenameVPCNetwork(d.Get("label").(string), d.Id())
 		if err != nil {
 			return diag.Errorf("[ERR] An error occurred while renaming the network %s", d.Id())
 		}
@@ -219,7 +220,7 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if d.HasChange("nameservers_v4") {
 		log.Printf("[INFO] updating the network nameservers %s", d.Id())
-		_, err := apiClient.UpdateNetwork(d.Id(), networkConfig)
+		_, err := apiClient.UpdateVPCNetwork(d.Id(), networkConfig)
 		if err != nil {
 			return diag.Errorf("[ERR] An error occurred while updating the nameservers for the network %s: %s", d.Id(), err)
 		}
@@ -228,30 +229,36 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 // function to delete a network
-func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNetworkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	networkID := d.Id()
 	log.Printf("[INFO] Deleting the network %s", networkID)
 
 	deleteStateConf := &retry.StateChangeConf{
-		Pending: []string{"deleting", "exists"},
+		Pending: []string{"deleting", "exists", "in-use"},
 		Target:  []string{"deleted"},
 		Refresh: func() (interface{}, string, error) {
 			// First, try to delete the network
-			resp, err := apiClient.DeleteNetwork(networkID)
+			resp, err := apiClient.DeleteVPCNetwork(networkID)
 			if err != nil {
+				// An instance, cluster, database or volume on this network is
+				// still being torn down; keep polling until it has gone.
+				if utils.IsResourceInUseError(err) {
+					log.Printf("[INFO] network %s is still in use, retrying: %s", networkID, err)
+					return 0, "in-use", nil
+				}
 				return 0, "", err
 			}
 			// If delete was successful, start polling
 			if resp.Result == "success" {
 				// Check if the network still exists
-				_, err := apiClient.GetNetwork(networkID)
+				_, err := apiClient.GetVPCNetwork(networkID)
 				if err != nil {
 					if errors.Is(err, civogo.DatabaseNetworkNotFoundError) {
 						return resp, "deleted", nil
@@ -269,7 +276,7 @@ func resourceNetworkDelete(_ context.Context, d *schema.ResourceData, m interfac
 		NotFoundChecks: 10,
 	}
 
-	_, err := deleteStateConf.WaitForStateContext(context.Background())
+	_, err = deleteStateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for network (%s) to be deleted: %s", networkID, err)
 	}
@@ -307,7 +314,7 @@ func createDefaultFirewall(apiClient *civogo.Client, networkID string, networkNa
 	}
 
 	// Create the default firewall
-	_, err := apiClient.NewFirewall(&firewallConfig)
+	_, err := apiClient.NewVPCFirewall(&firewallConfig)
 	if err != nil {
 		return err
 	}

@@ -35,17 +35,17 @@ func ResourceFirewall() *schema.Resource {
 				Description:  "The firewall network, if is not defined we use the default network",
 			},
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The firewall region, if is not defined we use the global defined in the provider",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The firewall region, if is not defined we use the global defined in the provider",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"create_default_rules": {
 				Type:        schema.TypeBool,
 				Default:     true,
 				Optional:    true,
-				ForceNew:    true,
-				Description: "The create rules flag is used to create the default firewall rules, if is not defined will be set to true, and if you set to false you need to define at least one ingress or egress rule",
+				Description: "The create rules flag is used to create the default firewall rules, if is not defined will be set to true. This flag only takes effect when the firewall is created; changing it on an existing firewall never recreates the firewall and does not re-create the default rules. If you set it to false you need to define at least one ingress or egress rule",
 			},
 			"ingress_rule": {
 				Type:        schema.TypeSet,
@@ -70,11 +70,18 @@ func ResourceFirewall() *schema.Resource {
 
 			if diff.HasChange("create_default_rules") {
 				createDefaultRules := diff.Get("create_default_rules").(bool)
-				ingressRules := diff.Get("ingress_rule")
-				egressRules := diff.Get("egress_rule")
 
-				if createDefaultRules && (ingressRules.(*schema.Set).Len() > 0 || egressRules.(*schema.Set).Len() > 0) {
-					return fmt.Errorf("create_default_rules can't be true when ingress_rule or egress_rule is specified")
+				if diff.Id() == "" {
+					ingressRules := diff.Get("ingress_rule")
+					egressRules := diff.Get("egress_rule")
+
+					if createDefaultRules && (ingressRules.(*schema.Set).Len() > 0 || egressRules.(*schema.Set).Len() > 0) {
+						return fmt.Errorf("create_default_rules can't be true when ingress_rule or egress_rule is specified")
+					}
+				} else if !createDefaultRules && !diff.HasChange("ingress_rule") && !diff.HasChange("egress_rule") {
+					// Without a rule diff the update never calls the API, so the
+					// default rules would silently stay in place.
+					return fmt.Errorf("when changing create_default_rules to false, you must define at least one ingress_rule or egress_rule to replace the default rules")
 				}
 			}
 
@@ -117,9 +124,9 @@ func ResourceFirewall() *schema.Resource {
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.NetworkRef("network_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	createDefaultRules := d.Get("create_default_rules").(bool)
@@ -152,7 +159,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 		Pending: []string{"failed"},
 		Target:  []string{"success"},
 		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.NewFirewall(firewallConfig)
+			resp, err := apiClient.NewVPCFirewall(firewallConfig)
 			if err != nil {
 				return 0, "", err
 			}
@@ -169,7 +176,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	// Get the firewall
-	firewall, err := apiClient.FindFirewall(firewallConfig.Name)
+	firewall, err := apiClient.FindVPCFirewall(firewallConfig.Name)
 	if err != nil {
 		return diag.Errorf("[ERR] error retrieving firewall: %s, err: %s", firewallConfig.Name, err)
 	}
@@ -183,13 +190,13 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceFirewallRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the firewall %s", d.Id())
-	resp, err := apiClient.FindFirewall(d.Id())
+	resp, err := apiClient.FindVPCFirewall(d.Id())
 	if err != nil {
 		if resp == nil {
 			d.SetId("")
@@ -222,9 +229,9 @@ func resourceFirewallRead(_ context.Context, d *schema.ResourceData, m interface
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("name") {
@@ -233,7 +240,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 				Name: d.Get("name").(string),
 			}
 			log.Printf("[INFO] updating the firewall name, %s", d.Id())
-			_, err := apiClient.RenameFirewall(d.Id(), &firewall)
+			_, err := apiClient.RenameVPCFirewall(d.Id(), &firewall)
 			if err != nil {
 				return diag.Errorf("[WARN] an error occurred while trying to rename the firewall %s, %s", d.Id(), err)
 			}
@@ -253,7 +260,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 
 		// call the api to get the current rules
-		allRules, err := apiClient.ListFirewallRules(d.Id())
+		allRules, err := apiClient.ListVPCFirewallRules(d.Id())
 		if err != nil {
 			return diag.Errorf("[ERR] an error occurred while trying to list the firewall rules, %s", err)
 		}
@@ -263,7 +270,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			if rule.Direction == "ingress" {
 				if !ingressRulesContains(ingressRules, rule) {
 					log.Printf("[INFO] removing the ingress rule %s", rule.ID)
-					_, err := apiClient.DeleteFirewallRule(d.Id(), rule.ID)
+					_, err := apiClient.DeleteVPCFirewallRule(d.Id(), rule.ID)
 					if err != nil {
 						return diag.Errorf("[WARN] an error occurred while trying to delete the ingress rule %s, %s", rule.ID, err)
 					}
@@ -271,7 +278,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			} else {
 				if !egressRulesContains(egressRules, rule) {
 					log.Printf("[INFO] removing the egress rule %s", rule.ID)
-					_, err := apiClient.DeleteFirewallRule(d.Id(), rule.ID)
+					_, err := apiClient.DeleteVPCFirewallRule(d.Id(), rule.ID)
 					if err != nil {
 						return diag.Errorf("[WARN] an error occurred while trying to delete the egress rule %s, %s", rule.ID, err)
 					}
@@ -284,7 +291,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			for _, ingressRule := range ingressRules {
 				if ingressRule.(map[string]interface{})["id"] == "" {
 					fwRule := firewallUpdateBuild(ingressRule, apiClient.Region, "ingress", d)
-					resp, err := apiClient.NewFirewallRule(fwRule)
+					resp, err := apiClient.NewVPCFirewallRule(fwRule)
 					if err != nil {
 						return diag.Errorf("[WARN] an error occurred while trying to create the ingress rule %s, %s", fwRule, err)
 					}
@@ -298,7 +305,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			for _, egressRule := range egressRules {
 				if egressRule.(map[string]interface{})["id"] == "" {
 					fwRule := firewallUpdateBuild(egressRule, apiClient.Region, "egress", d)
-					resp, err := apiClient.NewFirewallRule(fwRule)
+					resp, err := apiClient.NewVPCFirewallRule(fwRule)
 					if err != nil {
 						return diag.Errorf("[WARN] an error occurred while trying to create the egress rule %s, %s", fwRule, err)
 					}
@@ -312,17 +319,17 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 // function to delete a firewall
-func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if it's defined
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	firewallID := d.Id()
 	log.Printf("[INFO] Checking if firewall %s exists", firewallID)
-	_, err := apiClient.FindFirewall(firewallID)
+	_, err = apiClient.FindVPCFirewall(firewallID)
 	if err != nil {
 		log.Printf("[INFO] Unable to find firewall %s - probably it's been deleted", firewallID)
 		return nil
@@ -331,11 +338,18 @@ func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] deleting the firewall %s", firewallID)
 
 	deleteStateConf := &retry.StateChangeConf{
-		Pending: []string{"failed"},
+		Pending: []string{"in-use", "failed"},
 		Target:  []string{"success"},
 		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.DeleteFirewall(firewallID)
+			resp, err := apiClient.DeleteVPCFirewall(firewallID)
 			if err != nil {
+				// An instance, cluster or load balancer that references this
+				// firewall is still being torn down; keep polling until the
+				// reference is released.
+				if utils.IsResourceInUseError(err) {
+					log.Printf("[INFO] firewall %s is still in use, retrying: %s", firewallID, err)
+					return 0, "in-use", nil
+				}
 				return 0, "", err
 			}
 			return resp, string(resp.Result), nil
@@ -345,7 +359,7 @@ func resourceFirewallDelete(_ context.Context, d *schema.ResourceData, m interfa
 		MinTimeout:     3 * time.Second,
 		NotFoundChecks: 10,
 	}
-	_, err = deleteStateConf.WaitForStateContext(context.Background())
+	_, err = deleteStateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.Errorf("error waiting for firewall (%s) to be deleted: %s", firewallID, err)
 	}
@@ -436,7 +450,7 @@ func firewallRequestBuild(d *schema.ResourceData, client *civogo.Client) (*civog
 	if attr, ok := d.GetOk("network_id"); ok {
 		networkID = attr.(string)
 	} else {
-		network, err := client.GetDefaultNetwork()
+		network, err := client.GetDefaultVPCNetwork()
 		if err != nil {
 			return nil, fmt.Errorf("[ERR] failed to get the default network: %s", err)
 		}

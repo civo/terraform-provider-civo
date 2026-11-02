@@ -55,8 +55,8 @@ func ResourceDNSDomainRecord() *schema.Resource {
 			"ttl": {
 				Type:         schema.TypeInt,
 				Required:     true,
-				ValidateFunc: validation.IntBetween(600, 3600),
-				Description:  "How long caching DNS servers should cache this record for, in seconds (the minimum is 600 and the default if unspecified is 600)",
+				ValidateFunc: validation.IntBetween(60, 3600),
+				Description:  "How long caching DNS servers should cache this record for, in seconds (the minimum is 60 and the default if unspecified is 600)",
 			},
 			// Computed resource
 			"account_id": {

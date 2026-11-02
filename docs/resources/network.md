@@ -10,6 +10,8 @@ description: |-
 
 Provides a Civo network resource. This can be used to create, modify, and delete networks.
 
+~> **Deprecated:** `civo_network` is the legacy name for this resource. Use [`civo_vpc_network`](https://registry.terraform.io/providers/civo/civo/latest/docs/resources/vpc_network) instead; both names manage the same resource.
+
 ## Example Usage
 
 ```terraform

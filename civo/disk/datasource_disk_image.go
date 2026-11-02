@@ -5,6 +5,7 @@ import (
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/datalist"
+	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -48,7 +49,11 @@ func getDiskimages(m interface{}, extra map[string]interface{}) ([]interface{}, 
 	}
 
 	if region != "" {
-		apiClient.Region = region
+		var err error
+		apiClient, err = utils.RegionalClient(apiClient, utils.WithRegion(region))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	templateDiskList := []TemplateDisk{}

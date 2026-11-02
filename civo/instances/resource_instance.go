@@ -26,10 +26,12 @@ func ResourceInstance() *schema.Resource {
 		Description: "Provides a Civo instance resource. This can be used to create, modify, and delete instances.",
 		Schema: map[string]*schema.Schema{
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The region for the instance, if not declare we use the region in declared in the provider",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         true,
+				Description:      "The region for the instance, if not declare we use the region in declared in the provider",
+				DiffSuppressFunc: utils.IgnoreCaseDiff,
 			},
 			"hostname": {
 				Type:         schema.TypeString,
@@ -204,16 +206,15 @@ func ResourceInstance() *schema.Resource {
 func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d, utils.NetworkRef("network_id"), utils.FirewallRef("firewall_id")))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] configuring the instance %s", d.Get("hostname").(string))
 	config := &civogo.InstanceConfig{
 		Count:            1,
 		Hostname:         utils.RandomName(),
-		Size:             "g3.medium",
 		Region:           apiClient.Region,
 		PublicIPRequired: "true",
 		InitialUser:      "civo",
@@ -368,9 +369,9 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] retriving the instance %s", d.Id())
@@ -445,9 +446,9 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, m interface
 func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	// check if the size change if change we send to resize the instance
@@ -607,13 +608,13 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	apiClient := m.(*civogo.Client)
 
-	// overwrite the region if is defined in the datasource
-	if region, ok := d.GetOk("region"); ok {
-		apiClient.Region = region.(string)
+	apiClient, err := utils.RegionalClient(apiClient, utils.ResolveRegion(d))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] deleting the instance %s", d.Id())
-	_, err := apiClient.DeleteInstance(d.Id())
+	_, err = apiClient.DeleteInstance(d.Id())
 	if err != nil {
 		return diag.Errorf("[ERR] an error occurred while trying to delete instance %s", d.Id())
 	}
