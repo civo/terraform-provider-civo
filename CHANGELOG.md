@@ -1,4 +1,13 @@
 
+## [v1.4.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.4.0) (5 November 2026)
+
+### Merged
+- [#426](https://github.com/civo/terraform-provider-civo/pull/426) - fix(415): add region to civo_kubernetes_node_pool and infer it from the cluster
+- [#425](https://github.com/civo/terraform-provider-civo/pull/425) - fix(417): mark data source secret_access_key and password sensitive
+- [#428](https://github.com/civo/terraform-provider-civo/pull/428) - feat(183): add civo_kubernetes_clusters data source
+- [#431](https://github.com/civo/terraform-provider-civo/pull/431) - fix(429): fix panic when filtering civo_instances by tags
+- [#421](https://github.com/civo/terraform-provider-civo/pull/421) - fix(volume): resize in place instead of detaching and re-attaching; reject a shrink at plan time
+
 ## [v1.3.3](https://github.com/civo/terraform-provider-civo/releases/tag/v1.3.3) (29 September 2026)
 
 ### Merged
