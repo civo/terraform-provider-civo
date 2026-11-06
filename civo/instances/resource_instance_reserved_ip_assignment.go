@@ -2,6 +2,7 @@ package instances
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -121,15 +122,20 @@ func resourceInstanceReservedIPRead(_ context.Context, d *schema.ResourceData, m
 	instanceID := d.Get("instance_id").(string)
 	reservedID := d.Get("reserved_ip_id").(string)
 
-	// We check if the reserved ip is valid and if it is not we return an error
 	reservedIP, err := apiClient.FindVPCIP(reservedID)
 	if err != nil {
-		return diag.Errorf("[ERR] an error occurred while trying to get reserved ip %s", reservedID)
+		if errors.Is(err, civogo.ZeroMatchesError) {
+			log.Printf("[WARN] reserved ip %s not found, removing assignment %s from state", reservedID, d.Id())
+			d.SetId("")
+			return nil
+		}
+		return diag.Errorf("[ERR] an error occurred while trying to get reserved ip %s: %s", reservedID, err)
 	}
 
 	if reservedIP.AssignedTo.ID != instanceID {
+		log.Printf("[WARN] reserved ip %s is no longer assigned to instance %s, removing assignment %s from state", reservedIP.ID, instanceID, d.Id())
 		d.SetId("")
-		return diag.Errorf("[ERR] the reserved ip %s is not assigned to the instance %s", reservedIP.ID, instanceID)
+		return nil
 	}
 
 	return nil
