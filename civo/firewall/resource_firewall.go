@@ -356,13 +356,13 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 // firewallDeleteRefresh issues the firewall DELETE on every poll of the delete
-// wait and maps the outcome onto the wait's states.
+// wait and maps the outcome onto the wait's states. Transient API errors keep
+// the wait in "retrying"; the configured Timeout decides when to stop, so a
+// short DNS or load-balancer blip mid-delete does not abort the apply.
 func firewallDeleteRefresh(deleteFirewall func(string) (*civogo.SimpleResponse, error), firewallID string) retry.StateRefreshFunc {
-	transientErrors := 0
 	return func() (interface{}, string, error) {
 		resp, err := deleteFirewall(firewallID)
 		if err == nil {
-			transientErrors = 0
 			return resp, string(resp.Result), nil
 		}
 		switch {
@@ -370,7 +370,6 @@ func firewallDeleteRefresh(deleteFirewall func(string) (*civogo.SimpleResponse, 
 			// An instance, cluster or load balancer that references this
 			// firewall is still being torn down; keep polling until the
 			// reference is released.
-			transientErrors = 0
 			log.Printf("[INFO] firewall %s is still in use, retrying: %s", firewallID, err)
 			return 0, "in-use", nil
 		case errors.Is(err, civogo.DatabaseFirewallNotFoundError):
@@ -378,8 +377,7 @@ func firewallDeleteRefresh(deleteFirewall func(string) (*civogo.SimpleResponse, 
 			// response may have been lost), so the firewall is gone.
 			log.Printf("[INFO] firewall %s no longer exists, treating it as deleted", firewallID)
 			return &civogo.SimpleResponse{Result: "success"}, "success", nil
-		case utils.IsTransientError(err) && transientErrors < utils.MaxConsecutiveTransientErrors:
-			transientErrors++
+		case utils.IsTransientError(err):
 			log.Printf("[WARN] transient error deleting firewall %s, retrying: %s", firewallID, err)
 			return 0, "retrying", nil
 		}

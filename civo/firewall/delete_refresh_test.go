@@ -48,11 +48,12 @@ func TestFirewallDeleteRefresh(t *testing.T) {
 		},
 		{name: "timeout then deleted", results: []error{timeout, nil}, polls: 2, want: []string{"retrying", "success"}},
 		{
-			name:    "persistent timeout gives up",
-			results: []error{timeout},
-			polls:   6,
-			want:    []string{"retrying", "retrying", "retrying", "retrying", "retrying", ""},
-			wantErr: true,
+			// Continuous transient errors stay in "retrying"; the wait's
+			// Timeout, not a consecutive-error cap, decides when to stop.
+			name:    "many timeouts keep waiting",
+			results: []error{timeout, timeout, timeout, timeout, timeout, timeout, nil},
+			polls:   7,
+			want:    []string{"retrying", "retrying", "retrying", "retrying", "retrying", "retrying", "success"},
 		},
 		{name: "other error fails", results: []error{other}, polls: 1, want: []string{""}, wantErr: true},
 	}

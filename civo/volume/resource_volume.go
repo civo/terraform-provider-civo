@@ -11,7 +11,7 @@ import (
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -122,7 +122,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	d.SetId(volume.ID)
 
-	createStateConf := &resource.StateChangeConf{
+	createStateConf := &retry.StateChangeConf{
 		Pending:        []string{"creating"},
 		Target:         []string{"available"},
 		Refresh:        volumeCreateRefresh(apiClient.FindVolume, d.Id()),
@@ -517,21 +517,19 @@ func resourceVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 
 // volumeCreateRefresh polls a new volume for the create wait. A transient
 // error reaching the API keeps the wait in "creating" instead of failing a
-// create whose volume ID has already been assigned; only a run of
-// utils.MaxConsecutiveTransientErrors of them in a row ends the wait.
-func volumeCreateRefresh(findVolume func(string) (*civogo.Volume, error), volumeID string) resource.StateRefreshFunc {
-	transientErrors := 0
+// create whose volume ID has already been assigned. Continuous transient
+// errors are left to the wait's Timeout rather than a consecutive-error cap,
+// so a short DNS or load-balancer blip mid-create does not abort the apply.
+func volumeCreateRefresh(findVolume func(string) (*civogo.Volume, error), volumeID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := findVolume(volumeID)
 		if err != nil {
-			if utils.IsTransientError(err) && transientErrors < utils.MaxConsecutiveTransientErrors {
-				transientErrors++
+			if utils.IsTransientError(err) {
 				log.Printf("[WARN] transient error reading volume %s, retrying: %s", volumeID, err)
 				return 0, "creating", nil
 			}
 			return 0, "", err
 		}
-		transientErrors = 0
 		return resp, resp.Status, nil
 	}
 }

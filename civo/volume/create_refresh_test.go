@@ -33,15 +33,11 @@ func TestVolumeCreateRefresh(t *testing.T) {
 			want:  []string{"creating", "creating", "available"},
 		},
 		{
-			name:    "persistent timeout gives up",
-			reads:   []read{{err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}},
-			want:    []string{"creating", "creating", "creating", "creating", "creating", ""},
-			wantErr: true,
-		},
-		{
-			name:  "counter resets after a good read",
-			reads: []read{{err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {status: "creating"}, {err: timeout}, {status: "available"}},
-			want:  []string{"creating", "creating", "creating", "creating", "creating", "creating", "creating", "available"},
+			// Continuous transient errors stay in "creating"; the wait's
+			// Timeout, not a consecutive-error cap, decides when to stop.
+			name:  "many timeouts keep waiting",
+			reads: []read{{err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {status: "available"}},
+			want:  []string{"creating", "creating", "creating", "creating", "creating", "creating", "available"},
 		},
 		{
 			name:    "not found fails",
