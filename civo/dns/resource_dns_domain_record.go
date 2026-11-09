@@ -250,9 +250,7 @@ func resourceDNSDomainRecordImport(d *schema.ResourceData, m interface{}) ([]*sc
 	log.Printf("[INFO] retriving the domain record %s", DomainRecordID)
 	resp, err := apiClient.GetDNSRecord(domainID, DomainRecordID)
 	if err != nil {
-		if resp != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	d.SetId(resp.ID)

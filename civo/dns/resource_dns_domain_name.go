@@ -127,9 +127,7 @@ func resourceDNSDomainImport(d *schema.ResourceData, m interface{}) ([]*schema.R
 	log.Printf("[INFO] Searching the domain %s", d.Id())
 	resp, err := apiClient.GetDNSDomain(d.Id())
 	if err != nil {
-		if resp != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	d.SetId(resp.ID)
