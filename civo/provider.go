@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/civo/database"
@@ -160,7 +161,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	client.SetUserAgent(userAgent)
 
 	// Validate token by making a simple API request
-	_, err = client.ListRegions()
+	err = validateToken(client.ListRegions, tokenValidationRetryDelay)
 	if err != nil {
 
 		// Check if the error is DatabaseAccountNotFoundError
@@ -275,4 +276,26 @@ func validateTokenUsage(v interface{}, path cty.Path) diag.Diagnostics {
 	}
 
 	return diags
+}
+
+// tokenValidationRetryDelay is the pause between attempts of the configure-time
+// token check after a transient error.
+var tokenValidationRetryDelay = 2 * time.Second
+
+// validateToken makes the configure-time API request that checks the token.
+// A single client-side timeout should not fail provider configuration, so
+// transient errors are retried a few times before being returned.
+func validateToken(listRegions func() ([]civogo.Region, error), retryDelay time.Duration) error {
+	const attempts = 3
+	var err error
+	for attempt := 1; attempt <= attempts; attempt++ {
+		if _, err = listRegions(); err == nil || !utils.IsTransientError(err) {
+			return err
+		}
+		if attempt < attempts {
+			log.Printf("[WARN] transient error validating the Civo token (attempt %d of %d), retrying: %s", attempt, attempts, err)
+			time.Sleep(retryDelay)
+		}
+	}
+	return err
 }

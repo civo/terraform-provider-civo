@@ -610,3 +610,12 @@ func IsResourceInUseError(err error) bool {
 	}
 	return inUseErrorCodes[APIErrorCode(err)]
 }
+
+// IsTransientError reports whether err is a client-side failure to reach the
+// API (a network timeout, a refused or reset connection, a DNS failure).
+// civogo reports all of these as TimeoutError. The request may never have
+// reached the API, so it is worth repeating. Wait loops that use this should
+// keep polling on a match and let the configured Timeout decide when to stop.
+func IsTransientError(err error) bool {
+	return err != nil && errors.Is(err, civogo.TimeoutError)
+}

@@ -11,7 +11,7 @@ import (
 	"github.com/civo/civogo"
 	"github.com/civo/terraform-provider-civo/internal/utils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -122,16 +122,10 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	d.SetId(volume.ID)
 
-	createStateConf := &resource.StateChangeConf{
-		Pending: []string{"creating"},
-		Target:  []string{"available"},
-		Refresh: func() (interface{}, string, error) {
-			resp, err := apiClient.FindVolume(d.Id())
-			if err != nil {
-				return 0, "", err
-			}
-			return resp, resp.Status, nil
-		},
+	createStateConf := &retry.StateChangeConf{
+		Pending:        []string{"creating"},
+		Target:         []string{"available"},
+		Refresh:        volumeCreateRefresh(apiClient.FindVolume, d.Id()),
 		Timeout:        60 * time.Minute,
 		Delay:          3 * time.Second,
 		MinTimeout:     3 * time.Second,
@@ -519,4 +513,23 @@ func resourceVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// volumeCreateRefresh polls a new volume for the create wait. A transient
+// error reaching the API keeps the wait in "creating" instead of failing a
+// create whose volume ID has already been assigned. Continuous transient
+// errors are left to the wait's Timeout rather than a consecutive-error cap,
+// so a short DNS or load-balancer blip mid-create does not abort the apply.
+func volumeCreateRefresh(findVolume func(string) (*civogo.Volume, error), volumeID string) retry.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		resp, err := findVolume(volumeID)
+		if err != nil {
+			if utils.IsTransientError(err) {
+				log.Printf("[WARN] transient error reading volume %s, retrying: %s", volumeID, err)
+				return 0, "creating", nil
+			}
+			return 0, "", err
+		}
+		return resp, resp.Status, nil
+	}
 }
