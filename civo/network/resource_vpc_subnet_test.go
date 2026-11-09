@@ -75,7 +75,8 @@ func CivoVPCSubnetDestroy(s *terraform.State) error {
 func CivoVPCSubnetConfigBasic(networkLabel, subnetName string) string {
 	return fmt.Sprintf(`
 resource "civo_vpc_network" "foobar" {
-	label = "%s"
+	label        = "%s"
+	ipv6_enabled = true
 }
 
 resource "civo_vpc_subnet" "foobar" {
