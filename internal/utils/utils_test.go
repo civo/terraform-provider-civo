@@ -496,3 +496,38 @@ func TestKubernetesClusterRefNotFound(t *testing.T) {
 		t.Error("Probe = true for a 404")
 	}
 }
+
+func TestIsTransientError(t *testing.T) {
+	tests := []struct {
+		name      string
+		err       error
+		transient bool
+	}{
+		{"nil", nil, false},
+		{
+			// The error from civo/terraform-provider-civo#418.
+			name:      "client timeout",
+			err:       fmt.Errorf("%w: problem connecting to the API", civogo.TimeoutError),
+			transient: true,
+		},
+		{
+			name:      "not found",
+			err:       fmt.Errorf("%w: Failed to find that firewall in the internal database", civogo.DatabaseFirewallNotFoundError),
+			transient: false,
+		},
+		{
+			name:      "in use",
+			err:       apiError("409 Conflict", "database_firewall_inuse_by_instance"),
+			transient: false,
+		},
+		{"plain error", fmt.Errorf("connection reset"), false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsTransientError(tt.err); got != tt.transient {
+				t.Errorf("IsTransientError() = %v, want %v", got, tt.transient)
+			}
+		})
+	}
+}

@@ -2,10 +2,13 @@ package civo
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strings"
 
 	"testing"
 
+	"github.com/civo/civogo"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -123,5 +126,43 @@ func configureProvider(t testing.TB, raw map[string]interface{}) {
 	diags := rawProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(raw))
 	if diags.HasError() {
 		t.Fatalf("provider configure failed: %s", diagnosticsToString(diags))
+	}
+}
+
+func TestValidateTokenRetriesTransientErrors(t *testing.T) {
+	timeout := fmt.Errorf("%w: problem connecting to the API", civogo.TimeoutError)
+	invalid := fmt.Errorf("%w: not found", civogo.DatabaseAccountNotFoundError)
+
+	tests := []struct {
+		name      string
+		results   []error
+		wantCalls int
+		wantErr   error
+	}{
+		{name: "ok", results: []error{nil}, wantCalls: 1},
+		{name: "timeout then ok", results: []error{timeout, nil}, wantCalls: 2},
+		{name: "timeout every time", results: []error{timeout, timeout, timeout}, wantCalls: 3, wantErr: civogo.TimeoutError},
+		{name: "invalid token is not retried", results: []error{invalid}, wantCalls: 1, wantErr: civogo.DatabaseAccountNotFoundError},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			calls := 0
+			list := func() ([]civogo.Region, error) {
+				err := tt.results[calls]
+				calls++
+				return nil, err
+			}
+			err := validateToken(list, 0)
+			if calls != tt.wantCalls {
+				t.Errorf("calls = %d, want %d", calls, tt.wantCalls)
+			}
+			if tt.wantErr == nil && err != nil {
+				t.Errorf("unexpected error %v", err)
+			}
+			if tt.wantErr != nil && !errors.Is(err, tt.wantErr) {
+				t.Errorf("error = %v, want %v", err, tt.wantErr)
+			}
+		})
 	}
 }
