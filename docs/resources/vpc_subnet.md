@@ -12,8 +12,10 @@ Provides a Civo VPC subnet resource. This can be used to create and delete subne
 ## Example Usage
 
 ```terraform
+# Subnets can only be created in a network with IPv6 enabled.
 resource "civo_vpc_network" "example" {
-    label = "example-network"
+    label        = "example-network"
+    ipv6_enabled = true
 }
 
 resource "civo_vpc_subnet" "example" {

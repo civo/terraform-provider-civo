@@ -28,7 +28,9 @@ resource "civo_vpc_network" "custom_net" {
 ### Optional
 
 - `cidr_v4` (String) The CIDR block for the network
+- `ipv6_enabled` (Boolean) Enable IPv6 on the network. Required for networks that `civo_vpc_subnet` resources are created in. Changing this forces a new network
 - `nameservers_v4` (List of String) List of nameservers for the network
+- `nameservers_v6` (List of String) List of IPv6 nameservers for the network. Only used when `ipv6_enabled` is `true`. Changing this forces a new network
 - `region` (String) The region of the network
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vlan_allocation_pool_v4_end` (String) End of the IPv4 allocation pool for VLAN
@@ -40,6 +42,7 @@ resource "civo_vpc_network" "custom_net" {
 
 ### Read-Only
 
+- `cidr_v6` (String) The IPv6 CIDR block assigned to the network when `ipv6_enabled` is `true`
 - `default` (Boolean) If the network is default, this will be `true`
 - `id` (String) The ID of this resource.
 - `name` (String) The name of the network

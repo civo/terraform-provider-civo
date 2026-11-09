@@ -49,6 +49,28 @@ func ResourceNetwork() *schema.Resource {
 				Computed:    true,
 				Description: "List of nameservers for the network",
 			},
+			"ipv6_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Enable IPv6 on the network. Required for networks that `civo_vpc_subnet` resources are created in. Changing this forces a new network",
+			},
+			"nameservers_v6": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Computed:    true,
+				Description: "List of IPv6 nameservers for the network. Only used when `ipv6_enabled` is `true`. Changing this forces a new network",
+			},
+			"cidr_v6": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The IPv6 CIDR block assigned to the network when `ipv6_enabled` is `true`",
+			},
 			// Computed resource
 			"name": {
 				Type:        schema.TypeString,
@@ -133,6 +155,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 		Region:        apiClient.Region,
 		NameserversV4: expandStringList(d.Get("nameservers_v4")),
 	}
+	setIPv6Config(d, &configs)
 	// Only add VLAN configuration if VLAN ID is set
 	if vlanConfig.VlanID > 0 {
 		configs.VLanConfig = &vlanConfig
@@ -192,6 +215,9 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 	d.Set("default", CurrentNetwork.Default)
 	d.Set("cidr_v4", CurrentNetwork.CIDR)
 	d.Set("nameservers_v4", CurrentNetwork.NameserversV4)
+	d.Set("ipv6_enabled", CurrentNetwork.IPv6Enabled)
+	d.Set("cidr_v6", CurrentNetwork.CIDRV6)
+	d.Set("nameservers_v6", CurrentNetwork.NameserversV6)
 
 	return nil
 }
@@ -217,6 +243,9 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		Region:        apiClient.Region,
 		NameserversV4: expandStringList(d.Get("nameservers_v4")),
 	}
+	// Send the IPv6 settings again so an update of the IPv4 nameservers does
+	// not leave them out of the request.
+	setIPv6Config(d, &networkConfig)
 
 	if d.HasChange("nameservers_v4") {
 		log.Printf("[INFO] updating the network nameservers %s", d.Id())
@@ -282,6 +311,16 @@ func resourceNetworkDelete(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	return nil
+}
+
+// setIPv6Config adds the IPv6 settings to a network request. ipv6_enabled is
+// only sent when it is true, so networks that do not use IPv6 keep sending the
+// same request as before.
+func setIPv6Config(d *schema.ResourceData, config *civogo.NetworkConfig) {
+	if enabled, ok := d.Get("ipv6_enabled").(bool); ok && enabled {
+		config.IPv6Enabled = &enabled
+		config.NameserversV6 = expandStringList(d.Get("nameservers_v6"))
+	}
 }
 
 func expandStringList(input interface{}) []string {

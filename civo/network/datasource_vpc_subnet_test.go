@@ -32,7 +32,8 @@ func TestAccDataSourceCivoVPCSubnet_basic(t *testing.T) {
 func DataSourceCivoVPCSubnetConfig(networkLabel, subnetName string) string {
 	return fmt.Sprintf(`
 resource "civo_vpc_network" "foobar" {
-	label = "%s"
+	label        = "%s"
+	ipv6_enabled = true
 }
 
 resource "civo_vpc_subnet" "foobar" {
