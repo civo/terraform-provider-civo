@@ -60,7 +60,7 @@ func listElements(value interface{}) []interface{} {
 	}
 
 	rv := reflect.ValueOf(value)
-	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
+	for rv.Kind() == reflect.Pointer || rv.Kind() == reflect.Interface {
 		if rv.IsNil() {
 			return nil
 		}
@@ -88,7 +88,7 @@ func listElements(value interface{}) []interface{} {
 // pointers work too. It reports false for nil elements and for integers too large for int,
 // which can never equal a filter value.
 func primitiveValue(v reflect.Value) (interface{}, bool) {
-	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+	for v.Kind() == reflect.Pointer || v.Kind() == reflect.Interface {
 		if v.IsNil() {
 			return nil, false
 		}
