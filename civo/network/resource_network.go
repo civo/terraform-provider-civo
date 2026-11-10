@@ -167,23 +167,24 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
-	CurrentNetwork := civogo.Network{}
+	var CurrentNetwork *civogo.Network
 
 	log.Printf("[INFO] retriving the network %s", d.Id())
 	resp, err := apiClient.ListVPCNetworks()
 	if err != nil {
-		if resp == nil {
-			d.SetId("")
-			return nil
-		}
-
 		return diag.Errorf("[ERR] failed to list the network: %s", err)
 	}
 
-	for _, net := range resp {
-		if net.ID == d.Id() {
-			CurrentNetwork = net
+	for i := range resp {
+		if resp[i].ID == d.Id() {
+			CurrentNetwork = &resp[i]
 		}
+	}
+
+	if CurrentNetwork == nil {
+		log.Printf("[WARN] network %s not found, removing it from state", d.Id())
+		d.SetId("")
+		return nil
 	}
 
 	d.Set("name", CurrentNetwork.Name)
