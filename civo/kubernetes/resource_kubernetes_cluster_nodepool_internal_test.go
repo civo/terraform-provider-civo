@@ -73,3 +73,52 @@ func TestNodePoolReadInfersRegionFromCluster(t *testing.T) {
 		t.Errorf("node_count = %d, want 2 (read from LON1)", got)
 	}
 }
+
+// poolLookupAPI fakes cluster "c1" listing the given pools, while every pool
+// lookup answers with poolStatus.
+func poolLookupAPI(t *testing.T, clusterPools string, poolStatus int) *civogo.Client {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		switch {
+		case req.URL.Path == "/v2/kubernetes/clusters/c1":
+			_, _ = rw.Write([]byte(`{"id":"c1","pools":` + clusterPools + `}`))
+		case strings.HasPrefix(req.URL.Path, "/v2/kubernetes/clusters/c1/pools/"):
+			rw.WriteHeader(poolStatus)
+			_, _ = rw.Write([]byte(`{"code":"database_cluster_pool_not_found","reason":"not found"}`))
+		default:
+			t.Errorf("unexpected request %s", req.URL)
+			rw.WriteHeader(http.StatusInternalServerError)
+		}
+	}))
+	t.Cleanup(server.Close)
+
+	client, err := civogo.NewClientForTestingWithServer(server)
+	if err != nil {
+		t.Fatalf("could not build the test client: %v", err)
+	}
+	client.Region = "NYC1"
+	return client
+}
+
+// A pool deleted outside Terraform must drop out of state so the plan
+// recreates it, instead of failing the refresh.
+func TestNodePoolReadPoolDeletedOutsideTerraform(t *testing.T) {
+	client := poolLookupAPI(t, `[{"id":"p2"}]`, http.StatusNotFound)
+	d := schema.TestResourceDataRaw(t, nodePoolSchema(true), map[string]interface{}{"cluster_id": "c1", "region": "NYC1"})
+	d.SetId("p1")
+
+	if diags := resourceKubernetesClusterNodePoolRead(context.Background(), d, client); len(diags) != 0 || d.Id() != "" {
+		t.Fatalf("want pool cleared from state, got diags=%v id=%q", diags, d.Id())
+	}
+}
+
+// A failed lookup of a pool the cluster still lists is an API error, and the
+// pool must stay in state.
+func TestNodePoolReadPoolLookupFails(t *testing.T) {
+	client := poolLookupAPI(t, `[{"id":"p1"}]`, http.StatusInternalServerError)
+	d := schema.TestResourceDataRaw(t, nodePoolSchema(true), map[string]interface{}{"cluster_id": "c1", "region": "NYC1"})
+	d.SetId("p1")
+
+	if diags := resourceKubernetesClusterNodePoolRead(context.Background(), d, client); !diags.HasError() || d.Id() != "p1" {
+		t.Fatalf("want an error and the pool kept in state, got diags=%v id=%q", diags, d.Id())
+	}
+}

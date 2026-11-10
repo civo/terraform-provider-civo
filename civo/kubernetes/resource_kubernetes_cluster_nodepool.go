@@ -156,7 +156,8 @@ func resourceKubernetesClusterNodePoolRead(_ context.Context, d *schema.Resource
 	log.Printf("[INFO] retrieving the kubernetes cluster pool %s", d.Id())
 	respPool, err := apiClient.GetKubernetesClusterPool(clusterID, d.Id())
 	if err != nil {
-		if resp == nil {
+		if !clusterHasPool(resp, d.Id()) {
+			log.Printf("[WARN] kubernetes cluster pool %s not found in cluster %s, removing it from state", d.Id(), clusterID)
 			d.SetId("")
 			return nil
 		}
@@ -414,4 +415,15 @@ func waitForKubernetesNodePoolCreate(client *civogo.Client, d *schema.ResourceDa
 	}
 
 	return fmt.Errorf("timeout waiting to create nodepool %s", nodePoolID)
+}
+
+// clusterHasPool reports whether the cluster still lists the pool, so a failed
+// pool lookup can tell a pool deleted outside Terraform from an API error.
+func clusterHasPool(cluster *civogo.KubernetesCluster, poolID string) bool {
+	for _, pool := range cluster.Pools {
+		if pool.ID == poolID {
+			return true
+		}
+	}
+	return false
 }
