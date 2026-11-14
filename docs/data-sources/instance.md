@@ -40,7 +40,7 @@ output "instance_output" {
 - `disk_gb` (Number) The size of the disk
 - `firewall_id` (String) The ID of the firewall used
 - `id` (String) The ID of this resource.
-- `initial_password` (String) Instance initial password
+- `initial_password` (String, Sensitive) Instance initial password
 - `initial_user` (String) The name of the initial user created on the server
 - `network_id` (String) his will be the ID of the network
 - `notes` (String) The notes of the instance

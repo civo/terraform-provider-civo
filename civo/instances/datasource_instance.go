@@ -111,6 +111,7 @@ func DataSourceInstance() *schema.Resource {
 			"initial_password": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: "Instance initial password",
 			},
 			"private_ip": {
