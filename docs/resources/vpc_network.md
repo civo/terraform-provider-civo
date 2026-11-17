@@ -14,7 +14,8 @@ Provides a Civo network resource. This can be used to create, modify, and delete
 
 ```terraform
 resource "civo_vpc_network" "custom_net" {
-    label = "test_network"
+    label        = "test_network"
+    ipv6_enabled = true
 }
 ```
 
@@ -28,7 +29,9 @@ resource "civo_vpc_network" "custom_net" {
 ### Optional
 
 - `cidr_v4` (String) The CIDR block for the network
+- `ipv6_enabled` (Boolean) Whether to enable IPv6 on the network. Required for creating VPC subnets on this network.
 - `nameservers_v4` (List of String) List of nameservers for the network
+- `nameservers_v6` (List of String) List of IPv6 nameservers for the network
 - `region` (String) The region of the network
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `vlan_allocation_pool_v4_end` (String) End of the IPv4 allocation pool for VLAN
@@ -40,6 +43,7 @@ resource "civo_vpc_network" "custom_net" {
 
 ### Read-Only
 
+- `cidr_v6` (String) The IPv6 CIDR block for the network
 - `default` (Boolean) If the network is default, this will be `true`
 - `id` (String) The ID of this resource.
 - `name` (String) The name of the network

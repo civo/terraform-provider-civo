@@ -49,6 +49,27 @@ func ResourceNetwork() *schema.Resource {
 				Computed:    true,
 				Description: "List of nameservers for the network",
 			},
+			"ipv6_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Whether to enable IPv6 on the network. Required for creating VPC subnets on this network.",
+			},
+			"nameservers_v6": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Computed:    true,
+				Description: "List of IPv6 nameservers for the network",
+			},
+			"cidr_v6": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The IPv6 CIDR block for the network",
+			},
 			// Computed resource
 			"name": {
 				Type:        schema.TypeString,
@@ -132,6 +153,11 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 		CIDRv4:        d.Get("cidr_v4").(string),
 		Region:        apiClient.Region,
 		NameserversV4: expandStringList(d.Get("nameservers_v4")),
+		NameserversV6: expandStringList(d.Get("nameservers_v6")),
+	}
+	if v, ok := d.GetOk("ipv6_enabled"); ok {
+		enabled := v.(bool)
+		configs.IPv6Enabled = &enabled
 	}
 	// Only add VLAN configuration if VLAN ID is set
 	if vlanConfig.VlanID > 0 {
@@ -192,6 +218,9 @@ func resourceNetworkRead(_ context.Context, d *schema.ResourceData, m interface{
 	d.Set("default", CurrentNetwork.Default)
 	d.Set("cidr_v4", CurrentNetwork.CIDR)
 	d.Set("nameservers_v4", CurrentNetwork.NameserversV4)
+	d.Set("ipv6_enabled", CurrentNetwork.IPv6Enabled)
+	d.Set("cidr_v6", CurrentNetwork.CIDRV6)
+	d.Set("nameservers_v6", CurrentNetwork.NameserversV6)
 
 	return nil
 }
@@ -216,9 +245,10 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	networkConfig := civogo.NetworkConfig{
 		Region:        apiClient.Region,
 		NameserversV4: expandStringList(d.Get("nameservers_v4")),
+		NameserversV6: expandStringList(d.Get("nameservers_v6")),
 	}
 
-	if d.HasChange("nameservers_v4") {
+	if d.HasChange("nameservers_v4") || d.HasChange("nameservers_v6") {
 		log.Printf("[INFO] updating the network nameservers %s", d.Id())
 		_, err := apiClient.UpdateVPCNetwork(d.Id(), networkConfig)
 		if err != nil {
