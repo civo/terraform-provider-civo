@@ -8,7 +8,7 @@ description: |-
 
 # civo_volume (Resource)
 
-Provides a Civo volume which can be attached to an instance in order to provide expanded storage.
+Provides a Civo volume which can be attached to an instance in order to provide expanded storage. Create waits briefly for `available`, then accepts a stable `creating` status so apply does not hang when the network has no compute yet (an instance, cluster, or database); the volume usually becomes `available` once compute exists or it is attached.
 
 ## Example Usage
 
@@ -35,7 +35,7 @@ resource "civo_volume" "db" {
 ### Required
 
 - `name` (String) A name that you wish to use to refer to this volume
-- `network_id` (String) The network that the volume belongs to
+- `network_id` (String) The network that the volume belongs to. On a network with no instance, cluster, or database yet, the volume may stay in `creating` until one exists or the volume is attached; that is a successful create.
 - `size_gb` (Number) A minimum of 1 and a maximum of your available disk space from your quota specifies the size of the volume in gigabytes. Increases are applied in place: on a detached volume, and on a volume attached to a running instance when its volume type supports online expansion. Otherwise the API refuses the resize with `volume_onlie_resize` (detach the volume or move it to an expandable volume type) or `volume_resize_requires_running_instance` (start the instance). Decreases are rejected at plan time; recreate the volume with `terraform apply -replace` for a smaller size.
 
 ### Optional
@@ -48,12 +48,14 @@ resource "civo_volume" "db" {
 
 - `id` (String) The ID of this resource.
 - `mount_point` (String) The mount point of the volume (from instance's perspective)
+- `status` (String) The volume status reported by the API (for example `creating` or `available`)
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
+- `create` (String) How long to wait for the volume to reach `creating` or `available`. Defaults to `60m`.
 - `update` (String) How long to wait for a resize to be confirmed. Defaults to `60m`.
 
 ## Resizing
