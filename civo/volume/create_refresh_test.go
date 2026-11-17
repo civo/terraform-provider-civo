@@ -30,14 +30,14 @@ func TestVolumeCreateRefresh(t *testing.T) {
 			// #418: a client timeout after the volume ID was assigned.
 			name:  "timeout keeps waiting",
 			reads: []read{{status: "creating"}, {err: timeout}, {status: "available"}},
-			want:  []string{"creating", "creating", "available"},
+			want:  []string{"creating", "pending", "available"},
 		},
 		{
-			// Continuous transient errors stay in "creating"; the wait's
+			// Continuous transient errors stay in "pending"; the wait's
 			// Timeout, not a consecutive-error cap, decides when to stop.
 			name:  "many timeouts keep waiting",
 			reads: []read{{err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {err: timeout}, {status: "available"}},
-			want:  []string{"creating", "creating", "creating", "creating", "creating", "creating", "available"},
+			want:  []string{"pending", "pending", "pending", "pending", "pending", "pending", "available"},
 		},
 		{
 			name:    "not found fails",

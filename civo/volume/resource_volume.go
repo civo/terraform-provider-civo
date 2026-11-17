@@ -19,7 +19,7 @@ import (
 // This can be used to create, read, update, and delete operations for a Volume in the infrastructure.
 func ResourceVolume() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides a Civo volume which can be attached to an instance in order to provide expanded storage.",
+		Description: "Provides a Civo volume which can be attached to an instance in order to provide expanded storage. The platform may leave a new volume in `creating` until its network has compute (an instance, cluster, or database) or until it is attached; create succeeds in that state so apply does not hang for an empty network.",
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -42,13 +42,18 @@ func ResourceVolume() *schema.Resource {
 			"network_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The network that the volume belongs to",
+				Description: "The network that the volume belongs to. On a network with no instance, cluster, or database yet, the volume may stay in `creating` until one exists or the volume is attached; that is a successful create.",
 			},
 			// Computed resource
 			"mount_point": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The mount point of the volume (from instance's perspective)",
+			},
+			"status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The volume status reported by the API (for example `creating` or `available`)",
 			},
 			"volume_type": {
 				Type:        schema.TypeString,
@@ -65,6 +70,7 @@ func ResourceVolume() *schema.Resource {
 			State: resourceVolumeImport,
 		},
 		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
 			Update: schema.DefaultTimeout(60 * time.Minute),
 		},
 	}
@@ -122,17 +128,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	d.SetId(volume.ID)
 
-	createStateConf := &retry.StateChangeConf{
-		Pending:        []string{"creating"},
-		Target:         []string{"available"},
-		Refresh:        volumeCreateRefresh(apiClient.FindVolume, d.Id()),
-		Timeout:        60 * time.Minute,
-		Delay:          3 * time.Second,
-		MinTimeout:     3 * time.Second,
-		NotFoundChecks: 10,
-	}
-	_, err = createStateConf.WaitForStateContext(context.Background())
-	if err != nil {
+	if err := waitForVolumeCreate(ctx, apiClient.FindVolume, d.Id(), d.Timeout(schema.TimeoutCreate)); err != nil {
 		return diag.Errorf("error waiting for volume (%s) to be created: %s", d.Id(), err)
 	}
 
@@ -163,6 +159,7 @@ func resourceVolumeRead(_ context.Context, d *schema.ResourceData, m interface{}
 	d.Set("size_gb", resp.SizeGigabytes)
 	d.Set("mount_point", resp.MountPoint)
 	d.Set("volume_type", resp.VolumeType)
+	d.Set("status", resp.Status)
 
 	return nil
 }
@@ -504,6 +501,7 @@ func resourceVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 				d.Set("region", currentRegion)
 				d.Set("size_gb", volume.SizeGigabytes)
 				d.Set("mount_point", volume.MountPoint)
+				d.Set("status", volume.Status)
 			}
 		}
 	}
@@ -515,20 +513,109 @@ func resourceVolumeImport(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	return []*schema.ResourceData{d}, nil
 }
 
+// Defaults for waitForVolumeCreate. Package-level so unit tests can shrink them.
+var (
+	// volumeCreatePreferAvailable is how long create prefers waiting for
+	// "available" before accepting a stable "creating" status. The platform only
+	// finishes provisioning once the network has a compute host (or the volume is
+	// attached); empty networks never leave "creating" (#420 / #213). Preferring
+	// "available" first keeps same-apply attachment reliable when compute exists.
+	volumeCreatePreferAvailable = 2 * time.Minute
+	volumeCreatePollInterval    = 3 * time.Second
+)
+
+// waitForVolumeCreate polls until the volume is "available", or until it has
+// stayed in "creating" past volumeCreatePreferAvailable (empty-network case).
+// Transient API errors keep polling within timeout.
+func waitForVolumeCreate(ctx context.Context, findVolume func(string) (*civogo.Volume, error), volumeID string, timeout time.Duration) error {
+	if timeout <= 0 {
+		timeout = 60 * time.Minute
+	}
+	preferAvailable := volumeCreatePreferAvailable
+	if preferAvailable > timeout {
+		preferAvailable = timeout
+	}
+	pollInterval := volumeCreatePollInterval
+	if pollInterval <= 0 {
+		pollInterval = 3 * time.Second
+	}
+
+	start := time.Now()
+	deadline := start.Add(timeout)
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+
+	poll := func() (done bool, err error) {
+		resp, err := findVolume(volumeID)
+		if err != nil {
+			if utils.IsTransientError(err) {
+				log.Printf("[WARN] transient error reading volume %s, retrying: %s", volumeID, err)
+				return false, nil
+			}
+			return false, err
+		}
+		switch resp.Status {
+		case "available":
+			return true, nil
+		case "creating":
+			if time.Since(start) >= preferAvailable {
+				log.Printf("[INFO] volume %s still creating after %s; treating as created (network may have no compute yet)", volumeID, preferAvailable)
+				return true, nil
+			}
+			return false, nil
+		case "":
+			// Create responses sometimes omit status; keep waiting.
+			return false, nil
+		default:
+			return false, fmt.Errorf("unexpected volume status %q", resp.Status)
+		}
+	}
+
+	if done, err := poll(); err != nil || done {
+		return err
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if time.Now().After(deadline) {
+				resp, err := findVolume(volumeID)
+				if err == nil && (resp.Status == "creating" || resp.Status == "") {
+					log.Printf("[INFO] volume %s still provisioning at create timeout (status %q); treating as created", volumeID, resp.Status)
+					return nil
+				}
+				if err != nil {
+					return fmt.Errorf("timed out after %s: last read: %w", timeout, err)
+				}
+				return fmt.Errorf("timed out after %s waiting for volume to become available (last status %q)", timeout, resp.Status)
+			}
+			if done, err := poll(); err != nil || done {
+				return err
+			}
+		}
+	}
+}
+
 // volumeCreateRefresh polls a new volume for the create wait. A transient
-// error reaching the API keeps the wait in "creating" instead of failing a
+// error reaching the API keeps the wait in "pending" instead of failing a
 // create whose volume ID has already been assigned. Continuous transient
 // errors are left to the wait's Timeout rather than a consecutive-error cap,
 // so a short DNS or load-balancer blip mid-create does not abort the apply.
+// Kept for unit coverage of the refresh semantics used historically (#418).
 func volumeCreateRefresh(findVolume func(string) (*civogo.Volume, error), volumeID string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		resp, err := findVolume(volumeID)
 		if err != nil {
 			if utils.IsTransientError(err) {
 				log.Printf("[WARN] transient error reading volume %s, retrying: %s", volumeID, err)
-				return 0, "creating", nil
+				return 0, "pending", nil
 			}
 			return 0, "", err
+		}
+		if resp.Status == "" {
+			return resp, "pending", nil
 		}
 		return resp, resp.Status, nil
 	}
