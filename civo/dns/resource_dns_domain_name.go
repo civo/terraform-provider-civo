@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/civo/civogo"
@@ -125,8 +126,11 @@ func resourceDNSDomainImport(d *schema.ResourceData, m interface{}) ([]*schema.R
 	apiClient := m.(*civogo.Client)
 
 	log.Printf("[INFO] Searching the domain %s", d.Id())
-	resp, err := apiClient.GetDNSDomain(d.Id())
+	resp, err := apiClient.FindDNSDomain(d.Id())
 	if err != nil {
+		if errors.Is(err, civogo.ZeroMatchesError) {
+			return nil, civogo.ErrDNSDomainNotFound
+		}
 		return nil, err
 	}
 
