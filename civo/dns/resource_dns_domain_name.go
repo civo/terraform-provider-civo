@@ -2,6 +2,7 @@ package dns
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/civo/civogo"
@@ -123,16 +124,25 @@ func resourceDNSDomainNameDelete(_ context.Context, d *schema.ResourceData, m in
 // custom import to able add a main domain to the terraform
 func resourceDNSDomainImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	apiClient := m.(*civogo.Client)
+	importID := d.Id()
 
-	log.Printf("[INFO] Searching the domain %s", d.Id())
-	resp, err := apiClient.GetDNSDomain(d.Id())
+	log.Printf("[INFO] Searching the domain %s", importID)
+	domains, err := apiClient.ListDNSDomains()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("importing dns domain %q: %w", importID, err)
 	}
 
-	d.SetId(resp.ID)
-	d.Set("name", resp.Name)
-	d.Set("account_id", resp.AccountID)
+	for i := range domains {
+		if domains[i].Name != importID && domains[i].ID != importID {
+			continue
+		}
 
-	return []*schema.ResourceData{d}, nil
+		d.SetId(domains[i].ID)
+		d.Set("name", domains[i].Name)
+		d.Set("account_id", domains[i].AccountID)
+
+		return []*schema.ResourceData{d}, nil
+	}
+
+	return nil, civogo.ErrDNSDomainNotFound
 }
