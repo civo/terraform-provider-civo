@@ -48,6 +48,18 @@ func TestResourceDNSDomainImport(t *testing.T) {
 			id:        "99999",
 			wantErr:   civogo.ErrDNSDomainNotFound,
 		},
+		{
+			name:      "partial name multiple matches",
+			responses: map[string]string{"/v2/dns": testDNSDomainsListResponse},
+			id:        "example",
+			wantErr:   civogo.ErrDNSDomainNotFound,
+		},
+		{
+			name:      "partial name single match",
+			responses: map[string]string{"/v2/dns": testDNSDomainsListResponse},
+			id:        "exa",
+			wantErr:   civogo.ErrDNSDomainNotFound,
+		},
 	}
 
 	for _, tt := range tests {
