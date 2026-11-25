@@ -1,4 +1,16 @@
 
+## [v1.4.1](https://github.com/civo/terraform-provider-civo/releases/tag/v1.4.1) (25 November 2026)
+
+### Merged
+- [#447](https://github.com/civo/terraform-provider-civo/pull/447) - Allow civo_dns_domain_name resource to import using both domain name and domain id
+- [#439](https://github.com/civo/terraform-provider-civo/pull/439) - Fix/377 firewall docs cidr
+- [#435](https://github.com/civo/terraform-provider-civo/pull/435) - fix(kubernetes): mark kubeconfig sensitive on the civo_kubernetes_cluster data source
+- [#434](https://github.com/civo/terraform-provider-civo/pull/434) - fix(instances): stop swapping private_ip and public_ip in the civo_instances data source
+- [#436](https://github.com/civo/terraform-provider-civo/pull/436) - chore(datalist): use reflect.Pointer instead of reflect.Ptr
+- [#438](https://github.com/civo/terraform-provider-civo/pull/438) - fix(dns): return import errors instead of panicking
+- [#437](https://github.com/civo/terraform-provider-civo/pull/437) - fix(instances): drop reserved IP assignment from state when it drifts
+- [#433](https://github.com/civo/terraform-provider-civo/pull/433) - fix(418): retry transient API errors in waits and token validation
+
 ## [v1.4.0](https://github.com/civo/terraform-provider-civo/releases/tag/v1.4.0) (5 November 2026)
 
 ### Merged
